@@ -1,0 +1,32 @@
+generated: '2026-07-18'
+method: derived
+source: openapi/didit-openapi-original.json
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter: x-api-key
+  sources:
+  - openapi/didit-openapi-original.json
+- name: TransactionTokenAuth
+  type: apiKey
+  in: header
+  parameter: X-Transaction-Token
+  description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/.
+    Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+  sources:
+  - openapi/didit-openapi-original.json
+- name: SessionTokenAuth
+  type: apiKey
+  in: header
+  parameter: Session-Token
+  description: Short-lived token returned in the `session_token` field of POST /v3/session/.
+    Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints
+    on behalf of the verifying user, without your server-side API key.
+  sources:
+  - openapi/didit-openapi-original.json
