@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing System API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: System
+paths:
+  /system/healthcheck:
+    get:
+      summary: Service healthcheck (public, unauthenticated)
+      description: 'Public unauthenticated liveness probe. Returns `HTTP 200` with `{status: "ok", timestamp}` when service, DB, cache, and broker are healthy.'
+      operationId: get_system_healthcheck
+      tags:
+      - System
+      security: []
+      parameters: []
+      responses:
+        '200':
+          description: 'Service is healthy and accepting requests. Body is always `{"status": "ok", "timestamp": "<iso8601>"}`.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - status
+                - timestamp
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - ok
+                    description: Liveness marker. Always the literal string `"ok"` on a 200 response.
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Server time at which the healthcheck was evaluated, in ISO 8601 with millisecond precision and a `Z` (UTC) suffix.
+                    example: '2026-04-21T16:42:50.445Z'
+              examples:
+                Healthy:
+                  summary: Service is up
+                  value:
+                    status: ok
+                    timestamp: '2026-04-21T16:42:50.445Z'
+        '503':
+          description: Service is unhealthy — one of the configured health-check plugins (database, cache, broker) is failing. The response body is intentionally minimal; the HTTP status is the load-bearing signal. Retry with exponential backoff.
+        5XX:
+          description: Verification service is degraded or unreachable. Treat any non-2xx response as "unhealthy" and retry with exponential backoff.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: curl -i https://verification.didit.me/system/healthcheck
+      - lang: Python
+        label: Python (requests)
+        source: 'import requests
+
+
+          resp = requests.get("https://verification.didit.me/system/healthcheck", timeout=5)
+
+          resp.raise_for_status()
+
+          print(resp.json())  # {''status'': ''ok'', ''timestamp'': ''2026-04-21T16:42:50.445Z''}'
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: 'const res = await fetch("https://verification.didit.me/system/healthcheck");
+
+          if (!res.ok) throw new Error(`Didit unhealthy: ${res.status}`);
+
+          const body = await res.json();
+
+          console.log(body); // { status: ''ok'', timestamp: ''2026-04-21T16:42:50.445Z'' }'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

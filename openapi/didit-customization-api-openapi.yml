@@ -1,0 +1,383 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Customization API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Customization
+paths:
+  /v3/customization/:
+    get:
+      summary: Get branding customization
+      description: 'Returns the white-label branding for the application resolved from the API key: colors, fonts, border radii, logo URLs and UI/UX options. Custom domain and white-label email settings are managed only in the Business Console and are not part of this response.'
+      operationId: get_customization
+      tags:
+      - Customization
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/customization/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/customization/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n)\nresp.raise_for_status()\nbranding = resp.json()\nprint(branding['font_family'], branding['color_primary'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const branding = await fetch(\n  'https://verification.didit.me/v3/customization/',\n  { headers: { 'x-api-key': process.env.DIDIT_API_KEY } },\n).then((r) => r.json());\nconsole.log(branding.font_family, branding.color_primary);"
+      responses:
+        '200':
+          description: Current branding customization for the application.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingCustomization'
+              examples:
+                Default branding:
+                  value:
+                    color_primary: '#000000'
+                    color_secondary: '#9DA1A1'
+                    color_background: '#FFFFFF'
+                    color_panel: '#2567FF'
+                    color_panel_10: '#1A1A1A'
+                    color_on_panel_1: '#9DA1A1'
+                    color_on_panel_2: '#F4F4F6'
+                    color_on_background: '#000000'
+                    color_button_1: '#2567FF'
+                    color_button_2: '#F8F8F8'
+                    color_button_text_1: '#FFFFFF'
+                    color_button_text_2: '#000000'
+                    color_pill_text: '#111827'
+                    border_radius_panel: 10
+                    border_radius_buttons: 12
+                    font_family: Inter
+                    font_weight: regular
+                    font_url: https://fonts.googleapis.com/css2?family=Inter
+                    logo_square: null
+                    logo_rectangular: null
+                    favicon: null
+                    app_public_name: Acme Verify
+                    privacy_policy_url: https://acme.com/privacy
+                    skip_welcome_screen: false
+                    disable_login_with_didit: false
+                    hide_progress_bar: false
+                    callback_seconds: 3
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+      security:
+      - ApiKeyAuth: []
+    patch:
+      summary: Update branding customization
+      description: Partial update of the application's white-label branding. Send `application/json` to change colors, fonts, radii and UI options, or `multipart/form-data` to upload logo images. Only the fields you include are changed. Custom domain and white-label email cannot be set through this endpoint — use the Business Console for those.
+      operationId: update_customization
+      tags:
+      - Customization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandingCustomizationUpdate'
+            examples:
+              Update colors and font:
+                summary: Change branding colors and font
+                value:
+                  color_primary: '#123456'
+                  color_button_1: '#2567FF'
+                  font_family: AR One Sans
+                  border_radius_buttons: 16
+              Update UI options:
+                summary: Change public name and flow options
+                value:
+                  app_public_name: Acme Verify
+                  privacy_policy_url: https://acme.com/privacy
+                  skip_welcome_screen: true
+                  hide_progress_bar: true
+                  callback_seconds: 5
+              Remove a logo:
+                summary: Delete the current rectangular logo
+                value:
+                  delete_logo_rectangular: true
+          multipart/form-data:
+            schema:
+              type: object
+              description: Use multipart/form-data only to upload logo images. Branding fields above may also be sent as form fields in the same request.
+              properties:
+                image_square:
+                  type: string
+                  format: binary
+                  description: 'Square logo (1:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.'
+                image_rectangular:
+                  type: string
+                  format: binary
+                  description: 'Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.'
+                image_favicon:
+                  type: string
+                  format: binary
+                  description: Favicon image. Max **500 KB**.
+            example:
+              image_rectangular: (binary PNG logo, 2:1)
+              image_favicon: (binary favicon)
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/customization/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"color_primary\": \"#123456\", \"font_family\": \"AR One Sans\"}'"
+      - lang: curl
+        label: curl (logo upload)
+        source: "curl -X PATCH 'https://verification.didit.me/v3/customization/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -F 'image_rectangular=@logo.png' \\\n  -F 'image_favicon=@favicon.ico'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/customization/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'color_primary': '#123456', 'font_family': 'AR One Sans'},\n)\nresp.raise_for_status()\nprint(resp.json()['color_primary'])\n\n# Upload a logo (multipart):\nwith open('logo.png', 'rb') as logo:\n    requests.patch(\n        'https://verification.didit.me/v3/customization/',\n        headers={'x-api-key': 'YOUR_API_KEY'},\n        files={'image_rectangular': logo},\n    )"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/customization/', {\n  method: 'PATCH',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ color_primary: '#123456', font_family: 'AR One Sans' }),\n});\nconst branding = await resp.json();\nconsole.log(branding.color_primary);"
+      responses:
+        '200':
+          description: Branding updated. The FULL branding object is returned (all fields, not just the ones you changed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingCustomization'
+              examples:
+                Updated:
+                  value:
+                    color_primary: '#123456'
+                    color_secondary: '#9DA1A1'
+                    color_background: '#FFFFFF'
+                    color_panel: '#2567FF'
+                    color_panel_10: '#1A1A1A'
+                    color_on_panel_1: '#9DA1A1'
+                    color_on_panel_2: '#F4F4F6'
+                    color_on_background: '#000000'
+                    color_button_1: '#2567FF'
+                    color_button_2: '#F8F8F8'
+                    color_button_text_1: '#FFFFFF'
+                    color_button_text_2: '#000000'
+                    color_pill_text: '#111827'
+                    border_radius_panel: 10
+                    border_radius_buttons: 16
+                    font_family: AR One Sans
+                    font_weight: '400'
+                    font_url: https://fonts.googleapis.com/css2?family=AR+One+Sans
+                    logo_square: null
+                    logo_rectangular: https://cdn.didit.me/white_label/logo_rectangular/...
+                    favicon: null
+                    app_public_name: Acme Verify
+                    privacy_policy_url: https://acme.com/privacy
+                    skip_welcome_screen: true
+                    disable_login_with_didit: false
+                    hide_progress_bar: false
+                    callback_seconds: 3
+        '400':
+          description: Invalid body — e.g. malformed hex color, unknown font family or weight, a logo failing the size/aspect-ratio check, or a Business-Console-only field (`domain`, `from_email`, `verify_domain`, `force_remove_domain`, `verify_email_domain`, `force_remove_email_domain`, and their read-only companions). Also returned when setting `disable_login_with_didit` to `false` while a custom domain is configured.
+          content:
+            application/json:
+              examples:
+                Bad color:
+                  value:
+                    color_primary:
+                    - Invalid color format. Use '#RRGGBB' or '#RRGGBBAA' format.
+                Bad logo:
+                  value:
+                    image_rectangular:
+                    - Image aspect ratio must be 2:1. Got 1024x1024 image dimensions
+                Console-only field:
+                  value:
+                    domain:
+                    - Manage this field in the Business Console.
+                Bad font weight:
+                  value:
+                    font_weight:
+                    - 'Font weight 950 is not available for Inter. Available weights are: 100, 200, 300, 400, 500, 600, 700, 800, 900'
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+      security:
+      - ApiKeyAuth: []
+components:
+  schemas:
+    BrandingCustomization:
+      type: object
+      description: 'White-label branding for an application: colors, fonts, radii, logo URLs and UI/UX options. Logo URLs are read-only (set them by uploading images). Custom domain and white-label email are not included.'
+      properties:
+        color_primary:
+          type: string
+        color_secondary:
+          type: string
+        color_background:
+          type: string
+        color_panel:
+          type: string
+        color_panel_10:
+          type: string
+        color_on_panel_1:
+          type: string
+        color_on_panel_2:
+          type: string
+        color_on_background:
+          type: string
+        color_button_1:
+          type: string
+        color_button_2:
+          type: string
+        color_button_text_1:
+          type: string
+        color_button_text_2:
+          type: string
+        color_pill_text:
+          type: string
+        border_radius_panel:
+          type: integer
+        border_radius_buttons:
+          type: integer
+        font_family:
+          type: string
+        font_weight:
+          type: string
+        font_url:
+          type: string
+          nullable: true
+          description: Read-only. Resolved Google Fonts stylesheet URL for the selected family.
+        logo_square:
+          type: string
+          nullable: true
+          description: Read-only URL of the square logo. Upload via `image_square`.
+        logo_rectangular:
+          type: string
+          nullable: true
+          description: Read-only URL of the rectangular logo. Upload via `image_rectangular`.
+        favicon:
+          type: string
+          nullable: true
+          description: Read-only URL of the favicon. Upload via `image_favicon`.
+        app_public_name:
+          type: string
+          nullable: true
+        privacy_policy_url:
+          type: string
+          nullable: true
+        skip_welcome_screen:
+          type: boolean
+        disable_login_with_didit:
+          type: boolean
+        hide_progress_bar:
+          type: boolean
+        callback_seconds:
+          type: integer
+    BrandingCustomizationUpdate:
+      type: object
+      description: Partial branding update body. Provide only the fields you want to change. Hex colors accept `#RRGGBB` or `#RRGGBBAA`. Custom domain and white-label email are not accepted here.
+      properties:
+        color_primary:
+          type: string
+          description: Headers / primary text color.
+        color_secondary:
+          type: string
+          description: Paragraph / secondary text color.
+        color_background:
+          type: string
+          description: Page background color.
+        color_panel:
+          type: string
+          description: Panel / accent color.
+        color_panel_10:
+          type: string
+          description: Panel color at 10% opacity.
+        color_on_panel_1:
+          type: string
+          description: Support text color on panels.
+        color_on_panel_2:
+          type: string
+          description: Pill / badge color on panels.
+        color_on_background:
+          type: string
+          description: Text color on background.
+        color_button_1:
+          type: string
+          description: Primary button color.
+        color_button_2:
+          type: string
+          description: Secondary button color.
+        color_button_text_1:
+          type: string
+          description: Primary button text color.
+        color_button_text_2:
+          type: string
+          description: Secondary button text color.
+        color_pill_text:
+          type: string
+          description: Text color for pills, inputs and selectors.
+        border_radius_panel:
+          type: integer
+          minimum: 0
+          description: Panel corner radius in pixels.
+        border_radius_buttons:
+          type: integer
+          minimum: 0
+          description: Button corner radius in pixels.
+        font_family:
+          type: string
+          description: Google Font family name (e.g. `Inter`, `AR One Sans`).
+        font_weight:
+          type: string
+          description: Font weight available for the selected family (e.g. `regular`, `500`, `700`).
+        app_public_name:
+          type: string
+          nullable: true
+          description: Public name shown in the verification flow.
+        privacy_policy_url:
+          type: string
+          nullable: true
+          description: Privacy policy URL shown to the end user.
+        skip_welcome_screen:
+          type: boolean
+          description: Skip the initial welcome screen.
+        disable_login_with_didit:
+          type: boolean
+          description: Continue as guest instead of showing the login-with-Didit screen. Cannot be set back to `false` while a custom domain is configured (400).
+        hide_progress_bar:
+          type: boolean
+          description: Hide the progress bar during the flow.
+        callback_seconds:
+          type: integer
+          minimum: 0
+          description: Delay (seconds) before redirecting to the callback URL.
+        delete_logo_square:
+          type: boolean
+          description: When `true`, removes the current square logo.
+        delete_logo_rectangular:
+          type: boolean
+          description: When `true`, removes the current rectangular logo.
+        delete_favicon:
+          type: boolean
+          description: When `true`, removes the current favicon.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

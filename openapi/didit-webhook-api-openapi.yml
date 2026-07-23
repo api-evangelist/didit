@@ -1,0 +1,745 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Webhook API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Webhook
+paths:
+  /v3/webhook/destinations/:
+    get:
+      summary: List webhook destinations
+      description: List all webhook destinations (unpaginated array, oldest first). Each row includes URL, subscribed events, and delivery health metrics. The signing secret is NOT included in the list — fetch a single destination (`GET /v3/webhook/destinations/{destination_uuid}/`) to read `secret_shared_key`.
+      operationId: list_webhook_destinations
+      tags:
+      - Webhook
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/webhook/destinations/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/webhook/destinations/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=10,\n)\nresp.raise_for_status()\nfor dest in resp.json():\n    health = 'OK' if dest['error_rate_percentage'] < 5 else 'DEGRADED'\n    print(f\"{dest['label']:30s} {dest['url']:50s} {health}\")"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/webhook/destinations/', {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n});\nconst destinations = await resp.json();\nfor (const d of destinations) {\n  console.log(d.label, d.url, `${d.error_rate_percentage}% errors`);\n}"
+      responses:
+        '200':
+          description: List of webhook destinations (unpaginated, oldest first).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      format: uuid
+                      description: Stable destination identifier; use as `{destination_uuid}` for update/delete.
+                    label:
+                      type: string
+                      description: Human-readable name shown in the Console.
+                    url:
+                      type: string
+                      format: uri
+                      description: Destination URL that receives `POST` requests with the webhook payload.
+                    enabled:
+                      type: boolean
+                      description: When `false`, Didit silently skips delivery to this destination.
+                    webhook_version:
+                      type: string
+                      enum:
+                      - v1
+                      - v2
+                      - v3
+                      description: Payload schema version sent to this destination. `v3` is the current/recommended format.
+                    subscribed_events:
+                      $ref: '#/components/schemas/WebhookSubscribedEvents'
+                    subscribed_events_count:
+                      type: integer
+                      description: Cached length of `subscribed_events`, useful for UI rendering.
+                    deliveries_count:
+                      type: integer
+                      description: Total delivery attempts (successful + failed) recorded for this destination.
+                    failed_deliveries_count:
+                      type: integer
+                      description: Delivery attempts whose target responded with HTTP ≥ 400 (or did not respond).
+                    average_response_time_ms:
+                      type: integer
+                      nullable: true
+                      description: Average target response time in milliseconds, rounded to an integer. `null` if no deliveries yet.
+                    error_rate_percentage:
+                      type: integer
+                      description: '`round(failed_deliveries_count / deliveries_count * 100)`; `0` when there are no deliveries.'
+                    last_delivery_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      description: Timestamp of the most recent delivery attempt (success or failure). `null` if never delivered.
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+              examples:
+                Two destinations:
+                  value:
+                  - uuid: 11111111-2222-3333-4444-555555555555
+                    label: Production session webhooks
+                    url: https://yourapp.com/webhooks/didit
+                    enabled: true
+                    webhook_version: v3
+                    subscribed_events:
+                    - status.updated
+                    - data.updated
+                    subscribed_events_count: 2
+                    deliveries_count: 12453
+                    failed_deliveries_count: 14
+                    average_response_time_ms: 187
+                    error_rate_percentage: 0
+                    last_delivery_at: '2026-05-17T09:21:18Z'
+                    created_at: '2026-01-04T08:00:00Z'
+                    updated_at: '2026-04-22T14:09:11Z'
+                  - uuid: 22222222-3333-4444-5555-666666666666
+                    label: Staging mirror
+                    url: https://staging.yourapp.com/webhooks/didit
+                    enabled: false
+                    webhook_version: v3
+                    subscribed_events:
+                    - status.updated
+                    subscribed_events_count: 1
+                    deliveries_count: 0
+                    failed_deliveries_count: 0
+                    average_response_time_ms: null
+                    error_rate_percentage: 0
+                    last_delivery_at: null
+                    created_at: '2026-03-12T10:15:02Z'
+                    updated_at: '2026-03-12T10:15:02Z'
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    post:
+      summary: Create webhook destination
+      description: 'Create a webhook destination. The response includes the auto-generated `secret_shared_key` HMAC signing secret (also readable later via `GET /v3/webhook/destinations/{destination_uuid}/`). Always send `subscribed_events` with at least one event (no wildcards): an explicit empty list is rejected with 400, and omitting the field creates a destination subscribed to nothing, which never receives a webhook. The `(application, url)` pair must be unique among non-deleted destinations.'
+      operationId: create_webhook_destination
+      tags:
+      - Webhook
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/webhook/destinations/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"label\": \"Production session webhooks\",\n    \"url\": \"https://yourapp.com/webhooks/didit\",\n    \"webhook_version\": \"v3\",\n    \"subscribed_events\": [\"status.updated\", \"data.updated\"]\n  }'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/webhook/destinations/',\n    headers={\n        'x-api-key': os.environ['DIDIT_API_KEY'],\n        'Content-Type': 'application/json',\n    },\n    json={\n        'label': 'Production session webhooks',\n        'url': 'https://yourapp.com/webhooks/didit',\n        'webhook_version': 'v3',\n        'subscribed_events': ['status.updated', 'data.updated'],\n    },\n    timeout=10,\n)\nresp.raise_for_status()\ndestination = resp.json()\n# Store secret_shared_key in your secret manager.\nprint('Destination UUID:', destination['uuid'])\nprint('Signing secret:', destination['secret_shared_key'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/webhook/destinations/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    label: 'Production session webhooks',\n    url: 'https://yourapp.com/webhooks/didit',\n    webhook_version: 'v3',\n    subscribed_events: ['status.updated', 'data.updated'],\n  }),\n});\nif (!resp.ok) throw new Error(await resp.text());\nconst destination = await resp.json();\nconsole.log('Store this secret securely:', destination.secret_shared_key);"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - label
+              - url
+              properties:
+                label:
+                  type: string
+                  maxLength: 255
+                  description: Human-readable name displayed in Console → Webhooks. Helps distinguish destinations when you have several (e.g. "Prod", "Staging mirror").
+                url:
+                  type: string
+                  format: uri
+                  description: HTTPS URL that will receive `POST` requests. Must be unique per application among non-deleted destinations. Use a stable, hardened endpoint — Didit retries failed deliveries on a backoff schedule.
+                enabled:
+                  type: boolean
+                  default: true
+                  description: When `false`, the destination is saved but Didit will not push any webhooks to it. Useful for staging configs you want to keep parked.
+                webhook_version:
+                  type: string
+                  enum:
+                  - v1
+                  - v2
+                  - v3
+                  description: Payload schema version Didit will send. `v3` is the current/recommended format; older versions are kept for backward compatibility with legacy integrations.
+                subscribed_events:
+                  allOf:
+                  - $ref: '#/components/schemas/WebhookSubscribedEvents'
+                  description: 'Events to deliver. Effectively required: an explicit `[]` is rejected with 400, and omitting the field creates a destination with no subscriptions that receives nothing.'
+            examples:
+              session_updates:
+                summary: Session status and data updates
+                value:
+                  label: Production session webhooks
+                  url: https://yourapp.com/webhooks/didit
+                  webhook_version: v3
+                  subscribed_events:
+                  - status.updated
+                  - data.updated
+              transaction_updates:
+                summary: Transaction monitoring updates
+                value:
+                  label: Transaction monitoring webhooks
+                  url: https://yourapp.com/webhooks/didit-transactions
+                  webhook_version: v3
+                  subscribed_events:
+                  - transaction.created
+                  - transaction.status.updated
+              entity_updates:
+                summary: User and Business entity updates
+                value:
+                  label: Entity lifecycle webhooks
+                  url: https://yourapp.com/webhooks/didit-entities
+                  webhook_version: v3
+                  subscribed_events:
+                  - user.status.updated
+                  - user.data.updated
+                  - business.status.updated
+                  - business.data.updated
+                  - activity.created
+      responses:
+        '201':
+          description: Destination created. `secret_shared_key` is the HMAC signing secret — store it now.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: Stable destination identifier. Use as `{destination_uuid}` in subsequent calls.
+                  label:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  enabled:
+                    type: boolean
+                  webhook_version:
+                    type: string
+                    enum:
+                    - v1
+                    - v2
+                    - v3
+                  secret_shared_key:
+                    type: string
+                    description: Auto-generated HMAC signing secret bound to this destination (43-character URL-safe token). Use it to verify the signature headers on incoming webhooks. Always returned in full to API-key callers; Console users need the `read:webhooks` permission, otherwise they see an empty string.
+                  subscribed_events:
+                    $ref: '#/components/schemas/WebhookSubscribedEvents'
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  summary:
+                    type: object
+                    description: Delivery health summary (all zero/null on a brand-new destination).
+                    properties:
+                      total_deliveries:
+                        type: integer
+                      failed_deliveries:
+                        type: integer
+                      error_rate_percentage:
+                        type: integer
+                      min_response_time_ms:
+                        type: integer
+                        nullable: true
+                      avg_response_time_ms:
+                        type: integer
+                        nullable: true
+                      max_response_time_ms:
+                        type: integer
+                        nullable: true
+                      last_delivery_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+              examples:
+                Created:
+                  value:
+                    uuid: 11111111-2222-3333-4444-555555555555
+                    label: Production session webhooks
+                    url: https://yourapp.com/webhooks/didit
+                    enabled: true
+                    webhook_version: v3
+                    secret_shared_key: tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ
+                    subscribed_events:
+                    - status.updated
+                    - data.updated
+                    created_at: '2026-05-17T10:00:00Z'
+                    updated_at: '2026-05-17T10:00:00Z'
+                    summary:
+                      total_deliveries: 0
+                      failed_deliveries: 0
+                      error_rate_percentage: 0
+                      min_response_time_ms: null
+                      avg_response_time_ms: null
+                      max_response_time_ms: null
+                      last_delivery_at: null
+        '400':
+          description: Validation failed — usually a duplicate URL, missing/invalid `subscribed_events`, or unknown event name.
+          content:
+            application/json:
+              examples:
+                Duplicate URL:
+                  value:
+                    url:
+                    - This webhook destination already exists for the application.
+                Empty events list:
+                  value:
+                    subscribed_events:
+                    - At least one subscribed event is required.
+                Unknown event:
+                  value:
+                    subscribed_events:
+                    - 'Unsupported webhook events: foo.bar'
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/webhook/destinations/{destination_uuid}/:
+    get:
+      summary: Get webhook destination
+      description: Retrieve one webhook destination with its `secret_shared_key` signing secret and delivery health summary. API-key callers always receive the secret in full; Console users without `read:webhooks` see an empty string.
+      operationId: get_webhook_destination
+      tags:
+      - Webhook
+      parameters:
+      - name: destination_uuid
+        in: path
+        required: true
+        description: UUID of the destination (the `uuid` returned from create / list).
+        schema:
+          type: string
+          format: uuid
+        example: 11111111-2222-3333-4444-555555555555
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/webhook/destinations/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nuuid = '11111111-2222-3333-4444-555555555555'\nresp = requests.get(\n    f'https://verification.didit.me/v3/webhook/destinations/{uuid}/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=10,\n)\nresp.raise_for_status()\nprint(resp.json())"
+      - lang: javascript
+        label: JavaScript
+        source: "const uuid = '11111111-2222-3333-4444-555555555555';\nconst resp = await fetch(`https://verification.didit.me/v3/webhook/destinations/${uuid}/`, {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n});\nif (!resp.ok) throw new Error(`Lookup failed: ${resp.status}`);\nconst destination = await resp.json();\nconsole.log(destination);"
+      responses:
+        '200':
+          description: Webhook destination details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                  label:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  enabled:
+                    type: boolean
+                  webhook_version:
+                    type: string
+                    enum:
+                    - v1
+                    - v2
+                    - v3
+                  secret_shared_key:
+                    type: string
+                    description: HMAC signing secret (43-character URL-safe token). Always returned in full to API-key callers; Console users need `read:webhooks`, otherwise an empty string.
+                  subscribed_events:
+                    $ref: '#/components/schemas/WebhookSubscribedEvents'
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  summary:
+                    type: object
+                    description: Delivery health metrics aggregated over the destination's lifetime.
+                    properties:
+                      total_deliveries:
+                        type: integer
+                      failed_deliveries:
+                        type: integer
+                      error_rate_percentage:
+                        type: integer
+                      min_response_time_ms:
+                        type: integer
+                        nullable: true
+                      avg_response_time_ms:
+                        type: integer
+                        nullable: true
+                      max_response_time_ms:
+                        type: integer
+                        nullable: true
+                      last_delivery_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+              examples:
+                Healthy destination:
+                  value:
+                    uuid: 11111111-2222-3333-4444-555555555555
+                    label: Production session webhooks
+                    url: https://yourapp.com/webhooks/didit
+                    enabled: true
+                    webhook_version: v3
+                    secret_shared_key: tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ
+                    subscribed_events:
+                    - status.updated
+                    - data.updated
+                    created_at: '2026-01-04T08:00:00Z'
+                    updated_at: '2026-04-22T14:09:11Z'
+                    summary:
+                      total_deliveries: 12453
+                      failed_deliveries: 14
+                      error_rate_percentage: 0
+                      min_response_time_ms: 41
+                      avg_response_time_ms: 187
+                      max_response_time_ms: 2103
+                      last_delivery_at: '2026-05-17T09:21:18Z'
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No destination with this UUID exists, or it belongs to a different application, or it has been deleted.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Webhook destination not found.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    patch:
+      summary: Update webhook destination
+      description: Update a webhook destination. **`subscribed_events` is REPLACED wholesale, not merged** — fetch first, append, resend. Secret is not rotated.
+      operationId: update_webhook_destination
+      tags:
+      - Webhook
+      parameters:
+      - name: destination_uuid
+        in: path
+        required: true
+        description: UUID of the destination to update.
+        schema:
+          type: string
+          format: uuid
+        example: 11111111-2222-3333-4444-555555555555
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  description: New human-readable name.
+                url:
+                  type: string
+                  format: uri
+                  description: New target URL. Must be unique within the application.
+                enabled:
+                  type: boolean
+                  description: Set to `false` to pause deliveries to this destination without deleting it.
+                webhook_version:
+                  type: string
+                  enum:
+                  - v1
+                  - v2
+                  - v3
+                  description: New payload schema version for future deliveries.
+                subscribed_events:
+                  $ref: '#/components/schemas/WebhookSubscribedEvents'
+            examples:
+              Pause destination:
+                value:
+                  enabled: false
+              Add transaction events:
+                value:
+                  subscribed_events:
+                  - status.updated
+                  - data.updated
+                  - transaction.created
+                  - transaction.status.updated
+              Move target URL:
+                value:
+                  label: Production session webhooks v2
+                  url: https://api.yourapp.com/webhooks/didit/v2
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/webhook/destinations/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"subscribed_events\": [\n      \"status.updated\",\n      \"data.updated\",\n      \"transaction.created\"\n    ]\n  }'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nuuid = '11111111-2222-3333-4444-555555555555'\nresp = requests.patch(\n    f'https://verification.didit.me/v3/webhook/destinations/{uuid}/',\n    headers={\n        'x-api-key': os.environ['DIDIT_API_KEY'],\n        'Content-Type': 'application/json',\n    },\n    json={'enabled': False},\n    timeout=10,\n)\nresp.raise_for_status()\nprint('Paused destination:', resp.json()['label'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const uuid = '11111111-2222-3333-4444-555555555555';\nconst resp = await fetch(`https://verification.didit.me/v3/webhook/destinations/${uuid}/`, {\n  method: 'PATCH',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({ enabled: false }),\n});\nif (!resp.ok) throw new Error(await resp.text());\nconsole.log(await resp.json());"
+      responses:
+        '200':
+          description: Updated webhook destination. Body has the same shape as `GET /v3/webhook/destinations/{destination_uuid}/`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                  label:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  enabled:
+                    type: boolean
+                  webhook_version:
+                    type: string
+                    enum:
+                    - v1
+                    - v2
+                    - v3
+                  secret_shared_key:
+                    type: string
+                  subscribed_events:
+                    $ref: '#/components/schemas/WebhookSubscribedEvents'
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  summary:
+                    type: object
+                    properties:
+                      total_deliveries:
+                        type: integer
+                      failed_deliveries:
+                        type: integer
+                      error_rate_percentage:
+                        type: integer
+                      min_response_time_ms:
+                        type: integer
+                        nullable: true
+                      avg_response_time_ms:
+                        type: integer
+                        nullable: true
+                      max_response_time_ms:
+                        type: integer
+                        nullable: true
+                      last_delivery_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+              examples:
+                Paused:
+                  value:
+                    uuid: 11111111-2222-3333-4444-555555555555
+                    label: Production session webhooks
+                    url: https://yourapp.com/webhooks/didit
+                    enabled: false
+                    webhook_version: v3
+                    secret_shared_key: tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ
+                    subscribed_events:
+                    - status.updated
+                    - data.updated
+                    created_at: '2026-01-04T08:00:00Z'
+                    updated_at: '2026-05-17T11:02:55Z'
+                    summary:
+                      total_deliveries: 12453
+                      failed_deliveries: 14
+                      error_rate_percentage: 0
+                      min_response_time_ms: 41
+                      avg_response_time_ms: 187
+                      max_response_time_ms: 2103
+                      last_delivery_at: '2026-05-17T09:21:18Z'
+        '400':
+          description: Validation failed (duplicate URL, empty/unknown events list, malformed body).
+          content:
+            application/json:
+              examples:
+                Duplicate URL:
+                  value:
+                    url:
+                    - This webhook destination already exists for the application.
+                Empty events:
+                  value:
+                    subscribed_events:
+                    - At least one subscribed event is required.
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: Destination with this UUID does not exist (or is deleted, or belongs to another application).
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Webhook destination not found.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    delete:
+      summary: Delete webhook destination
+      description: Soft-delete a webhook destination. Future events stop; historical delivery records are retained for audit. Calling again returns 404.
+      operationId: delete_webhook_destination
+      tags:
+      - Webhook
+      parameters:
+      - name: destination_uuid
+        in: path
+        required: true
+        description: UUID of the destination to delete.
+        schema:
+          type: string
+          format: uuid
+        example: 11111111-2222-3333-4444-555555555555
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/webhook/destinations/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nuuid = '11111111-2222-3333-4444-555555555555'\nresp = requests.delete(\n    f'https://verification.didit.me/v3/webhook/destinations/{uuid}/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=10,\n)\nresp.raise_for_status()\nassert resp.status_code == 204"
+      - lang: javascript
+        label: JavaScript
+        source: "const uuid = '11111111-2222-3333-4444-555555555555';\nconst resp = await fetch(`https://verification.didit.me/v3/webhook/destinations/${uuid}/`, {\n  method: 'DELETE',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n});\nif (resp.status !== 204) throw new Error(`Delete failed: ${resp.status}`);"
+      responses:
+        '204':
+          description: Destination deleted. No response body.
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No destination with this UUID exists for the application (already deleted or never existed).
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Webhook destination not found.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+components:
+  schemas:
+    WebhookEvent:
+      type: string
+      description: Supported webhook event name. Use these exact strings in `subscribed_events`; unsupported values are rejected.
+      enum:
+      - status.updated
+      - data.updated
+      - user.status.updated
+      - user.data.updated
+      - business.status.updated
+      - business.data.updated
+      - activity.created
+      - transaction.created
+      - transaction.status.updated
+      - travel_rule.status.updated
+    WebhookSubscribedEvents:
+      type: array
+      description: Event filter for this webhook destination. Didit delivers only webhooks whose event type exactly matches one of these values — there is no wildcard subscription. When sent, the list must contain at least one valid event (an explicit `[]` is rejected with 400); a destination whose list is empty (field omitted at create) receives nothing. On update the list is replaced wholesale, never merged.
+      minItems: 1
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/WebhookEvent'
+      example:
+      - status.updated
+      - data.updated
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

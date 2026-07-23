@@ -1,0 +1,1030 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Regulatory Reports API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Regulatory Reports
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/regulatory-reports/:
+    get:
+      summary: List reports for case
+      description: List FIU reports generated for the case.
+      operationId: list_case_regulatory_reports
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/regulatory-reports/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated reports for the case.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows, capped at 100 for performance.
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RegulatoryReportDetail'
+    post:
+      summary: Create report from case
+      description: 'Create a draft FIU report for the case: DRAFT status, auto-populated from the optional template plus the case''s subject, linked transactions, and narrative. Validate then finalize to produce the goAML XML and PDF.'
+      operationId: create_case_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                report_type:
+                  type: string
+                  enum:
+                  - SAR
+                  - STR
+                  - CTR
+                  - TTR
+                  - UTR
+                  - IFT
+                  - CBR
+                  - TFR
+                  description: Required unless a template is given; the template's report_type is used otherwise.
+                jurisdiction:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  description: Required unless a template is given.
+                template:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Report template UUID; its field_config seeds the draft before case-derived data is merged in.
+                transactions:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  nullable: true
+                  description: Transactions to attach; defaults to the case's linked transactions.
+                rentity_id:
+                  type: string
+                  nullable: true
+                rentity_branch:
+                  type: string
+                  nullable: true
+                submission_code:
+                  type: string
+                  enum:
+                  - E
+                  - M
+                  default: E
+                entity_reference:
+                  type: string
+                  nullable: true
+                fiu_ref_number:
+                  type: string
+                  nullable: true
+                currency_code_local:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  nullable: true
+                submission_date:
+                  type: string
+                  format: date-time
+                  nullable: true
+                reporting_person:
+                  type: object
+                location:
+                  type: object
+                reason:
+                  type: string
+                  nullable: true
+                action:
+                  type: string
+                  nullable: true
+                activity:
+                  type: string
+                  nullable: true
+                narrative:
+                  type: object
+                  properties:
+                    who:
+                      type: string
+                    what:
+                      type: string
+                    when:
+                      type: string
+                    where:
+                      type: string
+                    why:
+                      type: string
+                    how:
+                      type: string
+                report_indicators:
+                  type: array
+                  items:
+                    type: string
+                included_fields:
+                  type: array
+                  items:
+                    type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/regulatory-reports/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"template\": \"7ec00000-0000-4000-8000-000000000006\"}'"
+      responses:
+        '201':
+          description: Draft report created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryReportDetail'
+        '400':
+          description: The referenced template was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/regulatory-reports/:
+    get:
+      summary: List reports
+      description: Application-wide FIU report list, optionally filtered by status, report_type, or case.
+      operationId: list_regulatory_reports
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - VALIDATED
+          - FINALIZED
+        description: Filter by status.
+      - name: report_type
+        in: query
+        schema:
+          type: string
+          enum:
+          - SAR
+          - STR
+          - CTR
+          - TTR
+          - UTR
+          - IFT
+          - CBR
+          - TFR
+        description: Filter by report type.
+      - name: case
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter to reports on this case.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated reports across the application.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows, capped at 100 for performance.
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RegulatoryReportDetail'
+    post:
+      summary: Create standalone report
+      description: 'Create a draft FIU report from the standalone Reports page: both case and template are required (unlike the case-scoped create, which can omit template).'
+      operationId: create_standalone_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - case
+              - template
+              properties:
+                case:
+                  type: string
+                  format: uuid
+                template:
+                  type: string
+                  format: uuid
+                report_type:
+                  type: string
+                  enum:
+                  - SAR
+                  - STR
+                  - CTR
+                  - TTR
+                  - UTR
+                  - IFT
+                  - CBR
+                  - TFR
+                  description: Required unless a template is given; the template's report_type is used otherwise.
+                jurisdiction:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  description: Required unless a template is given.
+                transactions:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  nullable: true
+                  description: Transactions to attach; defaults to the case's linked transactions.
+                rentity_id:
+                  type: string
+                  nullable: true
+                rentity_branch:
+                  type: string
+                  nullable: true
+                submission_code:
+                  type: string
+                  enum:
+                  - E
+                  - M
+                  default: E
+                entity_reference:
+                  type: string
+                  nullable: true
+                fiu_ref_number:
+                  type: string
+                  nullable: true
+                currency_code_local:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  nullable: true
+                submission_date:
+                  type: string
+                  format: date-time
+                  nullable: true
+                reporting_person:
+                  type: object
+                location:
+                  type: object
+                reason:
+                  type: string
+                  nullable: true
+                action:
+                  type: string
+                  nullable: true
+                activity:
+                  type: string
+                  nullable: true
+                narrative:
+                  type: object
+                  properties:
+                    who:
+                      type: string
+                    what:
+                      type: string
+                    when:
+                      type: string
+                    where:
+                      type: string
+                    why:
+                      type: string
+                    how:
+                      type: string
+                report_indicators:
+                  type: array
+                  items:
+                    type: string
+                included_fields:
+                  type: array
+                  items:
+                    type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"case\": \"c1a5e000-0000-4000-8000-000000000001\", \"template\": \"7ec00000-0000-4000-8000-000000000006\"}'"
+      responses:
+        '201':
+          description: Draft report created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryReportDetail'
+        '400':
+          description: The referenced template was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/regulatory-reports/{report_uuid}/:
+    get:
+      summary: Get report
+      description: Retrieve a regulatory report.
+      operationId: get_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Report detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryReportDetail'
+    patch:
+      summary: Update report
+      description: Edit a draft or validated report's fields. Finalized reports cannot be edited (409).
+      operationId: update_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jurisdiction:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                rentity_id:
+                  type: string
+                  nullable: true
+                rentity_branch:
+                  type: string
+                  nullable: true
+                submission_code:
+                  type: string
+                  enum:
+                  - E
+                  - M
+                  default: E
+                entity_reference:
+                  type: string
+                  nullable: true
+                fiu_ref_number:
+                  type: string
+                  nullable: true
+                currency_code_local:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  nullable: true
+                submission_date:
+                  type: string
+                  format: date-time
+                  nullable: true
+                reporting_person:
+                  type: object
+                location:
+                  type: object
+                reason:
+                  type: string
+                  nullable: true
+                action:
+                  type: string
+                  nullable: true
+                activity:
+                  type: string
+                  nullable: true
+                narrative:
+                  type: object
+                  properties:
+                    who:
+                      type: string
+                    what:
+                      type: string
+                    when:
+                      type: string
+                    where:
+                      type: string
+                    why:
+                      type: string
+                    how:
+                      type: string
+                report_indicators:
+                  type: array
+                  items:
+                    type: string
+                included_fields:
+                  type: array
+                  items:
+                    type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"rentity_id\": \"FIU-US-00123\", \"currency_code_local\": \"USD\"}'"
+      responses:
+        '200':
+          description: Updated report.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryReportDetail'
+        '409':
+          description: Report is already finalized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+    delete:
+      summary: Delete report
+      description: Soft-delete a draft or validated report. Finalized reports cannot be deleted (409).
+      operationId: delete_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Report deleted.
+        '409':
+          description: Report is already finalized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/regulatory-reports/{report_uuid}/validate/:
+    post:
+      summary: Validate report
+      description: 'Check the report against the obligatory goAML header fields (reporting entity ID, submission code, local currency, action taken, submission date), plus at least one attached transaction and a 2-letter jurisdiction, without generating any files. Also stores the result on the report: validation_errors and validated_at are updated, and a non-finalized report''s status moves to VALIDATED (no errors) or back to DRAFT (errors).'
+      operationId: validate_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/validate/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - DRAFT
+                    - VALIDATED
+                    - FINALIZED
+                  is_valid:
+                    type: boolean
+                  errors:
+                    type: array
+                    description: Empty when valid.
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+  /v3/organization/{organization_id}/application/{application_id}/regulatory-reports/{report_uuid}/finalize/:
+    post:
+      summary: Finalize report
+      description: Re-validate, then render the goAML XML and PDF and upload both to S3. On SAR/STR/TFR reports, this also moves the case's transaction alerts from Pending SAR to SAR filed.
+      operationId: finalize_regulatory_report
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/finalize/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/finalize/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=30,\n)\nif resp.status_code == 400:\n    print('Validation failed:', resp.json()['errors'])\nelse:\n    resp.raise_for_status()\n    report = resp.json()\n    print(report['status'], report['report_number'])"
+      responses:
+        '200':
+          description: Report finalized; xml_s3_key and pdf_s3_key are set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryReportDetail'
+        '400':
+          description: Report failed validation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+        '409':
+          description: Report is not in a finalizable state.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/regulatory-reports/{report_uuid}/download-url/:
+    get:
+      summary: Get report download URL
+      description: Mint a presigned URL for a finalized report's goAML XML or PDF.
+      operationId: get_regulatory_report_download_url
+      tags:
+      - Regulatory Reports
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: report_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 5ec00000-0000-4000-8000-000000000007
+        description: Report UUID.
+      - name: file
+        in: query
+        schema:
+          type: string
+          enum:
+          - pdf
+          - xml
+          default: pdf
+        description: Which file to download.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/regulatory-reports/5ec00000-0000-4000-8000-000000000007/download-url/?file=xml' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Presigned download URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  download_url:
+                    type: string
+                    format: uri
+                  file:
+                    type: string
+                    enum:
+                    - pdf
+                    - xml
+        '409':
+          description: Report is not finalized yet.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                  status:
+                    type: string
+components:
+  schemas:
+    RegulatoryReportDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        case_uuid:
+          type: string
+          format: uuid
+        case_number:
+          type: string
+          nullable: true
+        report_type:
+          type: string
+          enum:
+          - SAR
+          - STR
+          - CTR
+          - TTR
+          - UTR
+          - IFT
+          - CBR
+          - TFR
+        report_type_display:
+          type: string
+        report_code:
+          type: string
+          description: goAML report code derived from report_type, e.g. STR, CTR, BCR.
+        report_number:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - VALIDATED
+          - FINALIZED
+        status_display:
+          type: string
+        jurisdiction:
+          type: string
+          minLength: 2
+          maxLength: 2
+        rentity_id:
+          type: string
+          nullable: true
+          description: Reporting entity ID issued by the FIU.
+        rentity_branch:
+          type: string
+          nullable: true
+        submission_code:
+          type: string
+          enum:
+          - E
+          - M
+        entity_reference:
+          type: string
+          nullable: true
+        fiu_ref_number:
+          type: string
+          nullable: true
+        currency_code_local:
+          type: string
+          minLength: 3
+          maxLength: 3
+          nullable: true
+        submission_date:
+          type: string
+          format: date-time
+          nullable: true
+        reporting_person:
+          type: object
+        location:
+          type: object
+        reason:
+          type: string
+          nullable: true
+        action:
+          type: string
+          nullable: true
+        activity:
+          type: string
+          nullable: true
+        narrative:
+          type: object
+          description: Five Ws narrative sections.
+          properties:
+            who:
+              type: string
+            what:
+              type: string
+            when:
+              type: string
+            where:
+              type: string
+            why:
+              type: string
+            how:
+              type: string
+        report_indicators:
+          type: array
+          items:
+            type: string
+        included_fields:
+          type: array
+          items:
+            type: string
+        transactions:
+          type: array
+          items:
+            type: string
+            format: uuid
+        validation_errors:
+          type: array
+          description: Result of the most recent validation; each entry is a {field, message} object.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        validated_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalized_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_by_email:
+          type: string
+          nullable: true
+        created_by_name:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

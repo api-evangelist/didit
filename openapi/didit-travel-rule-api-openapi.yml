@@ -1,0 +1,1108 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Travel Rule API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Travel Rule
+paths:
+  /v3/travel-rule/settings/:
+    get:
+      summary: Get Travel Rule settings
+      description: Read the application's Travel Rule settings and VASP profile. Auto-creates a default (disabled) settings row and an empty profile on first read.
+      operationId: getTravelRuleSettings
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/settings/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Current Travel Rule settings and VASP profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleSettingsDetail'
+              examples:
+                Disabled (default):
+                  value:
+                    is_enabled: false
+                    jurisdiction: EU
+                    name_matching_strictness: DEFAULT
+                    confirmation_timeout_hours: 48
+                    timeout_outcome: HOLD
+                    threshold_amount: '0.00'
+                    legal_name: ''
+                    lei: ''
+                    compliance_email: ''
+                    is_discoverable: true
+    put:
+      summary: Update Travel Rule settings
+      description: 'Upsert the application''s Travel Rule settings and VASP profile. Partial update — only send the fields you want to change. Setting `is_enabled: true` requires a non-blank `legal_name` (already stored or included in the same request), otherwise returns 400.'
+      operationId: updateTravelRuleSettings
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleSettingsUpdate'
+            example:
+              is_enabled: true
+              legal_name: Origin CASP SL
+              jurisdiction: EU
+              name_matching_strictness: DEFAULT
+              confirmation_timeout_hours: 48
+              timeout_outcome: HOLD
+              is_discoverable: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PUT https://verification.didit.me/v3/travel-rule/settings/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"is_enabled\": true, \"legal_name\": \"Origin CASP SL\", \"jurisdiction\": \"EU\"}'"
+      responses:
+        '200':
+          description: Updated settings and profile, in the same shape as GET.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleSettingsDetail'
+        '400':
+          description: Validation error, e.g. enabling without a legal_name.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                legal_name:
+                - legal_name is required to enable travel rule.
+  /v3/travel-rule/wallet-addresses/:
+    get:
+      summary: List wallet address book entries
+      description: Paginated list of your application's Travel Rule wallet address book, newest first.
+      operationId: listTravelRuleWalletAddresses
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/wallet-addresses/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated wallet address book entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WalletAddressEntry'
+    post:
+      summary: Register a wallet address
+      description: Add an entry to your Travel Rule wallet address book so inbound INTERNAL-rail transfers can resolve against it.
+      operationId: createTravelRuleWalletAddress
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletAddressEntryCreate'
+            example:
+              address: 0xBeneficiaryWallet01
+              chain: ethereum
+              holder_name: Ana Diaz
+              holder_vendor_data: user-042
+              self_declared: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/wallet-addresses/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"address\": \"0xBeneficiaryWallet01\", \"chain\": \"ethereum\", \"holder_name\": \"Ana Diaz\", \"self_declared\": true}'"
+      responses:
+        '201':
+          description: The created entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletAddressEntry'
+        '400':
+          description: Duplicate address for this application and chain.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                address:
+                - A wallet address entry with this address and chain already exists.
+  /v3/travel-rule/wallet-addresses/{entry_uuid}/:
+    patch:
+      summary: Update wallet address holder metadata
+      description: Partial update of holder_name, holder_vendor_data, entity_type, and travel_address. Setting travel_address attaches a TRP routing address to the entry; invalid values are rejected with 400. The response echoes only these four fields.
+      operationId: updateTravelRuleWalletAddress
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: entry_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletAddressEntryUpdate'
+            example:
+              holder_name: Ana Updated
+              travel_address: ta...
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH https://verification.didit.me/v3/travel-rule/wallet-addresses/{entry_uuid}/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"holder_name\": \"Ana Updated\", \"travel_address\": \"ta...\"}'"
+      responses:
+        '200':
+          description: The updated fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletAddressEntryUpdate'
+    delete:
+      summary: Soft-delete a wallet address
+      description: Soft-deletes the entry (deleted_at is set). The address is freed up for re-registration; ownership proofs are retained for audit.
+      operationId: deleteTravelRuleWalletAddress
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: entry_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE https://verification.didit.me/v3/travel-rule/wallet-addresses/{entry_uuid}/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Deleted.
+  /v3/travel-rule/vasps/:
+    get:
+      summary: Search the VASP directory
+      description: Paginated search across discoverable Didit customers with Travel Rule enabled, plus VASPs catalogued in the internal counterparty registry. Excludes your own application's profile.
+      operationId: listTravelRuleVasps
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: search
+        in: query
+        schema:
+          type: string
+        description: Case-insensitive substring match on VASP name.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/travel-rule/vasps/?search=Bene' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated, name-sorted VASP directory results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VaspDirectoryEntry'
+  /v3/transactions/{transaction_id}/travel-rule/:
+    patch:
+      summary: Finish, cancel, or resend a Travel Rule transfer
+      description: 'Provide `payment_txn_id` to report the on-chain hash and move an outbound COMPLETED transfer to FINISHED (its INTERNAL-rail counterpart also moves to FINISHED), `{"action": "cancel"}` to cancel a non-terminal transfer, or `{"action": "resend"}` to re-run routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA (improve the counterparty data first, e.g. add a travel_address to the destination wallet entry).'
+      operationId: patchTravelRuleTransfer
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID that owns the transfer.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleTransferPatchRequest'
+            examples:
+              Finish:
+                value:
+                  payment_txn_id: 0xchainhash
+              Cancel:
+                value:
+                  action: cancel
+              Resend:
+                value:
+                  action: resend
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH https://verification.didit.me/v3/transactions/{transaction_id}/travel-rule/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"payment_txn_id\": \"0xchainhash\"}'"
+      responses:
+        '200':
+          description: The updated transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleTransferDetail'
+        '400':
+          description: Neither payment_txn_id nor a supported action (cancel, resend) was provided.
+        '409':
+          description: The transfer is not in a state that allows this operation (e.g. not COMPLETED/outbound for finish, already terminal for cancel, or not an outbound transfer in a resendable status for resend).
+  /v3/transactions/{transaction_id}/travel-rule/ownership/:
+    post:
+      summary: Confirm or deny wallet ownership
+      description: Called by the beneficiary's application when its INTERNAL-rail transfer is UNCONFIRMED_OWNERSHIP. Confirming marks the matching wallet address book entry as ownership-verified and runs the beneficiary name match on both sides of the transfer; denying declines both sides.
+      operationId: confirmTravelRuleOwnership
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID that owns the transfer (the beneficiary side's transaction).
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleOwnershipConfirmRequest'
+            example:
+              confirmed: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/transactions/{transaction_id}/travel-rule/ownership/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"confirmed\": true}'"
+      responses:
+        '200':
+          description: The updated transfer. originator_data/beneficiary_data are omitted until ownership_confirmed is true on an inbound transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleTransferDetail'
+        '409':
+          description: The transfer is not currently UNCONFIRMED_OWNERSHIP, or its matching wallet address book entry was deleted.
+  /v3/travel-rule/pickup/{token}/:
+    get:
+      summary: Get email-rail pickup info
+      description: Public, unauthenticated. Lets a non-Didit counterparty VASP preview the pending exchange from the emailed pickup link. The token itself is the authentication.
+      operationId: getTravelRulePickup
+      tags:
+      - Travel Rule
+      security: []
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: curl https://verification.didit.me/v3/travel-rule/pickup/{token}/
+      responses:
+        '200':
+          description: Pickup preview.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRulePickupInfo'
+        '404':
+          description: Unknown token.
+        '410':
+          description: The pickup window has closed (expired, or the transfer already left AWAITING_COUNTERPARTY).
+  /v3/travel-rule/pickup/{token}/respond/:
+    post:
+      summary: Respond to an email-rail pickup
+      description: Public, unauthenticated. Accepts or declines the exchange from the emailed pickup link. On accept, beneficiary_name is checked against the originator's name_matching_strictness policy.
+      operationId: respondTravelRulePickup
+      tags:
+      - Travel Rule
+      security: []
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRulePickupRespondRequest'
+            example:
+              decision: accept
+              beneficiary_name: Carlos Ruiz
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/pickup/{token}/respond/ \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"decision\": \"accept\", \"beneficiary_name\": \"Carlos Ruiz\"}'"
+      responses:
+        '200':
+          description: The resulting exchange status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+              example:
+                status: COMPLETED
+        '404':
+          description: Unknown token.
+        '410':
+          description: The pickup window has closed.
+  /v3/travel-rule/inbound/:
+    post:
+      summary: Register an after-deposit (sunrise) inbound transfer
+      description: Register Travel Rule data for a crypto deposit that already settled on-chain before any exchange took place. Creates an inbound travelRule transaction (or reuses an unclaimed deposit) and resolves the transfer against your wallet address book. A transaction.created webhook fires for newly-created transactions.
+      operationId: registerTravelRuleInbound
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleInboundRequest'
+            example:
+              chain: ethereum
+              txid: 0xdeposit-hash
+              wallet_address: 0xYourDepositWallet
+              amount: '500.00'
+              currency: USDC
+              originator_data:
+                name: Origin CASP SL
+              beneficiary_data:
+                name: Ana Diaz
+              originating_vasp:
+                name: Origin CASP SL
+                lei: ''
+                travel_address: ta...
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/inbound/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"chain\":\"ethereum\",\"txid\":\"0xdeposit-hash\",\"wallet_address\":\"0xYourDepositWallet\",\"amount\":\"500.00\",\"currency\":\"USDC\"}'"
+      responses:
+        '200':
+          description: An existing unclaimed deposit was reused (created is false).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleInboundResponse'
+        '201':
+          description: A new inbound transaction and transfer were created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleInboundResponse'
+  /v3/travel-rule/widget-session/:
+    post:
+      summary: Mint a wallet-ownership widget session
+      description: Mint a hosted wallet-ownership widget URL/token. Send the customer to the returned url to prove control of a wallet (message signing, Satoshi test, screenshot, or self-declaration). The widget is web-only in this release - open the url in the system browser or a custom tab, never inside a mobile SDK webview.
+      operationId: createTravelRuleWidgetSession
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleWidgetSessionCreate'
+            example:
+              wallet_address: 0xBeneficiaryWallet01
+              chain: ethereum
+              holder_name: Ana Diaz
+              vendor_data: user-042
+              transaction_id: 22222222-3333-4444-5555-666666666666
+              expires_in_minutes: 60
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/widget-session/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"wallet_address\":\"0xBeneficiaryWallet01\",\"chain\":\"ethereum\",\"holder_name\":\"Ana Diaz\"}'"
+      responses:
+        '201':
+          description: The minted widget session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleWidgetSessionResponse'
+  /v3/travel-rule/widget/{token}/:
+    get:
+      summary: Get wallet-ownership widget context
+      description: 'Public read endpoint keyed by the widget session token - no API key required. Returns the widget context plus the status of every proof, so you can poll it to detect completion; completed_at becomes non-null once a proof is verified. A SATOSHI_TEST proof can sit at status PENDING while its deposit is seen on-chain but unconfirmed - a background job automatically rechecks it and completes it once the deposit confirms, so no client action is needed while it waits. Each proof carries the fields its method needs: deposit_address, expected_amount, and its own expires_at for SATOSHI_TEST; challenge for MESSAGE_SIGNING. Prefer the travel_rule.status.updated webhook over polling when the session is linked to a transfer.'
+      operationId: getTravelRuleWidgetContext
+      tags:
+      - Travel Rule
+      security: []
+      parameters:
+      - name: token
+        in: path
+        required: true
+        description: Opaque session token returned when the widget session was minted.
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: curl https://verification.didit.me/v3/travel-rule/widget/{token}/
+      responses:
+        '200':
+          description: The widget context and proof statuses.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleWidgetContext'
+        '404':
+          description: Unknown token.
+        '410':
+          description: The session expired without completing.
+components:
+  schemas:
+    WalletAddressEntryCreate:
+      type: object
+      required:
+      - address
+      properties:
+        address:
+          type: string
+        chain:
+          type: string
+        holder_vendor_data:
+          type: string
+        holder_name:
+          type: string
+        entity_type:
+          type: string
+          default: individual
+        self_declared:
+          type: boolean
+          default: false
+          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
+        travel_address:
+          type: string
+          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
+    TravelRuleWidgetSessionCreate:
+      type: object
+      required:
+      - wallet_address
+      - chain
+      properties:
+        wallet_address:
+          type: string
+          description: The wallet address to verify.
+        chain:
+          type: string
+          description: Chain identifier for the address, e.g. "ethereum", "bitcoin", "solana".
+        holder_name:
+          type: string
+          description: Name of the wallet holder, used for the beneficiary name match.
+        vendor_data:
+          type: string
+          description: Your internal identifier for the holder, carried onto the created address-book entry.
+        transaction_id:
+          type: string
+          format: uuid
+          description: Optional. Didit transaction UUID of a Travel Rule transfer to advance when the proof verifies.
+        satoshi_deposit_address:
+          type: string
+          description: Optional. A deposit address you control; supplying it enables the SATOSHI_TEST proof method.
+        callback_url:
+          type: string
+          description: Optional. Where the widget returns the customer after completion.
+        expires_in_minutes:
+          type: integer
+          description: Optional. Lifetime of the minted link, in minutes. Automatically extended to cover the Satoshi test window when SATOSHI_TEST is offered.
+    TravelRuleWidgetSessionResponse:
+      type: object
+      properties:
+        widget_session_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          description: Opaque session token embedded in the widget URL.
+        url:
+          type: string
+          description: The hosted wallet-ownership widget URL. Open it verbatim in the system browser (never inside a mobile SDK webview).
+        expires_at:
+          type: string
+          format: date-time
+    TravelRulePickupRespondRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - accept
+          - decline
+        beneficiary_name:
+          type: string
+          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
+    VaspDirectoryEntry:
+      type: object
+      properties:
+        name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+        dd_status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETED
+          - REJECTED
+        dd_score:
+          type: integer
+        reachable_rails:
+          type: array
+          items:
+            type: string
+            enum:
+            - INTERNAL
+            - TRP
+            - GTR
+            - EMAIL
+        is_didit_customer:
+          type: boolean
+          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
+        dd_score_breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
+        dd_assessed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
+    TravelRuleTransferDetail:
+      type: object
+      description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. originator_data/beneficiary_data are omitted while PII is masked (see description).
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - AWAITING_COUNTERPARTY
+          - ON_HOLD
+          - COMPLETED
+          - FINISHED
+          - CANCELLED
+          - EXPIRED
+          - COUNTERPARTY_MISMATCHED_DATA
+          - COUNTERPARTY_VASP_NOT_FOUND
+          - COUNTERPARTY_VASP_NOT_REACHABLE
+          - UNCONFIRMED_OWNERSHIP
+          - COUNTERPARTY_VASP_GENERAL_DECLINE
+          - NOT_ENOUGH_COUNTERPARTY_DATA
+          - NOT_APPLICABLE
+        direction:
+          type: string
+          enum:
+          - INBOUND
+          - OUTBOUND
+        rail:
+          type: string
+          nullable: true
+          enum:
+          - INTERNAL
+          - TRP
+          - GTR
+          - EMAIL
+          - null
+        protocol:
+          type: string
+          nullable: true
+        ivms_version:
+          type: string
+          example: ivms101.2023
+        required:
+          type: boolean
+        ownership_confirmed:
+          type: boolean
+          nullable: true
+        deadline_at:
+          type: string
+          format: date-time
+          nullable: true
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              at:
+                type: string
+                format: date-time
+              detail:
+                type: string
+        counterparty_vasp:
+          type: object
+          nullable: true
+          properties:
+            name:
+              type: string
+            lei:
+              type: string
+            dd_score:
+              type: integer
+        originator_data:
+          type: object
+        beneficiary_data:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    TravelRuleTransferPatchRequest:
+      type: object
+      description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
+      properties:
+        payment_txn_id:
+          type: string
+          description: The on-chain transaction hash. Requires the transfer to be an outbound transfer in COMPLETED status.
+        action:
+          type: string
+          enum:
+          - cancel
+          - resend
+          description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
+    TravelRuleOwnershipConfirmRequest:
+      type: object
+      required:
+      - confirmed
+      properties:
+        confirmed:
+          type: boolean
+    WalletAddressEntry:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        address:
+          type: string
+          description: The wallet address. Unique per application and chain among non-deleted entries.
+        chain:
+          type: string
+          nullable: true
+          description: Free-text chain identifier, e.g. "ethereum", "bitcoin".
+        holder_vendor_data:
+          type: string
+          nullable: true
+          description: Your internal identifier for the holder.
+        holder_name:
+          type: string
+          nullable: true
+          description: Name of the wallet holder, used for the beneficiary name match.
+        entity_type:
+          type: string
+          description: Free text, defaults to "individual".
+        is_ownership_verified:
+          type: boolean
+          description: Read-only. Whether ownership of this address has been proven.
+        created_at:
+          type: string
+          format: date-time
+        self_declared:
+          type: boolean
+          description: Whether the entry was created as a self-declared ownership proof.
+        travel_address:
+          type: string
+          nullable: true
+          description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's transfers over the TRP rail.
+    TravelRuleSettingsDetail:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: Whether the managed Travel Rule negotiation flow is active for outbound `travelRule` transactions on this application.
+        jurisdiction:
+          type: string
+          maxLength: 8
+          description: Your VASP's operating jurisdiction code. Default `"EU"`.
+        name_matching_strictness:
+          type: string
+          enum:
+          - NONE
+          - STRICT
+          - DEFAULT
+          - FUZZY
+          description: How strictly beneficiary names must match before a transfer can reach COMPLETED.
+        confirmation_timeout_hours:
+          type: integer
+          minimum: 1
+          description: Hours an AWAITING_COUNTERPARTY transfer may remain unconfirmed before the periodic sweeper expires it. Default 48.
+        timeout_outcome:
+          type: string
+          enum:
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: What happens to the underlying transaction when a transfer expires. Default HOLD.
+        threshold_amount:
+          type: string
+          description: Decimal string. Minimum transfer amount that triggers a managed exchange; transfers below it resolve straight to NOT_APPLICABLE. Defaults to "0.00" (EU TFR applies no minimum amount).
+        legal_name:
+          type: string
+          description: Your VASP's legal name. Required (non-blank) to set is_enabled to true.
+        lei:
+          type: string
+          description: Your Legal Entity Identifier, surfaced in the VASP directory.
+        compliance_email:
+          type: string
+          format: email
+          description: Compliance contact email for your VASP profile.
+        is_discoverable:
+          type: boolean
+          description: Whether your VASP profile appears in GET /v3/travel-rule/vasps/ search results and can be reached on the INTERNAL rail. Default true.
+        inbound_auto_accept:
+          type: boolean
+          description: When true, inbound transfers whose beneficiary wallet is a verified address-book entry with a matching name are accepted automatically, without a manual review step. Default false.
+        allow_self_declaration:
+          type: boolean
+          description: When true, the wallet-ownership widget offers self-declaration as a fallback proof method. Default false.
+        allow_screenshot_proof:
+          type: boolean
+          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
+        auto_wallet_verification:
+          type: boolean
+          description: When true, submitting an outbound Travel Rule transfer that needs end-user proof of wallet control auto-mints a wallet-ownership widget session bound to the transaction and exposes it in the transaction's action_required block. Default true.
+        vasp_attribution_enabled:
+          type: boolean
+          description: 'When true, an outbound Travel Rule transfer that no rail can route is attributed through blockchain analytics: the destination wallet is resolved to its owning VASP, the entity is recorded on the transfer and in the VASP directory, and the rails are re-run once with the attributed name. Default true.'
+        travel_address:
+          type: string
+          description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Populated once your VASP profile is complete.
+    TravelRulePickupInfo:
+      type: object
+      properties:
+        originator_vasp_name:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        beneficiary_wallet:
+          type: string
+        status:
+          type: string
+    TravelRuleWidgetContext:
+      type: object
+      properties:
+        vasp_name:
+          type: string
+          description: Legal name from your VASP profile, shown to the customer in the widget. Empty when no profile exists.
+        wallet_address:
+          type: string
+        chain:
+          type: string
+        holder_name:
+          type: string
+        allowed_methods:
+          type: array
+          items:
+            type: string
+            enum:
+            - MESSAGE_SIGNING
+            - SCREENSHOT
+            - SATOSHI_TEST
+            - SELF_DECLARATION
+          description: Proof methods available for this session. MESSAGE_SIGNING requires a supported chain family, SATOSHI_TEST requires a satoshi_deposit_address on the session, SCREENSHOT requires the allow_screenshot_proof setting, and SELF_DECLARATION requires the allow_self_declaration setting.
+        transfer_status:
+          type: string
+          nullable: true
+          description: Status of the linked Travel Rule transfer. Null when the session was minted without a transaction_id.
+        callback_url:
+          type: string
+          description: Where the widget returns the customer after completion. Empty when not set.
+        expires_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Non-null once a proof has been verified.
+        proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelRuleWidgetProofSummary'
+        customization:
+          type: object
+          nullable: true
+          description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
+    TravelRuleWidgetProofSummary:
+      type: object
+      properties:
+        proof_id:
+          type: string
+          format: uuid
+        method:
+          type: string
+          enum:
+          - MESSAGE_SIGNING
+          - SATOSHI_TEST
+          - SCREENSHOT
+          - SELF_DECLARATION
+        status:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - REJECTED
+          - EXPIRED
+          description: PENDING on a SATOSHI_TEST proof means the deposit has been seen on-chain but has not yet reached enough confirmations; a background job automatically rechecks it and moves it to VERIFIED once it confirms, with no resubmission needed. REJECTED means a genuinely wrong deposit was submitted (absent, wrong sender, or wrong amount). EXPIRED means the proof's own test window closed before a valid deposit was seen.
+        wallet_address:
+          type: string
+        chain:
+          type: string
+        deposit_address:
+          type: string
+          nullable: true
+          description: Deposit address the customer must send the Satoshi test amount to. Present only on a SATOSHI_TEST proof.
+        expected_amount:
+          type: string
+          nullable: true
+          description: Exact on-chain amount, in the deposit's native currency, the Satoshi test deposit must match. Present only on a SATOSHI_TEST proof.
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Deadline for this proof's own Satoshi test window. Present only on a SATOSHI_TEST proof; the widget session's own expires_at is extended to cover it when SATOSHI_TEST is offered.
+        challenge:
+          type: string
+          nullable: true
+          description: Didit-issued message the customer signs with their wallet. Present only on a MESSAGE_SIGNING proof.
+        created_at:
+          type: string
+          format: date-time
+    WalletAddressEntryUpdate:
+      type: object
+      properties:
+        holder_name:
+          type: string
+        holder_vendor_data:
+          type: string
+        entity_type:
+          type: string
+        travel_address:
+          type: string
+      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
+    TravelRuleInboundRequest:
+      type: object
+      required:
+      - chain
+      - txid
+      - wallet_address
+      - amount
+      - currency
+      properties:
+        chain:
+          type: string
+          description: Chain the deposit settled on, e.g. "ethereum".
+        txid:
+          type: string
+          description: On-chain transaction hash. Deduped together with wallet_address.
+        wallet_address:
+          type: string
+          description: The destination wallet you received the deposit on.
+        amount:
+          type: string
+          description: Deposit amount as a decimal string.
+        currency:
+          type: string
+          description: Deposit asset, e.g. "USDC".
+        originator_data:
+          type: object
+          description: IVMS-101 originator payload from the sending VASP, if known.
+          additionalProperties: true
+        beneficiary_data:
+          type: object
+          description: IVMS-101 beneficiary payload (your customer).
+          additionalProperties: true
+        originating_vasp:
+          type: object
+          description: Optional description of the sending VASP.
+          properties:
+            name:
+              type: string
+            lei:
+              type: string
+            travel_address:
+              type: string
+              description: Travel address that lets Didit reach the sender on the TRP rail.
+    TravelRuleInboundResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+          description: Didit transaction UUID for the inbound deposit.
+        txn_id:
+          type: string
+          description: Didit-generated txn_id for the sunrise transaction.
+        created:
+          type: boolean
+          description: true when a new transaction was minted (HTTP 201); false when an existing unclaimed deposit was reused (HTTP 200).
+        travel_rule:
+          $ref: '#/components/schemas/TravelRuleTransferDetail'
+    TravelRuleSettingsUpdate:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+        legal_name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+          maxLength: 8
+        name_matching_strictness:
+          type: string
+          enum:
+          - NONE
+          - STRICT
+          - DEFAULT
+          - FUZZY
+        confirmation_timeout_hours:
+          type: integer
+          minimum: 1
+        timeout_outcome:
+          type: string
+          enum:
+          - HOLD
+          - REJECT
+          - PROCEED
+        compliance_email:
+          type: string
+          format: email
+        is_discoverable:
+          type: boolean
+        threshold_amount:
+          type: string
+          description: Decimal string. Minimum transfer amount that triggers a managed exchange.
+        inbound_auto_accept:
+          type: boolean
+        allow_self_declaration:
+          type: boolean
+        allow_screenshot_proof:
+          type: boolean
+          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
+        auto_wallet_verification:
+          type: boolean
+        vasp_attribution_enabled:
+          type: boolean
+      description: All fields optional; PUT applies a partial update.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

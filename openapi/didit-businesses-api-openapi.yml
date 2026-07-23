@@ -1,0 +1,864 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Businesses API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Businesses
+paths:
+  /v3/businesses/:
+    get:
+      summary: List businesses
+      description: List [businesses](/entities/businesses) Didit assembles from KYB sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus businesses created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.
+      operationId: list_businesses
+      tags:
+      - Businesses
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/businesses/?limit=50' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/businesses/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n    params={'limit': 50},\n)\nresp.raise_for_status()\npage = resp.json()\nfor biz in page['results']:\n    print(biz['vendor_data'], biz['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const url = new URL('https://verification.didit.me/v3/businesses/');\nurl.searchParams.set('limit', '50');\n\nconst page = await fetch(url, {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n}).then((r) => r.json());\nconsole.log(page.count, page.results.length);"
+      responses:
+        '200':
+          description: Paginated list of businesses with status, session counts, and feature breakdown.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows — exact up to 100, capped at 100 beyond that for performance. Do not use it to detect the last page; rely on `next` being `null` instead.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or `null` on the last page.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or `null` on the first page.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BusinessListItem'
+              examples:
+                Example:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - didit_internal_id: a1b2c3d4-e5f6-4890-abcd-ef1234567890
+                      vendor_data: company-123
+                      display_name: null
+                      legal_name: Acme Trading Ltd
+                      registration_number: '12345678'
+                      country_code: GB
+                      effective_name: Acme Trading Ltd
+                      status: ACTIVE
+                      session_count: 2
+                      approved_count: 1
+                      declined_count: 0
+                      in_review_count: 1
+                      features:
+                        KYB: Approved
+                      features_list:
+                      - feature: KYB
+                        status: Approved
+                      last_session_at: '2026-03-15T10:30:00Z'
+                      last_activity_at: '2026-03-15T10:30:00Z'
+                      first_session_at: '2026-01-10T08:00:00Z'
+                      tags:
+                      - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                        name: VIP
+                        color: '#2567FF'
+                      created_at: '2026-01-10T08:00:00Z'
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot list businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/businesses/{vendor_data}/:
+    get:
+      summary: Get business
+      description: Fetch one [business](/entities/businesses) by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404.
+      operationId: get_business
+      tags:
+      - Businesses
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent.
+        example: company-123
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/businesses/company-123/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/businesses/company-123/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n)\nresp.raise_for_status()\nbiz = resp.json()\nprint(biz['didit_internal_id'], biz['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const vendorData = encodeURIComponent('company-123');\nconst biz = await fetch(\n  `https://verification.didit.me/v3/businesses/${vendorData}/`,\n  { headers: { 'x-api-key': process.env.DIDIT_API_KEY } },\n).then((r) => r.json());\nconsole.log(biz.didit_internal_id, biz.status);"
+      responses:
+        '200':
+          description: Full business detail including metadata and aggregated session data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDetailItem'
+              examples:
+                Active business:
+                  value:
+                    didit_internal_id: a1b2c3d4-e5f6-4890-abcd-ef1234567890
+                    vendor_data: company-123
+                    display_name: null
+                    legal_name: Acme Trading Ltd
+                    registration_number: '12345678'
+                    country_code: GB
+                    effective_name: Acme Trading Ltd
+                    status: ACTIVE
+                    session_count: 2
+                    approved_count: 1
+                    declined_count: 0
+                    in_review_count: 1
+                    features:
+                      KYB: Approved
+                    features_list:
+                    - feature: KYB
+                      status: Approved
+                    last_session_at: '2026-03-15T10:30:00Z'
+                    last_activity_at: '2026-03-15T10:30:00Z'
+                    first_session_at: '2026-01-10T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      name: VIP
+                      color: '#2567FF'
+                    created_at: '2026-01-10T08:00:00Z'
+                    metadata:
+                      industry: fintech
+                    updated_at: '2026-03-15T10:30:00Z'
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot read this application's businesses. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No (non-deleted) business with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    patch:
+      summary: Update business
+      description: 'Partial update of a business: `display_name`, `legal_name`, `registration_number`, `country_code`, `status`, `metadata`. `metadata` fully replaces. Setting `status` to `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry.'
+      operationId: update_business
+      tags:
+      - Businesses
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the business (free-form string, NOT a UUID).
+        example: company-123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Partial-update body. Provide only the fields you want to change.
+              properties:
+                display_name:
+                  type: string
+                  nullable: true
+                  description: Friendly display name shown in the console (takes precedence over `legal_name` for UI display).
+                legal_name:
+                  type: string
+                  nullable: true
+                  description: Official legal name from registry or manual entry.
+                registration_number:
+                  type: string
+                  nullable: true
+                  description: Company registration or incorporation number.
+                country_code:
+                  type: string
+                  nullable: true
+                  description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  description: Business lifecycle status. Setting `BLOCKED` automatically adds the `vendor_data` to the system blocklist; flipping away from `BLOCKED` removes that blocklist entry.
+                metadata:
+                  type: object
+                  nullable: true
+                  description: Arbitrary JSON object you attach to the business. **Fully replaces** the existing metadata on update — merge client-side if you only want to add keys.
+            examples:
+              Update name:
+                summary: Update display name
+                value:
+                  display_name: Acme Corp
+              Flag for review:
+                summary: Flip status
+                value:
+                  status: FLAGGED
+              Add metadata:
+                summary: Replace metadata JSON
+                value:
+                  metadata:
+                    industry: fintech
+                    risk_level: low
+              Fix registry data:
+                summary: Correct extracted fields
+                value:
+                  legal_name: Acme Trading International Ltd
+                  registration_number: '12345678'
+                  country_code: GB
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/businesses/company-123/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"display_name\": \"Acme Corp\", \"status\": \"FLAGGED\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/businesses/company-123/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'display_name': 'Acme Corp', 'status': 'FLAGGED'},\n)\nresp.raise_for_status()\nprint(resp.json()['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/businesses/company-123/', {\n  method: 'PATCH',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ display_name: 'Acme Corp', status: 'FLAGGED' }),\n});\nconst biz = await resp.json();\nconsole.log(biz.status);"
+      responses:
+        '200':
+          description: Business updated. The full updated business record is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDetailItem'
+              examples:
+                Updated:
+                  value:
+                    didit_internal_id: a1b2c3d4-e5f6-4890-abcd-ef1234567890
+                    vendor_data: company-123
+                    display_name: Acme Corp
+                    legal_name: Acme Trading Ltd
+                    registration_number: '12345678'
+                    country_code: GB
+                    effective_name: Acme Corp
+                    status: FLAGGED
+                    session_count: 2
+                    approved_count: 1
+                    declined_count: 0
+                    in_review_count: 1
+                    features:
+                      KYB: Approved
+                    features_list:
+                    - feature: KYB
+                      status: Approved
+                    last_session_at: '2026-03-15T10:30:00Z'
+                    last_activity_at: '2026-03-15T10:30:00Z'
+                    first_session_at: '2026-01-10T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      name: VIP
+                      color: '#2567FF'
+                    created_at: '2026-01-10T08:00:00Z'
+                    metadata:
+                      industry: fintech
+                      risk_level: low
+                    updated_at: '2026-03-15T10:30:00Z'
+        '400':
+          description: Invalid body — typically an unknown `status` or malformed `metadata`.
+          content:
+            application/json:
+              examples:
+                Bad status:
+                  value:
+                    status:
+                    - 'Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED'
+                Bad metadata:
+                  value:
+                    metadata:
+                    - Metadata must be a JSON object.
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot update businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No (non-deleted) business with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/businesses/{vendor_data}/update-status/:
+    patch:
+      summary: Update business status
+      description: Flip only the lifecycle `status` of a business — VendorBusinessStatusChoices (`ACTIVE`/`FLAGGED`/`BLOCKED`, NOT session statuses). `BLOCKED` adds `vendor_data` to the system blocklist.
+      operationId: update_business_status
+      tags:
+      - Businesses
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the business (free-form string, NOT a UUID).
+        example: company-123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  description: New lifecycle status. `BLOCKED` also adds the `vendor_data` to the system blocklist.
+            examples:
+              Flag:
+                summary: Flag the business for review
+                value:
+                  status: FLAGGED
+              Block:
+                summary: Block the business (adds to system blocklist)
+                value:
+                  status: BLOCKED
+              Reactivate:
+                summary: Reactivate the business
+                value:
+                  status: ACTIVE
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/businesses/company-123/update-status/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"status\": \"BLOCKED\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/businesses/company-123/update-status/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'status': 'BLOCKED'},\n)\nresp.raise_for_status()\nprint(resp.json()['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/businesses/company-123/update-status/', {\n  method: 'PATCH',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ status: 'BLOCKED' }),\n});\nconst biz = await resp.json();\nconsole.log(biz.status);"
+      responses:
+        '200':
+          description: Business status updated. Full business record returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDetailItem'
+              examples:
+                Blocked:
+                  value:
+                    didit_internal_id: a1b2c3d4-e5f6-4890-abcd-ef1234567890
+                    vendor_data: company-123
+                    display_name: null
+                    legal_name: Acme Trading Ltd
+                    registration_number: '12345678'
+                    country_code: GB
+                    effective_name: Acme Trading Ltd
+                    status: BLOCKED
+                    session_count: 2
+                    approved_count: 1
+                    declined_count: 0
+                    in_review_count: 1
+                    features:
+                      KYB: Approved
+                    features_list:
+                    - feature: KYB
+                      status: Approved
+                    last_session_at: '2026-03-15T10:30:00Z'
+                    last_activity_at: '2026-03-15T10:30:00Z'
+                    first_session_at: '2026-01-10T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      name: VIP
+                      color: '#2567FF'
+                    created_at: '2026-01-10T08:00:00Z'
+                    metadata:
+                      industry: fintech
+                    updated_at: '2026-03-15T10:30:00Z'
+        '400':
+          description: Missing or invalid `status`.
+          content:
+            application/json:
+              examples:
+                Missing status:
+                  value:
+                    status:
+                    - This field is required.
+                Bad status:
+                  value:
+                    status:
+                    - 'Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED'
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot update businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No (non-deleted) business with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/businesses/delete/:
+    post:
+      summary: Batch delete businesses
+      description: '**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer [Update Business Status](#patch-/v3/businesses/-vendor_data-/update-status/) with `BLOCKED`.'
+      operationId: batch_delete_businesses
+      tags:
+      - Businesses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 'Provide `vendor_data_list`, `didit_internal_id_list`, or `delete_all: true`. Precedence when several are sent: `delete_all` > `vendor_data_list` > `didit_internal_id_list` (only the highest-precedence selector is used).'
+              properties:
+                vendor_data_list:
+                  type: array
+                  items:
+                    type: string
+                  description: Your own identifiers to delete, matched exactly as sent.
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Didit's internal UUIDs (`didit_internal_id`) to delete.
+                delete_all:
+                  type: boolean
+                  default: false
+                  description: If `true`, deletes every business in the application. Cannot be combined with the list selectors.
+            examples:
+              Specific businesses:
+                summary: Delete by vendor_data
+                value:
+                  vendor_data_list:
+                  - company-123
+                  - company-456
+              Specific internal IDs:
+                summary: Delete by didit_internal_id
+                value:
+                  didit_internal_id_list:
+                  - a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  - b2c3d4e5-f6a7-8901-bcde-f12345678901
+              All businesses:
+                summary: Wipe every business in this application
+                value:
+                  delete_all: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/businesses/delete/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"vendor_data_list\": [\"company-123\", \"company-456\"]}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/businesses/delete/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'vendor_data_list': ['company-123', 'company-456']},\n)\nresp.raise_for_status()\nprint('deleted', resp.json()['deleted'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/businesses/delete/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ vendor_data_list: ['company-123', 'company-456'] }),\n});\nconst body = await resp.json();\nconsole.log('deleted', body.deleted);"
+      responses:
+        '200':
+          description: Businesses deleted. Returns the number of rows actually removed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+                    description: Number of businesses deleted (excludes vendor_data values that didn't match anything).
+              examples:
+                Deleted some:
+                  value:
+                    deleted: 2
+                Nothing matched:
+                  value:
+                    deleted: 0
+        '400':
+          description: No selector supplied (all of `vendor_data_list`, `didit_internal_id_list`, and `delete_all` missing or empty). The error body is a JSON array.
+          content:
+            application/json:
+              examples:
+                Missing selector:
+                  value:
+                  - Provide vendor_data_list, didit_internal_id_list, or set delete_all=true.
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot delete businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/businesses/create/:
+    post:
+      summary: Create business
+      description: Pre-create a [business](/entities/businesses) *without* a KYB session. All fields are optional, but you should always send `vendor_data` — without it the record cannot be linked to sessions or transactions. When provided, `vendor_data` must be unique among non-deleted businesses (exact match; conflicts return 400). Not idempotent.
+      operationId: create_business
+      tags:
+      - Businesses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vendor_data:
+                  type: string
+                  nullable: true
+                  description: Your unique identifier for this business (free-form string, NOT a UUID). Optional but strongly recommended. When provided, must be unique among non-deleted businesses for the application; matched exactly as sent.
+                display_name:
+                  type: string
+                  nullable: true
+                  maxLength: 255
+                  description: Friendly display name shown in the console (takes precedence over `legal_name` for UI display).
+                legal_name:
+                  type: string
+                  nullable: true
+                  maxLength: 255
+                  description: Official legal name of the company.
+                registration_number:
+                  type: string
+                  nullable: true
+                  maxLength: 100
+                  description: Company registration or incorporation number.
+                country_code:
+                  type: string
+                  nullable: true
+                  maxLength: 10
+                  description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  default: ACTIVE
+                  description: Initial lifecycle status. Defaults to `ACTIVE`.
+                metadata:
+                  type: object
+                  nullable: true
+                  description: Arbitrary JSON object you attach to the business. Defaults to `{}`.
+            examples:
+              Basic:
+                summary: Recommended minimum
+                value:
+                  vendor_data: company-456
+                  legal_name: New Corp Ltd
+                  country_code: US
+              Full:
+                summary: All fields
+                value:
+                  vendor_data: company-789
+                  display_name: New Corp
+                  legal_name: New Corp International Ltd
+                  registration_number: '98765432'
+                  country_code: DE
+                  status: ACTIVE
+                  metadata:
+                    industry: fintech
+                    tier: enterprise
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/businesses/create/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"vendor_data\": \"company-456\", \"legal_name\": \"New Corp Ltd\", \"country_code\": \"US\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/businesses/create/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={\n        'vendor_data': 'company-456',\n        'legal_name': 'New Corp Ltd',\n        'country_code': 'US',\n    },\n)\nresp.raise_for_status()\nbiz = resp.json()\nprint(biz['didit_internal_id'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/businesses/create/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    vendor_data: 'company-456',\n    legal_name: 'New Corp Ltd',\n    country_code: 'US',\n  }),\n});\nconst biz = await resp.json();\nconsole.log(biz.didit_internal_id);"
+      responses:
+        '201':
+          description: Business created. Full business record returned (same shape as Get Business).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDetailItem'
+              examples:
+                Created:
+                  value:
+                    didit_internal_id: a1b2c3d4-e5f6-4890-abcd-ef1234567890
+                    vendor_data: company-456
+                    display_name: null
+                    legal_name: New Corp Ltd
+                    registration_number: null
+                    country_code: US
+                    effective_name: New Corp Ltd
+                    status: ACTIVE
+                    session_count: 0
+                    approved_count: 0
+                    declined_count: 0
+                    in_review_count: 0
+                    features: {}
+                    features_list: []
+                    last_session_at: null
+                    last_activity_at: '2026-03-15T10:30:00Z'
+                    first_session_at: null
+                    tags: []
+                    created_at: '2026-03-15T10:30:00Z'
+                    metadata: {}
+                    updated_at: '2026-03-15T10:30:00Z'
+        '400':
+          description: Invalid body — typically a duplicate `vendor_data`, an unknown `status`, or malformed `metadata`.
+          content:
+            application/json:
+              examples:
+                Duplicate:
+                  value:
+                    vendor_data:
+                    - A business with this vendor_data already exists.
+                Bad status:
+                  value:
+                    status:
+                    - 'Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED'
+                Bad metadata:
+                  value:
+                    metadata:
+                    - Metadata must be a JSON object.
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot create businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+components:
+  schemas:
+    BusinessListItem:
+      type: object
+      description: A verified business.
+      properties:
+        didit_internal_id:
+          type: string
+          format: uuid
+          description: Didit's stable internal UUID for this business.
+        vendor_data:
+          type: string
+          nullable: true
+          description: Your unique identifier for this business (passed when creating sessions). This can be null when no vendor identifier was supplied.
+        display_name:
+          type: string
+          nullable: true
+          description: Custom display name set by you
+        legal_name:
+          type: string
+          nullable: true
+          description: Official legal name from registry or manual entry
+        registration_number:
+          type: string
+          nullable: true
+          description: Company registration or incorporation number
+        country_code:
+          type: string
+          nullable: true
+          description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
+        effective_name:
+          type: string
+          nullable: true
+          description: 'Best available name: display_name if set, otherwise legal_name'
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - FLAGGED
+          - BLOCKED
+          description: Lifecycle status of the business record (NOT a session status). `ACTIVE` is the default, `FLAGGED` marks it for manual attention, `BLOCKED` prevents new sessions for this `vendor_data`.
+        session_count:
+          type: integer
+          description: Total number of verification sessions for this business
+        approved_count:
+          type: integer
+          description: Number of approved sessions
+        declined_count:
+          type: integer
+          description: Number of declined sessions
+        in_review_count:
+          type: integer
+          description: Number of sessions in review
+        features:
+          type: object
+          description: 'Aggregated per-feature status across all of this business''s KYB sessions. Currently the only key is `KYB` (the registry company check status). Possible values: `Approved`, `Declined`, `In Review`, `Not Finished`, `Resub Requested`.'
+        features_list:
+          type: array
+          items:
+            type: object
+            properties:
+              feature:
+                type: string
+              status:
+                type: string
+          description: Same data as `features`, as an ordered array of `{feature, status}` objects.
+        last_session_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent session
+        first_session_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the first session
+        last_activity_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent activity (status change, session update, etc.)
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              name:
+                type: string
+              color:
+                type: string
+          description: Tags assigned to this business
+        created_at:
+          type: string
+          format: date-time
+    BusinessDetailItem:
+      type: object
+      description: Full business detail. Extends BusinessListItem with metadata and updated_at.
+      allOf:
+      - $ref: '#/components/schemas/BusinessListItem'
+      - type: object
+        properties:
+          metadata:
+            type: object
+            description: Custom metadata JSON you attached to this business. Defaults to `{}`.
+          updated_at:
+            type: string
+            format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

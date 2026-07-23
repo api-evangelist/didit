@@ -1,0 +1,732 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Case Blueprints API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Case Blueprints
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/:
+    get:
+      summary: List blueprints
+      description: List case blueprints for the application.
+      operationId: list_case_blueprints
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated blueprint list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows, capped at 100 for performance.
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseBlueprintListItem'
+    post:
+      summary: Create blueprint
+      description: 'Create a case blueprint: general settings (assignment, escalation, transfer, 4-eyes pairing) plus content_config, the six sections that drive the case page.'
+      operationId: create_case_blueprint
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              - assignee_pool
+              properties:
+                name:
+                  type: string
+                  maxLength: 24
+                  description: Max 24 characters, e.g. "AML investigation".
+                description:
+                  type: string
+                  nullable: true
+                assignee_pool:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                  description: List of User UUIDs. Empty arrays are rejected with "Pick at least one assignee".
+                assignment_method:
+                  type: string
+                  enum:
+                  - MANUAL
+                  - AUTOMATIC
+                  default: MANUAL
+                max_active_cases:
+                  type: integer
+                  nullable: true
+                  minimum: 1
+                  description: 'Automatic-mode threshold: "fewer than N cases of this blueprint assigned".'
+                escalation_enabled:
+                  type: boolean
+                  default: false
+                escalation_blueprint:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Target blueprint UUID. Not enforced at save time, but the escalate action fails with 400 until both escalation_enabled and escalation_blueprint are set.
+                transfer_enabled:
+                  type: boolean
+                  default: false
+                four_eyes_checker_blueprint:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: 'Setting this enables 4-eyes review: resolutions on this blueprint stage on the checker blueprint''s queue.'
+                require_resolution_note:
+                  type: boolean
+                  default: false
+                content_config:
+                  $ref: '#/components/schemas/CaseContentConfig'
+                is_active:
+                  type: boolean
+                  default: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"name\": \"AML investigation\", \"assignee_pool\": [\"9a000000-0000-4000-8000-0000000000aa\"], \"assignment_method\": \"AUTOMATIC\", \"max_active_cases\": 15, \"require_resolution_note\": true, \"content_config\": {\"aml_control\": {\"enabled\": true, \"financial\": true, \"identity\": false}}}'"
+      responses:
+        '201':
+          description: Blueprint created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseBlueprintDetail'
+        '400':
+          description: Name over 24 chars, empty assignee_pool, or a cross-referenced blueprint (escalation/checker) not found.
+          content:
+            application/json:
+              schema:
+                type: object
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/{blueprint_uuid}/:
+    get:
+      summary: Get blueprint
+      description: Retrieve a blueprint, including its connected creation sources (AML config, transaction rules, workflow nodes) and which blueprints escalate to it.
+      operationId: get_case_blueprint
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: blueprint_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: b1de0000-0000-4000-8000-000000000002
+        description: Blueprint UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/b1de0000-0000-4000-8000-000000000002/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Blueprint detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseBlueprintDetail'
+    patch:
+      summary: Update blueprint
+      description: Partially update a blueprint's general settings or content_config.
+      operationId: update_case_blueprint
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: blueprint_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: b1de0000-0000-4000-8000-000000000002
+        description: Blueprint UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 24
+                  description: Max 24 characters, e.g. "AML investigation".
+                description:
+                  type: string
+                  nullable: true
+                assignee_pool:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                  description: List of User UUIDs. Empty arrays are rejected with "Pick at least one assignee".
+                assignment_method:
+                  type: string
+                  enum:
+                  - MANUAL
+                  - AUTOMATIC
+                max_active_cases:
+                  type: integer
+                  nullable: true
+                  minimum: 1
+                  description: 'Automatic-mode threshold: "fewer than N cases of this blueprint assigned".'
+                escalation_enabled:
+                  type: boolean
+                escalation_blueprint:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Target blueprint UUID. Not enforced at save time, but the escalate action fails with 400 until both escalation_enabled and escalation_blueprint are set.
+                transfer_enabled:
+                  type: boolean
+                four_eyes_checker_blueprint:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: 'Setting this enables 4-eyes review: resolutions on this blueprint stage on the checker blueprint''s queue.'
+                require_resolution_note:
+                  type: boolean
+                content_config:
+                  $ref: '#/components/schemas/CaseContentConfig'
+                is_active:
+                  type: boolean
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/b1de0000-0000-4000-8000-000000000002/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"transfer_enabled\": true}'"
+      responses:
+        '200':
+          description: Updated blueprint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseBlueprintDetail'
+    delete:
+      summary: Delete blueprint
+      description: 'Soft-delete a blueprint. Deletion always succeeds and does not touch the blueprint''s cases: existing cases keep their blueprint reference and its settings continue to apply to them. A deleted blueprint no longer appears in blueprint lists and can no longer be chosen as a transfer target; if a maker blueprint is deleted while a resolution is pending 4-eyes approval, a rejected resolution leaves the case on the checker blueprint.'
+      operationId: delete_case_blueprint
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: blueprint_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: b1de0000-0000-4000-8000-000000000002
+        description: Blueprint UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/b1de0000-0000-4000-8000-000000000002/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Blueprint deleted.
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/presets/:
+    get:
+      summary: List blueprint presets
+      description: List the four built-in presets (Screening hit, AML investigation, Suspicious activity, KYC review) with their content_config and whether each is already installed on this application.
+      operationId: list_case_blueprint_presets
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/presets/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Preset catalogue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        preset_key:
+                          type: string
+                          enum:
+                          - screening_hit
+                          - aml_investigation
+                          - suspicious_activity
+                          - kyc
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        content_config:
+                          $ref: '#/components/schemas/CaseContentConfig'
+                        installed:
+                          type: boolean
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/presets/install/:
+    post:
+      summary: Install blueprint presets
+      description: Copy one or more presets into the application as editable blueprints. Idempotent per preset_key; omit preset_keys to install every preset not yet installed.
+      operationId: install_case_blueprint_presets
+      tags:
+      - Case Blueprints
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preset_keys:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Subset of screening_hit, aml_investigation, suspicious_activity, kyc. Omit to install all.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/blueprints/presets/install/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"preset_keys\": [\"aml_investigation\", \"kyc\"]}'"
+      responses:
+        '200':
+          description: No new presets to install (all requested presets already exist).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: array
+                    items:
+                      type: string
+        '201':
+          description: One or more presets installed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: array
+                    items:
+                      type: string
+components:
+  schemas:
+    CaseBlueprintDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type: string
+          nullable: true
+        assignment_method:
+          type: string
+          enum:
+          - MANUAL
+          - AUTOMATIC
+        assignee_pool:
+          type: array
+          items:
+            type: string
+            format: uuid
+        max_active_cases:
+          type: integer
+          nullable: true
+        escalation_enabled:
+          type: boolean
+        transfer_enabled:
+          type: boolean
+        require_resolution_note:
+          type: boolean
+        is_active:
+          type: boolean
+        preset_key:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        escalation_blueprint:
+          type: string
+          format: uuid
+          nullable: true
+        escalation_blueprint_name:
+          type: string
+          nullable: true
+        four_eyes_checker_blueprint:
+          type: string
+          format: uuid
+          nullable: true
+        four_eyes_checker_blueprint_name:
+          type: string
+          nullable: true
+        content_config:
+          type: object
+          description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
+          properties:
+            checklist:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                optional:
+                  type: boolean
+                  description: When true, a case can be resolved with incomplete checklist items.
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        maxLength: 255
+                      order:
+                        type: integer
+            aml_control:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                financial:
+                  type: boolean
+                identity:
+                  type: boolean
+            identity:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                personal_information:
+                  type: boolean
+                applicant_tags:
+                  type: boolean
+                contact_information:
+                  type: boolean
+                risk_overview:
+                  type: boolean
+                poi_documents:
+                  type: boolean
+                poa_documents:
+                  type: boolean
+            verifications:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                summary:
+                  type: boolean
+            reporting:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                fiu_reports:
+                  type: boolean
+            financial:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                payment_methods:
+                  type: boolean
+                transactions:
+                  type: boolean
+        creation_sources:
+          type: array
+          description: Connectors currently routing new cases into this blueprint.
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                - aml
+                - rule
+                - workflow
+              id:
+                type: string
+              name:
+                type: string
+        receives_escalation_from:
+          type: array
+          description: Other blueprints whose Escalation target points at this one.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+        updated_at:
+          type: string
+          format: date-time
+    CaseBlueprintListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type: string
+          nullable: true
+        assignment_method:
+          type: string
+          enum:
+          - MANUAL
+          - AUTOMATIC
+        assignee_pool:
+          type: array
+          items:
+            type: string
+            format: uuid
+        max_active_cases:
+          type: integer
+          nullable: true
+        escalation_enabled:
+          type: boolean
+        transfer_enabled:
+          type: boolean
+        require_resolution_note:
+          type: boolean
+        is_active:
+          type: boolean
+        preset_key:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    CaseContentConfig:
+      type: object
+      description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
+      properties:
+        checklist:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            optional:
+              type: boolean
+              description: When true, a case can be resolved with incomplete checklist items.
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    maxLength: 255
+                  order:
+                    type: integer
+        aml_control:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            financial:
+              type: boolean
+            identity:
+              type: boolean
+        identity:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            personal_information:
+              type: boolean
+            applicant_tags:
+              type: boolean
+            contact_information:
+              type: boolean
+            risk_overview:
+              type: boolean
+            poi_documents:
+              type: boolean
+            poa_documents:
+              type: boolean
+        verifications:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            summary:
+              type: boolean
+        reporting:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            fiu_reports:
+              type: boolean
+        financial:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            payment_methods:
+              type: boolean
+            transactions:
+              type: boolean
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

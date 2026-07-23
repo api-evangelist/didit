@@ -1,0 +1,767 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Questionnaires API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Questionnaires
+paths:
+  /v3/questionnaires/:
+    get:
+      summary: List questionnaires
+      description: List your questionnaires, newest first, in a limit/offset pagination envelope (`{count, next, previous, results}`, default page size 50). Each row is one version; `questionnaire_group_id` is the stable group ID resolved to the latest `published` version.
+      operationId: list_questionnaires
+      tags:
+      - Questionnaires
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+        description: Page size (number of questionnaires per page).
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+        description: Number of rows to skip before the first returned questionnaire.
+      responses:
+        '200':
+          description: One page of questionnaires ordered by `created_at` descending, wrapped in the pagination envelope. Each item in `results` is a `QuestionnaireListItem`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Total number of questionnaire versions for the application.
+                  next:
+                    type: string
+                    format: uri
+                    nullable: true
+                    description: URL of the next page, or `null` on the last page.
+                  previous:
+                    type: string
+                    format: uri
+                    nullable: true
+                    description: URL of the previous page, or `null` on the first page.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestionnaireListItem'
+              examples:
+                One questionnaire:
+                  summary: A simple bilingual questionnaire
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    results:
+                    - uuid: 11111111-2222-3333-4444-555555555555
+                      title: KYC Questionnaire
+                      description: Additional verification questions
+                      languages:
+                      - en
+                      - es
+                      default_language: en
+                      is_active: true
+                      is_simple_questionnaire: true
+                      created_at: '2026-04-23T09:55:00Z'
+                      updated_at: '2026-04-23T10:00:00Z'
+                      question_types:
+                      - SHORT_TEXT
+                      - MULTIPLE_CHOICE
+                      - FILE_UPLOAD
+                      workflow_names: []
+                      questionnaire_group_id: 11111111-2222-3333-4444-555555555555
+                      version: 1
+                      status: published
+                      published_at: '2026-04-23T10:00:00Z'
+                      is_editable: false
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+        '500':
+          description: Unexpected server error while building the list. Safe to retry.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl -X GET 'https://verification.didit.me/v3/questionnaires/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: Python
+        label: Python (requests)
+        source: "import requests\n\nresp = requests.get(\n    \"https://verification.didit.me/v3/questionnaires/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    timeout=10,\n)\nresp.raise_for_status()\npage = resp.json()\nfor q in page[\"results\"]:\n    print(q[\"uuid\"], q[\"title\"], q[\"status\"])"
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: "const res = await fetch(\"https://verification.didit.me/v3/questionnaires/\", {\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (!res.ok) throw new Error(`Didit ${res.status}`);\nconst page = await res.json();\npage.results.forEach((q) => console.log(q.uuid, q.title, q.status));"
+    post:
+      summary: Create questionnaire
+      description: Create a simple linear questionnaire. Send `form_elements` in display order; branching and repeatable groups require the Console. Defaults to `published` v1.
+      operationId: create_questionnaire
+      tags:
+      - Questionnaires
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleQuestionnaireRequest'
+            examples:
+              Simple:
+                summary: Basic questionnaire
+                value:
+                  title: Customer Onboarding
+                  description: Additional information needed for verification
+                  default_language: en
+                  languages:
+                  - en
+                  is_active: true
+                  form_elements:
+                  - id: occupation
+                    element_type: short_text
+                    label:
+                      en: What is your occupation?
+                    is_required: true
+                    placeholder:
+                      en: Software engineer
+                  - id: source_of_funds
+                    element_type: multiple_choice
+                    label:
+                      en: Source of funds
+                    is_required: true
+                    options:
+                    - value: employment
+                      label:
+                        en: Employment
+                    - value: business
+                      label:
+                        en: Business
+                    - value: investments
+                      label:
+                        en: Investments
+                    - value: other
+                      label:
+                        en: Other
+      responses:
+        '201':
+          description: Questionnaire created. The response includes the `questionnaire_id` — store it to reference this questionnaire from workflows or future update/delete calls.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireDetail'
+              examples:
+                Created:
+                  value:
+                    questionnaire_id: 11111111-2222-3333-4444-555555555555
+                    title: Customer Onboarding
+                    description: Additional information needed for verification
+                    languages:
+                    - en
+                    default_language: en
+                    is_active: true
+                    is_simple_questionnaire: true
+                    graph:
+                      start_node: occupation
+                      nodes:
+                        occupation:
+                          element_type: SHORT_TEXT
+                          is_required: true
+                          title:
+                            en: What is your occupation?
+                          next: source_of_funds
+                        source_of_funds:
+                          element_type: MULTIPLE_CHOICE
+                          is_required: true
+                          title:
+                            en: Source of funds
+                          choices:
+                          - value: employment
+                            label:
+                              en: Employment
+                          - value: business
+                            label:
+                              en: Business
+                          next: null
+                    sections: []
+                    questionnaire_group_id: 11111111-2222-3333-4444-555555555555
+                    version: 1
+                    status: published
+                    published_at: '2026-04-23T10:00:00Z'
+                    is_editable: false
+        '400':
+          description: 'Validation error. Common causes: an unknown `element_type`, a translatable field missing a translation for one of `languages`, `languages` missing `en`, `default_language` not in `languages`, an option without a `label`, a question that has `branches`/`required_if`/`repeatable_config` (not supported by this endpoint), or sending a raw `graph` instead of `form_elements`. The body is a DRF validation error keyed by field name.'
+          content:
+            application/json:
+              examples:
+                Graph not accepted:
+                  value:
+                    graph: The v3 questionnaire API only accepts simple `form_elements`, not `graph`.
+                Missing label:
+                  value:
+                    form_elements:
+                    - label:
+                      - This field is required.
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '415':
+          description: 'Unsupported media type. Set `Content-Type: application/json` and send a JSON body.'
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+        '500':
+          description: Unexpected server error while creating the questionnaire. Safe to retry.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl -X POST 'https://verification.didit.me/v3/questionnaires/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"title\": \"Customer Onboarding\",\n    \"default_language\": \"en\",\n    \"languages\": [\"en\"],\n    \"form_elements\": [\n      {\n        \"id\": \"occupation\",\n        \"element_type\": \"short_text\",\n        \"label\": {\"en\": \"What is your occupation?\"},\n        \"is_required\": true\n      }\n    ]\n  }'"
+      - lang: Python
+        label: Python (requests)
+        source: "import requests\n\npayload = {\n    \"title\": \"Customer Onboarding\",\n    \"default_language\": \"en\",\n    \"languages\": [\"en\"],\n    \"form_elements\": [\n        {\n            \"id\": \"occupation\",\n            \"element_type\": \"short_text\",\n            \"label\": {\"en\": \"What is your occupation?\"},\n            \"is_required\": True,\n        },\n    ],\n}\nresp = requests.post(\n    \"https://verification.didit.me/v3/questionnaires/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    json=payload,\n    timeout=10,\n)\nresp.raise_for_status()\nquestionnaire = resp.json()\nprint(\"Questionnaire id:\", questionnaire[\"questionnaire_id\"])"
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: "const res = await fetch(\"https://verification.didit.me/v3/questionnaires/\", {\n  method: \"POST\",\n  headers: {\n    'x-api-key': 'YOUR_API_KEY',\n    \"Content-Type\": \"application/json\",\n  },\n  body: JSON.stringify({\n    title: \"Customer Onboarding\",\n    default_language: \"en\",\n    languages: [\"en\"],\n    form_elements: [\n      {\n        id: \"occupation\",\n        element_type: \"short_text\",\n        label: { en: \"What is your occupation?\" },\n        is_required: true,\n      },\n    ],\n  }),\n});\nif (!res.ok) throw new Error(`Didit ${res.status}: ${await res.text()}`);\nconst questionnaire = await res.json();\nconsole.log(\"Questionnaire id:\", questionnaire.questionnaire_id);"
+  /v3/questionnaires/{questionnaire_uuid}/:
+    get:
+      summary: Get questionnaire
+      description: 'Fetch full questionnaire detail for one version by `questionnaire_uuid`: title, `languages`, canonical `graph`, derived `sections`, and version metadata.'
+      operationId: get_questionnaire
+      tags:
+      - Questionnaires
+      parameters:
+      - name: questionnaire_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints).
+      responses:
+        '200':
+          description: Full questionnaire detail including the canonical `graph`, the derived `sections` view, version metadata, and `is_editable`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireDetail'
+              examples:
+                Published questionnaire:
+                  value:
+                    questionnaire_id: 11111111-2222-3333-4444-555555555555
+                    title: Customer Onboarding
+                    description: Additional information needed for verification
+                    languages:
+                    - en
+                    default_language: en
+                    is_active: true
+                    is_simple_questionnaire: true
+                    graph:
+                      start_node: occupation
+                      nodes:
+                        occupation:
+                          element_type: SHORT_TEXT
+                          is_required: true
+                          title:
+                            en: What is your occupation?
+                          next: source_of_funds
+                        source_of_funds:
+                          element_type: MULTIPLE_CHOICE
+                          is_required: true
+                          title:
+                            en: Source of funds
+                          choices:
+                          - value: employment
+                            label:
+                              en: Employment
+                          - value: business
+                            label:
+                              en: Business
+                          next: null
+                    sections:
+                    - title: {}
+                      description: {}
+                      items:
+                      - uuid: 11111111-2222-3333-4444-666666666666
+                        value: occupation
+                        element_type: SHORT_TEXT
+                        is_required: true
+                        title:
+                          en: What is your occupation?
+                    questionnaire_group_id: 11111111-2222-3333-4444-555555555555
+                    version: 1
+                    status: published
+                    published_at: '2026-04-23T10:00:00Z'
+                    is_editable: false
+        '403':
+          description: API key missing, malformed, expired, or scoped to a different application.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No questionnaire with this `questionnaire_uuid` exists for the authenticated application. Either the UUID is wrong or it belongs to another application — the API deliberately does not distinguish the two cases.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+        '500':
+          description: Unexpected server error. Safe to retry.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl -X GET 'https://verification.didit.me/v3/questionnaires/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: Python
+        label: Python (requests)
+        source: "import requests\n\nresp = requests.get(\n    f\"https://verification.didit.me/v3/questionnaires/{questionnaire_uuid}/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    timeout=10,\n)\nresp.raise_for_status()\nquestionnaire = resp.json()\nprint(questionnaire[\"title\"], questionnaire[\"status\"])"
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: "const res = await fetch(`https://verification.didit.me/v3/questionnaires/${questionnaireUuid}/`, {\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (!res.ok) throw new Error(`Didit ${res.status}`);\nconst questionnaire = await res.json();\nconsole.log(questionnaire.title, questionnaire.status);"
+    patch:
+      summary: Update questionnaire
+      description: 'Update a questionnaire. Versioning depends on the `status` field you send and the current state of the version: (1) no `status` on a **published** version → the published version is updated in place (same `questionnaire_id`, same `version`); (2) no `status` on a **draft** → the draft is updated and immediately published; (3) `status: "published"` on a **published** version → a NEW published version is created under the same `questionnaire_group_id` (new `questionnaire_id`, `version` + 1) and returned, and any existing draft in the group is deleted; (4) `status: "draft"` keeps a draft as a draft (autosave) but is rejected with 400 on a published version (`"Cannot revert a published version to draft."`).'
+      operationId: update_questionnaire
+      tags:
+      - Questionnaires
+      parameters:
+      - name: questionnaire_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Per-version UUID of the questionnaire to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleQuestionnaireUpdateRequest'
+            examples:
+              Rename:
+                summary: Rename a questionnaire
+                value:
+                  title: Updated Customer Onboarding
+              Replace questions:
+                summary: Replace the full linear question list
+                value:
+                  form_elements:
+                  - id: occupation
+                    element_type: short_text
+                    label:
+                      en: What is your occupation?
+                    is_required: true
+                  - id: source_of_funds
+                    element_type: multiple_choice
+                    label:
+                      en: Source of funds
+                    options:
+                    - value: employment
+                      label:
+                        en: Employment
+                    - value: business
+                      label:
+                        en: Business
+      responses:
+        '200':
+          description: 'Questionnaire updated. The body is the latest state of the resulting version — the in-place updated version, or the newly created published version when you sent `status: "published"` on a published row (in that case `questionnaire_id` and `version` differ from the ones you patched). `questionnaire_id` in the response is the per-version UUID; use `questionnaire_group_id` if you need the stable group identifier.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireDetail'
+        '400':
+          description: 'Validation error — unknown `element_type`, missing translation, unsupported branching/conditional fields, `languages` missing `en`, `default_language` not in `languages`, option without a label, sending a raw `graph`, or `status: "draft"` on a published version (`"Cannot revert a published version to draft."`). Response body is a DRF validation error keyed by field name.'
+        '403':
+          description: API key missing or invalid.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No questionnaire with this `questionnaire_uuid` exists for the authenticated application.
+        '415':
+          description: 'Unsupported media type. Set `Content-Type: application/json`.'
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+        '500':
+          description: Unexpected server error. Safe to retry.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl -X PATCH 'https://verification.didit.me/v3/questionnaires/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"title\": \"Updated Customer Onboarding\"}'"
+      - lang: Python
+        label: Python (requests)
+        source: "import requests\n\nresp = requests.patch(\n    f\"https://verification.didit.me/v3/questionnaires/{questionnaire_uuid}/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    json={\"title\": \"Updated Customer Onboarding\"},\n    timeout=10,\n)\nresp.raise_for_status()\nprint(resp.json()[\"questionnaire_id\"], resp.json()[\"status\"])"
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: "const res = await fetch(`https://verification.didit.me/v3/questionnaires/${questionnaireUuid}/`, {\n  method: \"PATCH\",\n  headers: {\n    'x-api-key': 'YOUR_API_KEY',\n    \"Content-Type\": \"application/json\",\n  },\n  body: JSON.stringify({ title: \"Updated Customer Onboarding\" }),\n});\nif (!res.ok) throw new Error(`Didit ${res.status}`);\nconst q = await res.json();\nconsole.log(q.questionnaire_id, q.status);"
+    delete:
+      summary: Delete questionnaire
+      description: Permanently delete one questionnaire version (hard delete, no undo). Stored questionnaire responses linked to this version are deleted with it, and sessions referencing it lose the link; other versions in the same group are not deleted. Workflows that referenced it keep running but the questionnaire step can no longer load it.
+      operationId: delete_questionnaire
+      tags:
+      - Questionnaires
+      parameters:
+      - name: questionnaire_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Per-version UUID of the questionnaire to delete.
+      responses:
+        '204':
+          description: Questionnaire deleted. The response body is empty.
+        '403':
+          description: API key missing or invalid.
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No questionnaire with this `questionnaire_uuid` exists for the authenticated application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded. Retry with exponential backoff.
+        '500':
+          description: Unexpected server error. Safe to retry.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl -X DELETE 'https://verification.didit.me/v3/questionnaires/11111111-2222-3333-4444-555555555555/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: Python
+        label: Python (requests)
+        source: "import requests\n\nresp = requests.delete(\n    f\"https://verification.didit.me/v3/questionnaires/{questionnaire_uuid}/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    timeout=10,\n)\nresp.raise_for_status()  # raises on 4xx/5xx; 204 is success"
+      - lang: JavaScript
+        label: Node.js (fetch)
+        source: "const res = await fetch(`https://verification.didit.me/v3/questionnaires/${questionnaireUuid}/`, {\n  method: \"DELETE\",\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (res.status !== 204) throw new Error(`Didit ${res.status}`);"
+components:
+  schemas:
+    QuestionnaireDetail:
+      type: object
+      description: Full questionnaire detail returned from GET, POST (create) and PATCH (update) endpoints.
+      properties:
+        questionnaire_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the questionnaire. Use this id when referencing the questionnaire from a workflow or in subsequent update/delete requests.
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        languages:
+          type: array
+          items:
+            type: string
+        default_language:
+          type: string
+        is_active:
+          type: boolean
+        is_simple_questionnaire:
+          type: boolean
+        graph:
+          type: object
+          description: Graph structure with start_node and nodes map.
+        sections:
+          type: array
+          description: Questionnaire content grouped into sections (derived from the graph).
+          items:
+            type: object
+        questionnaire_group_id:
+          type: string
+          format: uuid
+          description: Stable identifier that groups all versions of the same questionnaire.
+        version:
+          type: integer
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_editable:
+          type: boolean
+          description: True when the questionnaire can still be edited in place (draft versions).
+    SimpleQuestionnaireRequest:
+      type: object
+      description: Create a simple linear questionnaire. The API converts `form_elements` into the internal questionnaire graph.
+      required:
+      - title
+      - languages
+      - form_elements
+      properties:
+        title:
+          type: string
+          description: Internal name for the questionnaire.
+        description:
+          type: string
+          nullable: true
+        languages:
+          type: array
+          description: Languages included in every label. Must include `en`.
+          items:
+            type: string
+          example:
+          - en
+        default_language:
+          type: string
+          description: Default language. Must be included in `languages`.
+          example: en
+        is_active:
+          type: boolean
+          default: true
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          description: Omit this field to create a published questionnaire ready for workflows.
+        form_elements:
+          type: array
+          minItems: 1
+          description: Questions in the exact order users should see them. Branching and conditional fields are not supported.
+          items:
+            $ref: '#/components/schemas/SimpleQuestionnaireElement'
+    SimpleQuestionnaireUpdateRequest:
+      type: object
+      description: Update questionnaire metadata or replace the full linear `form_elements` list.
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        languages:
+          type: array
+          items:
+            type: string
+        default_language:
+          type: string
+        is_active:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+        form_elements:
+          type: array
+          minItems: 1
+          description: If provided, this replaces the full linear question list.
+          items:
+            $ref: '#/components/schemas/SimpleQuestionnaireElement'
+    QuestionnaireListItem:
+      type: object
+      description: One questionnaire version in the list view.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Per-version UUID. Use as `{questionnaire_uuid}` for get/update/delete and as `questionnaire_uuid` in a workflow's QUESTIONNAIRE feature config.
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        languages:
+          type: array
+          items:
+            type: string
+        default_language:
+          type: string
+        is_active:
+          type: boolean
+        is_simple_questionnaire:
+          type: boolean
+          description: True for linear questionnaires created through this API; false for graph-based questionnaires built in the Console.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        question_types:
+          type: array
+          items:
+            type: string
+          description: Uppercase element types of the answerable questions, in creation order (e.g. `SHORT_TEXT`, `MULTIPLE_CHOICE`, `FILE_UPLOAD`). Structural `SECTION_HEADER` and `SEPARATOR` elements are excluded. One entry per question, so values can repeat.
+        workflow_names:
+          type: array
+          items:
+            type: string
+          description: Names of workflows using this questionnaire. Currently always `[]` on this endpoint (populated only in the Console listing).
+        questionnaire_group_id:
+          type: string
+          format: uuid
+          description: Stable identifier that groups all versions of the same questionnaire.
+        version:
+          type: integer
+          description: Version number within the group, starting at 1.
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this version was published. `null` for drafts.
+        is_editable:
+          type: boolean
+          description: True when this version is a `draft`.
+    SimpleQuestionnaireElement:
+      type: object
+      required:
+      - element_type
+      - label
+      properties:
+        id:
+          type: string
+          description: Optional stable question id. If omitted, the API generates `q1`, `q2`, etc. Use lowercase letters, numbers, and underscores for readability.
+          example: source_of_funds
+        element_type:
+          type: string
+          description: Question type. The API accepts these lowercase values and their uppercase equivalents.
+          enum:
+          - short_text
+          - long_text
+          - dropdown
+          - single_choice
+          - multiple_choice
+          - number
+          - image
+          - file_upload
+          - time
+          - email
+          - address
+          - phone
+          - country
+          - date_picker
+          - consent
+          - section_header
+          - separator
+          - heading
+          - paragraph
+        label:
+          type: object
+          description: 'Question label by language code, for example `{ "en": "Source of funds" }`.'
+          additionalProperties:
+            type: string
+        description:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+        placeholder:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+        is_required:
+          type: boolean
+          default: false
+        options:
+          type: array
+          description: Use for `dropdown`, `single_choice`, and `multiple_choice`. If `value` is omitted, the API generates one from the option label.
+          items:
+            type: object
+            required:
+            - label
+            properties:
+              value:
+                type: string
+              label:
+                type: object
+                additionalProperties:
+                  type: string
+        max_files:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Use with `file_upload` or `image`.
+        validation:
+          type: object
+          nullable: true
+          description: Optional format validation for `short_text`, `long_text`, or `number`. Enforced while the user fills the field (they cannot proceed until it passes) and re-checked by the API on submission.
+          properties:
+            pattern:
+              type: string
+              description: Regular expression (ECMA-262 subset) the value must fully match. For `short_text` and `long_text`. Do not add ^/$ anchors; the whole value is matched.
+            min_length:
+              type: integer
+              minimum: 0
+              description: Minimum number of characters. For `short_text` and `long_text`.
+            max_length:
+              type: integer
+              minimum: 0
+              description: Maximum number of characters. For `short_text` and `long_text`.
+            min:
+              type: number
+              description: Minimum numeric value. For `number`.
+            max:
+              type: number
+              description: Maximum numeric value. For `number`.
+            error_message:
+              type: object
+              description: Translated message shown when validation fails, keyed by language code.
+              additionalProperties:
+                type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

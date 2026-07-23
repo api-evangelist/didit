@@ -1,0 +1,204 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Billing
+paths:
+  /v3/billing/balance/:
+    get:
+      summary: Get credit balance
+      description: Get current pre-paid credit balance in USD (organization-wide) plus auto-refill config. Amounts are decimal strings — parse with a decimal library.
+      operationId: get_billing_balance
+      tags:
+      - Billing
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/billing/balance/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\nfrom decimal import Decimal\n\nimport requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/billing/balance/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=10,\n)\nresp.raise_for_status()\ndata = resp.json()\nbalance = Decimal(data['balance'])\nif balance < Decimal('50'):\n    print(f'Low balance: ${balance} - top up before launching new sessions.')\nelse:\n    print(f'Balance OK: ${balance}')"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/billing/balance/', {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n});\nif (!resp.ok) throw new Error(`Billing balance failed: ${resp.status}`);\nconst { balance, auto_refill_enabled, auto_refill_threshold } = await resp.json();\nconsole.log({ balance, auto_refill_enabled, auto_refill_threshold });"
+      responses:
+        '200':
+          description: Current credit balance plus the organization's auto-refill configuration.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - balance
+                - auto_refill_enabled
+                properties:
+                  balance:
+                    type: string
+                    description: Current pre-paid credit balance in USD, as a fixed-point decimal string. Decreases as verifications are billed and increases when a top-up settles.
+                  auto_refill_enabled:
+                    type: boolean
+                    description: When `true`, Didit will automatically charge the saved Stripe payment method to add credits once the balance crosses `auto_refill_threshold`. Configured from Console → Billing.
+                  auto_refill_amount:
+                    type: string
+                    nullable: true
+                    description: USD amount that will be charged on each auto-refill. `null` when auto-refill is disabled or unset.
+                  auto_refill_threshold:
+                    type: string
+                    nullable: true
+                    description: Trigger threshold in USD. Auto-refill fires when `balance` falls below this value. `null` when auto-refill is disabled or unset.
+              examples:
+                Healthy balance with auto-refill:
+                  value:
+                    balance: '1234.5600'
+                    auto_refill_enabled: true
+                    auto_refill_amount: '500.00'
+                    auto_refill_threshold: '100.00'
+                Low balance, manual top-up only:
+                  value:
+                    balance: '12.0000'
+                    auto_refill_enabled: false
+                    auto_refill_amount: null
+                    auto_refill_threshold: null
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot read billing data for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/billing/top-up/:
+    post:
+      summary: Top up credits
+      description: Add credits via a hosted Stripe Checkout session (**$50 minimum**); not available on annual plans. Redirect the customer to the returned `checkout_session_url`.
+      operationId: billing_top_up
+      tags:
+      - Billing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - amount_in_dollars
+              properties:
+                amount_in_dollars:
+                  type: number
+                  minimum: 50
+                  description: Amount to charge, in USD. **Must be at least 50.** Tax is added automatically at checkout based on the customer's billing address.
+                success_url:
+                  type: string
+                  format: uri
+                  description: URL Stripe redirects the customer to after a successful payment. Defaults to `https://console.didit.me`. Append the literal placeholder `{CHECKOUT_SESSION_ID}` if you want Stripe to substitute the session ID.
+                cancel_url:
+                  type: string
+                  format: uri
+                  description: URL Stripe redirects the customer to when they abort or close the Checkout window. Defaults to `https://console.didit.me`.
+            examples:
+              Minimum top-up:
+                value:
+                  amount_in_dollars: 50
+              Custom amount with redirects:
+                value:
+                  amount_in_dollars: 500
+                  success_url: https://yourapp.com/billing/top-up/success
+                  cancel_url: https://yourapp.com/billing/top-up/cancel
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/billing/top-up/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"amount_in_dollars\": 500,\n    \"success_url\": \"https://yourapp.com/billing/success\",\n    \"cancel_url\": \"https://yourapp.com/billing/cancel\"\n  }'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/billing/top-up/',\n    headers={\n        'x-api-key': os.environ['DIDIT_API_KEY'],\n        'Content-Type': 'application/json',\n    },\n    json={\n        'amount_in_dollars': 500,\n        'success_url': 'https://yourapp.com/billing/success',\n        'cancel_url': 'https://yourapp.com/billing/cancel',\n    },\n    timeout=10,\n)\nresp.raise_for_status()\nsession = resp.json()\nprint('Redirect customer to:', session['checkout_session_url'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/billing/top-up/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    amount_in_dollars: 500,\n    success_url: 'https://yourapp.com/billing/success',\n    cancel_url: 'https://yourapp.com/billing/cancel',\n  }),\n});\nif (!resp.ok) throw new Error(`Top-up failed: ${resp.status}`);\nconst { checkout_session_url } = await resp.json();\nwindow.location.assign(checkout_session_url);"
+      responses:
+        '200':
+          description: Stripe Checkout session created. Redirect the user to `checkout_session_url` to complete payment.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - checkout_session_id
+                - checkout_session_url
+                properties:
+                  checkout_session_id:
+                    type: string
+                    description: Stripe Checkout Session identifier (e.g. `cs_test_a1B2c3...`). Useful for server-side reconciliation.
+                  checkout_session_url:
+                    type: string
+                    format: uri
+                    description: Single-use Stripe-hosted payment page URL. Redirect the customer here to complete payment.
+              examples:
+                Created:
+                  value:
+                    checkout_session_id: cs_test_a1B2c3D4e5F6g7H8i9J0
+                    checkout_session_url: https://checkout.stripe.com/c/pay/cs_test_a1B2c3D4e5F6g7H8i9J0
+        '400':
+          description: Invalid payload — the amount is missing, not a number, below the $50 minimum, or the organization is on an annual plan. The error body is a JSON array.
+          content:
+            application/json:
+              examples:
+                Missing amount:
+                  value:
+                  - amount_in_dollars is required.
+                Not a number:
+                  value:
+                  - amount_in_dollars must be a number.
+                Below minimum:
+                  value:
+                  - Amount must be at least $50.
+                Annual plan:
+                  value:
+                  - You have an annual plan. Contact your account manager to top up.
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot create top-up sessions for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

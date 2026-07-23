@@ -1,0 +1,2627 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Cases API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Cases
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/:
+    get:
+      summary: List cases
+      description: List cases for the application, newest first. Supports filtering, search, and sorting; see query parameters. Paginated with `limit`/`offset`.
+      operationId: list_cases
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size. Defaults to 50.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset of the first record.
+      - name: status__in
+        in: query
+        schema:
+          type: string
+        description: Comma-separated statuses to include, e.g. OPEN,AWAITING_USER.
+      - name: priority
+        in: query
+        schema:
+          type: string
+        description: Comma-separated priorities to include.
+      - name: source__in
+        in: query
+        schema:
+          type: string
+        description: Comma-separated sources to include.
+      - name: blueprint
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter to cases on this blueprint.
+      - name: assigned_to
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter to cases assigned to this user.
+      - name: unassigned
+        in: query
+        schema:
+          type: boolean
+        description: true for unassigned cases, false for assigned cases.
+      - name: tag
+        in: query
+        schema:
+          type: string
+        description: Filter to cases carrying this exact tag.
+      - name: search
+        in: query
+        schema:
+          type: string
+        description: Matches title, case_number, tag, subject name/UUID/external ID, linked session UUID, or linked transaction UUID.
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Created-at lower bound (inclusive).
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Created-at upper bound (inclusive).
+      - name: due_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: due_at upper bound.
+      - name: overdue
+        in: query
+        schema:
+          type: boolean
+        description: true to return only overdue open/awaiting-user cases.
+      - name: ordering
+        in: query
+        schema:
+          type: string
+          enum:
+          - created_at
+          - -created_at
+          - due_at
+          - -due_at
+          default: -created_at
+        description: Sort order. due_at sorts nulls last.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/?status__in=OPEN,AWAITING_USER&ordering=-due_at' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    params={'status__in': 'OPEN,AWAITING_USER', 'ordering': '-due_at'},\n    timeout=10,\n)\nresp.raise_for_status()\nfor case in resp.json()['results']:\n    print(case['case_number'], case['title'], case['priority'], case['due_at'])"
+      responses:
+        '200':
+          description: Paginated case list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or null.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or null.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseListItem'
+    post:
+      summary: Create case
+      description: Create a case anchored to exactly one subject (a user or a business), directly or by deriving the subject from an attached session/transaction link. Source is always `MANUAL` for API-created cases.
+      operationId: create_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - title
+              properties:
+                title:
+                  type: string
+                  maxLength: 255
+                blueprint:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: CaseBlueprint UUID. Omit for no blueprint.
+                priority:
+                  type: string
+                  enum:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+                  default: MEDIUM
+                due_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+                subject:
+                  type: object
+                  description: Required unless links is provided; the case's exactly-one subject.
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - user
+                      - business
+                    uuid:
+                      type: string
+                      format: uuid
+                links:
+                  type: array
+                  description: 'Sessions/business sessions/transactions to attach on creation, e.g. [{"entity_type": "transaction", "entity_uuid": "..."}]. When subject is omitted, the subject is derived from the first link''s owner.'
+                  items:
+                    type: object
+                assigned_to:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: User UUID to assign immediately.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"title\": \"Manual - Jane Doe\", \"blueprint\": \"b1de0000-0000-4000-8000-000000000002\", \"priority\": \"HIGH\", \"subject\": {\"type\": \"user\", \"uuid\": \"5b9a0000-0000-4000-8000-00000000f00d\"}, \"tags\": [\"review\"]}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n        'title': 'Manual - Jane Doe',\n        'blueprint': 'b1de0000-0000-4000-8000-000000000002',\n        'priority': 'HIGH',\n        'subject': {'type': 'user', 'uuid': '5b9a0000-0000-4000-8000-00000000f00d'},\n    },\n    timeout=10,\n)\nresp.raise_for_status()\ncase = resp.json()\nprint(case['case_number'], case['uuid'])"
+      responses:
+        '201':
+          description: Case created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '400':
+          description: Neither subject nor links provided, or the subject/blueprint/assignee was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/:
+    get:
+      summary: Get case
+      description: Retrieve a case with its subject, blueprint, notes, events, links, and checklist.
+      operationId: get_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Case detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '404':
+          description: Case (or nested resource) not found in this application.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+    patch:
+      summary: Update case
+      description: Update the case's title, priority, due date, or tags. Logs PRIORITY_CHANGED/DUE_DATE_CHANGED/TAG_ADDED/TAG_REMOVED events as applicable.
+      operationId: update_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 255
+                priority:
+                  type: string
+                  enum:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+                due_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"priority\": \"HIGH\", \"due_at\": \"2026-08-01T00:00:00Z\"}'"
+      responses:
+        '200':
+          description: Updated case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+    delete:
+      summary: Delete case
+      description: Soft-delete a case. There is no undelete endpoint; the row is retained internally for audit purposes only.
+      operationId: delete_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Case deleted.
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/assign/:
+    post:
+      summary: Assign or unassign case
+      description: 'Assign the case to a user, or unassign it by sending assignee_user_id: null. assignee_email/assignee_name auto-provision a User row when the assignee does not exist yet.'
+      operationId: assign_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - assignee_user_id
+              properties:
+                assignee_user_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: null to unassign.
+                assignee_email:
+                  type: string
+                  format: email
+                  nullable: true
+                assignee_name:
+                  type: string
+                  nullable: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/assign/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"assignee_user_id\": \"9a000000-0000-4000-8000-0000000000aa\"}'"
+      responses:
+        '200':
+          description: Case assigned/unassigned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/resolve/:
+    post:
+      summary: Resolve case
+      description: Resolve the case as false_positive or valid_threat. Blocked with 400 if the blueprint's checklist is not optional and items remain incomplete, or if the blueprint requires a resolution note and none is given. When the case's blueprint has a four_eyes_checker_blueprint configured, the resolution is staged (case.pending_resolution) and the case moves to the checker blueprint instead of resolving immediately; a different user must call approve or reject-approval.
+      operationId: resolve_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - resolution
+              properties:
+                resolution:
+                  type: string
+                  enum:
+                  - FALSE_POSITIVE
+                  - VALID_THREAT
+                note:
+                  type: string
+                  nullable: true
+                  description: Required when the blueprint sets require_resolution_note.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/resolve/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"resolution\": \"FALSE_POSITIVE\", \"note\": \"Confirmed legitimate activity after reviewing documents.\"}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/resolve/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={'resolution': 'FALSE_POSITIVE', 'note': 'Confirmed legitimate activity.'},\n    timeout=10,\n)\nresp.raise_for_status()\ncase = resp.json()\nprint(case['status'], case['resolution'], case.get('pending_resolution'))"
+      responses:
+        '200':
+          description: Resolved, or staged for 4-eyes approval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '400':
+          description: Incomplete checklist items, or a resolution note is required.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/reopen/:
+    post:
+      summary: Reopen case
+      description: Move an awaiting-user or resolved case back to open, clearing resolution, resolution_notes, resolved_at, and resolved_by_email.
+      operationId: reopen_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/reopen/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Reopen case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/request-info/:
+    post:
+      summary: Request info (awaiting user)
+      description: Move an open case to awaiting_user while more information is collected from the verified user. Fails with 400 if a resolution is currently pending 4-eyes approval.
+      operationId: request_case_info
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/request-info/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Request info (awaiting user).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/escalate/:
+    post:
+      summary: Escalate case
+      description: Move the case to its blueprint's configured escalation_blueprint. Requires the current blueprint to have escalation_enabled and an escalation_blueprint set, otherwise 400.
+      operationId: escalate_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/escalate/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Escalate case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/transfer/:
+    post:
+      summary: Transfer case
+      description: Move the case to a different, active blueprint of the same application. Requires the current blueprint to have transfer_enabled, otherwise 400.
+      operationId: transfer_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - target_blueprint
+              properties:
+                target_blueprint:
+                  type: string
+                  format: uuid
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/transfer/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"target_blueprint\": \"b1de0000-0000-4000-8000-000000000002\"}'"
+      responses:
+        '200':
+          description: Case transferred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/approve/:
+    post:
+      summary: Approve staged resolution (4-eyes)
+      description: Apply a resolution staged by resolve on a maker blueprint. The caller must be a different user than the one who submitted it, otherwise 403.
+      operationId: approve_case_resolution
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/approve/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Resolution applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '403':
+          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must approve it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        '409':
+          description: Case has no resolution pending approval.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/reject-approval/:
+    post:
+      summary: Reject staged resolution (4-eyes)
+      description: Reject a resolution staged by resolve and return the case to its maker blueprint. The caller must be a different user than the one who submitted it, otherwise 403.
+      operationId: reject_case_resolution
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                  nullable: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/reject-approval/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"notes\": \"Needs a clearer rationale before this can be approved.\"}'"
+      responses:
+        '200':
+          description: Resolution rejected, case returned to the maker blueprint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetail'
+        '403':
+          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must reject it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        '409':
+          description: Case has no resolution pending approval.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/entity-actions/:
+    post:
+      summary: Apply entity action
+      description: 'Act on the case''s subject without leaving the case: set_status changes the user/business status, add_tags applies applicant tags, add_note posts an internal case note, and add_to_blocklist adds the subject''s latest document and face to the blocklist. Logs an ENTITY_ACTION event.'
+      operationId: apply_case_entity_action
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - action
+              properties:
+                action:
+                  type: string
+                  enum:
+                  - set_status
+                  - add_tags
+                  - add_note
+                  - add_to_blocklist
+                status:
+                  type: string
+                  nullable: true
+                  description: Required for set_status; a valid VendorUser/VendorBusiness status.
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Required for add_tags.
+                note:
+                  type: string
+                  nullable: true
+                  description: Required for add_note.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/entity-actions/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"action\": \"add_tags\", \"tags\": [\"high-risk\"]}'"
+      responses:
+        '200':
+          description: Action applied.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entity_type:
+                    type: string
+                    enum:
+                    - user
+                    - business
+                  entity_uuid:
+                    type: string
+                    format: uuid
+                  action:
+                    type: string
+                    enum:
+                    - set_status
+                    - add_tags
+                    - add_note
+                    - add_to_blocklist
+                description: 'Plus action-specific keys: previous_status/new_status, tags_added, comment_uuid, or blocklisted_document_uuids/blocklisted_face_uuids.'
+        '400':
+          description: Unsupported action, missing required field, or the case has no subject.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/print/:
+    get:
+      summary: Print case (PDF)
+      description: Render the full case (summary, subject, checklist state, notes, attached sessions/transactions, events, FIU report list) as a PDF and return a presigned download URL.
+      operationId: print_case
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/print/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Presigned PDF URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/:
+    get:
+      summary: List case notes
+      description: List notes on the case, newest first.
+      operationId: list_case_notes
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated notes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or null.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or null.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseNote'
+    post:
+      summary: Create case note
+      description: Post a plain-text note, optionally mentioning teammates, tagging it, or attaching files uploaded via notes/presign/.
+      operationId: create_case_note
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - comment
+              properties:
+                comment:
+                  type: string
+                mentioned_emails:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                is_internal:
+                  type: boolean
+                  default: false
+                attachments:
+                  type: array
+                  description: s3_key values returned by POST notes/presign/; each must belong to this case.
+                  items:
+                    type: object
+                    properties:
+                      s3_key:
+                        type: string
+                      filename:
+                        type: string
+                      file_size:
+                        type: integer
+                tags:
+                  type: array
+                  items:
+                    type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"comment\": \"Called the customer, awaiting a reply with supporting documents.\", \"tags\": [\"follow-up\"]}'"
+      responses:
+        '201':
+          description: Note created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseNote'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/{note_uuid}/:
+    delete:
+      summary: Delete case note
+      description: Soft-delete a note.
+      operationId: delete_case_note
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: note_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: d0000000-0000-4000-8000-000000000003
+        description: Note UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/d0000000-0000-4000-8000-000000000003/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Note deleted.
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/presign/:
+    post:
+      summary: Upload note attachment
+      description: Upload a file (JPEG, PNG, WebP, PDF, plain text, or CSV; max 5 MB) to attach to a note. Returns the s3_key to pass in the note's attachments array.
+      operationId: upload_case_note_attachment
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/presign/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -F 'file=@evidence.pdf'"
+      responses:
+        '201':
+          description: File uploaded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  s3_key:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  filename:
+                    type: string
+                  file_size:
+                    type: integer
+        '400':
+          description: No file, unsupported content type, or file exceeds 5 MB.
+          content:
+            application/json:
+              schema:
+                type: object
+    get:
+      summary: Get note attachment URL
+      description: Mint a fresh presigned download URL for an attachment already stored on one of the case's notes.
+      operationId: get_case_note_attachment_url
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: s3_key
+        in: query
+        schema:
+          type: string
+        description: The attachment's s3_key, as returned by upload or listed on the note.
+        required: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/presign/?s3_key=case-notes/c1a5e000-0000-4000-8000-000000000001/evidence.pdf' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Presigned URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  s3_key:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  filename:
+                    type: string
+        '404':
+          description: s3_key missing or does not belong to this case.
+          content:
+            application/json:
+              schema:
+                type: object
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/links/:
+    get:
+      summary: List case links
+      description: List sessions, business sessions, and transactions attached to the case.
+      operationId: list_case_links
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/links/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Case links.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseLink'
+    post:
+      summary: Add case link
+      description: Attach a session, business session, or transaction to the case. Rejected with 400 if the entity belongs to a different subject than the case.
+      operationId: create_case_link
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - entity_type
+              - entity_uuid
+              properties:
+                entity_type:
+                  type: string
+                  enum:
+                  - session
+                  - business_session
+                  - transaction
+                entity_uuid:
+                  type: string
+                  format: uuid
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/links/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"entity_type\": \"transaction\", \"entity_uuid\": \"77000000-0000-4000-8000-000000000077\"}'"
+      responses:
+        '201':
+          description: Link created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLink'
+        '400':
+          description: Entity belongs to a different profile than the case subject.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/links/{link_uuid}/:
+    delete:
+      summary: Remove case link
+      description: Detach a linked session, business session, or transaction from the case.
+      operationId: delete_case_link
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: link_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 11000000-0000-4000-8000-000000000004
+        description: Link UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/links/11000000-0000-4000-8000-000000000004/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Link removed.
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/events/:
+    get:
+      summary: List case events
+      description: Read-only audit timeline of the case (created, status changes, assignment, resolution, escalation, transfers, tag/priority/due-date changes, entity actions, and more).
+      operationId: list_case_events
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/events/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated events, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or null.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or null.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseEvent'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/checklist/:
+    get:
+      summary: List case checklist
+      description: List the case's checklist items, copied from the blueprint's content_config.checklist.items at creation, ordered.
+      operationId: list_case_checklist
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/checklist/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Checklist items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseChecklistItem'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/checklist/{item_uuid}/:
+    patch:
+      summary: Toggle checklist item
+      description: Mark a checklist item complete or incomplete. Resolution is blocked while any item is incomplete, unless the blueprint marks the checklist optional.
+      operationId: toggle_case_checklist_item
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      - name: item_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c4ec0000-0000-4000-8000-000000000005
+        description: Checklist item UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_completed
+              properties:
+                is_completed:
+                  type: boolean
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/checklist/c4ec0000-0000-4000-8000-000000000005/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"is_completed\": true}'"
+      responses:
+        '200':
+          description: Updated checklist item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseChecklistItem'
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/aml/:
+    get:
+      summary: List case AML hits
+      description: List AML screening hits for the case's subject. Same shape as the hits returned by POST /v3/aml/.
+      operationId: list_case_aml_hits
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: case_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: c1a5e000-0000-4000-8000-000000000001
+        description: Case UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/aml/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: AML hits.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /v3/organization/{organization_id}/application/{application_id}/cases/statistics/:
+    get:
+      summary: Case analytics
+      description: 'Aggregate case analytics for the date range (defaults to the last 30 days; max 731 days): a created-vs-reviewed time series, per-officer/blueprint/source/status tables, rollup totals, and the live open/overdue queue depth.'
+      operationId: get_case_analytics
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Range start (inclusive). Defaults to 30 days ago.
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Range end (inclusive). Defaults to today.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/statistics/?date_from=2026-06-01&date_to=2026-06-30' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Analytics payload.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        created:
+                          type: integer
+                        reviewed:
+                          type: integer
+                  tables:
+                    type: object
+                    properties:
+                      officer:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              description: 'Dimension value: officer email, "blueprint_name:uuid", source, or status. "unassigned"/"none" for missing dimensions.'
+                            created:
+                              type: integer
+                            assigned:
+                              type: integer
+                            resolved:
+                              type: integer
+                            threat_rate:
+                              type: number
+                              format: float
+                            false_positive_rate:
+                              type: number
+                              format: float
+                            unresolved:
+                              type: integer
+                            reassignment_rate:
+                              type: number
+                              format: float
+                            escalation_rate:
+                              type: number
+                              format: float
+                            avg_assign_hours:
+                              type: number
+                              format: float
+                            avg_resolve_hours:
+                              type: number
+                              format: float
+                            avg_handling_hours:
+                              type: number
+                              format: float
+                      blueprint:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              description: 'Dimension value: officer email, "blueprint_name:uuid", source, or status. "unassigned"/"none" for missing dimensions.'
+                            created:
+                              type: integer
+                            assigned:
+                              type: integer
+                            resolved:
+                              type: integer
+                            threat_rate:
+                              type: number
+                              format: float
+                            false_positive_rate:
+                              type: number
+                              format: float
+                            unresolved:
+                              type: integer
+                            reassignment_rate:
+                              type: number
+                              format: float
+                            escalation_rate:
+                              type: number
+                              format: float
+                            avg_assign_hours:
+                              type: number
+                              format: float
+                            avg_resolve_hours:
+                              type: number
+                              format: float
+                            avg_handling_hours:
+                              type: number
+                              format: float
+                      source:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              description: 'Dimension value: officer email, "blueprint_name:uuid", source, or status. "unassigned"/"none" for missing dimensions.'
+                            created:
+                              type: integer
+                            assigned:
+                              type: integer
+                            resolved:
+                              type: integer
+                            threat_rate:
+                              type: number
+                              format: float
+                            false_positive_rate:
+                              type: number
+                              format: float
+                            unresolved:
+                              type: integer
+                            reassignment_rate:
+                              type: number
+                              format: float
+                            escalation_rate:
+                              type: number
+                              format: float
+                            avg_assign_hours:
+                              type: number
+                              format: float
+                            avg_resolve_hours:
+                              type: number
+                              format: float
+                            avg_handling_hours:
+                              type: number
+                              format: float
+                      status:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              description: 'Dimension value: officer email, "blueprint_name:uuid", source, or status. "unassigned"/"none" for missing dimensions.'
+                            created:
+                              type: integer
+                            assigned:
+                              type: integer
+                            resolved:
+                              type: integer
+                            threat_rate:
+                              type: number
+                              format: float
+                            false_positive_rate:
+                              type: number
+                              format: float
+                            unresolved:
+                              type: integer
+                            reassignment_rate:
+                              type: number
+                              format: float
+                            escalation_rate:
+                              type: number
+                              format: float
+                            avg_assign_hours:
+                              type: number
+                              format: float
+                            avg_resolve_hours:
+                              type: number
+                              format: float
+                            avg_handling_hours:
+                              type: number
+                              format: float
+                  totals:
+                    type: object
+                    properties:
+                      created:
+                        type: integer
+                      assigned:
+                        type: integer
+                      resolved:
+                        type: integer
+                      threat_rate:
+                        type: number
+                        format: float
+                      false_positive_rate:
+                        type: number
+                        format: float
+                      unresolved:
+                        type: integer
+                      reassignment_rate:
+                        type: number
+                        format: float
+                      escalation_rate:
+                        type: number
+                        format: float
+                      avg_assign_hours:
+                        type: number
+                        format: float
+                      avg_resolve_hours:
+                        type: number
+                        format: float
+                      avg_handling_hours:
+                        type: number
+                        format: float
+                  queue:
+                    type: object
+                    description: Live snapshot, not scoped to the date range.
+                    properties:
+                      open:
+                        type: integer
+                      overdue:
+                        type: integer
+  /v3/organization/{organization_id}/application/{application_id}/cases/bulk/status/:
+    post:
+      summary: Bulk update case status
+      description: 'Apply the same status transition to several cases in one call: OPEN reopens, AWAITING_USER requests info, RESOLVED resolves (resolution required). Each case is evaluated independently; gate failures (incomplete checklist, missing required note) are reported per case without aborting the batch.'
+      operationId: bulk_update_case_status
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - case_uuids
+              - status
+              properties:
+                case_uuids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                status:
+                  type: string
+                  enum:
+                  - OPEN
+                  - AWAITING_USER
+                  - RESOLVED
+                resolution:
+                  type: string
+                  enum:
+                  - FALSE_POSITIVE
+                  - VALID_THREAT
+                  description: Required when status is RESOLVED.
+                note:
+                  type: string
+                  nullable: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/bulk/status/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"case_uuids\": [\"c1a5e000-0000-4000-8000-000000000001\"], \"status\": \"RESOLVED\", \"resolution\": \"FALSE_POSITIVE\"}'"
+      responses:
+        '200':
+          description: Per-case results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+                  failures:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        case_uuid:
+                          type: string
+                          format: uuid
+                        detail:
+                          type: string
+  /v3/organization/{organization_id}/application/{application_id}/cases/bulk/assign/:
+    post:
+      summary: Bulk assign cases
+      description: 'Assign (or unassign, with assignee_user_id: null) several cases at once. All cases must share the same blueprint; mismatches are reported per case without aborting the batch.'
+      operationId: bulk_assign_cases
+      tags:
+      - Cases
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - case_uuids
+              - assignee_user_id
+              properties:
+                case_uuids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                assignee_user_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                assignee_email:
+                  type: string
+                  format: email
+                  nullable: true
+                assignee_name:
+                  type: string
+                  nullable: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/bulk/assign/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"case_uuids\": [\"c1a5e000-0000-4000-8000-000000000001\"], \"assignee_user_id\": \"9a000000-0000-4000-8000-0000000000aa\"}'"
+      responses:
+        '200':
+          description: Per-case results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+                  failures:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        case_uuid:
+                          type: string
+                          format: uuid
+                        detail:
+                          type: string
+components:
+  schemas:
+    CaseLink:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        linked_entity_type:
+          type: string
+          enum:
+          - session
+          - business_session
+          - transaction
+          nullable: true
+        linked_entity_uuid:
+          type: string
+          format: uuid
+          nullable: true
+        linked_entity_summary:
+          type: object
+          nullable: true
+          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        created_at:
+          type: string
+          format: date-time
+    CaseEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          enum:
+          - CREATED
+          - STATUS_CHANGED
+          - ASSIGNED
+          - UNASSIGNED
+          - RESOLVED
+          - REOPENED
+          - LINK_ADDED
+          - LINK_REMOVED
+          - NOTE_ADDED
+          - PRIORITY_CHANGED
+          - DUE_DATE_CHANGED
+          - TAG_ADDED
+          - TAG_REMOVED
+          - ESCALATED
+          - TRANSFERRED
+          - CHECKLIST_COMPLETED
+          - REPORT_CREATED
+          - REPORT_FINALIZED
+          - SUBMITTED_FOR_APPROVAL
+          - APPROVAL_GRANTED
+          - APPROVAL_REJECTED
+          - ENTITY_ACTION
+        actor_email:
+          type: string
+          format: email
+          nullable: true
+        actor_name:
+          type: string
+          nullable: true
+        previous_status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+          nullable: true
+        new_status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+          nullable: true
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    CaseBlueprintDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type: string
+          nullable: true
+        assignment_method:
+          type: string
+          enum:
+          - MANUAL
+          - AUTOMATIC
+        assignee_pool:
+          type: array
+          items:
+            type: string
+            format: uuid
+        max_active_cases:
+          type: integer
+          nullable: true
+        escalation_enabled:
+          type: boolean
+        transfer_enabled:
+          type: boolean
+        require_resolution_note:
+          type: boolean
+        is_active:
+          type: boolean
+        preset_key:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        escalation_blueprint:
+          type: string
+          format: uuid
+          nullable: true
+        escalation_blueprint_name:
+          type: string
+          nullable: true
+        four_eyes_checker_blueprint:
+          type: string
+          format: uuid
+          nullable: true
+        four_eyes_checker_blueprint_name:
+          type: string
+          nullable: true
+        content_config:
+          type: object
+          description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
+          properties:
+            checklist:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                optional:
+                  type: boolean
+                  description: When true, a case can be resolved with incomplete checklist items.
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        maxLength: 255
+                      order:
+                        type: integer
+            aml_control:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                financial:
+                  type: boolean
+                identity:
+                  type: boolean
+            identity:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                personal_information:
+                  type: boolean
+                applicant_tags:
+                  type: boolean
+                contact_information:
+                  type: boolean
+                risk_overview:
+                  type: boolean
+                poi_documents:
+                  type: boolean
+                poa_documents:
+                  type: boolean
+            verifications:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                summary:
+                  type: boolean
+            reporting:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                fiu_reports:
+                  type: boolean
+            financial:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                payment_methods:
+                  type: boolean
+                transactions:
+                  type: boolean
+        creation_sources:
+          type: array
+          description: Connectors currently routing new cases into this blueprint.
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                - aml
+                - rule
+                - workflow
+              id:
+                type: string
+              name:
+                type: string
+        receives_escalation_from:
+          type: array
+          description: Other blueprints whose Escalation target points at this one.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+        updated_at:
+          type: string
+          format: date-time
+    CaseSubject:
+      type: object
+      nullable: true
+      description: The single user or business the case is anchored to.
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+          - business
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        external_id:
+          type: string
+          nullable: true
+          description: The subject's vendor_data.
+    CaseBlueprintSummary:
+      type: object
+      nullable: true
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+    CaseDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        case_number:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type: string
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+          nullable: true
+        resolution_notes:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type: string
+          format: date-time
+          nullable: true
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolved_by_email:
+          type: string
+          nullable: true
+        pending_resolution:
+          type: object
+          nullable: true
+          description: Set only while a 4-eyes resolution is staged on the checker blueprint, awaiting approve or reject-approval.
+          properties:
+            resolution:
+              type: string
+              enum:
+              - FALSE_POSITIVE
+              - VALID_THREAT
+            resolution_notes:
+              type: string
+              nullable: true
+            maker_email:
+              type: string
+              format: email
+            maker_name:
+              type: string
+              nullable: true
+            maker_blueprint_id:
+              type: string
+              format: uuid
+            staged_at:
+              type: string
+              format: date-time
+        metadata:
+          type: object
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintDetail'
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseNote'
+          description: Newest 50 notes.
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseEvent'
+          description: Newest 100 events.
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseLink'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        checklist_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseChecklistItem'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CaseAssignee:
+      type: object
+      nullable: true
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+    CaseChecklistItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        label:
+          type: string
+          maxLength: 255
+        is_completed:
+          type: boolean
+        completed_by:
+          type: string
+          format: email
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        order:
+          type: integer
+    CaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        comment:
+          type: string
+        actor_email:
+          type: string
+          format: email
+          nullable: true
+        actor_name:
+          type: string
+          nullable: true
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+        is_internal:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              s3_key:
+                type: string
+              filename:
+                type: string
+              file_size:
+                type: integer
+              url:
+                type: string
+                format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+    CaseListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        case_number:
+          type: string
+          nullable: true
+          description: Auto-assigned, e.g. CS-0001.
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type: string
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+          nullable: true
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type: string
+          format: date-time
+          nullable: true
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_by_email:
+          type: string
+          nullable: true
+        created_by_name:
+          type: string
+          nullable: true
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintSummary'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        application_id:
+          type: string
+          format: uuid
+        application_name:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+        organization_name:
+          type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

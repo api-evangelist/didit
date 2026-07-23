@@ -1,0 +1,2177 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Transactions API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Transactions
+paths:
+  /v3/wallet-screening/:
+    post:
+      summary: Screen a wallet address
+      description: Run on-demand AML screening for a single crypto wallet/address without creating a transaction. Resolves your application's configured blockchain analytics provider (Merkle Science or Crystal), screens the address synchronously, and returns the normalised risk result. Nothing is written to the transactions table. One AML monitoring usage is billed per successful screening (sandbox applications are not billed).
+      operationId: screenWallet
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - wallet_address
+              - blockchain
+              properties:
+                wallet_address:
+                  type: string
+                  description: 'The crypto address to screen. Must match the format of the selected blockchain (e.g. a `0x`-prefixed 40-hex-char address for EVM chains). Alias: `address`.'
+                  example: '0x28c6c06298d514db089934071355e5743bf21d60'
+                blockchain:
+                  type: string
+                  description: 'Asset / chain identifier. One of: BTC, ETH, LTC, XRP, BCH, DOGE, TRX, SOL, MATIC, BNB, USDT, USDC. Alias: `currency`.'
+                  enum:
+                  - BTC
+                  - ETH
+                  - LTC
+                  - XRP
+                  - BCH
+                  - DOGE
+                  - TRX
+                  - SOL
+                  - MATIC
+                  - BNB
+                  - USDT
+                  - USDC
+                  example: ETH
+                direction:
+                  type: string
+                  description: Optional. Whether the address is being screened as an inbound (deposit) or outbound (withdrawal) counterparty. Accepts `inbound`, `outbound`, `deposit`, or `withdrawal`. Defaults to a neutral pre-transfer screen when omitted.
+                  enum:
+                  - inbound
+                  - outbound
+                  - deposit
+                  - withdrawal
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/wallet-screening/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n    \"blockchain\": \"ETH\"\n  }'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/wallet-screening/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n        'wallet_address': '0x28c6c06298d514db089934071355e5743bf21d60',\n        'blockchain': 'ETH',\n    },\n    timeout=20,\n)\nresp.raise_for_status()\nresult = resp.json()\nprint(result['risk_score'], result['severity'], result['sanctions_hit'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const result = await fetch('https://verification.didit.me/v3/wallet-screening/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    wallet_address: '0x28c6c06298d514db089934071355e5743bf21d60',\n    blockchain: 'ETH',\n  }),\n}).then((r) => r.json());\nconsole.log(result.risk_score, result.severity, result.sanctions_hit);"
+      responses:
+        '200':
+          description: The normalised wallet screening result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider:
+                    type: string
+                    description: Provider that performed the screening (e.g. `merklescience`, `crystal`).
+                  screening_type:
+                    type: string
+                    enum:
+                    - WALLET_SCREENING
+                    description: Always `WALLET_SCREENING` for this endpoint.
+                  risk_score:
+                    type: integer
+                    description: Normalised 0-100 risk score. Higher means greater exposure to risky entities.
+                  severity:
+                    type: string
+                    enum:
+                    - UNKNOWN
+                    - LOW
+                    - MEDIUM
+                    - HIGH
+                    - CRITICAL
+                    description: Severity bucket derived from `risk_score`.
+                  status:
+                    type: string
+                    enum:
+                    - SCREENED
+                    - PENDING
+                    - ERROR
+                    description: Screening outcome status.
+                  summary:
+                    type: string
+                    description: Human-readable summary of the screening result.
+                  wallet_address:
+                    type: string
+                    description: The screened address, echoed back.
+                  blockchain:
+                    type: string
+                    description: The blockchain that was screened.
+                  sanctions_hit:
+                    type: boolean
+                    description: True if the address has direct or indirect sanctions exposure.
+                  dominant_risk_category:
+                    type: string
+                    nullable: true
+                    description: Highest-weighted high-risk category, or `null` when none is dominant (e.g. `sanctioned`, `mixer`, `stolen_funds`).
+                  source_of_funds:
+                    type: array
+                    description: Where the address received funds from, attributed by entity. Each entry is an exposure breakdown.
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                          description: Normalised risk category, e.g. `exchange_licensed`, `dex`, `defi`, `payment_processor`, `mixer`, `darknet_market`, `sanctioned`, `stolen_funds`, `high_risk_exchange`.
+                        entity_name:
+                          type: string
+                          description: Name of the attributed entity (e.g. `Binance.com`, `Tornado Cash`).
+                        entity_type:
+                          type: string
+                          description: Provider entity type (e.g. `Exchange`, `Mixer`, `DeFi`, `Sanctions`, `Theft`).
+                        entity_subtype:
+                          type: string
+                          description: More granular subtype (e.g. `Mandatory KYC and AML`, `OFAC SDN`, `Yield Aggregator`).
+                        exposure_direction:
+                          type: string
+                          enum:
+                          - incoming
+                          - outgoing
+                          - connected
+                          description: Whether the funds came from (`incoming`) or went to (`outgoing`) this entity.
+                        exposure_type:
+                          type: string
+                          enum:
+                          - direct
+                          - indirect
+                          description: '`direct` (1 hop) or `indirect` (multi-hop) exposure.'
+                        is_direct:
+                          type: boolean
+                          description: True when the exposure is direct (0 hops).
+                        amount_usd:
+                          type: number
+                          description: USD value attributed to this entity.
+                        percentage:
+                          type: number
+                          description: Share of the direction's total exposure, 0-100.
+                        hops:
+                          type: integer
+                          description: Number of hops to the entity (0 for direct exposure).
+                        risk_level:
+                          type: string
+                          enum:
+                          - UNKNOWN
+                          - LOW
+                          - MEDIUM
+                          - HIGH
+                          - CRITICAL
+                          description: Risk level of the entity.
+                        country:
+                          type: string
+                          description: Primary ISO 3166-1 alpha-2 country of the entity, when known.
+                  destination_of_funds:
+                    type: array
+                    description: Where the address sent funds to, attributed by entity. Same item shape as `source_of_funds` with `exposure_direction` = `outgoing`.
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                        entity_name:
+                          type: string
+                        entity_type:
+                          type: string
+                        entity_subtype:
+                          type: string
+                        exposure_direction:
+                          type: string
+                          enum:
+                          - incoming
+                          - outgoing
+                          - connected
+                        exposure_type:
+                          type: string
+                          enum:
+                          - direct
+                          - indirect
+                        is_direct:
+                          type: boolean
+                        amount_usd:
+                          type: number
+                        percentage:
+                          type: number
+                        hops:
+                          type: integer
+                        risk_level:
+                          type: string
+                          enum:
+                          - UNKNOWN
+                          - LOW
+                          - MEDIUM
+                          - HIGH
+                          - CRITICAL
+                        country:
+                          type: string
+                  counterparty_connections:
+                    type: array
+                    description: Direct and indirect counterparty entities with received/sent amounts and risk levels.
+                    items:
+                      type: object
+                      properties:
+                        entity_name:
+                          type: string
+                          description: Counterparty entity name.
+                        entity_type:
+                          type: string
+                          description: Counterparty entity type.
+                        entity_subtype:
+                          type: string
+                          description: Counterparty entity subtype.
+                        risk_level:
+                          type: string
+                          enum:
+                          - UNKNOWN
+                          - LOW
+                          - MEDIUM
+                          - HIGH
+                          - CRITICAL
+                        categories:
+                          type: array
+                          items:
+                            type: string
+                          description: Risk categories attributed to the counterparty.
+                        received_usd:
+                          type: number
+                          description: USD received from the counterparty.
+                        sent_usd:
+                          type: number
+                          description: USD sent to the counterparty.
+                        received_hops:
+                          type: integer
+                        sent_hops:
+                          type: integer
+                        percentage:
+                          type: number
+                        is_direct:
+                          type: boolean
+                        country:
+                          type: string
+              example:
+                provider: merklescience
+                screening_type: WALLET_SCREENING
+                risk_score: 72
+                severity: HIGH
+                status: SCREENED
+                summary: 'Merkle Science risk: High (4/5). Dominant risk: mixer'
+                wallet_address: '0x28c6c06298d514db089934071355e5743bf21d60'
+                blockchain: ETH
+                sanctions_hit: true
+                dominant_risk_category: mixer
+                source_of_funds:
+                - category: exchange_licensed
+                  entity_name: Binance.com
+                  entity_type: Exchange
+                  entity_subtype: Mandatory KYC and AML
+                  exposure_direction: incoming
+                  exposure_type: direct
+                  is_direct: true
+                  amount_usd: 18420.55
+                  percentage: 61.4
+                  hops: 0
+                  risk_level: LOW
+                  country: SC
+                - category: mixer
+                  entity_name: Tornado Cash
+                  entity_type: Mixer
+                  entity_subtype: OFAC SDN
+                  exposure_direction: incoming
+                  exposure_type: indirect
+                  is_direct: false
+                  amount_usd: 11580.2
+                  percentage: 38.6
+                  hops: 2
+                  risk_level: CRITICAL
+                  country: RU
+                destination_of_funds:
+                - category: exchange_licensed
+                  entity_name: Coinbase
+                  entity_type: Exchange
+                  entity_subtype: Mandatory KYC and AML
+                  exposure_direction: outgoing
+                  exposure_type: direct
+                  is_direct: true
+                  amount_usd: 30000.75
+                  percentage: 100
+                  hops: 0
+                  risk_level: LOW
+                  country: US
+                counterparty_connections:
+                - entity_name: Tornado Cash
+                  entity_type: Mixer
+                  entity_subtype: OFAC SDN
+                  risk_level: CRITICAL
+                  categories:
+                  - mixer
+                  received_usd: 11580.2
+                  sent_usd: 0
+                  received_hops: 2
+                  sent_hops: 0
+                  percentage: 38.6
+                  is_direct: false
+                  country: RU
+        '400':
+          description: Validation error — malformed wallet address, missing `wallet_address`, or unsupported `blockchain`.
+        '401':
+          description: Missing or invalid `x-api-key`.
+        '409':
+          description: No AML provider is configured for the application, or the configured provider does not support wallet screening yet. Configure transaction monitoring first.
+        '502':
+          description: The AML provider could not complete the screening. Retry later.
+  /v3/transactions/:
+    get:
+      summary: List transactions
+      description: Paginated list of monitored transactions, newest first (`txn_date` desc). `count` is capped at 100; use `total_transactions` for the true row count. This endpoint does not support filtering or search parameters.
+      operationId: listTransactions
+      tags:
+      - Transactions
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/transactions/?limit=50' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/transactions/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    params={'limit': 50},\n    timeout=10,\n)\nresp.raise_for_status()\npage = resp.json()\nfor tx in page['results']:\n    print(\n        tx['transaction_number'],\n        tx['status'],\n        tx['severity'],\n        f\"{tx['amount']} {tx['currency']}\",\n        tx.get('subject_name') or tx.get('subject_vendor_data'),\n    )"
+      - lang: javascript
+        label: JavaScript
+        source: "const url = new URL('https://verification.didit.me/v3/transactions/');\nurl.searchParams.set('limit', '50');\nconst page = await fetch(url, {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n}).then((r) => r.json());\nfor (const tx of page.results) {\n  console.log(tx.transaction_number, tx.status, tx.severity, tx.amount, tx.currency);\n}"
+      responses:
+        '200':
+          description: Paginated list of transaction summaries, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Capped count of matching transactions (exact up to 100, capped thereafter). Use `total_transactions` for the true count when paginating.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or `null` on the last page.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or `null` on the first page.
+                  total_transactions:
+                    type: integer
+                    description: Exact total count of (non-deleted) transactions for the application. Present on paginated responses.
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        uuid:
+                          type: string
+                          format: uuid
+                          description: Stable Didit transaction identifier. Use as `{transaction_id}` in detail/notes/related calls.
+                        transaction_number:
+                          type: integer
+                          description: Application-scoped sequential transaction number shown in Console (e.g. `4123`).
+                        txn_id:
+                          type: string
+                          description: Customer-provided identifier from the create call (max 128 chars). Unique per application.
+                        transaction_type:
+                          type: string
+                          description: 'Top-level category as stored: `finance`, `kyc`, `travelRule`, `userPlatformEvent`, `gamblingBet`, `gamblingLimitChange`, `gamblingBonusChange`, `auditTrailEvent`. Note multi-word values are echoed back in camelCase even when submitted in snake_case.'
+                        action_type:
+                          type: string
+                          description: Sub-type within the category (e.g. `deposit`, `withdrawal`, `transfer`).
+                        status:
+                          type: string
+                          enum:
+                          - APPROVED
+                          - IN_REVIEW
+                          - DECLINED
+                          - AWAITING_USER
+                          description: Current monitoring verdict.
+                        direction:
+                          type: string
+                          enum:
+                          - INBOUND
+                          - OUTBOUND
+                          description: Direction relative to the subject. Stored uppercase regardless of the casing submitted.
+                        amount:
+                          type: string
+                          description: Transaction amount as a decimal string with trailing zeros stripped (e.g. `"1500"`, `"0.5"`, `"0.123456789012345678"`). Up to 18 decimal places.
+                        currency:
+                          type: string
+                          description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
+                        preferred_currency_amount:
+                          type: string
+                          nullable: true
+                          description: '`amount` converted to the application''s preferred currency, when available.'
+                        preferred_currency_code:
+                          type: string
+                          nullable: true
+                          description: Preferred currency code used for `preferred_currency_amount`.
+                        payment_details:
+                          type: string
+                          nullable: true
+                          description: Free-text payment reference or memo from the submission.
+                        score:
+                          type: integer
+                          description: Risk score (typically 0–100). Higher = riskier.
+                        severity:
+                          type: string
+                          nullable: true
+                          enum:
+                          - UNKNOWN
+                          - LOW
+                          - MEDIUM
+                          - HIGH
+                          - CRITICAL
+                          description: Categorical risk severity set by rules/providers (`UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). `null` until something sets it.
+                        subject_name:
+                          type: string
+                          nullable: true
+                          description: Full name of the `APPLICANT` party.
+                        subject_vendor_data:
+                          type: string
+                          nullable: true
+                          description: Your internal user/business identifier for the applicant.
+                        subject_country:
+                          type: string
+                          nullable: true
+                          description: Country code of the applicant, from the submitted `address.country` (typically ISO 3166-1 alpha-3).
+                        counterparty_name:
+                          type: string
+                          nullable: true
+                          description: Full name of the `COUNTERPARTY` party, if any.
+                        counterparty_vendor_data:
+                          type: string
+                          nullable: true
+                          description: Your internal identifier for the counterparty.
+                        counterparty_country:
+                          type: string
+                          nullable: true
+                          description: Country code of the counterparty, from the submitted `address.country`.
+                        tags:
+                          type: array
+                          description: Tags attached to the transaction (manually or by rules).
+                          items:
+                            type: object
+                            properties:
+                              uuid:
+                                type: string
+                                format: uuid
+                              name:
+                                type: string
+                              color:
+                                type: string
+                              description:
+                                type: string
+                                nullable: true
+                              source:
+                                type: string
+                                enum:
+                                - didit
+                                - custom
+                                description: Whether the tag is a Didit preset or a custom tag.
+                        txn_date:
+                          type: string
+                          format: date-time
+                          description: When the transaction occurred (from `transaction_at` at create time).
+                        created_at:
+                          type: string
+                          format: date-time
+                          description: When Didit recorded the submission.
+                        decision_reason_code:
+                          type: string
+                          nullable: true
+                          description: Machine-readable reason for the current `status` (e.g. `WALLET_HIGH_RISK`).
+                        decision_reason_label:
+                          type: string
+                          nullable: true
+                          description: Human-readable label for `decision_reason_code`.
+                        assigned_to_name:
+                          type: string
+                          nullable: true
+                          description: Display name of the Console reviewer assigned to this transaction.
+              examples:
+                Single transaction:
+                  value:
+                    count: 1
+                    next: null
+                    previous: null
+                    total_transactions: 1
+                    results:
+                    - uuid: abcdef12-3456-4890-abcd-ef1234567890
+                      transaction_number: 4123
+                      txn_id: your-txn-2026-05-17-001
+                      transaction_type: finance
+                      action_type: withdrawal
+                      status: IN_REVIEW
+                      direction: OUTBOUND
+                      amount: '1500'
+                      currency: EUR
+                      preferred_currency_amount: '1620.45'
+                      preferred_currency_code: USD
+                      payment_details: Withdrawal to crypto wallet
+                      txn_date: '2026-05-17T08:42:00Z'
+                      created_at: '2026-05-17T08:42:11Z'
+                      score: 78
+                      severity: HIGH
+                      decision_reason_code: WALLET_HIGH_RISK
+                      decision_reason_label: Destination wallet flagged as high risk
+                      tags:
+                      - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                        name: Manual review
+                        color: '#F59E0B'
+                        description: null
+                        source: custom
+                      subject_name: Maria Garcia
+                      subject_vendor_data: user-12345
+                      counterparty_name: null
+                      counterparty_vendor_data: null
+                      counterparty_country: null
+                      subject_country: null
+                      assigned_to_name: Alex Reviewer
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot list transactions for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    post:
+      summary: Create transaction
+      description: Submit a transaction for synchronous AML/risk monitoring. The transaction is created `APPROVED`, then your rules (and crypto screening, when applicable) run inline and may flip the returned `status` to `IN_REVIEW` or `DECLINED`. **`transaction_id` is your idempotency key** (max 128 chars, unique per app); reusing it returns 400. A `transaction.created` webhook is dispatched on success (sandbox applications are not billed and do not emit webhooks).
+      operationId: createTransaction
+      tags:
+      - Transactions
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/transactions/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"transaction_id\": \"your-txn-2026-05-17-001\",\n    \"transaction_category\": \"finance\",\n    \"transaction_details\": {\n      \"direction\": \"outbound\",\n      \"amount\": 1500,\n      \"currency\": \"EUR\",\n      \"action_type\": \"withdrawal\"\n    },\n    \"subject\": {\n      \"entity_type\": \"individual\",\n      \"vendor_data\": \"user-12345\",\n      \"full_name\": \"Maria Garcia\"\n    }\n  }'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/transactions/',\n    headers={\n        'x-api-key': os.environ['DIDIT_API_KEY'],\n        'Content-Type': 'application/json',\n    },\n    json={\n        'transaction_id': 'your-txn-2026-05-17-001',\n        'transaction_category': 'finance',\n        'transaction_details': {\n            'direction': 'outbound',\n            'amount': 1500,\n            'currency': 'EUR',\n            'action_type': 'withdrawal',\n        },\n        'subject': {\n            'entity_type': 'individual',\n            'vendor_data': 'user-12345',\n            'full_name': 'Maria Garcia',\n        },\n    },\n    timeout=15,\n)\nresp.raise_for_status()\ntx = resp.json()\nprint(tx['txn_id'], '->', tx['status'], tx['severity'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/transactions/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    transaction_id: 'your-txn-2026-05-17-001',\n    transaction_category: 'finance',\n    transaction_details: {\n      direction: 'outbound',\n      amount: 1500,\n      currency: 'EUR',\n      action_type: 'withdrawal',\n    },\n    subject: {\n      entity_type: 'individual',\n      vendor_data: 'user-12345',\n      full_name: 'Maria Garcia',\n    },\n  }),\n});\nif (!resp.ok) throw new Error(await resp.text());\nconst tx = await resp.json();\nconsole.log(tx.txn_id, tx.status, tx.severity);"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id:
+                  type: string
+                  description: Your unique identifier for this transaction (max 128 characters).
+                  example: your-txn-2026-05-17-001
+                transaction_at:
+                  type: string
+                  format: date-time
+                  description: When the transaction occurred. Defaults to now if omitted.
+                time_zone:
+                  type: string
+                  description: IANA time zone identifier, e.g. `Europe/Madrid`.
+                transaction_category:
+                  type: string
+                  description: Category of the transaction. CamelCase aliases (`travelRule`, `userPlatformEvent`, `gamblingBet`, …) are also accepted; the stored/echoed value is camelCase for multi-word categories.
+                  example: finance
+                  enum:
+                  - finance
+                  - kyc
+                  - travel_rule
+                  - user_event
+                  - audit_trail_event
+                  - gambling_bet
+                  - gambling_limit_change
+                  - gambling_bonus_change
+                  - travelRule
+                transaction_details:
+                  type: object
+                  description: Core financial details of the transaction.
+                  required:
+                  - direction
+                  - amount
+                  - currency
+                  properties:
+                    direction:
+                      type: string
+                      description: Direction of the transaction relative to the subject. Case-insensitive; `in`/`out` are accepted as aliases. Echoed back uppercase (`INBOUND`/`OUTBOUND`).
+                      example: outbound
+                      enum:
+                      - inbound
+                      - outbound
+                      - in
+                      - out
+                    amount:
+                      type: number
+                      description: Transaction amount (up to 18 decimal places).
+                      example: 1500
+                    currency:
+                      type: string
+                      description: Currency code, e.g. `EUR`, `USD`, `BTC`.
+                      example: EUR
+                    currency_kind:
+                      type: string
+                      description: Whether the currency is `fiat` or `crypto`.
+                    amount_in_default_currency:
+                      type: number
+                      nullable: true
+                      description: Pre-converted amount in the default currency. If omitted, automatic FX conversion is attempted.
+                    default_currency:
+                      type: string
+                      description: The default currency code for the converted amount.
+                    payment_details:
+                      type: string
+                      nullable: true
+                      description: Free-text payment reference or memo.
+                    payment_reference_id:
+                      type: string
+                      nullable: true
+                      description: External payment system reference. For crypto AML transaction-hash screening, send the blockchain transaction hash and also provide `subject.payment_method.account_id` with the related address.
+                    action_type:
+                      type: string
+                      nullable: true
+                      description: Sub-type of the transaction, e.g. `deposit`, `withdrawal`, `transfer`.
+                subject:
+                  type: object
+                  description: The subject (applicant) of the transaction.
+                  required:
+                  - vendor_data
+                  - full_name
+                  properties:
+                    entity_type:
+                      type: string
+                      description: 'Entity type: `individual` or `company`.'
+                    vendor_data:
+                      type: string
+                      description: Your internal user/business identifier.
+                      example: user-12345
+                    full_name:
+                      type: string
+                      description: Full name of the subject.
+                      example: Maria Garcia
+                    first_name:
+                      type: string
+                      description: First name of the subject.
+                    last_name:
+                      type: string
+                      description: Last name of the subject.
+                    date_of_birth:
+                      type: string
+                      format: date
+                      description: Date of birth (YYYY-MM-DD).
+                    address:
+                      type: object
+                      description: Address object.
+                      properties:
+                        country:
+                          type: string
+                          description: Country code (ISO 3166-1 alpha-3 recommended). Copied to the party's `country_code`.
+                        town:
+                          type: string
+                        state:
+                          type: string
+                        street:
+                          type: string
+                        post_code:
+                          type: string
+                    institution_details:
+                      type: object
+                      description: Institution details (for institutional subjects).
+                      properties:
+                        name:
+                          type: string
+                        code:
+                          type: string
+                        address:
+                          type: object
+                    device_context:
+                      type: object
+                      description: Device context captured at transaction time.
+                    payment_method:
+                      type: object
+                      description: Payment method used by the subject.
+                      properties:
+                        method_type:
+                          type: string
+                          description: 'Type of payment method: `bank_card`, `bank_account`, `crypto_wallet`, `ewallet`, `unhosted_wallet`, `other`.'
+                        account_id:
+                          type: string
+                          description: Account identifier (e.g. IBAN, wallet address). For crypto screening, this should contain the wallet address for this participant. Inbound transaction-hash screening requires the service/customer deposit address on the subject. Outbound screening uses the destination wallet on the counterparty.
+                        issuing_country:
+                          type: string
+                          description: ISO 3166-1 alpha-3 country code of the issuer.
+                counterparty:
+                  type: object
+                  description: The counterparty of the transaction (optional).
+                  properties:
+                    entity_type:
+                      type: string
+                      description: 'Entity type: `individual` or `company`.'
+                    vendor_data:
+                      type: string
+                      description: Your internal identifier for the counterparty.
+                    full_name:
+                      type: string
+                      description: Full name of the counterparty.
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    date_of_birth:
+                      type: string
+                      format: date
+                    address:
+                      type: object
+                      description: Address object with `country` (ISO 3166-1 alpha-3).
+                    institution_details:
+                      type: object
+                    device_context:
+                      type: object
+                    payment_method:
+                      type: object
+                      description: 'Payment method used by the counterparty. On travelRule transactions, `method_type: "unhosted_wallet"` declares the counterparty wallet as self-hosted: the transfer skips counterparty-VASP routing, is created directly in `UNCONFIRMED_OWNERSHIP`, and (when `auto_wallet_verification` is enabled) a wallet-ownership widget session is auto-minted and returned in the transaction''s `action_required` block.'
+                      properties:
+                        method_type:
+                          type: string
+                          description: 'Type of payment method: `bank_card`, `bank_account`, `crypto_wallet`, `ewallet`, `unhosted_wallet`, `other`. Use `unhosted_wallet` to declare a self-hosted wallet for the Travel Rule.'
+                        account_id:
+                          type: string
+                          description: Account identifier (e.g. IBAN or wallet address).
+                        issuing_country:
+                          type: string
+                custom_properties:
+                  type: object
+                  description: Arbitrary key-value pairs attached to the transaction. Each key can be referenced in rule conditions with the field path `custom_values.<key>`.
+                  additionalProperties: true
+                  example:
+                    merchant_id: test
+                    bank_name: test_2
+                travel_rule_details:
+                  type: object
+                  description: Travel Rule compliance metadata.
+                  required:
+                  - status
+                  properties:
+                    status:
+                      type: string
+                    protocol:
+                      type: string
+                    required:
+                      type: boolean
+                    obligations_count:
+                      type: integer
+                    originator_data:
+                      type: object
+                    beneficiary_data:
+                      type: object
+                    metadata:
+                      type: object
+                network_snapshot:
+                  type: object
+                  description: Pre-computed network graph snapshot.
+                  properties:
+                    nodes:
+                      type: array
+                      items:
+                        type: object
+                    edges:
+                      type: array
+                      items:
+                        type: object
+                    metrics:
+                      type: object
+                include_crypto_screening:
+                  type: boolean
+                  nullable: true
+                  description: 'Per-transaction override for crypto blockchain analytics screening. When `true`, crypto screening is performed regardless of the application default. When `false`, crypto screening is skipped even if enabled in the application settings. When omitted or `null`, the application-level default configured in the Console is used. Crypto screening requires `transaction_details.direction`, `currency_kind: "crypto"`, a chain/currency, and the wallet address selected by the direction: inbound pre-transfer screening uses `counterparty.payment_method.account_id`, inbound transaction-hash screening uses `subject.payment_method.account_id`, and outbound screening uses `counterparty.payment_method.account_id`. When `transaction_details.payment_reference_id` contains a blockchain transaction hash, Didit performs transaction screening and returns transaction summary enrichment when available.'
+              required:
+              - transaction_id
+              - transaction_category
+              - transaction_details
+              - subject
+            examples:
+              Minimal fiat withdrawal:
+                summary: Smallest acceptable payload for a fiat outbound transfer
+                value:
+                  transaction_id: your-txn-2026-05-17-001
+                  transaction_category: finance
+                  transaction_details:
+                    direction: outbound
+                    amount: 1500
+                    currency: EUR
+                    action_type: withdrawal
+                  subject:
+                    entity_type: individual
+                    vendor_data: user-12345
+                    full_name: Maria Garcia
+              Crypto outbound with screening:
+                summary: Outbound crypto withdrawal to an unhosted wallet, opt-in screening
+                value:
+                  transaction_id: your-txn-2026-05-17-002
+                  transaction_category: finance
+                  include_crypto_screening: true
+                  transaction_details:
+                    direction: outbound
+                    amount: 0.5
+                    currency: BTC
+                    currency_kind: crypto
+                    amount_in_default_currency: 32500
+                    default_currency: USD
+                    action_type: withdrawal
+                  subject:
+                    entity_type: individual
+                    vendor_data: user-12345
+                    full_name: Maria Garcia
+                    payment_method:
+                      method_type: crypto_wallet
+                      account_id: bc1qexampleexchangewalletaddressxyz
+                      issuing_country: ESP
+                  counterparty:
+                    entity_type: individual
+                    payment_method:
+                      method_type: unhosted_wallet
+                      account_id: bc1qexampleexternalwalletaddressabc
+              Travel Rule transfer:
+                summary: Outbound crypto transfer with Travel Rule originator/beneficiary data
+                value:
+                  transaction_id: your-txn-2026-05-17-003
+                  transaction_category: travel_rule
+                  transaction_details:
+                    direction: outbound
+                    amount: 25000
+                    currency: USDT
+                    currency_kind: crypto
+                    payment_reference_id: '0xabcdef1234567890'
+                    action_type: transfer
+                  subject:
+                    entity_type: individual
+                    vendor_data: user-12345
+                    full_name: Maria Garcia
+                    date_of_birth: '1992-03-14'
+                    address:
+                      country: ESP
+                      town: Madrid
+                      street: Calle Mayor 1
+                      post_code: '28013'
+                  counterparty:
+                    entity_type: individual
+                    full_name: John Beneficiary
+                    institution_details:
+                      name: Beneficiary VASP, Inc.
+                      code: BVASP-US
+                  travel_rule_details:
+                    status: PENDING
+                    protocol: IVMS101
+                    required: true
+                    originator_data:
+                      name: Maria Garcia
+                    beneficiary_data:
+                      name: John Beneficiary
+      responses:
+        '201':
+          description: Transaction submitted and monitored. The body is the full transaction detail (same shape as `GET /v3/transactions/{transaction_id}/`), reflecting any rule outcomes already applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+              examples:
+                Approved with no rule hits:
+                  value:
+                    uuid: abcdef12-3456-4890-abcd-ef1234567890
+                    transaction_number: 4123
+                    txn_id: your-txn-2026-05-17-001
+                    txn_date: '2026-05-17T08:42:00Z'
+                    zone_id: Europe/Madrid
+                    transaction_type: finance
+                    action_type: withdrawal
+                    direction: OUTBOUND
+                    status: APPROVED
+                    amount: '1500'
+                    currency: EUR
+                    currency_type: fiat
+                    amount_in_default_currency: '1620.45'
+                    default_currency_code: USD
+                    preferred_currency_amount: '1620.45'
+                    preferred_currency_code: USD
+                    payment_details: Withdrawal to crypto wallet
+                    payment_txn_id: null
+                    score: 0
+                    severity: null
+                    decision_reason_code: null
+                    decision_reason_label: null
+                    vendor_data: user-12345
+                    metadata:
+                      subject:
+                        entity_type: individual
+                        vendor_data: user-12345
+                        full_name: Maria Garcia
+                        address: {}
+                        institution_details: {}
+                        device_context: {}
+                      counterparty: {}
+                    props: {}
+                    tags: []
+                    parties:
+                    - uuid: b1111111-2222-4333-8444-555555555555
+                      role: APPLICANT
+                      entity_type: individual
+                      kind: USER
+                      vendor_data: user-12345
+                      full_name: Maria Garcia
+                      first_name: null
+                      last_name: null
+                      country_code: null
+                      dob: null
+                      address: {}
+                      institution_info: {}
+                      device: {}
+                      external_party_snapshot: null
+                    payment_methods: []
+                    activities:
+                    - uuid: d4e5f6a7-8901-4bcd-9ef0-123456789abc
+                      activity_type: TRANSACTION_CREATED
+                      source: TRANSACTION
+                      status: APPROVED
+                      title: withdrawal
+                      description: Transaction recorded.
+                      metadata: {}
+                      occurred_at: '2026-05-17T08:42:11Z'
+                    alerts: []
+                    rule_runs: []
+                    provider_results: []
+                    travel_rule: null
+                    network_snapshot: null
+                    remediation: null
+                    cost_breakdown: null
+                Flagged for review:
+                  value:
+                    uuid: abcdef12-3456-4890-abcd-ef1234567891
+                    transaction_number: 4124
+                    txn_id: your-txn-2026-05-17-002
+                    txn_date: '2026-05-17T08:42:00Z'
+                    zone_id: Europe/Madrid
+                    transaction_type: finance
+                    action_type: withdrawal
+                    direction: OUTBOUND
+                    status: IN_REVIEW
+                    amount: '0.5'
+                    currency: BTC
+                    currency_type: crypto
+                    amount_in_default_currency: '32500'
+                    default_currency_code: USD
+                    preferred_currency_amount: '32500'
+                    preferred_currency_code: USD
+                    payment_details: Withdrawal to crypto wallet
+                    payment_txn_id: null
+                    score: 78
+                    severity: HIGH
+                    decision_reason_code: WALLET_HIGH_RISK
+                    decision_reason_label: Destination wallet flagged as high risk
+                    vendor_data: user-12345
+                    metadata:
+                      subject:
+                        entity_type: individual
+                        vendor_data: user-12345
+                        full_name: Maria Garcia
+                        address: {}
+                        institution_details: {}
+                        device_context: {}
+                      counterparty: {}
+                    props:
+                      order_id: ord-9988
+                    tags: []
+                    parties:
+                    - uuid: b1111111-2222-4333-8444-555555555555
+                      role: APPLICANT
+                      entity_type: individual
+                      kind: USER
+                      vendor_data: user-12345
+                      full_name: Maria Garcia
+                      first_name: null
+                      last_name: null
+                      country_code: null
+                      dob: null
+                      address: {}
+                      institution_info: {}
+                      device: {}
+                      external_party_snapshot: null
+                    payment_methods: []
+                    activities: []
+                    alerts:
+                    - uuid: a7b8c9d0-1234-4abc-9def-567890abcdef
+                      title: Destination wallet flagged as high risk
+                      description: Provider risk score exceeded the configured threshold.
+                      severity: HIGH
+                      status: OPEN
+                      source: RULE
+                      metadata: {}
+                      created_at: '2026-05-17T08:42:12Z'
+                      due_at: null
+                    rule_runs:
+                    - uuid: e5f6a7b8-9012-4cde-af01-23456789abcd
+                      rule: f6a7b8c9-0123-4def-b012-3456789abcde
+                      rule_title: High-risk wallet screening
+                      rule_description: null
+                      rule_category: crypto
+                      matched: true
+                      is_test: false
+                      mode: ACTIVE
+                      severity: HIGH
+                      score_delta: 78
+                      status_target: IN_REVIEW
+                      action_summary:
+                        add_score: 78
+                        change_status: IN_REVIEW
+                      metadata: {}
+                      created_at: '2026-05-17T08:42:12Z'
+                    provider_results: []
+                    travel_rule: null
+                    network_snapshot: null
+                    remediation: null
+                    cost_breakdown: null
+        '400':
+          description: Validation failed (missing required fields, duplicate `transaction_id`, unknown enum value, invalid currency, etc.).
+          content:
+            application/json:
+              examples:
+                Missing required field:
+                  value:
+                    transaction_details:
+                      amount:
+                      - This field is required.
+                Duplicate transaction_id:
+                  value:
+                    transaction_id:
+                    - A transaction with this transaction_id already exists.
+                Invalid category:
+                  value:
+                    non_field_errors:
+                    - Unsupported transaction category.
+                Missing subject identity:
+                  value:
+                    subject:
+                    - subject.vendor_data and subject.full_name are required.
+                Blocklisted participant:
+                  value:
+                    vendor_data:
+                    - The individual 'user-12345' is in the blocklist and cannot participate in transactions.
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot submit transactions for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/transactions/{transaction_id}/:
+    get:
+      summary: Get transaction
+      description: 'Retrieve the full monitoring record for one transaction: parties, score/severity, rule runs, alerts, Travel Rule outcome, remediation session.'
+      operationId: getTransaction
+      tags:
+      - Transactions
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`).
+        schema:
+          type: string
+          format: uuid
+        example: abcdef12-3456-7890-abcd-ef1234567890
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/transactions/abcdef12-3456-7890-abcd-ef1234567890/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nuuid = 'abcdef12-3456-7890-abcd-ef1234567890'\nresp = requests.get(\n    f'https://verification.didit.me/v3/transactions/{uuid}/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    timeout=10,\n)\nresp.raise_for_status()\ntx = resp.json()\nfor alert in tx['alerts']:\n    print(alert.get('code'), alert.get('severity'))"
+      - lang: javascript
+        label: JavaScript
+        source: "const uuid = 'abcdef12-3456-7890-abcd-ef1234567890';\nconst resp = await fetch(`https://verification.didit.me/v3/transactions/${uuid}/`, {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n});\nif (!resp.ok) throw new Error(`Lookup failed: ${resp.status}`);\nconst tx = await resp.json();\nconsole.log(tx.status, tx.severity, tx.alerts.length, 'alerts');"
+      responses:
+        '200':
+          description: Full transaction detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+              examples:
+                In review with an alert:
+                  value:
+                    uuid: abcdef12-3456-4890-abcd-ef1234567890
+                    transaction_number: 4123
+                    txn_id: your-txn-2026-05-17-001
+                    txn_date: '2026-05-17T08:42:00Z'
+                    zone_id: Europe/Madrid
+                    transaction_type: finance
+                    action_type: withdrawal
+                    direction: OUTBOUND
+                    status: IN_REVIEW
+                    amount: '1500'
+                    currency: EUR
+                    currency_type: fiat
+                    amount_in_default_currency: '1620.45'
+                    default_currency_code: USD
+                    preferred_currency_amount: '1620.45'
+                    preferred_currency_code: USD
+                    payment_details: Withdrawal to crypto wallet
+                    payment_txn_id: null
+                    score: 78
+                    severity: HIGH
+                    decision_reason_code: WALLET_HIGH_RISK
+                    decision_reason_label: Destination wallet flagged as high risk
+                    vendor_data: user-12345
+                    metadata:
+                      subject:
+                        entity_type: individual
+                        vendor_data: user-12345
+                        full_name: Maria Garcia
+                        address: {}
+                        institution_details: {}
+                        device_context: {}
+                      counterparty: {}
+                    props:
+                      order_id: ord-9988
+                    tags: []
+                    parties:
+                    - uuid: b1111111-2222-4333-8444-555555555555
+                      role: APPLICANT
+                      entity_type: individual
+                      kind: USER
+                      vendor_data: user-12345
+                      full_name: Maria Garcia
+                      first_name: null
+                      last_name: null
+                      country_code: null
+                      dob: null
+                      address: {}
+                      institution_info: {}
+                      device: {}
+                      external_party_snapshot: null
+                    payment_methods: []
+                    activities: []
+                    alerts:
+                    - uuid: a7b8c9d0-1234-4abc-9def-567890abcdef
+                      title: Destination wallet flagged as high risk
+                      description: Provider risk score exceeded the configured threshold.
+                      severity: HIGH
+                      status: OPEN
+                      source: RULE
+                      metadata: {}
+                      created_at: '2026-05-17T08:42:12Z'
+                      due_at: null
+                    rule_runs: []
+                    provider_results: []
+                    travel_rule: null
+                    network_snapshot: null
+                    remediation: null
+                    cost_breakdown: null
+        '403':
+          description: Missing, invalid, or revoked API key, or the key cannot read this application's transactions. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No transaction with this UUID exists for the application (deleted, never created, belongs to another application, or the path segment is not a valid UUID).
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Throttled:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/transactions/sdk-token/:
+    post:
+      summary: Mint an SDK transaction token
+      description: 'Mint a short-lived scoped token your app passes to the Didit SDKs so they can submit transactions directly from the end-user''s device via `POST /v1/transactions/`. The token is bound to one `vendor_data` (your user id): every transaction submitted with it has its subject identity enforced server-side from that binding, so a tampered client cannot submit on behalf of another user. Mint tokens from your backend - never ship the API key itself in an app. camelCase aliases (`vendorData`, `ttlSeconds`, `maxUses`) are also accepted.'
+      operationId: createTransactionSdkToken
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vendor_data:
+                  type: string
+                  description: Your internal identifier for the end user this token is scoped to. Enforced as the subject identity of every transaction submitted with the token.
+                  example: user-042
+                ttl_seconds:
+                  type: integer
+                  default: 900
+                  maximum: 86400
+                  description: Token lifetime in seconds. Defaults to 900 (15 minutes); maximum 86400 (24 hours).
+                max_uses:
+                  type: integer
+                  nullable: true
+                  description: Maximum number of successful submissions allowed with this token. Omit or null for unlimited uses within the TTL.
+              required:
+              - vendor_data
+            example:
+              vendor_data: user-042
+              ttl_seconds: 900
+              max_uses: 3
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/transactions/sdk-token/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"vendor_data\": \"user-042\", \"ttl_seconds\": 900, \"max_uses\": 3}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/transactions/sdk-token/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={'vendor_data': 'user-042', 'ttl_seconds': 900, 'max_uses': 3},\n    timeout=10,\n)\nresp.raise_for_status()\ntoken = resp.json()\nprint(token['sdk_token'], token['expires_at'])"
+      responses:
+        '201':
+          description: The minted token. Hand `sdk_token` to your app; it authenticates the device-facing `/v1/transactions/` endpoints via the `X-Transaction-Token` header until `expires_at`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sdk_token:
+                    type: string
+                    description: The scoped transaction token to pass to the SDK.
+                  expires_at:
+                    type: string
+                    format: date-time
+                    description: When the token stops being accepted.
+              example:
+                sdk_token: q7Zt...urlsafe
+                expires_at: '2026-07-07T12:15:00Z'
+        '400':
+          description: 'Validation failed: missing `vendor_data`, or `ttl_seconds` outside the allowed range.'
+          content:
+            application/json:
+              examples:
+                Missing vendor_data:
+                  value:
+                    vendor_data:
+                    - This field is required.
+        '403':
+          description: Missing, invalid, or revoked API key.
+          content:
+            application/json:
+              examples:
+                Invalid API Key:
+                  value:
+                    detail: Invalid API Key.
+  /v1/transactions/:
+    post:
+      summary: Submit a transaction from an SDK
+      description: 'Device-facing endpoint the Didit SDKs call to submit a transaction directly from the end-user''s device. Authentication is a scoped token from `POST /v3/transactions/sdk-token/` sent in the `X-Transaction-Token` header instead of an API key, and the endpoint is CORS-enabled so browsers can call it cross-origin. The payload uses the camelCase wire aliases shown below (the SDK `submitTransaction` methods build it for you). Three server-side guarantees: the application is always taken from the token; the subject identity (`externalUserId`) is always enforced from the token''s `vendor_data`, so spoofed payload values are ignored; and device intelligence (the SDK device fingerprint plus server-derived IP and user agent) is attached to the subject automatically.'
+      operationId: submitTransactionFromSdk
+      tags:
+      - Transactions
+      security:
+      - TransactionTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                txnId:
+                  type: string
+                  description: Your unique identifier for this transaction (maps to `transaction_id`, max 128 characters).
+                  example: wd-2026-07-07-0042
+                txnDate:
+                  type: string
+                  format: date-time
+                  description: When the transaction occurred (maps to `transaction_at`). Defaults to now if omitted.
+                zoneId:
+                  type: string
+                  description: IANA time zone identifier (maps to `time_zone`), e.g. `Europe/Madrid`.
+                type:
+                  type: string
+                  description: Transaction category (maps to `transaction_category`), e.g. `finance`, `kyc`, `travelRule`, `userPlatformEvent`, `gamblingBet`.
+                  example: travelRule
+                info:
+                  type: object
+                  description: Core financial details of the transaction (maps to `transaction_details`).
+                  required:
+                  - direction
+                  - amount
+                  - currency
+                  properties:
+                    direction:
+                      type: string
+                      description: Direction relative to the subject. Case-insensitive; `in`/`out` are accepted as aliases. Echoed back uppercase (`INBOUND`/`OUTBOUND`).
+                      example: out
+                    amount:
+                      type: number
+                      description: Transaction amount (up to 18 decimal places). A decimal string is also accepted.
+                      example: 0.25
+                    currency:
+                      type: string
+                      description: Currency code, e.g. `EUR`, `USD`, `ETH`.
+                      example: ETH
+                    currencyType:
+                      type: string
+                      description: Whether the currency is `fiat` or `crypto` (maps to `currency_kind`).
+                    amountInDefaultCurrency:
+                      type: number
+                      nullable: true
+                      description: Pre-converted amount in the default currency (maps to `amount_in_default_currency`). If omitted, automatic FX conversion is attempted.
+                    defaultCurrencyCode:
+                      type: string
+                      description: The default currency code for the converted amount (maps to `default_currency`).
+                    paymentDetails:
+                      type: string
+                      nullable: true
+                      description: Free-text payment reference or memo (maps to `payment_details`).
+                    paymentTxnId:
+                      type: string
+                      nullable: true
+                      description: External payment reference (maps to `payment_reference_id`); the on-chain transaction hash for crypto transactions.
+                    type:
+                      type: string
+                      nullable: true
+                      description: Sub-type of the transaction (maps to `action_type`), e.g. `deposit`, `withdrawal`, `transfer`.
+                    cryptoParams:
+                      type: object
+                      description: 'Crypto-specific parameters, e.g. `{"crypto_chain": "ETH"}`.'
+                subject:
+                  type: object
+                  description: 'The subject (applicant) of the transaction. `externalUserId` is ignored here: the subject identity is always enforced from the token''s `vendor_data`.'
+                  required:
+                  - fullName
+                  properties:
+                    type:
+                      type: string
+                      description: 'Entity type (maps to `entity_type`): `individual` (default) or `company`.'
+                    externalUserId:
+                      type: string
+                      description: Ignored on the subject - enforced server-side from the token's `vendor_data`.
+                    fullName:
+                      type: string
+                      example: Jane Doe
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    dob:
+                      type: string
+                      format: date
+                      description: Date of birth (YYYY-MM-DD; maps to `date_of_birth`).
+                    address:
+                      type: object
+                      description: Address object with `country` (ISO 3166-1 alpha-3), `town`, `state`, `street`, `post_code`.
+                    institutionInfo:
+                      type: object
+                      description: Institution details for institutional participants (maps to `institution_details`).
+                    device:
+                      type: object
+                      description: Optional explicit device context. Merged with the automatically captured device intelligence; server-derived fields win on conflict.
+                    paymentMethod:
+                      type: object
+                      description: Payment method used by the subject (maps to `payment_method`).
+                      properties:
+                        type:
+                          type: string
+                          description: Payment method kind (maps to `method_type`), e.g. `bank_card`, `bank_account`, `crypto_wallet`, `ewallet`, `unhosted_wallet`, `other`.
+                        accountId:
+                          type: string
+                          description: 'Account identifier (maps to `account_id`): IBAN, card fingerprint, or wallet address.'
+                        issuingCountry:
+                          type: string
+                          description: ISO 3166-1 alpha-3 country code of the issuer (maps to `issuing_country`).
+                counterparty:
+                  type: object
+                  description: The counterparty of the transaction (optional). Same shape as `subject`; `externalUserId` is meaningful here.
+                  properties:
+                    type:
+                      type: string
+                      description: 'Entity type (maps to `entity_type`): `individual` or `company`.'
+                    externalUserId:
+                      type: string
+                      description: Your internal identifier for the counterparty (maps to `vendor_data`).
+                    fullName:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    dob:
+                      type: string
+                      format: date
+                    address:
+                      type: object
+                    institutionInfo:
+                      type: object
+                    device:
+                      type: object
+                    paymentMethod:
+                      type: object
+                      description: 'Payment method used by the counterparty (maps to `payment_method`). On travelRule transactions, `type: "unhosted_wallet"` declares the counterparty wallet as self-hosted: the transfer skips counterparty-VASP routing, is created directly in `UNCONFIRMED_OWNERSHIP`, and (when `auto_wallet_verification` is enabled) a wallet-ownership widget session is auto-minted and returned in `action_required` so the SDK can launch it.'
+                      properties:
+                        type:
+                          type: string
+                          description: Payment method kind (maps to `method_type`), e.g. `bank_card`, `bank_account`, `crypto_wallet`, `ewallet`, `unhosted_wallet`, `other`. Use `unhosted_wallet` to declare a self-hosted wallet for the Travel Rule.
+                        accountId:
+                          type: string
+                          description: 'Account identifier (maps to `account_id`): IBAN, card fingerprint, or wallet address.'
+                        issuingCountry:
+                          type: string
+                props:
+                  type: object
+                  additionalProperties: true
+                  description: Custom key-value pairs (maps to `custom_properties`). Each key can be referenced in rule conditions as `custom_values.<key>`.
+                travelRule:
+                  type: object
+                  description: Travel Rule details (maps to `travel_rule_details`). When Travel Rule is enabled for the application, Didit ignores any `status` you send and drives the exchange itself.
+                  required:
+                  - status
+                  properties:
+                    status:
+                      type: string
+                    protocol:
+                      type: string
+                    required:
+                      type: boolean
+                    obligationsCount:
+                      type: integer
+                    originatorData:
+                      type: object
+                    beneficiaryData:
+                      type: object
+                    metadata:
+                      type: object
+                includeCryptoScreening:
+                  type: boolean
+                  nullable: true
+                  description: Per-transaction override for crypto blockchain analytics screening (maps to `include_crypto_screening`).
+                fingerprint_v2:
+                  type: object
+                  description: The `didit-fp-v2` device fingerprint payload. Injected automatically by the SDKs; only relevant when calling the wire API directly.
+              required:
+              - txnId
+              - type
+              - info
+              - subject
+            example:
+              txnId: wd-2026-07-07-0042
+              type: travelRule
+              info:
+                direction: out
+                amount: '0.25'
+                currency: ETH
+                currencyType: crypto
+                cryptoParams:
+                  crypto_chain: ETH
+              subject:
+                fullName: Jane Doe
+              counterparty:
+                fullName: Ana Diaz
+                paymentMethod:
+                  type: unhosted_wallet
+                  accountId: 0xBeneficiaryWallet01
+              travelRule:
+                status: AWAITING_COUNTERPARTY
+                beneficiaryData:
+                  wallet_address: 0xBeneficiaryWallet01
+                  name: Ana Diaz
+              includeCryptoScreening: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v1/transactions/ \\\n  -H 'X-Transaction-Token: SDK_TOKEN' -H 'Content-Type: application/json' \\\n  -d '{\"txnId\": \"wd-2026-07-07-0042\", \"type\": \"travelRule\", \"info\": {\"direction\": \"out\", \"amount\": \"0.25\", \"currency\": \"ETH\", \"currencyType\": \"crypto\"}, \"subject\": {\"fullName\": \"Jane Doe\"}, \"counterparty\": {\"fullName\": \"Ana Diaz\", \"paymentMethod\": {\"type\": \"unhosted_wallet\", \"accountId\": \"0xBeneficiaryWallet01\"}}, \"travelRule\": {\"status\": \"AWAITING_COUNTERPARTY\", \"beneficiaryData\": {\"wallet_address\": \"0xBeneficiaryWallet01\", \"name\": \"Ana Diaz\"}}, \"includeCryptoScreening\": true}'"
+      - lang: javascript
+        label: Web SDK
+        source: "import { DiditSdk } from '@didit-protocol/sdk-web';\n\nconst result = await DiditSdk.shared.submitTransaction({\n  transactionToken: sdkToken,\n  transaction: {\n    txnId: 'wd-2026-07-07-0042',\n    category: 'travelRule',\n    details: { direction: 'out', amount: '0.25', currency: 'ETH', currencyType: 'crypto' },\n    subject: { fullName: 'Jane Doe' },\n    counterparty: { fullName: 'Ana Diaz', paymentMethod: { type: 'unhosted_wallet', accountId: '0xBeneficiaryWallet01' } },\n    travelRule: { status: 'AWAITING_COUNTERPARTY', beneficiaryData: { wallet_address: '0xBeneficiaryWallet01', name: 'Ana Diaz' } },\n    includeCryptoScreening: true\n  },\n  onActionCompleted: (refreshed) => console.log(refreshed.status)\n});"
+      responses:
+        '201':
+          description: Transaction submitted and monitored. Same detail shape as `GET /v3/transactions/{transaction_id}/`, including the `action_required` block when the end user must complete a follow-up action (the SDKs auto-launch it by default).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+              examples:
+                Wallet ownership required:
+                  value:
+                    uuid: 22222222-3333-4444-5555-666666666666
+                    txn_id: wd-2026-07-07-0042
+                    transaction_type: travelRule
+                    direction: OUTBOUND
+                    status: AWAITING_USER
+                    amount: '0.25'
+                    currency: ETH
+                    travel_rule:
+                      uuid: 33333333-4444-5555-6666-777777777777
+                      status: ON_HOLD
+                      required: true
+                    action_required:
+                      type: wallet_ownership
+                      url: https://verification.didit.me/wallet-ownership/3s9x...urlsafe
+                      widget_session_id: 77777777-8888-9999-aaaa-bbbbbbbbbbbb
+                      expires_at: '2026-07-07T13:00:00Z'
+        '400':
+          description: Validation failed (missing required fields, duplicate `txnId`, unknown category).
+          content:
+            application/json:
+              examples:
+                Missing fields:
+                  value:
+                    info:
+                      currency:
+                      - This field is required.
+        '401':
+          description: 'The transaction token was rejected: missing, unknown, revoked, over its `max_uses`, or expired. Expired-token responses always contain the word `expired` in the detail, which is how the SDKs distinguish `expired_token` from `invalid_token` errors.'
+          content:
+            application/json:
+              examples:
+                Invalid token:
+                  value:
+                    detail: Invalid transaction token.
+                Expired token:
+                  value:
+                    detail: Transaction token expired.
+  /v1/transactions/{transaction_id}/:
+    get:
+      summary: Get a transaction from an SDK
+      description: Device-facing read endpoint, authenticated with the same `X-Transaction-Token` used to submit. The SDKs poll it after an auto-launched action flow completes or its window closes, so the final state never depends on a single notification. Returns the same transaction detail as the submit response, including the current `action_required` block (`null` once the action is resolved).
+      operationId: getTransactionFromSdk
+      tags:
+      - Transactions
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID (the `uuid` from the submit response, **not** your `txnId`).
+        schema:
+          type: string
+          format: uuid
+        example: 22222222-3333-4444-5555-666666666666
+      security:
+      - TransactionTokenAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v1/transactions/22222222-3333-4444-5555-666666666666/' \\\n  -H 'X-Transaction-Token: SDK_TOKEN'"
+      responses:
+        '200':
+          description: The full transaction detail, including `action_required` (`null` once the pending action is resolved).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+        '401':
+          description: 'The transaction token was rejected: missing, unknown, revoked, over its `max_uses`, or expired.'
+          content:
+            application/json:
+              examples:
+                Expired token:
+                  value:
+                    detail: Transaction token expired.
+        '404':
+          description: No transaction with this UUID exists for the token's application, or the path segment is not a valid UUID.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+components:
+  schemas:
+    TransactionDetail:
+      type: object
+      description: Full monitoring record for one transaction, as returned by `GET /v3/transactions/{transaction_id}/` and `POST /v3/transactions/`.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Didit-stable transaction identifier. Use as `{transaction_id}` for follow-up calls.
+        transaction_number:
+          type: integer
+          description: Application-scoped sequential transaction number shown in Console (e.g. `4123`).
+        txn_id:
+          type: string
+          description: The `transaction_id` you supplied at create time (max 128 chars). Unique per application.
+        txn_date:
+          type: string
+          format: date-time
+          description: When the transaction occurred (from `transaction_at`; defaults to submission time).
+        zone_id:
+          type: string
+          nullable: true
+          description: IANA time zone identifier provided at create time.
+        transaction_type:
+          type: string
+          description: 'Top-level category as stored: `finance`, `kyc`, `travelRule`, `userPlatformEvent`, `gamblingBet`, `gamblingLimitChange`, `gamblingBonusChange`, `auditTrailEvent`. Note multi-word values are echoed back in camelCase even when submitted in snake_case.'
+        action_type:
+          type: string
+          description: Sub-type within the category (e.g. `deposit`, `withdrawal`, `transfer`). Defaults to the category when not supplied.
+        direction:
+          type: string
+          enum:
+          - INBOUND
+          - OUTBOUND
+          description: Direction relative to the subject. Stored uppercase regardless of the casing submitted (`in`/`out`/`inbound`/`outbound` are accepted on input).
+        status:
+          type: string
+          enum:
+          - APPROVED
+          - IN_REVIEW
+          - DECLINED
+          - AWAITING_USER
+          description: Current monitoring verdict. Transactions are created `APPROVED`; rules may flip them to `IN_REVIEW`/`DECLINED` synchronously.
+        amount:
+          type: string
+          description: Transaction amount as a decimal string with trailing zeros stripped (e.g. `"1500"`, `"0.5"`, `"0.123456789012345678"`). Up to 18 decimal places.
+        currency:
+          type: string
+          description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
+        currency_type:
+          type: string
+          nullable: true
+          description: '`fiat` or `crypto`, as submitted in `currency_kind`.'
+        amount_in_default_currency:
+          type: string
+          nullable: true
+          description: Pre-converted amount you supplied, as a decimal string with trailing zeros stripped.
+        default_currency_code:
+          type: string
+          nullable: true
+        preferred_currency_amount:
+          type: string
+          nullable: true
+          description: '`amount` converted to the application''s preferred currency, when available.'
+        preferred_currency_code:
+          type: string
+          nullable: true
+        payment_details:
+          type: string
+          nullable: true
+          description: Free-text payment reference or memo from the submission.
+        payment_txn_id:
+          type: string
+          nullable: true
+          description: External payment system reference (e.g. blockchain transaction hash) from `payment_reference_id`.
+        score:
+          type: integer
+          description: Risk score accumulated by rules (typically 0–100). Higher = riskier.
+        severity:
+          type: string
+          nullable: true
+          enum:
+          - UNKNOWN
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          description: Categorical risk severity set by rules/providers (`UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). `null` until something sets it.
+        decision_reason_code:
+          type: string
+          nullable: true
+          description: Machine-readable reason for the current `status`.
+        decision_reason_label:
+          type: string
+          nullable: true
+          description: Human-readable label for `decision_reason_code`.
+        vendor_data:
+          type: string
+          nullable: true
+          description: Convenience copy of the applicant's `vendor_data`.
+        metadata:
+          type: object
+          description: Snapshot of the `subject` and `counterparty` payloads as submitted at create time.
+        props:
+          type: object
+          description: The `custom_properties` you supplied at create time. Each key is addressable in rule conditions as `custom_values.<key>`.
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              name:
+                type: string
+              color:
+                type: string
+              description:
+                type: string
+                nullable: true
+              source:
+                type: string
+                enum:
+                - didit
+                - custom
+                description: Whether the tag is a Didit preset or a custom tag.
+          description: Tags attached to the transaction (manually or by rules).
+        parties:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              role:
+                type: string
+                enum:
+                - APPLICANT
+                - REMITTER
+                - BENEFICIARY
+                - COUNTERPARTY
+                description: Party role. The create endpoint assigns `APPLICANT` (the subject) and `COUNTERPARTY`.
+              entity_type:
+                type: string
+                enum:
+                - individual
+                - company
+                - external
+                - unhostedWallet
+              kind:
+                type: string
+                enum:
+                - USER
+                - BUSINESS
+                - EXTERNAL
+                description: '`USER`/`BUSINESS` parties link back to a Didit-owned entity via `vendor_data`. `EXTERNAL` parties have no Didit entity behind them.'
+              vendor_data:
+                type: string
+                nullable: true
+                description: Your internal user/business identifier.
+              full_name:
+                type: string
+                nullable: true
+              first_name:
+                type: string
+                nullable: true
+              last_name:
+                type: string
+                nullable: true
+              country_code:
+                type: string
+                nullable: true
+                description: Country code from the submitted `address.country` (typically ISO 3166-1 alpha-3).
+              dob:
+                type: string
+                format: date
+                nullable: true
+                description: Date of birth from the submitted `date_of_birth`.
+              address:
+                type: object
+                description: Address object as submitted. `{}` when omitted.
+              institution_info:
+                type: object
+                description: Institution details as submitted. `{}` when omitted.
+              device:
+                type: object
+                description: Normalized device context, including server-side IP enrichment under `network_context` (geolocation, VPN/data-center flags) when an IP was provided.
+              external_party_snapshot:
+                type: object
+                nullable: true
+                description: Frozen copy of the party data for `EXTERNAL` parties (or after the linked entity was deleted). `null` while linked to a live entity.
+          description: Transaction parties (applicant, counterparty).
+        payment_methods:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              payment_method_type:
+                type: string
+                enum:
+                - bank_card
+                - bank_account
+                - e_wallet
+                - crypto_wallet
+                - unhosted_wallet
+                - other
+              label:
+                type: string
+                nullable: true
+              fingerprint:
+                type: string
+                nullable: true
+                description: SHA-256 over `type:account_id:issuing_country` — stable identifier to correlate reuse of the same instrument.
+              account_id:
+                type: string
+                nullable: true
+                description: Account identifier (IBAN, wallet address, card token, …).
+              issuing_country:
+                type: string
+                nullable: true
+              owner_kind:
+                type: string
+                enum:
+                - USER
+                - BUSINESS
+                - EXTERNAL
+              vendor_data:
+                type: string
+                nullable: true
+                description: Your identifier for the owning user/business.
+              owner_name:
+                type: string
+                nullable: true
+              institution_info:
+                type: object
+              details:
+                type: object
+                description: Raw `payment_method` object as submitted.
+              external_owner_snapshot:
+                type: object
+                nullable: true
+              role:
+                type: string
+                enum:
+                - SOURCE
+                - DESTINATION
+                - FUNDING
+                - BENEFICIARY
+                description: 'How this method was used in the transaction. The create endpoint assigns `SOURCE`/`DESTINATION` from the direction (outbound: subject = SOURCE; inbound: subject = DESTINATION).'
+          description: Payment methods linked to the transaction.
+        activities:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              activity_type:
+                type: string
+                description: E.g. `TRANSACTION_CREATED`, `TRANSACTION_NOTE_ADDED`, `TRANSACTION_STATUS_CHANGED`.
+              source:
+                type: string
+              status:
+                type: string
+                nullable: true
+              title:
+                type: string
+                nullable: true
+              description:
+                type: string
+                nullable: true
+              metadata:
+                type: object
+              occurred_at:
+                type: string
+                format: date-time
+          description: Activity log entries (creation, notes, manual reviews, status changes).
+        alerts:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              title:
+                type: string
+              description:
+                type: string
+                nullable: true
+              severity:
+                type: string
+                enum:
+                - UNKNOWN
+                - LOW
+                - MEDIUM
+                - HIGH
+                - CRITICAL
+              status:
+                type: string
+                enum:
+                - OPEN
+                - INVESTIGATING
+                - AWAITING_USER
+                - PENDING_SAR
+                - SAR_FILED
+                - RESOLVED
+                - DISMISSED
+              source:
+                type: string
+                enum:
+                - RULE
+                - PROVIDER
+                - MANUAL
+              metadata:
+                type: object
+              created_at:
+                type: string
+                format: date-time
+              due_at:
+                type: string
+                format: date-time
+                nullable: true
+          description: Alerts raised by rules and providers.
+        rule_runs:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              rule:
+                type: string
+                format: uuid
+                description: UUID of the rule that ran.
+              rule_title:
+                type: string
+              rule_description:
+                type: string
+                nullable: true
+              rule_category:
+                type: string
+              matched:
+                type: boolean
+                description: Whether the rule's conditions matched this transaction.
+              is_test:
+                type: boolean
+                description: True when the rule ran in TEST mode (no effect on status/score).
+              mode:
+                type: string
+                enum:
+                - ACTIVE
+                - DISABLED
+                - TEST
+              severity:
+                type: string
+                nullable: true
+              score_delta:
+                type: integer
+                description: Score added by this rule's `add_score` actions.
+              status_target:
+                type: string
+                nullable: true
+                description: Status set by a `change_status` action, if any.
+              action_summary:
+                type: object
+                description: Summary of the actions the rule executed.
+              metadata:
+                type: object
+              created_at:
+                type: string
+                format: date-time
+          description: Per-rule execution results — which rule fired, with what score impact.
+        provider_results:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              provider:
+                type: string
+              result_type:
+                type: string
+                enum:
+                - FIAT_MONITORING
+                - WALLET_SCREENING
+                - TRANSACTION_SCREENING
+                - TRAVEL_RULE
+                - NETWORK_GRAPH
+                - CUSTOM
+              status:
+                type: string
+              severity:
+                type: string
+                nullable: true
+              score:
+                type: integer
+              summary:
+                type: string
+                nullable: true
+              payload:
+                type: object
+                description: Raw provider response payload.
+              created_at:
+                type: string
+                format: date-time
+          description: Raw provider payloads (AML screening, blockchain analytics, etc.).
+        travel_rule:
+          type: object
+          nullable: true
+          description: Travel Rule compliance check, present when `travel_rule_details` was submitted.
+          properties:
+            uuid:
+              type: string
+              format: uuid
+            status:
+              type: string
+            protocol:
+              type: string
+              nullable: true
+            required:
+              type: boolean
+            obligations_count:
+              type: integer
+            originator_data:
+              type: object
+            beneficiary_data:
+              type: object
+            metadata:
+              type: object
+        network_snapshot:
+          type: object
+          nullable: true
+          description: Graph snapshot of related transactions/parties used by the rules engine, present when submitted.
+          properties:
+            uuid:
+              type: string
+              format: uuid
+            nodes:
+              type: array
+              items:
+                type: object
+            edges:
+              type: array
+              items:
+                type: object
+            metrics:
+              type: object
+        remediation:
+          type: object
+          nullable: true
+          description: Remediation session offered to the user when re-verification is required. Superseded by `action_required`, which is the canonical block; kept for backward compatibility.
+          properties:
+            session_id:
+              type: string
+            session_token:
+              type: string
+            url:
+              type: string
+              format: uri
+            status:
+              type: string
+        action_required:
+          type: object
+          nullable: true
+          description: 'Pending end-user action required to complete this transaction, or null when there is none. The Didit SDKs auto-launch the action by default and refresh the transaction when it finishes. Two variants, discriminated by `type`: `verification_session` (a hosted verification session created by a rule action) and `wallet_ownership` (a wallet-ownership widget session auto-minted for a Travel Rule transfer that needs proof of wallet control, gated by the `auto_wallet_verification` Travel Rule setting). When both could apply, `wallet_ownership` takes precedence because it blocks the Travel Rule exchange.'
+          oneOf:
+          - title: Verification session
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                - verification_session
+              url:
+                type: string
+                format: uri
+                description: Hosted verification URL to open for the end user.
+              session_id:
+                type: string
+                format: uuid
+                description: Verification session id.
+              session_token:
+                type: string
+                description: Session token, used by the mobile SDKs to launch the flow natively.
+              status:
+                type: string
+                description: Verification session status.
+            required:
+            - type
+            - url
+          - title: Wallet ownership
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                - wallet_ownership
+              url:
+                type: string
+                format: uri
+                description: Hosted wallet-ownership widget URL. Open it in a real browser surface - on mobile use SFSafariViewController or a Chrome Custom Tab, never an embedded webview.
+              widget_session_id:
+                type: string
+                format: uuid
+                description: Wallet-ownership widget session id.
+              expires_at:
+                type: string
+                format: date-time
+                description: When the widget session expires.
+            required:
+            - type
+            - url
+        cost_breakdown:
+          type: object
+          nullable: true
+          description: Per-feature credit cost breakdown for this transaction.
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

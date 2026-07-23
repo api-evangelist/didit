@@ -1,0 +1,1347 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Users API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Users
+paths:
+  /v3/users/:
+    get:
+      summary: List users
+      description: List [users](/entities/users) Didit assembles from KYC sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus users created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.
+      operationId: list_users
+      tags:
+      - Users
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/users/?limit=50' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/users/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n    params={'limit': 50},\n)\nresp.raise_for_status()\npage = resp.json()\nfor user in page['results']:\n    print(user['vendor_data'], user['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const url = new URL('https://verification.didit.me/v3/users/');\nurl.searchParams.set('limit', '50');\n\nconst page = await fetch(url, {\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY },\n}).then((r) => r.json());\n\nconsole.log(page.count, page.results.length);"
+      responses:
+        '200':
+          description: Paginated list of users with verification status, session counts, and feature breakdown.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows — exact up to 100, capped at 100 beyond that for performance. Do not use it to detect the last page; rely on `next` being `null` instead.
+                  next:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the next page, or `null` on the last page.
+                  previous:
+                    type: string
+                    nullable: true
+                    description: Absolute URL of the previous page, or `null` on the first page.
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserListItem'
+              examples:
+                Example:
+                  value:
+                    count: 2
+                    next: null
+                    previous: null
+                    results:
+                    - didit_internal_id: f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418
+                      vendor_data: user-abc-123
+                      display_name: null
+                      full_name: John Michael Doe
+                      date_of_birth: '1990-05-15'
+                      effective_name: John Michael Doe
+                      status: ACTIVE
+                      portrait_image_url: https://<media-host>/...
+                      session_count: 3
+                      approved_count: 2
+                      declined_count: 0
+                      in_review_count: 1
+                      issuing_states:
+                      - USA
+                      approved_emails:
+                      - john@example.com
+                      approved_phones:
+                      - '+14155551234'
+                      features:
+                        ID_VERIFICATION: Approved
+                        LIVENESS: Approved
+                        FACE_MATCH: Approved
+                        AML: Approved
+                      features_list:
+                      - feature: ID_VERIFICATION
+                        status: Approved
+                      - feature: LIVENESS
+                        status: Approved
+                      - feature: FACE_MATCH
+                        status: Approved
+                      - feature: AML
+                        status: Approved
+                      last_session_at: '2025-06-15T10:30:00Z'
+                      last_activity_at: '2025-06-15T10:30:00Z'
+                      first_session_at: '2025-06-01T08:00:00Z'
+                      tags:
+                      - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                        name: VIP
+                        color: '#2567FF'
+                      created_at: '2025-06-01T08:00:00Z'
+                    - didit_internal_id: 6ed99d53-e8f5-4cf8-9ac1-4a506cb40f6b
+                      vendor_data: null
+                      display_name: Jane S.
+                      full_name: Jane Elizabeth Smith
+                      date_of_birth: '1985-11-22'
+                      effective_name: Jane S.
+                      status: FLAGGED
+                      portrait_image_url: null
+                      session_count: 1
+                      approved_count: 0
+                      declined_count: 0
+                      in_review_count: 1
+                      issuing_states: []
+                      approved_emails: []
+                      approved_phones: []
+                      features:
+                        ID_VERIFICATION: In Review
+                      features_list:
+                      - feature: ID_VERIFICATION
+                        status: In Review
+                      last_session_at: '2025-06-20T14:00:00Z'
+                      last_activity_at: '2025-06-20T14:05:00Z'
+                      first_session_at: '2025-06-20T14:00:00Z'
+                      tags: []
+                      created_at: '2025-06-20T14:00:00Z'
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot list users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/users/{vendor_data}/:
+    get:
+      summary: Get user
+      description: Fetch one [user](/entities/users) by `vendor_data` (exact match). Adds `metadata`, `comments`, and `updated_at` to the list view, and switches `tags` to the detailed tag-link shape. Returns soft-deleted users too.
+      operationId: get_user
+      tags:
+      - Users
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent.
+        example: user-abc-123
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/users/user-abc-123/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.get(\n    'https://verification.didit.me/v3/users/user-abc-123/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n)\nresp.raise_for_status()\nuser = resp.json()\nprint(user['didit_internal_id'], user['status'], user['session_count'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const vendorData = encodeURIComponent('user-abc-123');\nconst user = await fetch(\n  `https://verification.didit.me/v3/users/${vendorData}/`,\n  { headers: { 'x-api-key': process.env.DIDIT_API_KEY } },\n).then((r) => r.json());\n\nconsole.log(user.didit_internal_id, user.status);"
+      responses:
+        '200':
+          description: Full user detail including metadata, comments/activity log, and aggregated session data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailItem'
+              examples:
+                Active user:
+                  value:
+                    didit_internal_id: f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418
+                    vendor_data: user-abc-123
+                    display_name: null
+                    full_name: John Michael Doe
+                    date_of_birth: '1990-05-15'
+                    effective_name: John Michael Doe
+                    status: ACTIVE
+                    metadata:
+                      tier: premium
+                      source: website
+                    portrait_image_url: https://<media-host>/...
+                    session_count: 3
+                    approved_count: 2
+                    declined_count: 0
+                    in_review_count: 1
+                    issuing_states:
+                    - USA
+                    approved_emails:
+                    - john@example.com
+                    approved_phones:
+                    - '+14155551234'
+                    features:
+                      ID_VERIFICATION: Approved
+                      LIVENESS: Approved
+                      FACE_MATCH: Approved
+                      AML: Approved
+                    features_list:
+                    - feature: ID_VERIFICATION
+                      status: Approved
+                    - feature: LIVENESS
+                      status: Approved
+                    - feature: FACE_MATCH
+                      status: Approved
+                    - feature: AML
+                      status: Approved
+                    last_session_at: '2025-06-15T10:30:00Z'
+                    last_activity_at: '2025-06-15T10:30:00Z'
+                    first_session_at: '2025-06-01T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      tag:
+                        uuid: e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b
+                        name: VIP
+                        color: '#2567FF'
+                        description: null
+                        source: custom
+                        created_at: '2025-05-01T09:00:00Z'
+                        updated_at: '2025-05-01T09:00:00Z'
+                      added_by_email: analyst@acme.com
+                      added_by_name: Jane Analyst
+                      created_at: '2025-06-02T11:00:00Z'
+                    comments:
+                    - uuid: c1111111-2222-4333-8444-555555555555
+                      comment_type: STATUS_CHANGED
+                      comment: null
+                      actor_email: analyst@acme.com
+                      actor_name: Jane Analyst
+                      previous_status: FLAGGED
+                      new_status: ACTIVE
+                      previous_value: null
+                      new_value: null
+                      changed_fields: []
+                      metadata: null
+                      mentioned_emails: []
+                      created_at: '2025-06-01T10:30:00Z'
+                    created_at: '2025-06-01T08:00:00Z'
+                    updated_at: '2025-06-15T10:30:00Z'
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot read this application''s users. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No user with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+    patch:
+      summary: Update user
+      description: 'Partial update of a user: `display_name`, `full_name`, `date_of_birth`, `status`, `metadata`, `approved_emails`/`approved_phones`/`issuing_states`. `metadata` fully replaces. **Note:** unlike [Update User Status](#patch-/v3/users/-vendor_data-/update-status/), changing `status` here does NOT record a status-change activity and does NOT sync the system blocklist — use the dedicated update-status endpoint for `BLOCKED`/unblock flows.'
+      operationId: update_user
+      tags:
+      - Users
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the user (free-form string, NOT a UUID).
+        example: user-abc-123
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/users/user-abc-123/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"display_name\": \"Jane S.\", \"status\": \"FLAGGED\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/users/user-abc-123/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'display_name': 'Jane S.', 'status': 'FLAGGED'},\n)\nresp.raise_for_status()\nprint(resp.json()['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/users/user-abc-123/', {\n  method: 'PATCH',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ display_name: 'Jane S.', status: 'FLAGGED' }),\n});\nconst user = await resp.json();\nconsole.log(user.status);"
+      responses:
+        '200':
+          description: User updated. The full updated user record (same shape as Get User) is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailItem'
+              examples:
+                Updated:
+                  value:
+                    didit_internal_id: f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418
+                    vendor_data: user-abc-123
+                    display_name: Jane S.
+                    full_name: Jane Elizabeth Smith
+                    date_of_birth: '1985-11-22'
+                    effective_name: Jane S.
+                    status: FLAGGED
+                    metadata:
+                      tier: premium
+                    portrait_image_url: https://<media-host>/...
+                    session_count: 3
+                    approved_count: 2
+                    declined_count: 0
+                    in_review_count: 1
+                    issuing_states:
+                    - USA
+                    approved_emails:
+                    - john@example.com
+                    approved_phones:
+                    - '+14155551234'
+                    features:
+                      ID_VERIFICATION: Approved
+                      LIVENESS: Approved
+                      FACE_MATCH: Approved
+                      AML: Approved
+                    features_list:
+                    - feature: ID_VERIFICATION
+                      status: Approved
+                    - feature: LIVENESS
+                      status: Approved
+                    - feature: FACE_MATCH
+                      status: Approved
+                    - feature: AML
+                      status: Approved
+                    last_session_at: '2025-06-15T10:30:00Z'
+                    last_activity_at: '2025-06-15T10:30:00Z'
+                    first_session_at: '2025-06-01T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      tag:
+                        uuid: e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b
+                        name: VIP
+                        color: '#2567FF'
+                        description: null
+                        source: custom
+                        created_at: '2025-05-01T09:00:00Z'
+                        updated_at: '2025-05-01T09:00:00Z'
+                      added_by_email: analyst@acme.com
+                      added_by_name: Jane Analyst
+                      created_at: '2025-06-02T11:00:00Z'
+                    comments: []
+                    created_at: '2025-06-01T08:00:00Z'
+                    updated_at: '2025-06-15T10:30:00Z'
+        '400':
+          description: Invalid body — typically an unknown `status` or a `date_of_birth` not in `YYYY-MM-DD`.
+          content:
+            application/json:
+              examples:
+                Bad status:
+                  value:
+                    status:
+                    - '"INVALID" is not a valid choice.'
+                Bad date_of_birth:
+                  value:
+                    date_of_birth:
+                    - 'Date has wrong format. Use one of these formats instead: YYYY-MM-DD.'
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot update users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No user with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                  nullable: true
+                  maxLength: 512
+                  description: Full name of the user
+                display_name:
+                  type: string
+                  nullable: true
+                  description: Custom display name for this user
+                date_of_birth:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Date of birth in YYYY-MM-DD format
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  description: User lifecycle status. Changing it via this generic PATCH does NOT sync the system blocklist or record a status-change activity; prefer the update-status endpoint.
+                metadata:
+                  type: object
+                  nullable: true
+                  description: Arbitrary JSON object you attach to the user. **Fully replaces** the existing metadata on update — merge client-side if you only want to add keys.
+                approved_emails:
+                  type: array
+                  items:
+                    type: string
+                  description: Verified email addresses for this user, e.g. `["john@example.com"]`. Fully replaces the stored list.
+                approved_phones:
+                  type: array
+                  items:
+                    type: string
+                  description: Verified phone numbers for this user. Fully replaces the stored list.
+                issuing_states:
+                  type: array
+                  items:
+                    type: string
+                  description: Issuing countries (ISO 3166-1 alpha-3), e.g. `["USA"]`. Fully replaces the stored list.
+            examples:
+              Rename:
+                summary: Set display name
+                value:
+                  display_name: Jane S.
+              Override status:
+                summary: Flag the user for review
+                value:
+                  status: FLAGGED
+              Add metadata:
+                summary: Replace metadata JSON
+                value:
+                  metadata:
+                    tier: premium
+                    risk_level: low
+              Fix extracted DOB:
+                summary: Correct extracted profile fields
+                value:
+                  full_name: Jane Elizabeth Smith
+                  date_of_birth: '1985-11-22'
+  /v3/users/delete/:
+    post:
+      summary: Batch delete users
+      description: '**Hard delete** users — rows are removed permanently (including previously soft-deleted records). For everyday blocking prefer [Update User Status](#patch-/v3/users/-vendor_data-/update-status/) with `BLOCKED`. Unlike the businesses endpoint, this endpoint only accepts `vendor_data_list` or `delete_all` (no `didit_internal_id_list`).'
+      operationId: batch_delete_users
+      tags:
+      - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 'Provide `vendor_data_list` or `delete_all: true`. When `delete_all` is `true` it takes precedence and `vendor_data_list` is ignored.'
+              properties:
+                vendor_data_list:
+                  type: array
+                  items:
+                    type: string
+                  description: Your own identifiers to delete, matched exactly as sent.
+                delete_all:
+                  type: boolean
+                  default: false
+                  description: If `true`, deletes every user in the application.
+            examples:
+              Specific users:
+                summary: Delete users by vendor_data
+                value:
+                  vendor_data_list:
+                  - user-123
+                  - user-456
+              All users:
+                summary: Wipe every user in this application
+                value:
+                  delete_all: true
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/users/delete/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"vendor_data_list\": [\"user-123\", \"user-456\"]}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/users/delete/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'vendor_data_list': ['user-123', 'user-456']},\n)\nresp.raise_for_status()\nprint('deleted', resp.json()['deleted'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/users/delete/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ vendor_data_list: ['user-123', 'user-456'] }),\n});\nconst body = await resp.json();\nconsole.log('deleted', body.deleted);"
+      responses:
+        '200':
+          description: Users deleted. Returns the number of rows actually removed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+                    description: Number of users deleted (excludes vendor_data values that didn't match anything).
+              examples:
+                Deleted some:
+                  value:
+                    deleted: 2
+                Nothing matched:
+                  value:
+                    deleted: 0
+        '400':
+          description: No selector supplied (`vendor_data_list` missing/empty and `delete_all` not `true`). The error body is a JSON array.
+          content:
+            application/json:
+              examples:
+                Missing selector:
+                  value:
+                  - Provide vendor_data_list or set delete_all=true.
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot delete users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/users/{vendor_data}/update-status/:
+    patch:
+      summary: Update user status
+      description: Flip only the lifecycle `status` of a user — `ACTIVE`/`FLAGGED`/`BLOCKED` (NOT session statuses). `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry. Each change is recorded as a `STATUS_CHANGED` activity on the user.
+      operationId: update_user_status
+      tags:
+      - Users
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  description: New lifecycle status. `BLOCKED` also adds the `vendor_data` to the system blocklist.
+            examples:
+              Activate:
+                summary: Reactivate the user
+                value:
+                  status: ACTIVE
+              Flag:
+                summary: Flag the user for review
+                value:
+                  status: FLAGGED
+              Block:
+                summary: Block the user (adds to system blocklist)
+                value:
+                  status: BLOCKED
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/users/user-abc-123/update-status/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"status\": \"BLOCKED\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/users/user-abc-123/update-status/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'status': 'BLOCKED'},\n)\nresp.raise_for_status()\nprint(resp.json()['status'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/users/user-abc-123/update-status/', {\n  method: 'PATCH',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ status: 'BLOCKED' }),\n});\nconst user = await resp.json();\nconsole.log(user.status);"
+      responses:
+        '200':
+          description: User status updated. Full user record returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailItem'
+              examples:
+                Blocked:
+                  value:
+                    didit_internal_id: f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418
+                    vendor_data: user-abc-123
+                    display_name: null
+                    full_name: John Michael Doe
+                    date_of_birth: '1990-05-15'
+                    effective_name: John Michael Doe
+                    status: BLOCKED
+                    metadata:
+                      tier: premium
+                      source: website
+                    portrait_image_url: https://<media-host>/...
+                    session_count: 3
+                    approved_count: 2
+                    declined_count: 0
+                    in_review_count: 1
+                    issuing_states:
+                    - USA
+                    approved_emails:
+                    - john@example.com
+                    approved_phones:
+                    - '+14155551234'
+                    features:
+                      ID_VERIFICATION: Approved
+                      LIVENESS: Approved
+                      FACE_MATCH: Approved
+                      AML: Approved
+                    features_list:
+                    - feature: ID_VERIFICATION
+                      status: Approved
+                    - feature: LIVENESS
+                      status: Approved
+                    - feature: FACE_MATCH
+                      status: Approved
+                    - feature: AML
+                      status: Approved
+                    last_session_at: '2025-06-15T10:30:00Z'
+                    last_activity_at: '2025-06-15T10:30:00Z'
+                    first_session_at: '2025-06-01T08:00:00Z'
+                    tags:
+                    - uuid: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+                      tag:
+                        uuid: e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b
+                        name: VIP
+                        color: '#2567FF'
+                        description: null
+                        source: custom
+                        created_at: '2025-05-01T09:00:00Z'
+                        updated_at: '2025-05-01T09:00:00Z'
+                      added_by_email: analyst@acme.com
+                      added_by_name: Jane Analyst
+                      created_at: '2025-06-02T11:00:00Z'
+                    comments:
+                    - uuid: c1111111-2222-4333-8444-555555555555
+                      comment_type: STATUS_CHANGED
+                      comment: null
+                      actor_email: null
+                      actor_name: null
+                      previous_status: ACTIVE
+                      new_status: BLOCKED
+                      previous_value: null
+                      new_value: null
+                      changed_fields: []
+                      metadata: null
+                      mentioned_emails: []
+                      created_at: '2025-06-15T10:30:00Z'
+                    created_at: '2025-06-01T08:00:00Z'
+                    updated_at: '2025-06-15T10:30:00Z'
+        '400':
+          description: Missing or invalid `status`.
+          content:
+            application/json:
+              examples:
+                Missing status:
+                  value:
+                    status:
+                    - This field is required.
+                Bad status:
+                  value:
+                    status:
+                    - 'Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED'
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot update users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No (non-deleted) user with the supplied `vendor_data` exists for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/users/create/:
+    post:
+      summary: Create user
+      description: Pre-create a [user](/entities/users) by `vendor_data` *without* a verification session. `vendor_data` must be unique among non-deleted users for the application (exact match; conflicts return 400). Not idempotent.
+      operationId: create_user
+      tags:
+      - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - vendor_data
+              properties:
+                vendor_data:
+                  type: string
+                  description: Your unique identifier for this user (free-form string, NOT a UUID). Must be unique among non-deleted users for the application; matched exactly as sent.
+                full_name:
+                  type: string
+                  nullable: true
+                  maxLength: 512
+                  description: Full legal name of the user.
+                display_name:
+                  type: string
+                  nullable: true
+                  description: Friendly display name shown in the console (takes precedence over `full_name` for UI display).
+                  maxLength: 255
+                date_of_birth:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Date of birth in `YYYY-MM-DD` format.
+                status:
+                  type: string
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  default: ACTIVE
+                  description: Initial lifecycle status. Defaults to `ACTIVE`.
+                metadata:
+                  type: object
+                  nullable: true
+                  description: Arbitrary JSON object you attach to the user. Defaults to `{}`.
+                approved_emails:
+                  type: array
+                  items:
+                    type: string
+                  description: Pre-trusted email addresses for this user, e.g. `["john@example.com"]`.
+                approved_phones:
+                  type: array
+                  items:
+                    type: string
+                  description: Pre-trusted phone numbers for this user, e.g. `["+14155551234"]`.
+                issuing_states:
+                  type: array
+                  items:
+                    type: string
+                  description: Pre-recorded issuing countries (ISO 3166-1 alpha-3), e.g. `["USA"]`.
+            examples:
+              Basic:
+                summary: Create with basic info
+                value:
+                  vendor_data: user-abc-123
+                  full_name: John Doe
+              Full:
+                summary: All fields
+                value:
+                  vendor_data: user-abc-456
+                  full_name: Jane Smith
+                  display_name: Jane S.
+                  date_of_birth: '1990-05-15'
+                  status: ACTIVE
+                  metadata:
+                    tier: premium
+                    source: api
+                  approved_emails:
+                  - jane@example.com
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/users/create/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"vendor_data\": \"user-abc-123\", \"full_name\": \"John Doe\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/users/create/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'vendor_data': 'user-abc-123', 'full_name': 'John Doe'},\n)\nresp.raise_for_status()\nuser = resp.json()\nprint(user['didit_internal_id'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/users/create/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ vendor_data: 'user-abc-123', full_name: 'John Doe' }),\n});\nconst user = await resp.json();\nconsole.log(user.didit_internal_id);"
+      responses:
+        '201':
+          description: User created. Full user record returned (same shape as Get User).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailItem'
+              examples:
+                Created:
+                  value:
+                    didit_internal_id: f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418
+                    vendor_data: user-abc-123
+                    display_name: null
+                    full_name: John Doe
+                    date_of_birth: null
+                    effective_name: John Doe
+                    status: ACTIVE
+                    metadata: {}
+                    portrait_image_url: null
+                    session_count: 0
+                    approved_count: 0
+                    declined_count: 0
+                    in_review_count: 0
+                    issuing_states: []
+                    approved_emails: []
+                    approved_phones: []
+                    features: {}
+                    features_list: []
+                    last_session_at: null
+                    last_activity_at: '2025-06-15T10:30:00Z'
+                    first_session_at: null
+                    tags: []
+                    comments: []
+                    created_at: '2025-06-15T10:30:00Z'
+                    updated_at: '2025-06-15T10:30:00Z'
+        '400':
+          description: Invalid body — typically a duplicate `vendor_data`, a missing required field, or a malformed value.
+          content:
+            application/json:
+              examples:
+                Duplicate:
+                  value:
+                    vendor_data:
+                    - A user with this vendor_data already exists.
+                Missing vendor_data:
+                  value:
+                    vendor_data:
+                    - This field is required.
+                Bad metadata:
+                  value:
+                    metadata:
+                    - Metadata must be a JSON object.
+                Bad status:
+                  value:
+                    status:
+                    - 'Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED'
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Invalid or revoked API key, or the key cannot create users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).'
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '429':
+          description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+  /v3/organization/{organization_id}/application/{application_id}/vendor-users/by-id/{didit_internal_id}/faces/upload/:
+    post:
+      summary: Upload user face
+      description: Attach a trusted imported face image to an existing User profile. Use this after creating or retrieving a User by `vendor_data` and reading its `didit_internal_id`. The uploaded face is stored on the User profile and indexed for duplicate detection and face search. It is not added to a face blocklist.
+      operationId: upload_user_face
+      tags:
+      - Users
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID that owns the application.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID that owns the User profile.
+      - name: didit_internal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - image
+              properties:
+                image:
+                  type: string
+                  format: byte
+                  description: 'Raw base64-encoded JPG or PNG face image. Do not include a `data:image/...;base64,` prefix. Max decoded size: 2 MB.'
+                comment:
+                  type: string
+                  description: Optional operator-visible note for the uploaded face.
+                  default: ''
+            examples:
+              Imported face:
+                summary: Attach a face imported from a previous provider
+                value:
+                  image: /9j/4AAQSkZJRgABAQEA...
+                  comment: Imported from previous KYC provider
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/vendor-users/by-id/f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418/faces/upload/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"image\": \"/9j/4AAQSkZJRgABAQEA...\", \"comment\": \"Imported from previous KYC provider\"}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/vendor-users/by-id/f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418/faces/upload/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={\n        'image': '/9j/4AAQSkZJRgABAQEA...',\n        'comment': 'Imported from previous KYC provider',\n    },\n)\nresp.raise_for_status()\nface = resp.json()\nprint(face['uuid'], face['image_url'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/vendor-users/by-id/f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418/faces/upload/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    image: '/9j/4AAQSkZJRgABAQEA...',\n    comment: 'Imported from previous KYC provider',\n  }),\n});\nconst face = await resp.json();\nconsole.log(face.uuid, face.image_url);"
+      responses:
+        '201':
+          description: Face uploaded and attached to the User profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - uuid
+                - image_url
+                - comment
+                - uploaded_by
+                - created_at
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: UUID of the uploaded User face record.
+                  image_url:
+                    type: string
+                    format: uri
+                    nullable: true
+                    description: Signed URL for the uploaded face image.
+                  comment:
+                    type: string
+                    nullable: true
+                    description: Comment supplied when the face was uploaded.
+                  uploaded_by:
+                    type: string
+                    nullable: true
+                    description: Email or actor identifier of the uploader when available.
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Upload timestamp.
+              examples:
+                Uploaded:
+                  value:
+                    uuid: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+                    image_url: https://signed-url.example/face.jpg
+                    comment: Imported from previous KYC provider
+                    uploaded_by: api
+                    created_at: '2026-05-18T12:00:00Z'
+        '400':
+          description: 'Invalid request body or image. Common causes: invalid base64, invalid image, no detectable face, image over 2 MB, missing embedding, or the User already has 5 uploaded faces.'
+          content:
+            application/json:
+              examples:
+                No face:
+                  value:
+                    image: No face detected in the image. Please upload a clear photo with a visible face.
+                Too many faces:
+                  value:
+                    detail: Maximum of 5 faces per user reached.
+                Too large:
+                  value:
+                    image: Image exceeds maximum size of 2 MB.
+        '401':
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              examples:
+                Missing key:
+                  value:
+                    detail: Authentication credentials were not provided.
+        '403':
+          description: The credential is valid but cannot write User profiles for this application.
+          content:
+            application/json:
+              examples:
+                Forbidden:
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No User exists for that `didit_internal_id` in the application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
+        '429':
+          description: Rate limit exceeded; back off and retry.
+          content:
+            application/json:
+              examples:
+                Rate limited:
+                  value:
+                    detail: Request was throttled. Expected available in 30 seconds.
+      security:
+      - ApiKeyAuth: []
+components:
+  schemas:
+    UserDetailItem:
+      type: object
+      description: Full user detail. Extends UserListItem with metadata, comments, and updated_at.
+      allOf:
+      - $ref: '#/components/schemas/UserListItem'
+      - type: object
+        properties:
+          metadata:
+            type: object
+            description: Custom metadata JSON you attached to this user. Defaults to `{}`.
+          tags:
+            type: array
+            description: 'Tag assignments. NOTE: on detail responses each entry is a tag *link* object (`{uuid, tag: {...}, added_by_email, added_by_name, created_at}`), unlike the flat `{uuid, name, color}` shape used on list responses.'
+            items:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                  description: UUID of the tag assignment (not the tag itself).
+                tag:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                    color:
+                      type: string
+                    description:
+                      type: string
+                      nullable: true
+                    source:
+                      type: string
+                      enum:
+                      - didit
+                      - custom
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                added_by_email:
+                  type: string
+                  nullable: true
+                added_by_name:
+                  type: string
+                  nullable: true
+                created_at:
+                  type: string
+                  format: date-time
+          comments:
+            type: array
+            items:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                comment_type:
+                  type: string
+                  enum:
+                  - COMMENT
+                  - STATUS_CHANGED
+                  - METADATA_UPDATED
+                  - TAG_ADDED
+                  - TAG_REMOVED
+                  - PROFILE_UPDATED
+                comment:
+                  type: string
+                  nullable: true
+                actor_email:
+                  type: string
+                  nullable: true
+                actor_name:
+                  type: string
+                  nullable: true
+                previous_status:
+                  type: string
+                  nullable: true
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  - null
+                new_status:
+                  type: string
+                  nullable: true
+                  enum:
+                  - ACTIVE
+                  - FLAGGED
+                  - BLOCKED
+                  - null
+                previous_value:
+                  type: object
+                  nullable: true
+                  description: Previous field values for PROFILE_UPDATED entries.
+                new_value:
+                  type: object
+                  nullable: true
+                  description: New field values for PROFILE_UPDATED entries.
+                changed_fields:
+                  type: array
+                  items:
+                    type: string
+                  description: Names of the fields changed by a PROFILE_UPDATED entry.
+                metadata:
+                  type: object
+                  nullable: true
+                mentioned_emails:
+                  type: array
+                  items:
+                    type: string
+                created_at:
+                  type: string
+                  format: date-time
+            description: Activity log and comments for this user (status changes, profile edits, manual notes).
+          updated_at:
+            type: string
+            format: date-time
+    UserListItem:
+      type: object
+      description: A verified user.
+      properties:
+        didit_internal_id:
+          type: string
+          format: uuid
+          description: Didit's stable internal UUID for this user.
+        vendor_data:
+          type: string
+          nullable: true
+          description: Your unique identifier for this user (passed when creating sessions). This can be null when no vendor identifier was supplied.
+        display_name:
+          type: string
+          nullable: true
+          description: Custom display name set by you
+        full_name:
+          type: string
+          nullable: true
+          description: Full name extracted from verified documents
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        effective_name:
+          type: string
+          nullable: true
+          description: 'Best available name: display_name if set, otherwise full_name'
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - FLAGGED
+          - BLOCKED
+          description: Lifecycle status of the user record (NOT a session status). `ACTIVE` is the default, `FLAGGED` marks the user for manual attention, `BLOCKED` prevents new sessions for this `vendor_data`.
+        portrait_image_url:
+          type: string
+          nullable: true
+          description: Presigned URL of the user's portrait photo (expires after a few hours)
+        session_count:
+          type: integer
+          description: Total number of verification sessions for this user
+        approved_count:
+          type: integer
+          description: Number of approved sessions
+        declined_count:
+          type: integer
+          description: Number of declined sessions
+        in_review_count:
+          type: integer
+          description: Number of sessions in review
+        issuing_states:
+          type: array
+          items:
+            type: string
+          description: ISO 3166-1 alpha-3 codes of issuing countries seen on this user's approved ID documents, e.g. `["USA", "ESP"]`. Empty array when none.
+        approved_emails:
+          type: array
+          items:
+            type: string
+          description: Verified email addresses collected from this user's approved sessions, e.g. `["john@example.com"]`.
+        approved_phones:
+          type: array
+          items:
+            type: string
+          description: Verified phone numbers collected from this user's approved sessions, e.g. `["+14155551234"]`.
+        features:
+          type: object
+          description: 'Aggregated per-feature status across all of this user''s sessions. Possible keys: `ID_VERIFICATION`, `NFC`, `LIVENESS`, `FACE_MATCH`, `POA`, `QUESTIONNAIRE`, `EMAIL_VERIFICATION`, `PHONE`, `AML`, `IP_ANALYSIS`, `AGE_ESTIMATION`, `DATABASE_VALIDATION`. Possible values: `Approved`, `Declined`, `In Review`, `Not Finished`, `Resub Requested`.'
+        features_list:
+          type: array
+          items:
+            type: object
+            properties:
+              feature:
+                type: string
+              status:
+                type: string
+          description: Same data as `features`, as an ordered array of `{feature, status}` objects.
+        last_session_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent session
+        first_session_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the first session
+        last_activity_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent activity on this user (session, transaction, status change, data edit, etc.).
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              name:
+                type: string
+              color:
+                type: string
+          description: Tags assigned to this user
+        created_at:
+          type: string
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.

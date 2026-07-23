@@ -1,0 +1,346 @@
+openapi: 3.0.0
+info:
+  version: 3.0.0
+  title: Didit Verification Billing Report Templates API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Report Templates
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/report-templates/:
+    get:
+      summary: List report templates
+      description: List FIU report templates for the application.
+      operationId: list_report_templates
+      tags:
+      - Report Templates
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+        description: Page size.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated templates.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of matching rows, capped at 100 for performance.
+                  next:
+                    type: string
+                    nullable: true
+                  previous:
+                    type: string
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportTemplateDetail'
+    post:
+      summary: Create report template
+      description: Create a reusable per-jurisdiction, per-report-type goAML header template. Rejected with 400 if any of the template-level obligatory fields (rentity_id, submission_code, currency_code_local) is missing from field_config; an invalid template cannot be saved or used to create a report. Per-filing header fields (action, submission_date, transactions) are enforced at report validate/finalize time instead.
+      operationId: create_report_template
+      tags:
+      - Report Templates
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              - jurisdiction
+              - report_type
+              properties:
+                name:
+                  type: string
+                jurisdiction:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  description: ISO 3166-1 alpha-2 country code, upper-cased on save.
+                report_type:
+                  type: string
+                  enum:
+                  - SAR
+                  - STR
+                  - CTR
+                  - TTR
+                  - UTR
+                  - IFT
+                  - CBR
+                  - TFR
+                field_config:
+                  type: object
+                  description: 'Reusable goAML header defaults. Template-level obligatory fields: rentity_id, submission_code, and currency_code_local (3-letter). Optional: enabled_fields (which optional report blocks to include) plus reporting_person, location, reason, and action defaults. Per-filing header fields (action, submission_date, transactions, jurisdiction) are enforced when the report is validated or finalized, not on the template.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"name\": \"US SAR default\", \"jurisdiction\": \"US\", \"report_type\": \"SAR\", \"field_config\": {\"rentity_id\": \"FIU-US-00123\", \"submission_code\": \"E\", \"currency_code_local\": \"USD\"}}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n        'name': 'US SAR default',\n        'jurisdiction': 'US',\n        'report_type': 'SAR',\n        'field_config': {'rentity_id': 'FIU-US-00123', 'submission_code': 'E', 'currency_code_local': 'USD'},\n    },\n    timeout=10,\n)\nresp.raise_for_status()\nprint(resp.json()['uuid'])"
+      responses:
+        '201':
+          description: Template created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateDetail'
+        '400':
+          description: Unrecognized jurisdiction, or field_config fails obligatory-field validation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /v3/organization/{organization_id}/application/{application_id}/report-templates/{template_uuid}/:
+    get:
+      summary: Get report template
+      description: Retrieve a report template.
+      operationId: get_report_template
+      tags:
+      - Report Templates
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: template_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 7ec00000-0000-4000-8000-000000000006
+        description: Report template UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/7ec00000-0000-4000-8000-000000000006/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Template detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateDetail'
+    patch:
+      summary: Update report template
+      description: Partially update a report template. Re-validates obligatory goAML fields on save.
+      operationId: update_report_template
+      tags:
+      - Report Templates
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: template_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 7ec00000-0000-4000-8000-000000000006
+        description: Report template UUID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                jurisdiction:
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  description: ISO 3166-1 alpha-2 country code, upper-cased on save.
+                report_type:
+                  type: string
+                  enum:
+                  - SAR
+                  - STR
+                  - CTR
+                  - TTR
+                  - UTR
+                  - IFT
+                  - CBR
+                  - TFR
+                field_config:
+                  type: object
+                  description: 'Reusable goAML header defaults. Template-level obligatory fields: rentity_id, submission_code, and currency_code_local (3-letter). Optional: enabled_fields (which optional report blocks to include) plus reporting_person, location, reason, and action defaults. Per-filing header fields (action, submission_date, transactions, jurisdiction) are enforced when the report is validated or finalized, not on the template.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/7ec00000-0000-4000-8000-000000000006/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"field_config\": {\"rentity_id\": \"FIU-US-00124\"}}'"
+      responses:
+        '200':
+          description: Updated template.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateDetail'
+    delete:
+      summary: Delete report template
+      description: Soft-delete a report template. Reports already created from it are unaffected.
+      operationId: delete_report_template
+      tags:
+      - Report Templates
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: template_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 7ec00000-0000-4000-8000-000000000006
+        description: Report template UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/report-templates/7ec00000-0000-4000-8000-000000000006/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '204':
+          description: Template deleted.
+components:
+  schemas:
+    ReportTemplateDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        jurisdiction:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: ISO 3166-1 alpha-2 country code.
+        report_type:
+          type: string
+          enum:
+          - SAR
+          - STR
+          - CTR
+          - TTR
+          - UTR
+          - IFT
+          - CBR
+          - TFR
+        report_type_display:
+          type: string
+        field_config:
+          type: object
+          description: 'Reusable goAML header defaults. Template-level obligatory fields: rentity_id, submission_code, and currency_code_local (3-letter). Optional: enabled_fields (which optional report blocks to include) plus reporting_person, location, reason, and action defaults. Per-filing header fields (action, submission_date, transactions, jurisdiction) are enforced when the report is validated or finalized, not on the template.'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
