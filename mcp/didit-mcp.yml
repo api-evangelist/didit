@@ -1,0 +1,29 @@
+generated: '2026-07-18'
+method: searched
+status: published
+source: https://docs.didit.me/integration/ai-agent-integration
+server:
+  name: didit
+  transport: http
+  protocol: sse
+  url: https://mcp.didit.me/mcp
+  auth: OAuth 2.1 browser sign-in (no API key required; acts as the signed-in console user)
+  repo: https://github.com/didit-protocol/mcp
+  registration: https://business.didit.me/.well-known/oauth-authorization-server
+tool_count: "130+"
+tool_groups:
+  - name: Sessions & Workflows
+    description: Create, retrieve, and manage KYC/KYB verification sessions and workflows.
+  - name: Standalone verification
+    description: ID verification, liveness, face match, AML screening, age estimation, proof of address.
+  - name: AML & Travel Rule
+    description: Sanctions/PEP screening, transaction monitoring, and FATF/EU Travel Rule transfers.
+  - name: Workspace operations
+    description: Lists (blocklist/allowlist), webhook destinations, billing balance and top-up.
+  - name: Marketplace & account
+    description: Programmatic registration and cross-organization account features.
+note: >-
+  Official hosted MCP server. Tools return the verbatim JSON of the underlying
+  Didit REST endpoints; every call respects the console role's permissions.
+  A first-party Agent Skills package is also published at
+  https://github.com/didit-protocol/skills (12 skills).

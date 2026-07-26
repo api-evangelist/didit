@@ -1,0 +1,30 @@
+generated: '2026-07-18'
+method: searched
+source: https://business.didit.me/.well-known/oauth-authorization-server
+docs: https://docs.didit.me/integration/programmatic-registration
+note: >-
+  The verification REST API authenticates with an x-api-key header (no OAuth
+  scopes). OAuth 2.1 applies to the Business Console / Management surface and
+  the hosted MCP server, whose authorization-server metadata advertises these
+  scopes. Flow: authorization_code + refresh_token, PKCE S256, public clients.
+schemes:
+  - name: OAuth2
+    issuer: https://business.didit.me
+    authorization_url: https://business.didit.me/authorize
+    token_url: https://business.didit.me/api/auth/oauth-token
+    registration_url: https://business.didit.me/api/auth/oauth-register
+    flows:
+      - flow: authorizationCode
+        pkce: S256
+        grant_types: [authorization_code, refresh_token]
+scopes:
+  - scope: openid
+    description: OpenID Connect authentication.
+  - scope: profile
+    description: Access to the signed-in user's profile.
+  - scope: email
+    description: Access to the signed-in user's email address.
+  - scope: "didit:management"
+    description: Management API access — workflows, lists, webhooks, users, businesses, billing.
+  - scope: "didit:verification"
+    description: Verification API access — sessions and standalone verification operations.

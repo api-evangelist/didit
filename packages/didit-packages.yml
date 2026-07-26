@@ -1,0 +1,62 @@
+generated: '2026-07-18'
+method: searched
+source: https://github.com/didit-protocol
+note: >-
+  First-party Didit SDKs and agent tooling published under the didit-protocol
+  GitHub organization. Server-side verification uses the x-api-key REST API;
+  these client SDKs drive the hosted/embedded verification flows and native apps.
+packages:
+  - language: javascript
+    registry: npm
+    name: "@didit-sdk/web"
+    repo: https://github.com/didit-protocol/sdk-web
+    url: https://www.npmjs.com/package/@didit-sdk/web
+    install: npm install @didit-sdk/web
+    kind: web-sdk
+    official: true
+  - language: javascript
+    registry: npm
+    name: "@didit-sdk/react-native"
+    repo: https://github.com/didit-protocol/sdk-react-native
+    install: npm install @didit-sdk/react-native
+    kind: mobile-sdk
+    official: true
+  - language: dart
+    registry: pub.dev
+    name: didit_sdk
+    repo: https://github.com/didit-protocol/sdk-flutter
+    install: flutter pub add didit_sdk
+    kind: mobile-sdk
+    official: true
+  - language: kotlin
+    registry: maven
+    name: me.didit:sdk-android
+    repo: https://github.com/didit-protocol/sdk-android
+    kind: mobile-sdk
+    official: true
+  - language: swift
+    registry: cocoapods
+    name: DiditSDK
+    repo: https://github.com/didit-protocol/sdk-ios
+    kind: mobile-sdk
+    official: true
+  - language: javascript
+    registry: npm
+    name: didit-mcp
+    repo: https://github.com/didit-protocol/mcp
+    kind: mcp-server
+    hosted: https://mcp.didit.me/mcp
+    official: true
+  - language: python
+    registry: github
+    name: didit-skills
+    repo: https://github.com/didit-protocol/skills
+    kind: agent-skills
+    note: 12 production-ready Agent Skills for KYC/AML/biometric/session flows
+    official: true
+  - language: php
+    registry: wordpress
+    name: didit-plugin-wordpress
+    repo: https://github.com/didit-protocol/plugin-wordpress
+    kind: cms-plugin
+    official: true

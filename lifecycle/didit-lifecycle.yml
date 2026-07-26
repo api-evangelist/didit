@@ -1,0 +1,20 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/changelog/may-2026
+versioning:
+  scheme: uri-path
+  current: v3
+  base_path: /v3/
+  note: >-
+    API is versioned in the URI path (/v3/). SDKs follow semantic versioning
+    (native SDK 4.x); product releases are published as a date-based changelog.
+deprecation:
+  policy_url: null
+  sunset_header: false
+  note: No formal RFC 8594 Sunset/Deprecation-header policy documented.
+status_page: https://status.didit.me
+changelog: https://docs.didit.me/changelog/may-2026
+sla:
+  url: https://didit.me/pricing
+  note: Enterprise custom contracts and SLAs; 99% of verifications complete under 2 seconds (p99).
+deprecated_operations: []

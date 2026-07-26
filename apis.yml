@@ -1,22 +1,364 @@
 aid: didit
 name: Didit
-description: Didit is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist
-  network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: >-
+  Didit is a developer-first identity verification and fraud-prevention platform that
+  exposes one unified API for KYC (ID verification, passive/active liveness, face match
+  and search, age estimation, proof of address, NFC), KYB business verification (registry,
+  UBO/ownership, officers, entity AML), AML sanctions/PEP screening, transaction monitoring
+  (KYT), crypto wallet screening, and FATF/EU Travel Rule. It spans 220+ countries, 14,000+
+  document types and 50+ languages with sub-two-second inference, pay-per-call pricing from
+  $0.30 and a 500-verification monthly free tier. The v3 REST API authenticates with an
+  x-api-key header, ships Web/iOS/Android/React Native/Flutter SDKs, HMAC-signed webhooks,
+  a live hosted MCP server, and Agent Skills. Backed by Y Combinator and Robinhood Ventures.
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://avatars.githubusercontent.com/u/131235139?v=4
 url: https://raw.githubusercontent.com/api-evangelist/didit/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
 - y-combinator
-x-tier: stub
+x-tier: enriched
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-18'
 tags:
-- Company
-apis: []
+- Identity
+- Identity Verification
+- KYC
+- KYB
+- AML
+- Fraud Prevention
+- Compliance
+- Biometrics
+- Transaction Monitoring
+- Crypto
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: didit:didit-billing-api
+  name: Didit Billing API
+  description: The Billing API from Didit — 2 operation(s) for billing.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Billing
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-billing-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-businesses-api
+  name: Didit Businesses API
+  description: The Businesses API from Didit — 5 operation(s) for businesses.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Businesses
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-businesses-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-case-blueprints-api
+  name: Didit Case Blueprints API
+  description: The Case Blueprints API from Didit — 4 operation(s) for case blueprints.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Case Blueprints
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-case-blueprints-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-cases-api
+  name: Didit Cases API
+  description: The Cases API from Didit — 24 operation(s) for cases.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Cases
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-cases-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-customization-api
+  name: Didit Customization API
+  description: The Customization API from Didit — 1 operation(s) for customization.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Customization
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-customization-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-questionnaires-api
+  name: Didit Questionnaires API
+  description: The Questionnaires API from Didit — 2 operation(s) for questionnaires.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Questionnaires
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-questionnaires-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-regulatory-reports-api
+  name: Didit Regulatory Reports API
+  description: The Regulatory Reports API from Didit — 6 operation(s) for regulatory reports.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Regulatory Reports
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-regulatory-reports-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-report-templates-api
+  name: Didit Report Templates API
+  description: The Report Templates API from Didit — 2 operation(s) for report templates.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Report Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-report-templates-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-session-api
+  name: Didit Session API
+  description: The Session API from Didit — 1 operation(s) for session.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Session
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-session-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-sessions-api
+  name: Didit Sessions API
+  description: The Sessions API from Didit — 20 operation(s) for sessions.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Sessions
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-sessions-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-standalone-apis-api
+  name: Didit Standalone APIs API
+  description: The Standalone APIs API from Didit — 14 operation(s) for standalone apis.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Standalone APIs
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-standalone-apis-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-system-api
+  name: Didit System API
+  description: The System API from Didit — 1 operation(s) for system.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - System
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-system-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-transactions-api
+  name: Didit Transactions API
+  description: The Transactions API from Didit — 6 operation(s) for transactions.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-transactions-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-travel-rule-api
+  name: Didit Travel Rule API
+  description: The Travel Rule API from Didit — 11 operation(s) for travel rule.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Travel Rule
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-travel-rule-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-users-api
+  name: Didit Users API
+  description: The Users API from Didit — 6 operation(s) for users.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-users-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-webhook-api
+  name: Didit Webhook API
+  description: The Webhook API from Didit — 2 operation(s) for webhook.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Webhook
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-webhook-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+- aid: didit:didit-workflows-api
+  name: Didit Workflows API
+  description: The Workflows API from Didit — 2 operation(s) for workflows.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Workflows
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-workflows-api-openapi.yml
+  - type: APIReference
+    url: https://docs.didit.me/api-reference
+  - type: Documentation
+    url: https://docs.didit.me
+common:
+- type: DeveloperPortal
+  url: https://docs.didit.me
+- type: Documentation
+  url: https://docs.didit.me
+- type: APIReference
+  url: https://docs.didit.me/api-reference
+- type: GettingStarted
+  url: https://docs.didit.me/getting-started/quick-start
+- type: Support
+  url: https://wa.me/+19544659728
+- type: Blog
+  url: https://didit.me/blog
+- type: GitHubOrganization
+  url: https://github.com/didit-protocol
+- type: Pricing
+  url: https://didit.me/pricing
+- type: SignUp
+  url: https://business.didit.me
+- type: TermsOfService
+  url: https://didit.me/terms/business
+- type: PrivacyPolicy
+  url: https://didit.me/terms/privacy-policy
+- type: StatusPage
+  url: https://status.didit.me
+- type: OpenAPI
+  url: openapi/didit-openapi-original.json
+- type: Authentication
+  url: authentication/didit-authentication.yml
+- type: OAuthScopes
+  url: scopes/didit-scopes.yml
+- type: Packages
+  url: packages/didit-packages.yml
+- type: SDKs
+  url: packages/didit-packages.yml
+- type: MCPServer
+  url: mcp/didit-mcp.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/didit-llms.txt
+- type: WellKnown
+  url: well-known/didit-well-known.yml
+- type: Overlay
+  url: overlays/didit-openapi-overlay.yaml
+- type: Conformance
+  url: conformance/didit-conformance.yml
+- type: Compliance
+  url: https://docs.didit.me/getting-started/security-compliance
+- type: ErrorCatalog
+  url: errors/didit-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/didit-lifecycle.yml
+- type: ChangeLog
+  url: changelog/didit-changelog.yml
+- type: Conventions
+  url: conventions/didit-conventions.yml
+- type: Sandbox
+  url: sandbox/didit-sandbox.yml
+- type: Components
+  url: components/didit-components.yml
+- type: DataModel
+  url: data-model/didit-data-model.yml
+- type: Webhooks
+  url: asyncapi/didit-webhooks.yml
+- type: AgenticAccess
+  url: agentic-access/didit-agentic-access.yml
+- type: DomainSecurity
+  url: security/didit-domain-security.yml
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

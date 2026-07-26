@@ -1,0 +1,49 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/api-reference
+note: Cross-cutting request/response semantics for the Didit Verification API (v3).
+authentication:
+  style: api-key
+  header: x-api-key
+  scoped_tokens:
+    - name: Session-Token
+      use: hosted verification flow, session-scoped calls
+    - name: X-Transaction-Token
+      use: device-facing SDK transaction submission (scoped, short-lived)
+  oauth:
+    surface: Business Console / Management API / MCP
+    metadata: https://business.didit.me/.well-known/oauth-authorization-server
+    cross_ref: scopes/didit-scopes.yml
+idempotency:
+  request_idempotency: false
+  note: >-
+    No documented request Idempotency-Key contract on the REST API. Webhook
+    delivery carries a stable event_id (UUID) for consumer-side deduplication.
+pagination:
+  style: offset-limit
+  params: [limit, offset]
+  applies_to: list endpoints (sessions, users, businesses, transactions, cases, workflows)
+versioning:
+  style: uri-path
+  current: v3
+  cross_ref: lifecycle/didit-lifecycle.yml
+content_types:
+  json: application/json
+  uploads: multipart/form-data
+error_envelope:
+  format: http-status + JSON body
+  problem_json: false
+  cross_ref: errors/didit-problem-types.yml
+rate_limiting:
+  free_tier: 10 requests/minute
+  paid_tier: 600 requests/minute
+  exceeded_status: 429
+  source: https://docs.didit.me/integration/rate-limiting
+webhooks:
+  signature: HMAC-SHA256
+  headers: [X-Signature-V2, X-Signature, X-Signature-Simple, X-Timestamp]
+  replay_window_seconds: 300
+  cross_ref: asyncapi/didit-webhooks.yml
+tenancy:
+  scoping_params: [organization_id, application_id]
+  environments: [live, sandbox]

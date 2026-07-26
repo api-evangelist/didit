@@ -1,0 +1,46 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/getting-started/security-compliance
+note: >-
+  Cross-cutting standards. Compliance certifications are published by Didit;
+  API-shape standards are derived from the OpenAPI. Errors use plain HTTP
+  status + JSON body (not RFC 9457 problem+json).
+standards:
+  - id: soc2-type1
+    conforms: true
+    evidence: "SOC 2 Type I (Type II audit in progress) — security-compliance page"
+  - id: iso-27001
+    conforms: true
+    evidence: "ISO/IEC 27001 ISMS certification"
+  - id: iso-27017
+    conforms: true
+    evidence: "ISO/IEC 27017 cloud security controls"
+  - id: iso-27018
+    conforms: true
+    evidence: "ISO/IEC 27018 cloud PII protection"
+  - id: gdpr
+    conforms: true
+    evidence: "GDPR compliant; data-processor model, EU (AWS) default region"
+  - id: ibeta-level1-iso-30107-3
+    conforms: true
+    evidence: "iBeta Level 1 presentation-attack detection (ISO/IEC 30107-3)"
+  - id: eidas2
+    conforms: true
+    evidence: "eIDAS 2.0 alignment; NFC + active liveness attested by Spanish regulators (Tesoro, SEPBLAC, CNMV, Banco de Espana)"
+  - id: mica
+    conforms: true
+    evidence: "MiCA-aligned crypto/wallet screening and Travel Rule"
+  - id: eu-ai-act
+    conforms: true
+    evidence: "EU AI Act readiness for high-risk AI systems"
+  - id: oauth2
+    conforms: true
+    evidence: "business.didit.me publishes RFC 8414 oauth-authorization-server metadata (OAuth 2.1 + PKCE S256) for console/MCP"
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: "responses use plain JSON error bodies, not application/problem+json"
+  - id: rfc8594-sunset-header
+    conforms: false
+  - id: pagination-offset-limit
+    conforms: true
+    evidence: "list endpoints use limit/offset query parameters"

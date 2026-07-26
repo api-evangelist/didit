@@ -1,0 +1,23 @@
+generated: '2026-07-18'
+method: generated
+note: >-
+  Agent Skills grounded in verified operationIds from openapi/didit-openapi-original.json.
+  Didit also publishes a first-party Agent Skills package (12 skills, Python) at
+  https://github.com/didit-protocol/skills.
+provider_published:
+  repo: https://github.com/didit-protocol/skills
+  count: 12
+  language: python
+skills:
+  - file: didit-hosted-kyc-session.md
+    name: Run a hosted KYC verification session
+    api: openapi/didit-openapi-original.json
+    operations: [post_v3_session_create, get_v3_session_decision, create_webhook_destination]
+  - file: didit-standalone-id-facematch.md
+    name: Standalone ID verification + face match
+    api: openapi/didit-openapi-original.json
+    operations: [post_v3id-verification, post_v3passive-liveness, post_v3face-match]
+  - file: didit-kyb-business-lookup.md
+    name: Business verification (KYB) lookup
+    api: openapi/didit-openapi-original.json
+    operations: [post_v3_kyb_search, post_v3_kyb_select]

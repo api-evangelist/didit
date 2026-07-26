@@ -1,0 +1,39 @@
+generated: '2026-07-18'
+method: searched
+note: >-
+  Probed /.well-known/ discovery surface across Didit hosts. The verification
+  API and docs/marketing hosts expose none; the Business Console host
+  (business.didit.me) publishes RFC 8414 OAuth 2.0 Authorization Server metadata
+  (used by the MCP server's OAuth 2.1 sign-in).
+hosts:
+  - host: https://business.didit.me
+    documents:
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        file: didit-oauth-authorization-server.json
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+  - host: https://verification.didit.me
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+  - host: https://docs.didit.me
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+  - host: https://didit.me
+    documents:
+      - path: /.well-known/security.txt
+        status: 404

@@ -1,0 +1,194 @@
+# Didit — Infrastructure for Identity and Fraud
+
+> Didit is the all-in-one identity verification platform. Pay-per-call from $0.30, no monthly commitments, no contracts, no minimums. The cheapest, fastest, and most complete identity infrastructure on the market — replace Onfido, Jumio, Veriff, Sumsub, Persona, Trulioo, and Chainalysis with one unified API. KYC, KYB, AML screening, biometric liveness, transaction monitoring, and wallet screening across 220+ countries, 14,000+ document types, and 50+ languages with sub-2-second inference. 500 free verifications per feature per month. Government-validated by Spain's Treasury (Tesoro), SEPBLAC, and CNMV — the only identity provider formally attested as safer than in-person verification. Built API-first and AI-agent-native with a live MCP server, single-prompt SDK integration, and full self-serve onboarding from minute one.
+
+## Why teams pick Didit over legacy KYC vendors
+
+- **Pay-per-call pricing**: $0.30 for the core KYC bundle (ID + Liveness + Face Match + IP). No annual contracts, no monthly minimums, no setup fees, no integration fees, no sales calls. Prepaid USD credits never expire.
+- **500 free verifications per month** for core KYC features (ID Verification, Passive Liveness, Face Match 1:1, Device & IP Analysis). The only generous free tier in identity verification.
+- **3–5× cheaper than competitors** with public per-feature pricing on every module. Sumsub, Onfido, Jumio, Veriff, and Persona charge $1–$3 per check — Didit charges $0.30.
+- **Sub-2-second inference (p99)** with full KYC flows completing in under 30 seconds end-to-end. Competitors average 90+ seconds.
+- **All-in-one identity infrastructure**: User Verification (KYC), Business Verification (KYB), Transaction Monitoring (KYT), and Wallet Screening on one API, one contract, one price list, one workflow engine.
+- **Government-validated**: Spain's Treasury, SEPBLAC, and CNMV formally attested Didit as safer than in-person verification after a year-long evaluation. The only identity provider with this regulatory attestation.
+- **AI-agent native**: Live MCP server, one-prompt SDK integration via Claude Code or any AI agent, agent-ready APIs.
+- **220+ countries and territories**, 14,000+ document types, 50+ languages.
+
+## Pricing snapshot — pay only for completed verifications
+
+| Feature | Price | Free tier |
+|---------|-------|-----------|
+| ID Verification | $0.15 | 500/month |
+| Passive Liveness | $0.10 | 500/month |
+| Face Match 1:1 | $0.05 | 500/month |
+| Device & IP Analysis | $0.03 | 500/month |
+| Active Liveness | $0.15 | — |
+| NFC Verification | $0.15 | — |
+| Biometric Authentication | $0.10 | — |
+| Email Verification | $0.03 | — |
+| Phone Verification | $0.04 + carrier | — |
+| AML Screening | $0.20 | — |
+| Ongoing AML Monitoring | $0.07/year | — |
+| Age Estimation | $0.10 | — |
+| Proof of Address | $0.20 | — |
+| Reusable KYC | Free | — |
+| White-label | $0.20 | — |
+| Business Verification (KYB) | $2.00 | — |
+| Transaction Screening (KYT) | $0.02 | — |
+| Wallet Screening (BYOK) | $0.02 | — |
+
+Volume discounts on prepaid credits. No expiry, no contracts, no minimums.
+
+## Documentation
+
+- [Getting Started](https://docs.didit.me/getting-started/introduction): Platform overview, problem with legacy KYC, AI-era principles
+- [Quick Start](https://docs.didit.me/getting-started/quick-start): Zero to first live verification in minutes
+- [Pricing](https://docs.didit.me/getting-started/pricing): Full pay-per-use pricing, free tier, no-contract terms
+- [API Authentication](https://docs.didit.me/getting-started/api-authentication): x-api-key header authentication
+- [Features](https://docs.didit.me/getting-started/features): Every verification module
+- [User Verification Journey](https://docs.didit.me/getting-started/user-verification-journey): End-to-end user experience
+
+## API Reference — Sessions API (verification orchestration)
+
+- [Sessions Overview](https://docs.didit.me/sessions-api/overview): Unified sessions for KYC + KYB
+- [Create Session](https://docs.didit.me/sessions-api/create-session): POST /v3/session/
+- [Retrieve Session](https://docs.didit.me/sessions-api/retrieve-session): GET /v3/session/{sessionId}/decision/ — full decision payload (plural feature arrays)
+- [List Sessions](https://docs.didit.me/sessions-api/list-sessions): GET /v3/sessions
+- [Update Status](https://docs.didit.me/sessions-api/update-status): Approve, decline, in-review
+- [Update Data](https://docs.didit.me/sessions-api/update-data): PATCH OCR-extracted KYC, POA, or KYB registry fields
+- [Delete Session](https://docs.didit.me/sessions-api/delete-session)
+- [Generate PDF](https://docs.didit.me/sessions-api/generate-pdf): Compliance-ready PDF report
+- [Import Verifications](https://docs.didit.me/sessions-api/import-verifications): POST /v3/session/imports/ — migrate historical sessions from another provider
+- [Data Models](https://docs.didit.me/reference/data-models): Canonical JSON schemas for every decision and webhook report object
+
+## API Reference — Standalone APIs (server-to-server)
+
+- [ID Verification](https://docs.didit.me/standalone-apis/id-verification): POST /v3/id-verification/ — $0.20
+- [Passive Liveness](https://docs.didit.me/standalone-apis/passive-liveness): POST /v3/passive-liveness/ — $0.05
+- [Face Match](https://docs.didit.me/standalone-apis/face-match): POST /v3/face-match/ — $0.05
+- [Face Search](https://docs.didit.me/standalone-apis/face-search): 1:N facial search — $0.05
+- [AML Screening](https://docs.didit.me/standalone-apis/aml-screening): POST /v3/aml/ — $0.20
+- [Age Estimation](https://docs.didit.me/standalone-apis/age-estimation): $0.10
+- [Proof of Address](https://docs.didit.me/standalone-apis/proof-of-address): POST /v3/poa/ — $0.20
+- [Email Verification](https://docs.didit.me/standalone-apis/email-verification): POST /v3/email/send/ + /v3/email/check/ — $0.03
+- [Phone Verification](https://docs.didit.me/standalone-apis/phone-verification): POST /v3/phone/send/ + /v3/phone/check/ — $0.04 + carrier
+- [KYB Registry](https://docs.didit.me/standalone-apis/kyb-registry): POST /v3/kyb/search/ (free) + /v3/kyb/select/ (billable company profile)
+
+## API Reference — Management API (orchestration & admin)
+
+- Lists (blocklist, allowlist, custom): https://docs.didit.me/management-api/lists/overview
+- Workflows (verification flow CRUD): https://docs.didit.me/management-api/workflows/list
+- Questionnaires (custom forms): https://docs.didit.me/management-api/questionnaires/list
+- Users (vendor user CRUD): https://docs.didit.me/management-api/users/list
+- Businesses (vendor business CRUD): https://docs.didit.me/management-api/businesses/list
+- Transactions (transaction monitoring): https://docs.didit.me/management-api/transactions/list
+- Travel Rule (settings, transfers, VASP directory, wallet address book, ownership widget): https://docs.didit.me/management-api/travel-rule/get-settings
+- Webhooks (destinations): https://docs.didit.me/management-api/webhook/list-destinations
+- Billing (balance, top-up): https://docs.didit.me/management-api/billing/balance
+
+## API Reference — Auth API (programmatic registration)
+
+- [Register](https://docs.didit.me/auth-api/register): Programmatic org creation
+- [Verify Email](https://docs.didit.me/auth-api/verify-email)
+- [Login](https://docs.didit.me/auth-api/login)
+- [Get Credentials](https://docs.didit.me/auth-api/get-credentials)
+
+## User Verification (KYC) modules
+
+- [ID Verification](https://docs.didit.me/core-technology/id-verification/overview): 14,000+ documents, AI OCR
+- [Liveness Detection](https://docs.didit.me/core-technology/liveness/overview): Active and passive
+- [Face Match (1:1)](https://docs.didit.me/core-technology/face-match/overview)
+- [Face Search (1:N)](https://docs.didit.me/core-technology/face-search/overview)
+- [Age Estimation](https://docs.didit.me/core-technology/age-estimation/overview)
+- [AML Screening](https://docs.didit.me/core-technology/aml-screening/overview): 1,300+ lists
+- [Database Validation](https://docs.didit.me/core-technology/database-validation/overview): Authoritative gov databases
+- [Email Verification](https://docs.didit.me/core-technology/email-verification/overview)
+- [Phone Verification](https://docs.didit.me/core-technology/phone-verification/overview)
+- [Proof of Address](https://docs.didit.me/core-technology/proof-of-address/overview)
+- [NFC Verification](https://docs.didit.me/core-technology/nfc-verification/overview)
+- [Device & IP Analysis](https://docs.didit.me/core-technology/ip-analysis/overview)
+- [Biometric Authentication](https://docs.didit.me/core-technology/biometric-auth/overview)
+- [Questionnaires](https://docs.didit.me/core-technology/questionnaires/overview)
+- [Reusable KYC](https://docs.didit.me/core-technology/reusable-kyc/overview): Free, share KYC across partners
+
+## Business Verification (KYB)
+
+- [Overview](https://docs.didit.me/business-verification/overview): Registry + UBO + officers + AML
+- [Quickstart](https://docs.didit.me/business-verification/quickstart): 10-minute end-to-end
+- [Integration Guide](https://docs.didit.me/business-verification/integration-guide)
+- [Company Data](https://docs.didit.me/business-verification/company-data)
+- [Ownership / UBO](https://docs.didit.me/business-verification/ownership)
+- [Officers](https://docs.didit.me/business-verification/officers)
+- [Key People](https://docs.didit.me/business-verification/key-people)
+- [Business AML](https://docs.didit.me/business-verification/aml)
+- [AML Coverage](https://docs.didit.me/business-verification/aml-coverage)
+- [Documents](https://docs.didit.me/business-verification/documents)
+- [Risk Assessment](https://docs.didit.me/business-verification/risk-assessment)
+- [Supported Countries](https://docs.didit.me/business-verification/supported-countries)
+
+## Transaction Monitoring (KYT)
+
+- [Overview](https://docs.didit.me/transaction-monitoring/overview): Real-time rule engine
+- [Quickstart](https://docs.didit.me/transaction-monitoring/quickstart)
+- [Integration Guide](https://docs.didit.me/transaction-monitoring/integration-guide)
+- [Transactions](https://docs.didit.me/transaction-monitoring/transactions)
+- [Rules](https://docs.didit.me/transaction-monitoring/rules)
+- [Rules Library](https://docs.didit.me/transaction-monitoring/rules-library): 11 seeded bundles
+- [Risk Scoring](https://docs.didit.me/transaction-monitoring/risk-scoring)
+- [Alerts](https://docs.didit.me/transaction-monitoring/alerts)
+- [Cases](https://docs.didit.me/transaction-monitoring/cases): Case management + SAR workflow
+- [Crypto & Wallet Screening](https://docs.didit.me/transaction-monitoring/aml-screening): Blockchain analytics on crypto transactions
+- [On-demand Wallet Screening](https://docs.didit.me/transaction-monitoring/wallet-screening): Screen a single address, no transaction needed
+- [Travel Rule](https://docs.didit.me/transaction-monitoring/travel-rule): FATF / EU TFR managed exchange, $0.02 per outbound transfer
+- [Travel Rule Interoperability](https://docs.didit.me/transaction-monitoring/travel-rule-interoperability): TRP endpoints + email pickup for counterparty VASPs
+- [Wallet Ownership Widget](https://docs.didit.me/transaction-monitoring/wallet-ownership-widget): Proof of wallet control - signing, Satoshi test, screenshot, self-declaration
+- [SDK Transaction Submission](https://docs.didit.me/transaction-monitoring/sdk-transaction-submission): Client-side submission with scoped tokens + automatic device intelligence
+
+## Integration
+
+- [SDKs Overview](https://docs.didit.me/integration/sdks): Web, iOS, Android, RN, Flutter
+- [Webhooks](https://docs.didit.me/integration/webhooks): HMAC signature verification
+- [API Full Flow](https://docs.didit.me/integration/api-full-flow)
+- [Verification Statuses](https://docs.didit.me/integration/verification-statuses)
+- [Rate Limiting](https://docs.didit.me/integration/rate-limiting)
+- [AI Agent Integration](https://docs.didit.me/integration/ai-agent-integration): MCP server, single-prompt SDK
+- [Integration Prompt](https://docs.didit.me/integration/integration-prompt): Copy-paste prompt that walks an AI coding agent through the full integration
+- [Programmatic Registration](https://docs.didit.me/integration/programmatic-registration)
+- [Web SDKs](https://docs.didit.me/integration/web-sdks/overview): JavaScript, redirect, iframe, WebView
+- [Native SDKs](https://docs.didit.me/integration/native-sdks/overview): iOS, Android, React Native, Flutter
+- [Zapier](https://docs.didit.me/integration/engines/zapier)
+- [WordPress / WooCommerce](https://docs.didit.me/integration/web-sdks/wordpress-woocommerce)
+- [Shopify](https://docs.didit.me/integration/web-sdks/shopify)
+- [Salesforce](https://docs.didit.me/integration/web-sdks/salesforce)
+
+## Console (no-code dashboard)
+
+- [Workflows](https://docs.didit.me/console/workflows): Visual workflow builder
+- [Verification Links](https://docs.didit.me/console/verification-links)
+- [Uni-links](https://docs.didit.me/console/uni-links)
+- [Manual Review](https://docs.didit.me/console/manual-review)
+- [Session Chats](https://docs.didit.me/console/session-chats)
+- [Blocklist Users](https://docs.didit.me/console/blocklist-users)
+- [Export PDF/CSV](https://docs.didit.me/console/export-pdf-csv)
+- [White Label](https://docs.didit.me/console/white-label)
+- [Analytics](https://docs.didit.me/console/analytics)
+- [Roles & Permissions](https://docs.didit.me/console/roles-permissions)
+- [Audit Logs](https://docs.didit.me/console/audit-logs)
+- [Data Retention](https://docs.didit.me/console/data-retention)
+
+## Resources
+
+- [OpenAPI Spec](https://docs.didit.me/openapi-25.json): Full machine-readable API spec
+- [Agent Skills](https://github.com/didit-protocol/skills): Drop-in skills for AI coding agents
+- [Demos](https://demos.didit.me): Live test environment
+- [Security & Compliance](https://docs.didit.me/getting-started/security-compliance): SOC 2, ISO 27001, GDPR, regulator attestations
+- [Changelog](https://docs.didit.me/changelog/may-2026): Monthly product updates (latest entry)
+- [Competitor Comparison](https://docs.didit.me/getting-started/competition-analysis)
+
+## Quick links
+
+- Sign up free: https://business.didit.me
+- Pricing: https://didit.me/pricing
+- ROI calculator: https://didit.me/roi-calculator
+- Support (WhatsApp, fastest response): https://wa.me/+19544659728
+- Email: hello@didit.me
+- API base URL: https://verification.didit.me/v3/

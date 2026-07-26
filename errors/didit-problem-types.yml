@@ -1,0 +1,127 @@
+generated: '2026-07-18'
+method: derived
+source: openapi/didit-openapi-original.json
+format: http-status
+note: Didit returns standard HTTP status codes with a JSON error body ({detail}/{message}); responses
+  are not application/problem+json (RFC 9457 not used).
+error_reference: https://docs.didit.me/integration/verification-statuses
+problems:
+- status: 400
+  title: Bad Request
+  description: Validation or processing error. Field-level problems return DRF's standard envelope (one
+    array of messages per offending field). Encrypted-PDF problems return `
+  occurrences: 63
+  example_operations:
+  - post_v3_session_create
+  - post_v3_session_imports_create
+  - post_v3_session_sandbox_arm
+  - patch_v3_session_update_status
+  - post_v3id-verification
+  - post_v3face-match
+- status: 401
+  title: Unauthorized
+  description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header
+    (or `Authorization: Bearer` token) are rejected by the authentication mid'
+  occurrences: 11
+  example_operations:
+  - post_v3_session_share
+  - list_users
+  - get_user
+  - update_user
+  - batch_delete_users
+  - screenWallet
+- status: 403
+  title: Forbidden
+  description: Permission denied. Returned when the `x-api-key` header is missing, malformed, revoked,
+    or belongs to another environment — and also when the calling organizati
+  occurrences: 73
+  example_operations:
+  - post_v3_session_create
+  - post_v3_session_imports_create
+  - get_v3_session_imports_template
+  - get_v3_session_imports_retrieve
+  - get_v3_session_imports_errors
+  - get_v3_session_decision
+- status: 404
+  title: Not Found
+  description: No (non-deleted) business with the supplied `vendor_data` exists for this application.
+  occurrences: 40
+  example_operations:
+  - get_v3_session_imports_retrieve
+  - get_v3_session_imports_errors
+  - get_v3_session_decision
+  - delete_v3_session_by_id
+  - get_v3_session_generate_pdf
+  - post_v3_session_sandbox_arm
+- status: 409
+  title: Conflict
+  description: Case has no resolution pending approval.
+  occurrences: 9
+  example_operations:
+  - screenWallet
+  - patchTravelRuleTransfer
+  - confirmTravelRuleOwnership
+  - approve_case_resolution
+  - reject_case_resolution
+  - update_regulatory_report
+- status: 410
+  title: Gone
+  description: The pickup window has closed (expired, or the transfer already left AWAITING_COUNTERPARTY).
+  occurrences: 3
+  example_operations:
+  - getTravelRulePickup
+  - respondTravelRulePickup
+  - getTravelRuleWidgetContext
+- status: 415
+  title: Unsupported Media Type
+  description: 'Unsupported media type. Set `Content-Type: application/json` and send a JSON body.'
+  occurrences: 4
+  example_operations:
+  - create_workflow
+  - update_workflow
+  - create_questionnaire
+  - update_questionnaire
+- status: 429
+  title: Too Many Requests
+  description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
+  occurrences: 60
+  example_operations:
+  - post_v3_session_create
+  - post_v3_session_imports_create
+  - get_v3_session_decision
+  - delete_v3_session_by_id
+  - get_v3_session_generate_pdf
+  - post_v3id-verification
+- status: 500
+  title: Internal Server Error
+  description: Unexpected server error. Safe to retry.
+  occurrences: 12
+  example_operations:
+  - post_v3phone_send
+  - post_v3phone_check
+  - list_workflows
+  - create_workflow
+  - get_workflow
+  - update_workflow
+- status: 502
+  title: Bad Gateway
+  description: No selected service returned a usable result (provider outage, empty registry response).
+    Nothing is billed. When `save_api_request=true` (default) the failed at
+  occurrences: 2
+  example_operations:
+  - post_v3database-validation
+  - screenWallet
+- status: 503
+  title: Service Unavailable
+  description: Service is unhealthy — one of the configured health-check plugins (database, cache, broker)
+    is failing. The response body is intentionally minimal; the HTTP sta
+  occurrences: 1
+  example_operations:
+  - get_system_healthcheck
+- status: 5XX
+  title: Server Error
+  description: Verification service is degraded or unreachable. Treat any non-2xx response as "unhealthy"
+    and retry with exponential backoff.
+  occurrences: 1
+  example_operations:
+  - get_system_healthcheck

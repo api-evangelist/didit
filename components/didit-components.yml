@@ -1,0 +1,29 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/integration/web-sdks/overview
+note: >-
+  Client-side / embeddable surfaces distinct from server-side SDKs. Didit ships
+  hosted and embedded verification experiences plus a design-system component
+  library and e-commerce plugins.
+families:
+  - name: Web verification SDK
+    kind: embeddable
+    surfaces: [JavaScript, redirect, iframe, WebView]
+    docs: https://docs.didit.me/integration/web-sdks/overview
+    loader: "@didit-sdk/web (npm)"
+  - name: Hosted verification flow
+    kind: hosted
+    docs: https://docs.didit.me/getting-started/user-verification-journey
+    note: Hosted session URL returned by POST /v3/session/.
+  - name: Wallet Ownership Widget
+    kind: embeddable
+    docs: https://docs.didit.me/transaction-monitoring/wallet-ownership-widget
+    note: Proof-of-wallet-control widget (signing, Satoshi test, screenshot, self-declaration).
+  - name: diditui design system
+    kind: component-library
+    repo: https://github.com/didit-protocol/diditui
+    note: diditui and diditui-v2 React/TypeScript component libraries.
+  - name: E-commerce plugins
+    kind: hosted-plugin
+    surfaces: [WordPress/WooCommerce, Shopify, Salesforce, Zapier]
+    docs: https://docs.didit.me/integration/web-sdks/wordpress-woocommerce

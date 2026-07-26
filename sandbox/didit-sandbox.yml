@@ -1,0 +1,23 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/integration/webhooks
+note: >-
+  Didit separates live and sandbox by environment. Webhook and session payloads
+  carry an "environment" field of "live" or "sandbox". The free tier (500
+  verifications per feature per month, no card required) doubles as an evaluation
+  sandbox against the production host. No published static test-document set or
+  magic test identifiers were found in the docs; NEVER invent test values.
+environments:
+  - name: sandbox
+    signal: 'payload field environment: "sandbox"'
+  - name: live
+    signal: 'payload field environment: "live"'
+free_tier:
+  verifications_per_feature_per_month: 500
+  features: [ID Verification, Passive Liveness, Face Match 1:1, Device & IP Analysis]
+  card_required: false
+demo_environment: https://demos.didit.me
+webhook_testing:
+  tool: '"Try Webhook" in the Business Console Deliveries tab'
+test_values:
+  note: No published static test cards / magic identifiers documented; not fabricated.

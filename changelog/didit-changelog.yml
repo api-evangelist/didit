@@ -1,0 +1,18 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/changelog/may-2026
+scheme: date-based (monthly), with semver on SDKs
+current: May 2026
+entries:
+  - version: May 2026
+    date: '2026-05-01'
+    breaking: false
+    highlights:
+      - "Native SDK 4.0 (through 4.0.2): four modular variants (Core / AutoDetection / ...), iOS binary size reduced ~84% to ~6 MB."
+      - "Document liveness controls: per-fraud-type thresholds (Screen Replay, Printed Copy, Portrait Replacement) via new Forgery console tab."
+      - "New DATA_INCONSISTENT risk flag for mismatched front/back document submissions."
+      - "South Africa database validation: DHA fingerprints, vehicle ownership, business registry, banking verification, AML."
+      - "Mexico INE real-time voter-card validation."
+      - "AML deduplication: skips billing on resubmits when identity data is unchanged."
+      - "Mongolian language support added (54 total)."
+      - "Custom-domain SSL/CAA diagnostics in console; 11 new document types."

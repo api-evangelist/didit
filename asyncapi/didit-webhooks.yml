@@ -1,0 +1,38 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.didit.me/integration/webhooks
+spec_type: Webhooks
+note: >-
+  Didit documents a webhook event surface but publishes no AsyncAPI document.
+  This is the captured webhook catalog. Signature: HMAC-SHA256 over three header
+  variants (X-Signature-V2 recommended, X-Signature raw-body, X-Signature-Simple
+  envelope) with X-Timestamp (Unix seconds); reject when abs(now - ts) > 300s.
+  Delivery retries up to twice (~1 min, then ~4 min) on 5xx/404/timeout.
+transport: https-push
+envelope:
+  fields: [event_id, webhook_type, timestamp, created_at, application_id, environment, status]
+  idempotency_key: event_id
+configuration:
+  create: POST /v3/webhook/destinations/
+  fields: [url, webhook_version, subscribed_events, secret_shared_key]
+events:
+  - type: status.updated
+    description: KYC or KYB session status changed.
+  - type: data.updated
+    description: Verification data edited after creation.
+  - type: user.status.updated
+    description: Consolidated user entity status change.
+  - type: user.data.updated
+    description: Consolidated user entity data change.
+  - type: business.status.updated
+    description: Consolidated business entity status change.
+  - type: business.data.updated
+    description: Consolidated business entity data change.
+  - type: activity.created
+    description: Activity timeline event (reserved; not currently sent for live traffic).
+  - type: transaction.created
+    description: Transaction monitoring — transaction created.
+  - type: transaction.status.updated
+    description: Transaction monitoring — status/score change.
+  - type: travel_rule.status.updated
+    description: Travel Rule exchange status change.
