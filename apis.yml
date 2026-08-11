@@ -314,7 +314,7 @@ common:
 - type: StatusPage
   url: https://status.didit.me
 - type: OpenAPI
-  url: openapi/didit-openapi-original.json
+  url: openapi/_original/didit-openapi-original.json
 - type: Authentication
   url: authentication/didit-authentication.yml
 - type: OAuthScopes
