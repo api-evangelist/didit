@@ -1,0 +1,49 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Session API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Session",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Retrieve the full decision for a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/session/:sessionId/decision/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the verification session whose decision you want to retrieve. This is the `session_id` returned by `POST /v3/session/`. The same path works for both User Verification (KYC) and Business Verification (KYB) sessions — the server looks the id up in both tables.\n\n**Must be a valid UUID.** The route only matches well-formed UUIDs, so a malformed value is rejected by the URL router before any application code runs and the response is a `404` **HTML** page rather than the JSON `{\"detail\": ...}` envelope shown below. Validate the UUID format client-side so you can distinguish an input error from a genuine missing-session `404`."
+              },
+              {
+                "name": "include",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of extra payload sections. The only supported value is `events`. When `include=events` is passed, the response additionally contains the session event timeline (`events`), the full activity log (`activity_reviews`), blocklist flags (`blocklisted`), a per-session `cost_breakdown`, workflow metadata (`workflow_type`, `workflow_version`, `workflow_version_id`), and session metadata (`api_service` — string or `null`, set only for standalone-API sessions; `session_type` — `API`, `HOSTED`, or `MIGRATED`; `has_device_nfc_support` — boolean). Two fields change relative to the plain shape: the top-level `session_kind` discriminator is **omitted** (the events shape only exists for user sessions), and the `features` array switches from plain strings to `{feature, node_id}` objects — where the email feature is reported as `EMAIL` instead of `EMAIL_VERIFICATION`. This expanded shape is primarily used by the Didit Console; most API integrations should omit the parameter. **KYB limitation:** `include=events` only applies to user (KYC) sessions. Business sessions (`session_kind = \"business\"`) always return the standard business decision shape — `events`, `activity_reviews`, `blocklisted`, `cost_breakdown` and the extra `workflow_*`/session metadata are never returned for business sessions, and their `features` array stays a plain string array."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve the complete decision report for a verification session — the rolled-up session `status` plus one report per verification feature the workflow executed. This is the canonical read endpoint for both User Verification (KYC) and Business Verification (KYB) sessions: the same path serves both, and the top-level `session_kind` discriminator tells you which shape you received (`\"user\"` or `\"business\"`).\n\n**Every feature report is a plural array.** V3 workflows are graphs that can run the same"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

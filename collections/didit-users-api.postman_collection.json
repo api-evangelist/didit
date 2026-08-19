@@ -1,0 +1,2815 @@
+{
+  "item": [
+    {
+      "id": "7a4b593a-04d8-4422-9ed2-7352bf1f1f80",
+      "name": "Users",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "494e0ad4-60f1-4c47-8362-ba3fcd130330",
+          "name": "List users",
+          "request": {
+            "name": "List users",
+            "description": {
+              "content": "List [users](/entities/users) Didit assembles from KYC sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus users created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "eeed17f4-6616-47f1-a7b5-40a5d86e0581",
+              "name": "Paginated list of users with verification status, session counts, and feature breakdown.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 2,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"didit_internal_id\": \"f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418\",\n      \"vendor_data\": \"user-abc-123\",\n      \"display_name\": null,\n      \"full_name\": \"John Michael Doe\",\n      \"date_of_birth\": \"1990-05-15\",\n      \"effective_name\": \"John Michael Doe\",\n      \"status\": \"ACTIVE\",\n      \"portrait_image_url\": \"https://<media-host>/...\",\n      \"session_count\": 3,\n      \"approved_count\": 2,\n      \"declined_count\": 0,\n      \"in_review_count\": 1,\n      \"issuing_states\": [\n        \"USA\"\n      ],\n      \"approved_emails\": [\n        \"john@example.com\"\n      ],\n      \"approved_phones\": [\n        \"+14155551234\"\n      ],\n      \"features\": {\n        \"ID_VERIFICATION\": \"Approved\",\n        \"LIVENESS\": \"Approved\",\n        \"FACE_MATCH\": \"Approved\",\n        \"AML\": \"Approved\"\n      },\n      \"features_list\": [\n        {\n          \"feature\": \"ID_VERIFICATION\",\n          \"status\": \"Approved\"\n        },\n        {\n          \"feature\": \"LIVENESS\",\n          \"status\": \"Approved\"\n        },\n        {\n          \"feature\": \"FACE_MATCH\",\n          \"status\": \"Approved\"\n        },\n        {\n          \"feature\": \"AML\",\n          \"status\": \"Approved\"\n        }\n      ],\n      \"last_session_at\": \"2025-06-15T10:30:00Z\",\n      \"last_activity_at\": \"2025-06-15T10:30:00Z\",\n      \"first_session_at\": \"2025-06-01T08:00:00Z\",\n      \"tags\": [\n        {\n          \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n          \"name\": \"VIP\",\n          \"color\": \"#2567FF\"\n        }\n      ],\n      \"created_at\": \"2025-06-01T08:00:00Z\"\n    },\n    {\n      \"didit_internal_id\": \"6ed99d53-e8f5-4cf8-9ac1-4a506cb40f6b\",\n      \"vendor_data\": null,\n      \"display_name\": \"Jane S.\",\n      \"full_name\": \"Jane Elizabeth Smith\",\n      \"date_of_birth\": \"1985-11-22\",\n      \"effective_name\": \"Jane S.\",\n      \"status\": \"FLAGGED\",\n      \"portrait_image_url\": null,\n      \"session_count\": 1,\n      \"approved_count\": 0,\n      \"declined_count\": 0,\n      \"in_review_count\": 1,\n      \"issuing_states\": [],\n      \"approved_emails\": [],\n      \"approved_phones\": [],\n      \"features\": {\n        \"ID_VERIFICATION\": \"In Review\"\n      },\n      \"features_list\": [\n        {\n          \"feature\": \"ID_VERIFICATION\",\n          \"status\": \"In Review\"\n        }\n      ],\n      \"last_session_at\": \"2025-06-20T14:00:00Z\",\n      \"last_activity_at\": \"2025-06-20T14:05:00Z\",\n      \"first_session_at\": \"2025-06-20T14:00:00Z\",\n      \"tags\": [],\n      \"created_at\": \"2025-06-20T14:00:00Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "aad85dff-bf55-4998-8114-b0ddd78943cb",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "882a85de-1f6a-42db-9a0f-c1d7ece3c65f",
+              "name": "Invalid or revoked API key, or the key cannot list users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f7bf0be2-356c-448e-9046-dec0e34c8b9a",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "555f2400-7a97-4ac4-82ec-54747c0e3b2b",
+          "name": "Get user",
+          "request": {
+            "name": "Get user",
+            "description": {
+              "content": "Fetch one [user](/entities/users) by `vendor_data` (exact match). Adds `metadata`, `comments`, and `updated_at` to the list view, and switches `tags` to the detailed tag-link shape. Returns soft-deleted users too.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                ":vendor_data",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "a98320c2-b675-4cac-bd9e-20b00aebd676",
+              "name": "Full user detail including metadata, comments/activity log, and aggregated session data.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418\",\n  \"vendor_data\": \"user-abc-123\",\n  \"display_name\": null,\n  \"full_name\": \"John Michael Doe\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"effective_name\": \"John Michael Doe\",\n  \"status\": \"ACTIVE\",\n  \"metadata\": {\n    \"tier\": \"premium\",\n    \"source\": \"website\"\n  },\n  \"portrait_image_url\": \"https://<media-host>/...\",\n  \"session_count\": 3,\n  \"approved_count\": 2,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"issuing_states\": [\n    \"USA\"\n  ],\n  \"approved_emails\": [\n    \"john@example.com\"\n  ],\n  \"approved_phones\": [\n    \"+14155551234\"\n  ],\n  \"features\": {\n    \"ID_VERIFICATION\": \"Approved\",\n    \"LIVENESS\": \"Approved\",\n    \"FACE_MATCH\": \"Approved\",\n    \"AML\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"ID_VERIFICATION\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"AML\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2025-06-15T10:30:00Z\",\n  \"last_activity_at\": \"2025-06-15T10:30:00Z\",\n  \"first_session_at\": \"2025-06-01T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"tag\": {\n        \"uuid\": \"e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b\",\n        \"name\": \"VIP\",\n        \"color\": \"#2567FF\",\n        \"description\": null,\n        \"source\": \"custom\",\n        \"created_at\": \"2025-05-01T09:00:00Z\",\n        \"updated_at\": \"2025-05-01T09:00:00Z\"\n      },\n      \"added_by_email\": \"analyst@acme.com\",\n      \"added_by_name\": \"Jane Analyst\",\n      \"created_at\": \"2025-06-02T11:00:00Z\"\n    }\n  ],\n  \"comments\": [\n    {\n      \"uuid\": \"c1111111-2222-4333-8444-555555555555\",\n      \"comment_type\": \"STATUS_CHANGED\",\n      \"comment\": null,\n      \"actor_email\": \"analyst@acme.com\",\n      \"actor_name\": \"Jane Analyst\",\n      \"previous_status\": \"FLAGGED\",\n      \"new_status\": \"ACTIVE\",\n      \"previous_value\": null,\n      \"new_value\": null,\n      \"changed_fields\": [],\n      \"metadata\": null,\n      \"mentioned_emails\": [],\n      \"created_at\": \"2025-06-01T10:30:00Z\"\n    }\n  ],\n  \"created_at\": \"2025-06-01T08:00:00Z\",\n  \"updated_at\": \"2025-06-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "491fb388-d4ab-4d49-9731-3b0875521c09",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c1900110-42d7-44a9-b1e9-6e315ae8d756",
+              "name": "Invalid or revoked API key, or the key cannot read this application's users. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a7ff630a-2f8f-4006-8e1f-eaedccdd443d",
+              "name": "No user with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9bfe6fc7-84a2-4a99-8c76-87d235071e23",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c58a126d-7a0d-4d2c-9905-7d3d4a3a6505",
+          "name": "Update user",
+          "request": {
+            "name": "Update user",
+            "description": {
+              "content": "Partial update of a user: `display_name`, `full_name`, `date_of_birth`, `status`, `metadata`, `approved_emails`/`approved_phones`/`issuing_states`. `metadata` fully replaces. **Note:** unlike [Update User Status](#patch-/v3/users/-vendor_data-/update-status/), changing `status` here does NOT record a status-change activity and does NOT sync the system blocklist — use the dedicated update-status endpoint for `BLOCKED`/unblock flows.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                ":vendor_data",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"<string>\",\n  \"display_name\": \"<string>\",\n  \"date_of_birth\": \"<date>\",\n  \"status\": \"<string>\",\n  \"metadata\": \"<object>\",\n  \"approved_emails\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"approved_phones\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"issuing_states\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "ad6777bf-de2a-4d64-9c83-14171d28b9b3",
+              "name": "User updated. The full updated user record (same shape as Get User) is returned.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418\",\n  \"vendor_data\": \"user-abc-123\",\n  \"display_name\": \"Jane S.\",\n  \"full_name\": \"Jane Elizabeth Smith\",\n  \"date_of_birth\": \"1985-11-22\",\n  \"effective_name\": \"Jane S.\",\n  \"status\": \"FLAGGED\",\n  \"metadata\": {\n    \"tier\": \"premium\"\n  },\n  \"portrait_image_url\": \"https://<media-host>/...\",\n  \"session_count\": 3,\n  \"approved_count\": 2,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"issuing_states\": [\n    \"USA\"\n  ],\n  \"approved_emails\": [\n    \"john@example.com\"\n  ],\n  \"approved_phones\": [\n    \"+14155551234\"\n  ],\n  \"features\": {\n    \"ID_VERIFICATION\": \"Approved\",\n    \"LIVENESS\": \"Approved\",\n    \"FACE_MATCH\": \"Approved\",\n    \"AML\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"ID_VERIFICATION\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"AML\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2025-06-15T10:30:00Z\",\n  \"last_activity_at\": \"2025-06-15T10:30:00Z\",\n  \"first_session_at\": \"2025-06-01T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"tag\": {\n        \"uuid\": \"e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b\",\n        \"name\": \"VIP\",\n        \"color\": \"#2567FF\",\n        \"description\": null,\n        \"source\": \"custom\",\n        \"created_at\": \"2025-05-01T09:00:00Z\",\n        \"updated_at\": \"2025-05-01T09:00:00Z\"\n      },\n      \"added_by_email\": \"analyst@acme.com\",\n      \"added_by_name\": \"Jane Analyst\",\n      \"created_at\": \"2025-06-02T11:00:00Z\"\n    }\n  ],\n  \"comments\": [],\n  \"created_at\": \"2025-06-01T08:00:00Z\",\n  \"updated_at\": \"2025-06-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e64ee072-67f3-4255-8952-1a6187bfaaeb",
+              "name": "Invalid body — typically an unknown `status` or a `date_of_birth` not in `YYYY-MM-DD`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": [\n    \"\\\"INVALID\\\" is not a valid choice.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f61f1451-56a0-42de-b2a8-4592797203b9",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "19b14575-e309-4ac3-83bf-19dfad5b56e2",
+              "name": "Invalid or revoked API key, or the key cannot update users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fcf3e879-80aa-4421-b813-f4fb661a56a8",
+              "name": "No user with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9bd4f8e0-c03b-4c43-8367-27e3eae64516",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Jane S.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "659502c0-fa53-42e6-af81-63afeb6e0c70",
+          "name": "Batch delete users",
+          "request": {
+            "name": "Batch delete users",
+            "description": {
+              "content": "**Hard delete** users — rows are removed permanently (including previously soft-deleted records). For everyday blocking prefer [Update User Status](#patch-/v3/users/-vendor_data-/update-status/) with `BLOCKED`. Unlike the businesses endpoint, this endpoint only accepts `vendor_data_list` or `delete_all` (no `didit_internal_id_list`).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                "delete",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"delete_all\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "817095e8-44ef-4c2c-80b3-1a49248a9d7d",
+              "name": "Users deleted. Returns the number of rows actually removed.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"user-123\",\n    \"user-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"deleted\": 2\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "eda7502b-97f8-4d07-ace4-d6c0209d5a0f",
+              "name": "No selector supplied (`vendor_data_list` missing/empty and `delete_all` not `true`). The error body is a JSON array.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"user-123\",\n    \"user-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  \"Provide vendor_data_list or set delete_all=true.\"\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "83b3bc30-5bed-4618-bcac-b30c2c57bf4a",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"user-123\",\n    \"user-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6dee9c84-fb8b-4a20-8ade-31851ac5ca47",
+              "name": "Invalid or revoked API key, or the key cannot delete users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"user-123\",\n    \"user-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3ff1c1a7-b8f2-4d19-92c5-3f1bb7afc403",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"user-123\",\n    \"user-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "960b0283-e214-4037-8634-66faf0ec385e",
+          "name": "Update user status",
+          "request": {
+            "name": "Update user status",
+            "description": {
+              "content": "Flip only the lifecycle `status` of a user — `ACTIVE`/`FLAGGED`/`BLOCKED` (NOT session statuses). `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry. Each change is recorded as a `STATUS_CHANGED` activity on the user.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                ":vendor_data",
+                "update-status",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the user."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c95a5a65-bef0-43ba-9052-449a2190bc65",
+              "name": "User status updated. Full user record returned.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418\",\n  \"vendor_data\": \"user-abc-123\",\n  \"display_name\": null,\n  \"full_name\": \"John Michael Doe\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"effective_name\": \"John Michael Doe\",\n  \"status\": \"BLOCKED\",\n  \"metadata\": {\n    \"tier\": \"premium\",\n    \"source\": \"website\"\n  },\n  \"portrait_image_url\": \"https://<media-host>/...\",\n  \"session_count\": 3,\n  \"approved_count\": 2,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"issuing_states\": [\n    \"USA\"\n  ],\n  \"approved_emails\": [\n    \"john@example.com\"\n  ],\n  \"approved_phones\": [\n    \"+14155551234\"\n  ],\n  \"features\": {\n    \"ID_VERIFICATION\": \"Approved\",\n    \"LIVENESS\": \"Approved\",\n    \"FACE_MATCH\": \"Approved\",\n    \"AML\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"ID_VERIFICATION\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"status\": \"Approved\"\n    },\n    {\n      \"feature\": \"AML\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2025-06-15T10:30:00Z\",\n  \"last_activity_at\": \"2025-06-15T10:30:00Z\",\n  \"first_session_at\": \"2025-06-01T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"tag\": {\n        \"uuid\": \"e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b\",\n        \"name\": \"VIP\",\n        \"color\": \"#2567FF\",\n        \"description\": null,\n        \"source\": \"custom\",\n        \"created_at\": \"2025-05-01T09:00:00Z\",\n        \"updated_at\": \"2025-05-01T09:00:00Z\"\n      },\n      \"added_by_email\": \"analyst@acme.com\",\n      \"added_by_name\": \"Jane Analyst\",\n      \"created_at\": \"2025-06-02T11:00:00Z\"\n    }\n  ],\n  \"comments\": [\n    {\n      \"uuid\": \"c1111111-2222-4333-8444-555555555555\",\n      \"comment_type\": \"STATUS_CHANGED\",\n      \"comment\": null,\n      \"actor_email\": null,\n      \"actor_name\": null,\n      \"previous_status\": \"ACTIVE\",\n      \"new_status\": \"BLOCKED\",\n      \"previous_value\": null,\n      \"new_value\": null,\n      \"changed_fields\": [],\n      \"metadata\": null,\n      \"mentioned_emails\": [],\n      \"created_at\": \"2025-06-15T10:30:00Z\"\n    }\n  ],\n  \"created_at\": \"2025-06-01T08:00:00Z\",\n  \"updated_at\": \"2025-06-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "23e5ddf4-e6a1-4478-bfe5-fa248798d545",
+              "name": "Missing or invalid `status`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": [\n    \"This field is required.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "432e105c-b822-4b8f-a6a3-e04baf90fba6",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5b62c5a3-77cb-4e67-919f-70bb2503d901",
+              "name": "Invalid or revoked API key, or the key cannot update users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c28cd31b-fbc1-4abf-bf1d-7327e4cd5388",
+              "name": "No (non-deleted) user with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bb150dfd-44f1-4a4e-8f48-63f9c7699bbe",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the user."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "86194f3a-f45a-4b19-bb3d-20dbf978a26f",
+          "name": "Create user",
+          "request": {
+            "name": "Create user",
+            "description": {
+              "content": "Pre-create a [user](/entities/users) by `vendor_data` *without* a verification session. `vendor_data` must be unique among non-deleted users for the application (exact match; conflicts return 400). Not idempotent.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "users",
+                "create",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_data\": \"<string>\",\n  \"full_name\": \"<string>\",\n  \"display_name\": \"<string>\",\n  \"date_of_birth\": \"<date>\",\n  \"status\": \"ACTIVE\",\n  \"metadata\": \"<object>\",\n  \"approved_emails\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"approved_phones\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"issuing_states\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "6383ae87-a8b4-49ff-aa70-ccf2fb818b27",
+              "name": "User created. Full user record returned (same shape as Get User).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-abc-123\",\n  \"full_name\": \"John Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418\",\n  \"vendor_data\": \"user-abc-123\",\n  \"display_name\": null,\n  \"full_name\": \"John Doe\",\n  \"date_of_birth\": null,\n  \"effective_name\": \"John Doe\",\n  \"status\": \"ACTIVE\",\n  \"metadata\": {},\n  \"portrait_image_url\": null,\n  \"session_count\": 0,\n  \"approved_count\": 0,\n  \"declined_count\": 0,\n  \"in_review_count\": 0,\n  \"issuing_states\": [],\n  \"approved_emails\": [],\n  \"approved_phones\": [],\n  \"features\": {},\n  \"features_list\": [],\n  \"last_session_at\": null,\n  \"last_activity_at\": \"2025-06-15T10:30:00Z\",\n  \"first_session_at\": null,\n  \"tags\": [],\n  \"comments\": [],\n  \"created_at\": \"2025-06-15T10:30:00Z\",\n  \"updated_at\": \"2025-06-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ddb19785-f8eb-4264-882e-b987c1bc8084",
+              "name": "Invalid body — typically a duplicate `vendor_data`, a missing required field, or a malformed value.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-abc-123\",\n  \"full_name\": \"John Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"vendor_data\": [\n    \"A user with this vendor_data already exists.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "22fb73fc-a188-4767-a9c5-894cf4f6888d",
+              "name": "No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-abc-123\",\n  \"full_name\": \"John Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You must be authenticated with a valid access token to access this endpoint.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "91027539-7ebc-4da5-b165-98097a17816f",
+              "name": "Invalid or revoked API key, or the key cannot create users for this application. Note: on this endpoint an *invalid* key returns `403` (not `401`).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-abc-123\",\n  \"full_name\": \"John Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "68c8580e-31ec-49b5-a4e1-827cdb1b7b7b",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "users",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-abc-123\",\n  \"full_name\": \"John Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9e723e47-e7ca-4e53-bd97-0212a4e23ed5",
+          "name": "Upload user face",
+          "request": {
+            "name": "Upload user face",
+            "description": {
+              "content": "Attach a trusted imported face image to an existing User profile. Use this after creating or retrieving a User by `vendor_data` and reading its `didit_internal_id`. The uploaded face is stored on the User profile and indexed for duplicate detection and face search. It is not added to a face blocklist.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "vendor-users",
+                "by-id",
+                ":didit_internal_id",
+                "faces",
+                "upload",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID that owns the application."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID that owns the User profile."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "didit_internal_id",
+                  "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"<byte>\",\n  \"comment\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "144c6a90-43bb-4caa-8d3a-d8fcb5f1a175",
+              "name": "Face uploaded and attached to the User profile.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n  \"image_url\": \"https://signed-url.example/face.jpg\",\n  \"comment\": \"Imported from previous KYC provider\",\n  \"uploaded_by\": \"api\",\n  \"created_at\": \"2026-05-18T12:00:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8e1a939f-56e3-4c4c-ad9a-49bf877f2e59",
+              "name": "Invalid request body or image. Common causes: invalid base64, invalid image, no detectable face, image over 2 MB, missing embedding, or the User already has 5 uploaded faces.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"image\": \"No face detected in the image. Please upload a clear photo with a visible face.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b54b8770-ea2a-448d-9b8a-38f042f33f79",
+              "name": "Missing or invalid API key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Authentication credentials were not provided.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "602a2a03-2154-4dd5-a039-38b93927c962",
+              "name": "The credential is valid but cannot write User profiles for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ed4b60a7-4f1b-49d2-a884-9da173a6e16b",
+              "name": "No User exists for that `didit_internal_id` in the application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "50383331-698c-442c-bd02-9aa7c302065e",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "vendor-users",
+                    "by-id",
+                    ":didit_internal_id",
+                    "faces",
+                    "upload",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID that owns the application."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID that owns the User profile."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "didit_internal_id",
+                      "description": "(Required) Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"/9j/4AAQSkZJRgABAQEA...\",\n  \"comment\": \"Imported from previous KYC provider\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "1bdd528c-506e-4b20-b5a9-460d243f5dab",
+    "name": "Didit Verification Billing Users API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

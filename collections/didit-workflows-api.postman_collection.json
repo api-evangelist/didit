@@ -1,0 +1,1811 @@
+{
+  "item": [
+    {
+      "id": "ffdb3bf3-e397-4d65-abb8-5491e3c51b77",
+      "name": "Workflows",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "ea6517cd-c753-4d9d-85f5-2f623192656d",
+          "name": "List workflows",
+          "request": {
+            "name": "List workflows",
+            "description": {
+              "content": "List your workflows, newest first, in a limit/offset pagination envelope (`{count, next, previous, results}`, default page size 50). Each row is one version; `workflow_id` is the stable group ID and new sessions use the latest `published` version.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "workflows",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size (number of workflows per page)."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Number of rows to skip before the first returned workflow."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "3151c885-8a4c-4020-bbb6-db6b3673617c",
+              "name": "One page of workflows ordered by `created_at` descending, wrapped in the pagination envelope. Each item in `results` is a `WorkflowListItem`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 2,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"uuid\": \"a1b2c3d4-5678-90ab-cdef-111111111111\",\n      \"workflow_id\": \"a1b2c3d4-5678-90ab-cdef-111111111111\",\n      \"workflow_label\": \"Standard KYC\",\n      \"workflow_type\": \"kyc\",\n      \"is_default\": true,\n      \"is_archived\": false,\n      \"is_white_label_enabled\": false,\n      \"total_price\": 0.15,\n      \"min_price\": 0.15,\n      \"max_price\": 0.15,\n      \"features\": \"OCR + LIVENESS + FACE_MATCH\",\n      \"is_simple_workflow\": true,\n      \"is_editable\": false,\n      \"workflow_url\": \"https://verify.didit.me/u/_yljPOx8RWG3UAz5ZRQGVQ\",\n      \"max_retry_attempts\": 3,\n      \"retry_window_days\": 7,\n      \"session_expiration_time\": 604800,\n      \"version\": 2,\n      \"status\": \"published\",\n      \"has_draft\": false,\n      \"created_by\": {\n        \"name\": \"Alex Mateo\",\n        \"email\": \"alex@example.com\",\n        \"type\": \"user\"\n      },\n      \"updated_at\": \"2026-04-12T10:30:00Z\"\n    },\n    {\n      \"uuid\": \"b2c3d4e5-6789-01bc-defa-222222222222\",\n      \"workflow_id\": \"b2c3d4e5-6789-01bc-defa-222222222222\",\n      \"workflow_label\": \"Full Verification + AML\",\n      \"workflow_type\": \"kyc\",\n      \"is_default\": false,\n      \"is_archived\": false,\n      \"is_white_label_enabled\": false,\n      \"total_price\": 0.25,\n      \"min_price\": 0.25,\n      \"max_price\": 0.25,\n      \"features\": \"OCR + LIVENESS + FACE_MATCH + AML\",\n      \"is_simple_workflow\": true,\n      \"is_editable\": true,\n      \"workflow_url\": \"https://verify.didit.me/u/Aq3kPOx8RWG3UAz5ZRQGVQ\",\n      \"max_retry_attempts\": 3,\n      \"retry_window_days\": 7,\n      \"session_expiration_time\": 604800,\n      \"version\": 1,\n      \"status\": \"draft\",\n      \"has_draft\": true,\n      \"created_by\": null,\n      \"updated_at\": \"2026-04-15T18:05:21Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a29d2e2b-a018-4b7d-9a6f-cff2a46294b6",
+              "name": "The API key is missing, malformed, expired, or belongs to a different application. Body: `{\"detail\": \"You do not have permission to perform this action.\"}`. Refresh the token via the [Auth API](/auth-api/get-credentials) and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "78ce4387-6f25-419b-b75a-f9c8c01a1056",
+              "name": "Rate limit exceeded. Retry with exponential backoff and honour any `Retry-After` header.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "88e55008-7056-431d-bf26-a94b14e4d7eb",
+              "name": "Unexpected server error while building the list. The request can be safely retried.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "4fa59c0d-3a3f-451b-b227-b5a5f5dcdfe7",
+          "name": "Create workflow",
+          "request": {
+            "name": "Create workflow",
+            "description": {
+              "content": "Create a simple workflow. Send `features` in execution order (ordering rules apply); defaults to `published` v1. The body accepts ONLY the fields listed in `SimpleWorkflowRequest` — any other key (including `workflow_type`) is rejected with a 400. Not idempotent — each call creates a new workflow. Maximum 50 workflows per application.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "workflows",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"<string>\",\n      \"config\": {\n        \"key_0\": false,\n        \"key_1\": \"string\"\n      },\n      \"label\": \"<string>\"\n    }\n  ],\n  \"workflow_label\": \"ID Verification\",\n  \"is_default\": \"<boolean>\",\n  \"status\": \"<string>\",\n  \"is_white_label_enabled\": false,\n  \"is_desktop_allowed\": false,\n  \"max_retry_attempts\": 3,\n  \"retry_window_days\": 7,\n  \"face_liveness_max_attempts\": 3,\n  \"face_match_max_attempts\": 3,\n  \"session_expiration_time\": 604800\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "16cb93a1-7f46-4a35-a3d1-6d1d1f9b0550",
+              "name": "Workflow created. The response body is the FULL workflow configuration — the same raw `VerificationSettings` serialization returned by `GET /v3/workflows/{settings_uuid}/` (~190 fields: every feature toggle, threshold, action and the generated `workflow_graph`), not the compact list item. Store the `uuid` (also exposed as `workflow_id`) so you can reference it from later session-creation calls. Note: `features` is a `\" + \"`-joined string and prices are JSON numbers.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"c3d4e5f6-7890-12cd-ef34-333333333333\",\n  \"workflow_id\": \"c3d4e5f6-7890-12cd-ef34-333333333333\",\n  \"workflow_label\": \"Standard KYC\",\n  \"workflow_type\": null,\n  \"is_default\": false,\n  \"is_archived\": false,\n  \"total_price\": 0.15,\n  \"min_price\": 0.15,\n  \"max_price\": 0.15,\n  \"features\": \"OCR + LIVENESS + FACE_MATCH\",\n  \"is_simple_workflow\": false,\n  \"is_editable\": false,\n  \"workflow_url\": \"https://verify.didit.me/u/w9TkPOx8RWG3UAz5ZRQGVQ\",\n  \"workflow_graph\": {\n    \"start_node\": \"ocr\",\n    \"nodes\": \"... one node per feature plus a final status node ...\"\n  },\n  \"max_retry_attempts\": 3,\n  \"retry_window_days\": 7,\n  \"session_expiration_time\": 604800,\n  \"version\": 1,\n  \"status\": \"published\",\n  \"published_at\": \"2026-05-17T10:30:00Z\",\n  \"created_at\": \"2026-05-17T10:30:00Z\",\n  \"updated_at\": \"2026-05-17T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "507d2dcd-051e-4d4d-a725-083b49c75187",
+              "name": "Validation error. Common causes: a top-level key outside the accepted whitelist (e.g. `workflow_type`), an unknown `feature` value, a feature placed before its dependency (e.g., `FACE_MATCH` before `OCR`), a passive feature (`AML`, `IP_ANALYSIS`, `DATABASE_VALIDATION`, `KYB_KEY_PEOPLE`) used as the first step, a `QUESTIONNAIRE` feature whose `config.questionnaire_uuid` does not exist for this application, or an out-of-range threshold. Body is a DRF validation error object — keys are field names, values are arrays of human-readable messages.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"features\": [\n    \"At least one feature is required.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "67dc7b26-3ae9-4741-b043-f254317593c8",
+              "name": "The API key is missing, malformed, expired, or scoped to a different application. Refresh via the [Auth API](/auth-api/get-credentials) and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "938b2ae5-5ad2-437d-a8b5-c52119d8dac8",
+              "name": "Unsupported media type. Set `Content-Type: application/json` and send a JSON body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "b311dbe5-6ef4-4707-b44f-0359f2db9fb0",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "31be88d1-4227-4570-92e6-03eb01a7657f",
+              "name": "Unexpected server error while creating the workflow. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workflow_label\": \"Standard KYC\",\n  \"features\": [\n    {\n      \"feature\": \"OCR\",\n      \"config\": {\n        \"duplicated_user_action\": \"review\"\n      }\n    },\n    {\n      \"feature\": \"LIVENESS\",\n      \"config\": {\n        \"face_liveness_method\": \"passive\"\n      }\n    },\n    {\n      \"feature\": \"FACE_MATCH\",\n      \"config\": {\n        \"face_match_score_decline_threshold\": 40,\n        \"face_match_score_review_threshold\": 60\n      }\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "0ff05c0d-4fec-4a53-95a4-538031458d0e",
+          "name": "Get workflow",
+          "request": {
+            "name": "Get workflow",
+            "description": {
+              "content": "Fetch full configuration for one workflow version by `settings_uuid`: feature toggles, thresholds, allowed documents, graph, retry policy, callbacks, and pricing.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "workflows",
+                ":settings_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "settings_uuid",
+                  "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "805eddd1-370e-403f-915f-8bb1767aad56",
+              "name": "Full workflow configuration. The shape is the raw `VerificationSettings` serialization (~190 fields: every feature toggle, threshold, warning action, allowed-documents config, the `workflow_graph`, retry policy, callbacks and pricing). The example below is abbreviated. Notes: `features` is a `\" + \"`-joined string (e.g. `\"OCR + LIVENESS\"`), prices are JSON numbers, and `is_editable` is `true` only for `draft` versions.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"a1b2c3d4-5678-90ab-cdef-111111111111\",\n  \"workflow_id\": \"a1b2c3d4-5678-90ab-cdef-111111111111\",\n  \"workflow_label\": \"Standard KYC\",\n  \"workflow_type\": \"kyc\",\n  \"is_default\": true,\n  \"is_archived\": false,\n  \"is_liveness_enabled\": true,\n  \"face_liveness_method\": \"passive\",\n  \"face_liveness_score_decline_threshold\": 50,\n  \"face_liveness_score_review_threshold\": 70,\n  \"is_face_match_enabled\": true,\n  \"face_match_score_decline_threshold\": 40,\n  \"face_match_score_review_threshold\": 60,\n  \"is_aml_enabled\": false,\n  \"is_phone_verification_enabled\": false,\n  \"is_email_verification_enabled\": false,\n  \"is_database_validation_enabled\": false,\n  \"is_ip_analysis_enabled\": false,\n  \"is_nfc_enabled\": false,\n  \"duplicated_user_action\": \"no_action\",\n  \"documents_allowed\": {\n    \"ESP\": {\n      \"P\": {\n        \"sides\": 1,\n        \"enabled\": 1,\n        \"subtypes\": [\n          \"EPASSPORT\",\n          \"PASSPORT_GENERIC\"\n        ],\n        \"preferred_characters\": \"latin\",\n        \"expiration_check_mode\": \"strict\"\n      }\n    }\n  },\n  \"max_retry_attempts\": 3,\n  \"retry_window_days\": 7,\n  \"session_expiration_time\": 604800,\n  \"version\": 2,\n  \"status\": \"published\",\n  \"published_at\": \"2026-04-12T10:30:00Z\",\n  \"is_simple_workflow\": false,\n  \"is_editable\": false,\n  \"workflow_url\": \"https://verify.didit.me/u/_yljPOx8RWG3UAz5ZRQGVQ\",\n  \"total_price\": 0.15,\n  \"min_price\": 0.15,\n  \"max_price\": 0.15,\n  \"features\": \"OCR + LIVENESS + FACE_MATCH\",\n  \"created_at\": \"2025-01-15T10:30:00Z\",\n  \"updated_at\": \"2026-04-12T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "65ff4414-dd3a-48b1-bedb-5c26bc5613eb",
+              "name": "API key is missing, malformed, expired, or scoped to a different application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9f3756ef-8761-4c7e-a924-785fd0a7c89b",
+              "name": "No workflow with this `settings_uuid` exists for the authenticated application. Either the UUID is wrong or it belongs to another application — Didit deliberately does not distinguish the two cases to avoid leaking the existence of cross-application records.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "92719d58-b04f-42d9-9c1c-01a352ce8de4",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "a6da0d7a-6c52-4436-bbf9-a617f3367cf6",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c690d955-39f8-4486-a275-bf21d9fb5490",
+          "name": "Update workflow",
+          "request": {
+            "name": "Update workflow",
+            "description": {
+              "content": "Update a workflow. Versioning depends on the `status` field you send and the current state of the version: (1) no `status` on a **published** version → the published version is updated in place (same `uuid`, same `version`); (2) no `status` on a **draft** → the draft is updated and immediately published; (3) `status: \"published\"` on a **published** version → a NEW published version is created under the same `workflow_id` (new `uuid`, `version` + 1) and returned, and any existing draft in the group is deleted; (4) `status: \"draft\"` keeps a draft as a draft (autosave) but is rejected with 400 on a published version (`\"Cannot revert a published version to draft.\"`). The body accepts the same strict field whitelist as create — unknown keys are rejected with 400.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "workflows",
+                ":settings_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "settings_uuid",
+                  "description": "(Required) Per-version UUID of the workflow to update."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workflow_label\": \"<string>\",\n  \"is_default\": \"<boolean>\",\n  \"status\": \"<string>\",\n  \"features\": [\n    {\n      \"feature\": \"<string>\",\n      \"config\": {\n        \"key_0\": \"string\"\n      },\n      \"label\": \"<string>\"\n    }\n  ],\n  \"is_white_label_enabled\": \"<boolean>\",\n  \"is_desktop_allowed\": \"<boolean>\",\n  \"max_retry_attempts\": \"<integer>\",\n  \"retry_window_days\": \"<integer>\",\n  \"face_liveness_max_attempts\": \"<integer>\",\n  \"face_match_max_attempts\": \"<integer>\",\n  \"session_expiration_time\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "f33d5172-4f2e-417c-8632-e63cd859c76d",
+              "name": "Workflow updated. The body is the FULL configuration of the resulting version (same raw `VerificationSettings` shape as `GET /v3/workflows/{settings_uuid}/`). When the update created a new version (`status: \"published\"` sent on a published row) the returned `uuid` and `version` differ from the ones you patched — use the returned `uuid` for subsequent calls.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"key_0\": 7775.022923614616,\n  \"key_1\": 6152.008453661494\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5c579232-75e1-47c1-8b4c-7994fec3bed0",
+              "name": "Validation error — a top-level key outside the accepted whitelist, an unknown feature, invalid ordering, out-of-range threshold, referencing a non-existent questionnaire, or `status: \"draft\"` sent for a published version (`\"Cannot revert a published version to draft.\"`). The response body is a DRF validation error keyed by field name.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "b728b6bd-67d7-42a9-aac8-990a0d1a5fed",
+              "name": "API key missing or invalid.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "43f73605-fa02-4839-8a9d-943472456176",
+              "name": "No workflow with this `settings_uuid` exists for the authenticated application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "f1dd3013-a447-490f-858b-94535d7a2997",
+              "name": "Unsupported media type. Set `Content-Type: application/json`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "2f17ce04-ef6f-446c-908c-8760d3f11344",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "da9736f8-063e-41c8-92d5-8759b223f4e8",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"features\": [\n    {\n      \"feature\": \"OCR\"\n    },\n    {\n      \"feature\": \"AML\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "659c7047-3ebd-4171-a6b4-4f37546e298f",
+          "name": "Delete workflow",
+          "request": {
+            "name": "Delete workflow",
+            "description": {
+              "content": "Permanently delete one workflow version (hard delete, no undo). Existing sessions keep their verification results but their workflow reference is cleared; other versions in the same `workflow_id` group are not deleted.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "workflows",
+                ":settings_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "settings_uuid",
+                  "description": "(Required) Per-version UUID of the workflow to delete."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "ea8f1a2c-8cba-4880-8b48-17c05a002770",
+              "name": "Workflow deleted. The response body is empty.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "47fa7d3b-a49f-43f6-9616-83b3ccaa1b29",
+              "name": "API key missing or invalid.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d424419c-af2f-4b58-9bb8-1e0c99ac8a3d",
+              "name": "No workflow with this `settings_uuid` exists for the authenticated application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bf0264df-0bac-4165-9b2a-28f7c9239657",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "255a92de-75fe-48ed-884a-a414b7518553",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "workflows",
+                    ":settings_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "settings_uuid",
+                      "description": "(Required) Per-version UUID of the workflow to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "87eb2c27-03d1-4ca6-a1cd-5335839fe654",
+    "name": "Didit Verification Billing Workflows API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

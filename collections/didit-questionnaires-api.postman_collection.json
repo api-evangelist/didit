@@ -1,0 +1,1811 @@
+{
+  "item": [
+    {
+      "id": "774bb376-406b-4987-8930-bd589c30b3a1",
+      "name": "Questionnaires",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "aacbef81-7749-43e5-91e6-c3613e349039",
+          "name": "List questionnaires",
+          "request": {
+            "name": "List questionnaires",
+            "description": {
+              "content": "List your questionnaires, newest first, in a limit/offset pagination envelope (`{count, next, previous, results}`, default page size 50). Each row is one version; `questionnaire_group_id` is the stable group ID resolved to the latest `published` version.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "questionnaires",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size (number of questionnaires per page)."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Number of rows to skip before the first returned questionnaire."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f06b12ed-20e8-402f-b222-0dba8563d7b9",
+              "name": "One page of questionnaires ordered by `created_at` descending, wrapped in the pagination envelope. Each item in `results` is a `QuestionnaireListItem`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"uuid\": \"11111111-2222-3333-4444-555555555555\",\n      \"title\": \"KYC Questionnaire\",\n      \"description\": \"Additional verification questions\",\n      \"languages\": [\n        \"en\",\n        \"es\"\n      ],\n      \"default_language\": \"en\",\n      \"is_active\": true,\n      \"is_simple_questionnaire\": true,\n      \"created_at\": \"2026-04-23T09:55:00Z\",\n      \"updated_at\": \"2026-04-23T10:00:00Z\",\n      \"question_types\": [\n        \"SHORT_TEXT\",\n        \"MULTIPLE_CHOICE\",\n        \"FILE_UPLOAD\"\n      ],\n      \"workflow_names\": [],\n      \"questionnaire_group_id\": \"11111111-2222-3333-4444-555555555555\",\n      \"version\": 1,\n      \"status\": \"published\",\n      \"published_at\": \"2026-04-23T10:00:00Z\",\n      \"is_editable\": false\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "45b4df5f-5ba7-41d9-8ce6-4f5f6d497c9d",
+              "name": "API key missing, malformed, expired, or scoped to a different application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4bd0576e-429b-4f1a-9894-e2209c8c9eaa",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "5141cf0f-4956-487e-b1b2-6895f2bfa5ab",
+              "name": "Unexpected server error while building the list. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9af8da98-111f-4b48-851f-7cfe9851ec0f",
+          "name": "Create questionnaire",
+          "request": {
+            "name": "Create questionnaire",
+            "description": {
+              "content": "Create a simple linear questionnaire. Send `form_elements` in display order; branching and repeatable groups require the Console. Defaults to `published` v1.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "questionnaires",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"<string>\",\n  \"languages\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"form_elements\": [\n    {\n      \"element_type\": \"<string>\",\n      \"label\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\",\n        \"key_2\": \"<string>\"\n      },\n      \"id\": \"<string>\",\n      \"description\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\",\n        \"key_2\": \"<string>\",\n        \"key_3\": \"<string>\"\n      },\n      \"placeholder\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\"\n      },\n      \"is_required\": false,\n      \"options\": [\n        {\n          \"label\": {\n            \"key_0\": \"<string>\"\n          },\n          \"value\": \"<string>\"\n        },\n        {\n          \"label\": {\n            \"key_0\": \"<string>\"\n          },\n          \"value\": \"<string>\"\n        }\n      ],\n      \"max_files\": \"<integer>\",\n      \"validation\": {\n        \"pattern\": \"<string>\",\n        \"min_length\": \"<integer>\",\n        \"max_length\": \"<integer>\",\n        \"min\": \"<number>\",\n        \"max\": \"<number>\",\n        \"error_message\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    }\n  ],\n  \"description\": \"<string>\",\n  \"default_language\": \"<string>\",\n  \"is_active\": true,\n  \"status\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "4667488c-0470-47c2-9721-67fffcf9027b",
+              "name": "Questionnaire created. The response includes the `questionnaire_id` — store it to reference this questionnaire from workflows or future update/delete calls.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"questionnaire_id\": \"11111111-2222-3333-4444-555555555555\",\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"default_language\": \"en\",\n  \"is_active\": true,\n  \"is_simple_questionnaire\": true,\n  \"graph\": {\n    \"start_node\": \"occupation\",\n    \"nodes\": {\n      \"occupation\": {\n        \"element_type\": \"SHORT_TEXT\",\n        \"is_required\": true,\n        \"title\": {\n          \"en\": \"What is your occupation?\"\n        },\n        \"next\": \"source_of_funds\"\n      },\n      \"source_of_funds\": {\n        \"element_type\": \"MULTIPLE_CHOICE\",\n        \"is_required\": true,\n        \"title\": {\n          \"en\": \"Source of funds\"\n        },\n        \"choices\": [\n          {\n            \"value\": \"employment\",\n            \"label\": {\n              \"en\": \"Employment\"\n            }\n          },\n          {\n            \"value\": \"business\",\n            \"label\": {\n              \"en\": \"Business\"\n            }\n          }\n        ],\n        \"next\": null\n      }\n    }\n  },\n  \"sections\": [],\n  \"questionnaire_group_id\": \"11111111-2222-3333-4444-555555555555\",\n  \"version\": 1,\n  \"status\": \"published\",\n  \"published_at\": \"2026-04-23T10:00:00Z\",\n  \"is_editable\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b037b407-1afb-4ce6-93c7-a9f3e38e8232",
+              "name": "Validation error. Common causes: an unknown `element_type`, a translatable field missing a translation for one of `languages`, `languages` missing `en`, `default_language` not in `languages`, an option without a `label`, a question that has `branches`/`required_if`/`repeatable_config` (not supported by this endpoint), or sending a raw `graph` instead of `form_elements`. The body is a DRF validation error keyed by field name.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"graph\": \"The v3 questionnaire API only accepts simple `form_elements`, not `graph`.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0ae9af32-46b2-4756-b37c-1c45c5702917",
+              "name": "API key missing, malformed, expired, or scoped to a different application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a66734df-a45e-4613-b2c5-51d63bec780d",
+              "name": "Unsupported media type. Set `Content-Type: application/json` and send a JSON body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "e79f1adc-8f18-4158-a248-f4421a30c20d",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "5376df1b-5d7a-4b1a-9fd4-add8118d2870",
+              "name": "Unexpected server error while creating the questionnaire. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"default_language\": \"en\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"is_active\": true,\n  \"form_elements\": [\n    {\n      \"id\": \"occupation\",\n      \"element_type\": \"short_text\",\n      \"label\": {\n        \"en\": \"What is your occupation?\"\n      },\n      \"is_required\": true,\n      \"placeholder\": {\n        \"en\": \"Software engineer\"\n      }\n    },\n    {\n      \"id\": \"source_of_funds\",\n      \"element_type\": \"multiple_choice\",\n      \"label\": {\n        \"en\": \"Source of funds\"\n      },\n      \"is_required\": true,\n      \"options\": [\n        {\n          \"value\": \"employment\",\n          \"label\": {\n            \"en\": \"Employment\"\n          }\n        },\n        {\n          \"value\": \"business\",\n          \"label\": {\n            \"en\": \"Business\"\n          }\n        },\n        {\n          \"value\": \"investments\",\n          \"label\": {\n            \"en\": \"Investments\"\n          }\n        },\n        {\n          \"value\": \"other\",\n          \"label\": {\n            \"en\": \"Other\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "68b7b7a9-7b1f-4779-b14f-af0ab63c734b",
+          "name": "Get questionnaire",
+          "request": {
+            "name": "Get questionnaire",
+            "description": {
+              "content": "Fetch full questionnaire detail for one version by `questionnaire_uuid`: title, `languages`, canonical `graph`, derived `sections`, and version metadata.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "questionnaires",
+                ":questionnaire_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "questionnaire_uuid",
+                  "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "23b51d1e-8427-4358-a7eb-51dbbb263283",
+              "name": "Full questionnaire detail including the canonical `graph`, the derived `sections` view, version metadata, and `is_editable`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"questionnaire_id\": \"11111111-2222-3333-4444-555555555555\",\n  \"title\": \"Customer Onboarding\",\n  \"description\": \"Additional information needed for verification\",\n  \"languages\": [\n    \"en\"\n  ],\n  \"default_language\": \"en\",\n  \"is_active\": true,\n  \"is_simple_questionnaire\": true,\n  \"graph\": {\n    \"start_node\": \"occupation\",\n    \"nodes\": {\n      \"occupation\": {\n        \"element_type\": \"SHORT_TEXT\",\n        \"is_required\": true,\n        \"title\": {\n          \"en\": \"What is your occupation?\"\n        },\n        \"next\": \"source_of_funds\"\n      },\n      \"source_of_funds\": {\n        \"element_type\": \"MULTIPLE_CHOICE\",\n        \"is_required\": true,\n        \"title\": {\n          \"en\": \"Source of funds\"\n        },\n        \"choices\": [\n          {\n            \"value\": \"employment\",\n            \"label\": {\n              \"en\": \"Employment\"\n            }\n          },\n          {\n            \"value\": \"business\",\n            \"label\": {\n              \"en\": \"Business\"\n            }\n          }\n        ],\n        \"next\": null\n      }\n    }\n  },\n  \"sections\": [\n    {\n      \"title\": {},\n      \"description\": {},\n      \"items\": [\n        {\n          \"uuid\": \"11111111-2222-3333-4444-666666666666\",\n          \"value\": \"occupation\",\n          \"element_type\": \"SHORT_TEXT\",\n          \"is_required\": true,\n          \"title\": {\n            \"en\": \"What is your occupation?\"\n          }\n        }\n      ]\n    }\n  ],\n  \"questionnaire_group_id\": \"11111111-2222-3333-4444-555555555555\",\n  \"version\": 1,\n  \"status\": \"published\",\n  \"published_at\": \"2026-04-23T10:00:00Z\",\n  \"is_editable\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b2bda7ec-3f28-4019-b75d-61f0b6c21a21",
+              "name": "API key missing, malformed, expired, or scoped to a different application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b4fb48b6-60e3-4cb5-8fad-414b0792d96e",
+              "name": "No questionnaire with this `questionnaire_uuid` exists for the authenticated application. Either the UUID is wrong or it belongs to another application — the API deliberately does not distinguish the two cases.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b64593bb-2d13-4089-a439-6fd240fff144",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "5560601a-c875-45b9-8375-f332f667ffa9",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c21bdefc-4898-428d-98cf-d11757d86cd3",
+          "name": "Update questionnaire",
+          "request": {
+            "name": "Update questionnaire",
+            "description": {
+              "content": "Update a questionnaire. Versioning depends on the `status` field you send and the current state of the version: (1) no `status` on a **published** version → the published version is updated in place (same `questionnaire_id`, same `version`); (2) no `status` on a **draft** → the draft is updated and immediately published; (3) `status: \"published\"` on a **published** version → a NEW published version is created under the same `questionnaire_group_id` (new `questionnaire_id`, `version` + 1) and returned, and any existing draft in the group is deleted; (4) `status: \"draft\"` keeps a draft as a draft (autosave) but is rejected with 400 on a published version (`\"Cannot revert a published version to draft.\"`).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "questionnaires",
+                ":questionnaire_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "questionnaire_uuid",
+                  "description": "(Required) Per-version UUID of the questionnaire to update."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"<string>\",\n  \"description\": \"<string>\",\n  \"languages\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"default_language\": \"<string>\",\n  \"is_active\": \"<boolean>\",\n  \"status\": \"<string>\",\n  \"form_elements\": [\n    {\n      \"element_type\": \"<string>\",\n      \"label\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\",\n        \"key_2\": \"<string>\"\n      },\n      \"id\": \"<string>\",\n      \"description\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\"\n      },\n      \"placeholder\": {\n        \"key_0\": \"<string>\",\n        \"key_1\": \"<string>\",\n        \"key_2\": \"<string>\"\n      },\n      \"is_required\": false,\n      \"options\": [\n        {\n          \"label\": {\n            \"key_0\": \"<string>\"\n          },\n          \"value\": \"<string>\"\n        },\n        {\n          \"label\": {\n            \"key_0\": \"<string>\"\n          },\n          \"value\": \"<string>\"\n        }\n      ],\n      \"max_files\": \"<integer>\",\n      \"validation\": {\n        \"pattern\": \"<string>\",\n        \"min_length\": \"<integer>\",\n        \"max_length\": \"<integer>\",\n        \"min\": \"<number>\",\n        \"max\": \"<number>\",\n        \"error_message\": {\n          \"key_0\": \"<string>\"\n        }\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "9c5f2d22-7193-4ebb-80a8-9a5a6bf5f513",
+              "name": "Questionnaire updated. The body is the latest state of the resulting version — the in-place updated version, or the newly created published version when you sent `status: \"published\"` on a published row (in that case `questionnaire_id` and `version` differ from the ones you patched). `questionnaire_id` in the response is the per-version UUID; use `questionnaire_group_id` if you need the stable group identifier.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"questionnaire_id\": \"1d8b9858-cc6e-5095-80c2-aa323ad23960\",\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"languages\": [\n    \"string\",\n    \"string\"\n  ],\n  \"default_language\": \"string\",\n  \"is_active\": true,\n  \"is_simple_questionnaire\": true,\n  \"graph\": {},\n  \"questionnaire_group_id\": \"76d5ee89-7875-a5b9-bb6f-7cf09759fc47\",\n  \"version\": 3763,\n  \"status\": \"published\",\n  \"published_at\": \"1963-03-19T06:56:25.991Z\",\n  \"is_editable\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "00ca1455-0a75-4c2e-80a3-0e1507368fd8",
+              "name": "Validation error — unknown `element_type`, missing translation, unsupported branching/conditional fields, `languages` missing `en`, `default_language` not in `languages`, option without a label, sending a raw `graph`, or `status: \"draft\"` on a published version (`\"Cannot revert a published version to draft.\"`). Response body is a DRF validation error keyed by field name.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "257157a5-0ae2-402c-8734-ef44842c8ca5",
+              "name": "API key missing or invalid.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "51aa1539-3f49-45dc-afbb-bf85dede803d",
+              "name": "No questionnaire with this `questionnaire_uuid` exists for the authenticated application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "018dbe7b-669f-4904-b632-cd34fe70fcfc",
+              "name": "Unsupported media type. Set `Content-Type: application/json`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "e7c0698d-46d1-44bc-8793-6d1e31a79ab0",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "3f183e23-c157-491b-bc0f-4d87de04897a",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Customer Onboarding\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "214db443-9e43-4d78-97ea-d640a95f7525",
+          "name": "Delete questionnaire",
+          "request": {
+            "name": "Delete questionnaire",
+            "description": {
+              "content": "Permanently delete one questionnaire version (hard delete, no undo). Stored questionnaire responses linked to this version are deleted with it, and sessions referencing it lose the link; other versions in the same group are not deleted. Workflows that referenced it keep running but the questionnaire step can no longer load it.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "questionnaires",
+                ":questionnaire_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "questionnaire_uuid",
+                  "description": "(Required) Per-version UUID of the questionnaire to delete."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "e9bf473c-cc59-48f1-a7f8-ae1de631942d",
+              "name": "Questionnaire deleted. The response body is empty.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "017c37d4-57ac-412f-8202-9440bf133e87",
+              "name": "API key missing or invalid.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "20414e26-3865-499a-acad-f5c0ccc58812",
+              "name": "No questionnaire with this `questionnaire_uuid` exists for the authenticated application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5c0a7e25-ca98-47a2-a192-be591aa72546",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "d0cef6f3-d2da-4a01-aaa5-6cdeda39864e",
+              "name": "Unexpected server error. Safe to retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "questionnaires",
+                    ":questionnaire_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "questionnaire_uuid",
+                      "description": "(Required) Per-version UUID of the questionnaire to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "ba942c7b-fbf4-4fa1-a5db-7ed892dcb57e",
+    "name": "Didit Verification Billing Questionnaires API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,1089 @@
+{
+  "item": [
+    {
+      "id": "080b8236-af9c-4512-8d15-a2894e2b0aea",
+      "name": "Case Blueprints",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "1a4ec5da-bc2e-48a6-9a80-453b6af0c247",
+          "name": "List blueprints",
+          "request": {
+            "name": "List blueprints",
+            "description": {
+              "content": "List case blueprints for the application.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset."
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "21ef35a6-e57e-4322-b67b-9a4fe0c351c9",
+              "name": "Paginated blueprint list.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 7666,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"uuid\": \"476baf40-e730-563f-8fc8-a838391e07d9\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"assignment_method\": \"AUTOMATIC\",\n      \"assignee_pool\": [\n        \"698e1a81-de50-0c30-769d-631af072ebff\",\n        \"b47b9e69-5c04-06c0-556e-cee9ec2bf054\"\n      ],\n      \"max_active_cases\": 604,\n      \"escalation_enabled\": true,\n      \"transfer_enabled\": false,\n      \"require_resolution_note\": true,\n      \"is_active\": true,\n      \"preset_key\": \"string\",\n      \"created_at\": \"2005-04-25T01:20:22.408Z\"\n    },\n    {\n      \"uuid\": \"bb0d1907-d0cd-5ad3-3e8c-740b96533484\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"assignment_method\": \"MANUAL\",\n      \"assignee_pool\": [\n        \"7a9c45eb-cec8-a62a-f1ee-43d91b071b68\",\n        \"f10187c3-9b62-772f-834d-8513e3f2d1a3\"\n      ],\n      \"max_active_cases\": 4994,\n      \"escalation_enabled\": true,\n      \"transfer_enabled\": true,\n      \"require_resolution_note\": true,\n      \"is_active\": false,\n      \"preset_key\": \"string\",\n      \"created_at\": \"1971-03-17T14:14:09.355Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "00129877-261e-4a1f-8ee9-0fd91f6d7f86",
+          "name": "Create blueprint",
+          "request": {
+            "name": "Create blueprint",
+            "description": {
+              "content": "Create a case blueprint: general settings (assignment, escalation, transfer, 4-eyes pairing) plus content_config, the six sections that drive the case page.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"<string>\",\n  \"assignee_pool\": [\n    \"<uuid>\"\n  ],\n  \"description\": \"<string>\",\n  \"assignment_method\": \"MANUAL\",\n  \"max_active_cases\": \"<integer>\",\n  \"escalation_enabled\": false,\n  \"escalation_blueprint\": \"<uuid>\",\n  \"transfer_enabled\": false,\n  \"four_eyes_checker_blueprint\": \"<uuid>\",\n  \"require_resolution_note\": false,\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": \"<boolean>\",\n      \"optional\": \"<boolean>\",\n      \"items\": [\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        },\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": \"<boolean>\",\n      \"financial\": \"<boolean>\",\n      \"identity\": \"<boolean>\"\n    },\n    \"identity\": {\n      \"enabled\": \"<boolean>\",\n      \"personal_information\": \"<boolean>\",\n      \"applicant_tags\": \"<boolean>\",\n      \"contact_information\": \"<boolean>\",\n      \"risk_overview\": \"<boolean>\",\n      \"poi_documents\": \"<boolean>\",\n      \"poa_documents\": \"<boolean>\"\n    },\n    \"verifications\": {\n      \"enabled\": \"<boolean>\",\n      \"summary\": \"<boolean>\"\n    },\n    \"reporting\": {\n      \"enabled\": \"<boolean>\",\n      \"fiu_reports\": \"<boolean>\"\n    },\n    \"financial\": {\n      \"enabled\": \"<boolean>\",\n      \"payment_methods\": \"<boolean>\",\n      \"transactions\": \"<boolean>\"\n    }\n  },\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "68bfc49a-233c-4efb-bcba-fc5e75551684",
+              "name": "Blueprint created.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"assignee_pool\": [\n    \"<uuid>\"\n  ],\n  \"description\": \"<string>\",\n  \"assignment_method\": \"MANUAL\",\n  \"max_active_cases\": \"<integer>\",\n  \"escalation_enabled\": false,\n  \"escalation_blueprint\": \"<uuid>\",\n  \"transfer_enabled\": false,\n  \"four_eyes_checker_blueprint\": \"<uuid>\",\n  \"require_resolution_note\": false,\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": \"<boolean>\",\n      \"optional\": \"<boolean>\",\n      \"items\": [\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        },\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": \"<boolean>\",\n      \"financial\": \"<boolean>\",\n      \"identity\": \"<boolean>\"\n    },\n    \"identity\": {\n      \"enabled\": \"<boolean>\",\n      \"personal_information\": \"<boolean>\",\n      \"applicant_tags\": \"<boolean>\",\n      \"contact_information\": \"<boolean>\",\n      \"risk_overview\": \"<boolean>\",\n      \"poi_documents\": \"<boolean>\",\n      \"poa_documents\": \"<boolean>\"\n    },\n    \"verifications\": {\n      \"enabled\": \"<boolean>\",\n      \"summary\": \"<boolean>\"\n    },\n    \"reporting\": {\n      \"enabled\": \"<boolean>\",\n      \"fiu_reports\": \"<boolean>\"\n    },\n    \"financial\": {\n      \"enabled\": \"<boolean>\",\n      \"payment_methods\": \"<boolean>\",\n      \"transactions\": \"<boolean>\"\n    }\n  },\n  \"is_active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"77eb4669-6119-5ef3-b781-98a333c5ecad\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"assignment_method\": \"MANUAL\",\n  \"assignee_pool\": [\n    \"30ba4b84-435f-b709-b2f0-b2d652e70fac\",\n    \"b0a81f71-ba51-f76b-5523-d7fb009b70bb\"\n  ],\n  \"max_active_cases\": 490,\n  \"escalation_enabled\": false,\n  \"transfer_enabled\": true,\n  \"require_resolution_note\": false,\n  \"is_active\": false,\n  \"preset_key\": \"string\",\n  \"created_at\": \"1949-06-13T21:11:10.644Z\",\n  \"escalation_blueprint\": \"8767282a-e288-fbf5-1bdd-6bf6f70b4a2b\",\n  \"escalation_blueprint_name\": \"string\",\n  \"four_eyes_checker_blueprint\": \"ac8ce2e7-4d06-4838-5509-b9c18d2fb80b\",\n  \"four_eyes_checker_blueprint_name\": \"string\",\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": false,\n      \"optional\": true,\n      \"items\": [\n        {\n          \"label\": \"string\",\n          \"order\": 1266\n        },\n        {\n          \"label\": \"string\",\n          \"order\": 7562\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": true,\n      \"financial\": false,\n      \"identity\": true\n    },\n    \"identity\": {\n      \"enabled\": true,\n      \"personal_information\": true,\n      \"applicant_tags\": false,\n      \"contact_information\": false,\n      \"risk_overview\": true,\n      \"poi_documents\": false,\n      \"poa_documents\": false\n    },\n    \"verifications\": {\n      \"enabled\": true,\n      \"summary\": true\n    },\n    \"reporting\": {\n      \"enabled\": true,\n      \"fiu_reports\": true\n    },\n    \"financial\": {\n      \"enabled\": true,\n      \"payment_methods\": true,\n      \"transactions\": true\n    }\n  },\n  \"creation_sources\": [\n    {\n      \"kind\": \"aml\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"kind\": \"aml\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"receives_escalation_from\": [\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"updated_at\": \"1947-10-12T10:15:54.471Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "db09263d-1edd-496d-aab3-b8b9b4cf3e88",
+              "name": "Name over 24 chars, empty assignee_pool, or a cross-referenced blueprint (escalation/checker) not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"assignee_pool\": [\n    \"<uuid>\"\n  ],\n  \"description\": \"<string>\",\n  \"assignment_method\": \"MANUAL\",\n  \"max_active_cases\": \"<integer>\",\n  \"escalation_enabled\": false,\n  \"escalation_blueprint\": \"<uuid>\",\n  \"transfer_enabled\": false,\n  \"four_eyes_checker_blueprint\": \"<uuid>\",\n  \"require_resolution_note\": false,\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": \"<boolean>\",\n      \"optional\": \"<boolean>\",\n      \"items\": [\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        },\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": \"<boolean>\",\n      \"financial\": \"<boolean>\",\n      \"identity\": \"<boolean>\"\n    },\n    \"identity\": {\n      \"enabled\": \"<boolean>\",\n      \"personal_information\": \"<boolean>\",\n      \"applicant_tags\": \"<boolean>\",\n      \"contact_information\": \"<boolean>\",\n      \"risk_overview\": \"<boolean>\",\n      \"poi_documents\": \"<boolean>\",\n      \"poa_documents\": \"<boolean>\"\n    },\n    \"verifications\": {\n      \"enabled\": \"<boolean>\",\n      \"summary\": \"<boolean>\"\n    },\n    \"reporting\": {\n      \"enabled\": \"<boolean>\",\n      \"fiu_reports\": \"<boolean>\"\n    },\n    \"financial\": {\n      \"enabled\": \"<boolean>\",\n      \"payment_methods\": \"<boolean>\",\n      \"transactions\": \"<boolean>\"\n    }\n  },\n  \"is_active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c8a8541f-c012-484f-bf22-185a7ff9f9df",
+          "name": "Get blueprint",
+          "request": {
+            "name": "Get blueprint",
+            "description": {
+              "content": "Retrieve a blueprint, including its connected creation sources (AML config, transaction rules, workflow nodes) and which blueprints escalate to it.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                ":blueprint_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "blueprint_uuid",
+                  "description": "(Required) Blueprint UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "b2b80a3f-3a93-4cb7-ae6c-956c93b90c8c",
+              "name": "Blueprint detail.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ":blueprint_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "blueprint_uuid",
+                      "description": "(Required) Blueprint UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"331978c0-cff5-5727-1140-106d83b8e793\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"assignment_method\": \"MANUAL\",\n  \"assignee_pool\": [\n    \"c17bc790-3c8d-1b78-8e1a-d5e3b75021d3\",\n    \"7a7a48da-5984-4b4c-2ee5-72f6d978806e\"\n  ],\n  \"max_active_cases\": 3889,\n  \"escalation_enabled\": true,\n  \"transfer_enabled\": false,\n  \"require_resolution_note\": false,\n  \"is_active\": true,\n  \"preset_key\": \"string\",\n  \"created_at\": \"2007-06-09T10:50:20.590Z\",\n  \"escalation_blueprint\": \"a95fa7de-2370-4df1-a340-ef63d56acb50\",\n  \"escalation_blueprint_name\": \"string\",\n  \"four_eyes_checker_blueprint\": \"f0c35fba-a284-618a-245e-8dd7422ae624\",\n  \"four_eyes_checker_blueprint_name\": \"string\",\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": true,\n      \"optional\": false,\n      \"items\": [\n        {\n          \"label\": \"string\",\n          \"order\": 4365\n        },\n        {\n          \"label\": \"string\",\n          \"order\": 5556\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": false,\n      \"financial\": true,\n      \"identity\": true\n    },\n    \"identity\": {\n      \"enabled\": false,\n      \"personal_information\": false,\n      \"applicant_tags\": true,\n      \"contact_information\": false,\n      \"risk_overview\": false,\n      \"poi_documents\": true,\n      \"poa_documents\": true\n    },\n    \"verifications\": {\n      \"enabled\": true,\n      \"summary\": true\n    },\n    \"reporting\": {\n      \"enabled\": true,\n      \"fiu_reports\": false\n    },\n    \"financial\": {\n      \"enabled\": true,\n      \"payment_methods\": true,\n      \"transactions\": false\n    }\n  },\n  \"creation_sources\": [\n    {\n      \"kind\": \"workflow\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"kind\": \"rule\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"receives_escalation_from\": [\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"updated_at\": \"1980-06-29T04:03:29.656Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f2adfb39-73ff-4705-98af-197f45dcb41b",
+          "name": "Update blueprint",
+          "request": {
+            "name": "Update blueprint",
+            "description": {
+              "content": "Partially update a blueprint's general settings or content_config.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                ":blueprint_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "blueprint_uuid",
+                  "description": "(Required) Blueprint UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"assignee_pool\": [\n    \"<uuid>\"\n  ],\n  \"assignment_method\": \"<string>\",\n  \"max_active_cases\": \"<integer>\",\n  \"escalation_enabled\": \"<boolean>\",\n  \"escalation_blueprint\": \"<uuid>\",\n  \"transfer_enabled\": \"<boolean>\",\n  \"four_eyes_checker_blueprint\": \"<uuid>\",\n  \"require_resolution_note\": \"<boolean>\",\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": \"<boolean>\",\n      \"optional\": \"<boolean>\",\n      \"items\": [\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        },\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": \"<boolean>\",\n      \"financial\": \"<boolean>\",\n      \"identity\": \"<boolean>\"\n    },\n    \"identity\": {\n      \"enabled\": \"<boolean>\",\n      \"personal_information\": \"<boolean>\",\n      \"applicant_tags\": \"<boolean>\",\n      \"contact_information\": \"<boolean>\",\n      \"risk_overview\": \"<boolean>\",\n      \"poi_documents\": \"<boolean>\",\n      \"poa_documents\": \"<boolean>\"\n    },\n    \"verifications\": {\n      \"enabled\": \"<boolean>\",\n      \"summary\": \"<boolean>\"\n    },\n    \"reporting\": {\n      \"enabled\": \"<boolean>\",\n      \"fiu_reports\": \"<boolean>\"\n    },\n    \"financial\": {\n      \"enabled\": \"<boolean>\",\n      \"payment_methods\": \"<boolean>\",\n      \"transactions\": \"<boolean>\"\n    }\n  },\n  \"is_active\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "2ae47999-605d-422b-93be-cf98167c34de",
+              "name": "Updated blueprint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ":blueprint_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "blueprint_uuid",
+                      "description": "(Required) Blueprint UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"assignee_pool\": [\n    \"<uuid>\"\n  ],\n  \"assignment_method\": \"<string>\",\n  \"max_active_cases\": \"<integer>\",\n  \"escalation_enabled\": \"<boolean>\",\n  \"escalation_blueprint\": \"<uuid>\",\n  \"transfer_enabled\": \"<boolean>\",\n  \"four_eyes_checker_blueprint\": \"<uuid>\",\n  \"require_resolution_note\": \"<boolean>\",\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": \"<boolean>\",\n      \"optional\": \"<boolean>\",\n      \"items\": [\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        },\n        {\n          \"label\": \"<string>\",\n          \"order\": \"<integer>\"\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": \"<boolean>\",\n      \"financial\": \"<boolean>\",\n      \"identity\": \"<boolean>\"\n    },\n    \"identity\": {\n      \"enabled\": \"<boolean>\",\n      \"personal_information\": \"<boolean>\",\n      \"applicant_tags\": \"<boolean>\",\n      \"contact_information\": \"<boolean>\",\n      \"risk_overview\": \"<boolean>\",\n      \"poi_documents\": \"<boolean>\",\n      \"poa_documents\": \"<boolean>\"\n    },\n    \"verifications\": {\n      \"enabled\": \"<boolean>\",\n      \"summary\": \"<boolean>\"\n    },\n    \"reporting\": {\n      \"enabled\": \"<boolean>\",\n      \"fiu_reports\": \"<boolean>\"\n    },\n    \"financial\": {\n      \"enabled\": \"<boolean>\",\n      \"payment_methods\": \"<boolean>\",\n      \"transactions\": \"<boolean>\"\n    }\n  },\n  \"is_active\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"331978c0-cff5-5727-1140-106d83b8e793\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"assignment_method\": \"MANUAL\",\n  \"assignee_pool\": [\n    \"c17bc790-3c8d-1b78-8e1a-d5e3b75021d3\",\n    \"7a7a48da-5984-4b4c-2ee5-72f6d978806e\"\n  ],\n  \"max_active_cases\": 3889,\n  \"escalation_enabled\": true,\n  \"transfer_enabled\": false,\n  \"require_resolution_note\": false,\n  \"is_active\": true,\n  \"preset_key\": \"string\",\n  \"created_at\": \"2007-06-09T10:50:20.590Z\",\n  \"escalation_blueprint\": \"a95fa7de-2370-4df1-a340-ef63d56acb50\",\n  \"escalation_blueprint_name\": \"string\",\n  \"four_eyes_checker_blueprint\": \"f0c35fba-a284-618a-245e-8dd7422ae624\",\n  \"four_eyes_checker_blueprint_name\": \"string\",\n  \"content_config\": {\n    \"checklist\": {\n      \"enabled\": true,\n      \"optional\": false,\n      \"items\": [\n        {\n          \"label\": \"string\",\n          \"order\": 4365\n        },\n        {\n          \"label\": \"string\",\n          \"order\": 5556\n        }\n      ]\n    },\n    \"aml_control\": {\n      \"enabled\": false,\n      \"financial\": true,\n      \"identity\": true\n    },\n    \"identity\": {\n      \"enabled\": false,\n      \"personal_information\": false,\n      \"applicant_tags\": true,\n      \"contact_information\": false,\n      \"risk_overview\": false,\n      \"poi_documents\": true,\n      \"poa_documents\": true\n    },\n    \"verifications\": {\n      \"enabled\": true,\n      \"summary\": true\n    },\n    \"reporting\": {\n      \"enabled\": true,\n      \"fiu_reports\": false\n    },\n    \"financial\": {\n      \"enabled\": true,\n      \"payment_methods\": true,\n      \"transactions\": false\n    }\n  },\n  \"creation_sources\": [\n    {\n      \"kind\": \"workflow\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"kind\": \"rule\",\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"receives_escalation_from\": [\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    },\n    {\n      \"id\": \"string\",\n      \"name\": \"string\"\n    }\n  ],\n  \"updated_at\": \"1980-06-29T04:03:29.656Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "bcb877a4-3df5-42eb-b2cd-a7e420d3f26d",
+          "name": "Delete blueprint",
+          "request": {
+            "name": "Delete blueprint",
+            "description": {
+              "content": "Soft-delete a blueprint. Deletion always succeeds and does not touch the blueprint's cases: existing cases keep their blueprint reference and its settings continue to apply to them. A deleted blueprint no longer appears in blueprint lists and can no longer be chosen as a transfer target; if a maker blueprint is deleted while a resolution is pending 4-eyes approval, a rejected resolution leaves the case on the checker blueprint.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                ":blueprint_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "blueprint_uuid",
+                  "description": "(Required) Blueprint UUID."
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "e70f1820-dd39-42b7-8292-71a8ceb96e4e",
+              "name": "Blueprint deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    ":blueprint_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "blueprint_uuid",
+                      "description": "(Required) Blueprint UUID."
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ca579465-6908-4ebb-ac09-7f7767c0b197",
+          "name": "List blueprint presets",
+          "request": {
+            "name": "List blueprint presets",
+            "description": {
+              "content": "List the four built-in presets (Screening hit, AML investigation, Suspicious activity, KYC review) with their content_config and whether each is already installed on this application.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                "presets",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "9e213042-3b03-4626-8639-a3bfb3f1228a",
+              "name": "Preset catalogue.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    "presets",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"results\": [\n    {\n      \"preset_key\": \"aml_investigation\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"content_config\": {\n        \"checklist\": {\n          \"enabled\": \"<boolean>\",\n          \"optional\": \"<boolean>\",\n          \"items\": [\n            {\n              \"label\": \"<string>\",\n              \"order\": \"<integer>\"\n            },\n            {\n              \"label\": \"<string>\",\n              \"order\": \"<integer>\"\n            }\n          ]\n        },\n        \"aml_control\": {\n          \"enabled\": \"<boolean>\",\n          \"financial\": \"<boolean>\",\n          \"identity\": \"<boolean>\"\n        },\n        \"identity\": {\n          \"enabled\": \"<boolean>\",\n          \"personal_information\": \"<boolean>\",\n          \"applicant_tags\": \"<boolean>\",\n          \"contact_information\": \"<boolean>\",\n          \"risk_overview\": \"<boolean>\",\n          \"poi_documents\": \"<boolean>\",\n          \"poa_documents\": \"<boolean>\"\n        },\n        \"verifications\": {\n          \"enabled\": \"<boolean>\",\n          \"summary\": \"<boolean>\"\n        },\n        \"reporting\": {\n          \"enabled\": \"<boolean>\",\n          \"fiu_reports\": \"<boolean>\"\n        },\n        \"financial\": {\n          \"enabled\": \"<boolean>\",\n          \"payment_methods\": \"<boolean>\",\n          \"transactions\": \"<boolean>\"\n        }\n      },\n      \"installed\": true\n    },\n    {\n      \"preset_key\": \"kyc\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"content_config\": {\n        \"checklist\": {\n          \"enabled\": \"<boolean>\",\n          \"optional\": \"<boolean>\",\n          \"items\": [\n            {\n              \"label\": \"<string>\",\n              \"order\": \"<integer>\"\n            },\n            {\n              \"label\": \"<string>\",\n              \"order\": \"<integer>\"\n            }\n          ]\n        },\n        \"aml_control\": {\n          \"enabled\": \"<boolean>\",\n          \"financial\": \"<boolean>\",\n          \"identity\": \"<boolean>\"\n        },\n        \"identity\": {\n          \"enabled\": \"<boolean>\",\n          \"personal_information\": \"<boolean>\",\n          \"applicant_tags\": \"<boolean>\",\n          \"contact_information\": \"<boolean>\",\n          \"risk_overview\": \"<boolean>\",\n          \"poi_documents\": \"<boolean>\",\n          \"poa_documents\": \"<boolean>\"\n        },\n        \"verifications\": {\n          \"enabled\": \"<boolean>\",\n          \"summary\": \"<boolean>\"\n        },\n        \"reporting\": {\n          \"enabled\": \"<boolean>\",\n          \"fiu_reports\": \"<boolean>\"\n        },\n        \"financial\": {\n          \"enabled\": \"<boolean>\",\n          \"payment_methods\": \"<boolean>\",\n          \"transactions\": \"<boolean>\"\n        }\n      },\n      \"installed\": true\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "88d7770d-1f87-414e-9e11-5829e177cdfd",
+          "name": "Install blueprint presets",
+          "request": {
+            "name": "Install blueprint presets",
+            "description": {
+              "content": "Copy one or more presets into the application as editable blueprints. Idempotent per preset_key; omit preset_keys to install every preset not yet installed.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                "blueprints",
+                "presets",
+                "install",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preset_keys\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "accf1b6e-31d0-4a2a-a769-9e669c13c5e8",
+              "name": "No new presets to install (all requested presets already exist).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    "presets",
+                    "install",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"preset_keys\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"created\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "496253e7-0946-4b2a-9887-b776eb6afd62",
+              "name": "One or more presets installed.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    "blueprints",
+                    "presets",
+                    "install",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"preset_keys\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"created\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "1ff06b36-9391-45ad-89cf-be1467d2b56b",
+    "name": "Didit Verification Billing Case Blueprints API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Questionnaires API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Questionnaires",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List questionnaires",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/questionnaires/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size (number of questionnaires per page)."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of rows to skip before the first returned questionnaire."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List your questionnaires, newest first, in a limit/offset pagination envelope (`{count, next, previous, results}`, default page size 50). Each row is one version; `questionnaire_group_id` is the stable group ID resolved to the latest `published` version."
+        },
+        {
+          "info": {
+            "name": "Create questionnaire",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/questionnaires/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Create a simple linear questionnaire. Send `form_elements` in display order; branching and repeatable groups require the Console. Defaults to `published` v1."
+        },
+        {
+          "info": {
+            "name": "Get questionnaire",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/questionnaires/:questionnaire_uuid/",
+            "params": [
+              {
+                "name": "questionnaire_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the questionnaire (the `uuid` value returned by the list endpoint, also returned as `questionnaire_id` on detail endpoints)."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Fetch full questionnaire detail for one version by `questionnaire_uuid`: title, `languages`, canonical `graph`, derived `sections`, and version metadata."
+        },
+        {
+          "info": {
+            "name": "Update questionnaire",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/questionnaires/:questionnaire_uuid/",
+            "params": [
+              {
+                "name": "questionnaire_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the questionnaire to update."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Update a questionnaire. Versioning depends on the `status` field you send and the current state of the version: (1) no `status` on a **published** version → the published version is updated in place (same `questionnaire_id`, same `version`); (2) no `status` on a **draft** → the draft is updated and immediately published; (3) `status: \"published\"` on a **published** version → a NEW published version is created under the same `questionnaire_group_id` (new `questionnaire_id`, `version` + 1) and ret"
+        },
+        {
+          "info": {
+            "name": "Delete questionnaire",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/questionnaires/:questionnaire_uuid/",
+            "params": [
+              {
+                "name": "questionnaire_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the questionnaire to delete."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Permanently delete one questionnaire version (hard delete, no undo). Stored questionnaire responses linked to this version are deleted with it, and sessions referencing it lose the link; other versions in the same group are not deleted. Workflows that referenced it keep running but the questionnaire step can no longer load it."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,1809 @@
+{
+  "item": [
+    {
+      "id": "dcb471b2-a326-4da7-84d5-f9afa34db3cc",
+      "name": "Transactions",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "35d470ed-06d7-41f8-b9de-2361e49e70fb",
+          "name": "Screen a wallet address",
+          "request": {
+            "name": "Screen a wallet address",
+            "description": {
+              "content": "Run on-demand AML screening for a single crypto wallet/address without creating a transaction. Resolves your application's configured blockchain analytics provider (Merkle Science or Crystal), screens the address synchronously, and returns the normalised risk result. Nothing is written to the transactions table. One AML monitoring usage is billed per successful screening (sandbox applications are not billed).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "wallet-screening",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_address\": \"<string>\",\n  \"blockchain\": \"<string>\",\n  \"direction\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "fbcd2882-e55f-43ae-85ee-b99a811506ab",
+              "name": "The normalised wallet screening result.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "wallet-screening",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"direction\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"provider\": \"merklescience\",\n  \"screening_type\": \"WALLET_SCREENING\",\n  \"risk_score\": 72,\n  \"severity\": \"HIGH\",\n  \"status\": \"SCREENED\",\n  \"summary\": \"Merkle Science risk: High (4/5). Dominant risk: mixer\",\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"sanctions_hit\": true,\n  \"dominant_risk_category\": \"mixer\",\n  \"source_of_funds\": [\n    {\n      \"category\": \"exchange_licensed\",\n      \"entity_name\": \"Binance.com\",\n      \"entity_type\": \"Exchange\",\n      \"entity_subtype\": \"Mandatory KYC and AML\",\n      \"exposure_direction\": \"incoming\",\n      \"exposure_type\": \"direct\",\n      \"is_direct\": true,\n      \"amount_usd\": 18420.55,\n      \"percentage\": 61.4,\n      \"hops\": 0,\n      \"risk_level\": \"LOW\",\n      \"country\": \"SC\"\n    },\n    {\n      \"category\": \"mixer\",\n      \"entity_name\": \"Tornado Cash\",\n      \"entity_type\": \"Mixer\",\n      \"entity_subtype\": \"OFAC SDN\",\n      \"exposure_direction\": \"incoming\",\n      \"exposure_type\": \"indirect\",\n      \"is_direct\": false,\n      \"amount_usd\": 11580.2,\n      \"percentage\": 38.6,\n      \"hops\": 2,\n      \"risk_level\": \"CRITICAL\",\n      \"country\": \"RU\"\n    }\n  ],\n  \"destination_of_funds\": [\n    {\n      \"category\": \"exchange_licensed\",\n      \"entity_name\": \"Coinbase\",\n      \"entity_type\": \"Exchange\",\n      \"entity_subtype\": \"Mandatory KYC and AML\",\n      \"exposure_direction\": \"outgoing\",\n      \"exposure_type\": \"direct\",\n      \"is_direct\": true,\n      \"amount_usd\": 30000.75,\n      \"percentage\": 100,\n      \"hops\": 0,\n      \"risk_level\": \"LOW\",\n      \"country\": \"US\"\n    }\n  ],\n  \"counterparty_connections\": [\n    {\n      \"entity_name\": \"Tornado Cash\",\n      \"entity_type\": \"Mixer\",\n      \"entity_subtype\": \"OFAC SDN\",\n      \"risk_level\": \"CRITICAL\",\n      \"categories\": [\n        \"mixer\"\n      ],\n      \"received_usd\": 11580.2,\n      \"sent_usd\": 0,\n      \"received_hops\": 2,\n      \"sent_hops\": 0,\n      \"percentage\": 38.6,\n      \"is_direct\": false,\n      \"country\": \"RU\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8cbb1821-df7c-49dd-84d9-1e5ff6ddf5b4",
+              "name": "Validation error — malformed wallet address, missing `wallet_address`, or unsupported `blockchain`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "wallet-screening",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"direction\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "9dfc94fe-259c-4234-bf9e-7bf9543babc2",
+              "name": "Missing or invalid `x-api-key`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "wallet-screening",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"direction\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "e7e0a403-08af-49b3-99c0-40bffe4f7e25",
+              "name": "No AML provider is configured for the application, or the configured provider does not support wallet screening yet. Configure transaction monitoring first.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "wallet-screening",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"direction\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "92f9521b-31c2-42bf-94ed-532ee392c458",
+              "name": "The AML provider could not complete the screening. Retry later.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "wallet-screening",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n  \"blockchain\": \"ETH\",\n  \"direction\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "88af149d-ef80-4bef-afb4-89393bf17e3d",
+          "name": "List transactions",
+          "request": {
+            "name": "List transactions",
+            "description": {
+              "content": "Paginated list of monitored transactions, newest first (`txn_date` desc). `count` is capped at 100; use `total_transactions` for the true row count. This endpoint does not support filtering or search parameters.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "7118ac94-568f-4d4d-a542-e0e691ca750f",
+              "name": "Paginated list of transaction summaries, newest first.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"total_transactions\": 1,\n  \"results\": [\n    {\n      \"uuid\": \"abcdef12-3456-4890-abcd-ef1234567890\",\n      \"transaction_number\": 4123,\n      \"txn_id\": \"your-txn-2026-05-17-001\",\n      \"transaction_type\": \"finance\",\n      \"action_type\": \"withdrawal\",\n      \"status\": \"IN_REVIEW\",\n      \"direction\": \"OUTBOUND\",\n      \"amount\": \"1500\",\n      \"currency\": \"EUR\",\n      \"preferred_currency_amount\": \"1620.45\",\n      \"preferred_currency_code\": \"USD\",\n      \"payment_details\": \"Withdrawal to crypto wallet\",\n      \"txn_date\": \"2026-05-17T08:42:00Z\",\n      \"created_at\": \"2026-05-17T08:42:11Z\",\n      \"score\": 78,\n      \"severity\": \"HIGH\",\n      \"decision_reason_code\": \"WALLET_HIGH_RISK\",\n      \"decision_reason_label\": \"Destination wallet flagged as high risk\",\n      \"tags\": [\n        {\n          \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n          \"name\": \"Manual review\",\n          \"color\": \"#F59E0B\",\n          \"description\": null,\n          \"source\": \"custom\"\n        }\n      ],\n      \"subject_name\": \"Maria Garcia\",\n      \"subject_vendor_data\": \"user-12345\",\n      \"counterparty_name\": null,\n      \"counterparty_vendor_data\": null,\n      \"counterparty_country\": null,\n      \"subject_country\": null,\n      \"assigned_to_name\": \"Alex Reviewer\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5310a08f-2127-491f-8d43-23e235b51799",
+              "name": "Missing, invalid, or revoked API key, or the key cannot list transactions for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9034f3c2-e075-4118-ae73-7b321943411b",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b47cb101-6384-481a-b05f-bdd2a70b4dfc",
+          "name": "Create transaction",
+          "request": {
+            "name": "Create transaction",
+            "description": {
+              "content": "Submit a transaction for synchronous AML/risk monitoring. The transaction is created `APPROVED`, then your rules (and crypto screening, when applicable) run inline and may flip the returned `status` to `IN_REVIEW` or `DECLINED`. **`transaction_id` is your idempotency key** (max 128 chars, unique per app); reusing it returns 400. A `transaction.created` webhook is dispatched on success (sandbox applications are not billed and do not emit webhooks).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transaction_id\": \"<string>\",\n  \"transaction_category\": \"<string>\",\n  \"transaction_details\": {\n    \"direction\": \"<string>\",\n    \"amount\": \"<number>\",\n    \"currency\": \"<string>\",\n    \"currency_kind\": \"<string>\",\n    \"amount_in_default_currency\": \"<number>\",\n    \"default_currency\": \"<string>\",\n    \"payment_details\": \"<string>\",\n    \"payment_reference_id\": \"<string>\",\n    \"action_type\": \"<string>\"\n  },\n  \"subject\": {\n    \"vendor_data\": \"<string>\",\n    \"full_name\": \"<string>\",\n    \"entity_type\": \"<string>\",\n    \"first_name\": \"<string>\",\n    \"last_name\": \"<string>\",\n    \"date_of_birth\": \"<date>\",\n    \"address\": {\n      \"country\": \"<string>\",\n      \"town\": \"<string>\",\n      \"state\": \"<string>\",\n      \"street\": \"<string>\",\n      \"post_code\": \"<string>\"\n    },\n    \"institution_details\": {\n      \"name\": \"<string>\",\n      \"code\": \"<string>\",\n      \"address\": \"<object>\"\n    },\n    \"device_context\": \"<object>\",\n    \"payment_method\": {\n      \"method_type\": \"<string>\",\n      \"account_id\": \"<string>\",\n      \"issuing_country\": \"<string>\"\n    }\n  },\n  \"transaction_at\": \"<dateTime>\",\n  \"time_zone\": \"<string>\",\n  \"counterparty\": {\n    \"entity_type\": \"<string>\",\n    \"vendor_data\": \"<string>\",\n    \"full_name\": \"<string>\",\n    \"first_name\": \"<string>\",\n    \"last_name\": \"<string>\",\n    \"date_of_birth\": \"<date>\",\n    \"address\": \"<object>\",\n    \"institution_details\": \"<object>\",\n    \"device_context\": \"<object>\",\n    \"payment_method\": {\n      \"method_type\": \"<string>\",\n      \"account_id\": \"<string>\",\n      \"issuing_country\": \"<string>\"\n    }\n  },\n  \"custom_properties\": {\n    \"key_0\": 9049\n  },\n  \"travel_rule_details\": {\n    \"status\": \"<string>\",\n    \"protocol\": \"<string>\",\n    \"required\": \"<boolean>\",\n    \"obligations_count\": \"<integer>\",\n    \"originator_data\": \"<object>\",\n    \"beneficiary_data\": \"<object>\",\n    \"metadata\": \"<object>\"\n  },\n  \"network_snapshot\": {\n    \"nodes\": [\n      \"<object>\",\n      \"<object>\"\n    ],\n    \"edges\": [\n      \"<object>\",\n      \"<object>\"\n    ],\n    \"metrics\": \"<object>\"\n  },\n  \"include_crypto_screening\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "d360f01a-528a-4191-a5cf-1d16aefcf0e7",
+              "name": "Transaction submitted and monitored. The body is the full transaction detail (same shape as `GET /v3/transactions/{transaction_id}/`), reflecting any rule outcomes already applied.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transaction_id\": \"your-txn-2026-05-17-001\",\n  \"transaction_category\": \"finance\",\n  \"transaction_details\": {\n    \"direction\": \"outbound\",\n    \"amount\": 1500,\n    \"currency\": \"EUR\",\n    \"action_type\": \"withdrawal\"\n  },\n  \"subject\": {\n    \"entity_type\": \"individual\",\n    \"vendor_data\": \"user-12345\",\n    \"full_name\": \"Maria Garcia\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"abcdef12-3456-4890-abcd-ef1234567890\",\n  \"transaction_number\": 4123,\n  \"txn_id\": \"your-txn-2026-05-17-001\",\n  \"txn_date\": \"2026-05-17T08:42:00Z\",\n  \"zone_id\": \"Europe/Madrid\",\n  \"transaction_type\": \"finance\",\n  \"action_type\": \"withdrawal\",\n  \"direction\": \"OUTBOUND\",\n  \"status\": \"APPROVED\",\n  \"amount\": \"1500\",\n  \"currency\": \"EUR\",\n  \"currency_type\": \"fiat\",\n  \"amount_in_default_currency\": \"1620.45\",\n  \"default_currency_code\": \"USD\",\n  \"preferred_currency_amount\": \"1620.45\",\n  \"preferred_currency_code\": \"USD\",\n  \"payment_details\": \"Withdrawal to crypto wallet\",\n  \"payment_txn_id\": null,\n  \"score\": 0,\n  \"severity\": null,\n  \"decision_reason_code\": null,\n  \"decision_reason_label\": null,\n  \"vendor_data\": \"user-12345\",\n  \"metadata\": {\n    \"subject\": {\n      \"entity_type\": \"individual\",\n      \"vendor_data\": \"user-12345\",\n      \"full_name\": \"Maria Garcia\",\n      \"address\": {},\n      \"institution_details\": {},\n      \"device_context\": {}\n    },\n    \"counterparty\": {}\n  },\n  \"props\": {},\n  \"tags\": [],\n  \"parties\": [\n    {\n      \"uuid\": \"b1111111-2222-4333-8444-555555555555\",\n      \"role\": \"APPLICANT\",\n      \"entity_type\": \"individual\",\n      \"kind\": \"USER\",\n      \"vendor_data\": \"user-12345\",\n      \"full_name\": \"Maria Garcia\",\n      \"first_name\": null,\n      \"last_name\": null,\n      \"country_code\": null,\n      \"dob\": null,\n      \"address\": {},\n      \"institution_info\": {},\n      \"device\": {},\n      \"external_party_snapshot\": null\n    }\n  ],\n  \"payment_methods\": [],\n  \"activities\": [\n    {\n      \"uuid\": \"d4e5f6a7-8901-4bcd-9ef0-123456789abc\",\n      \"activity_type\": \"TRANSACTION_CREATED\",\n      \"source\": \"TRANSACTION\",\n      \"status\": \"APPROVED\",\n      \"title\": \"withdrawal\",\n      \"description\": \"Transaction recorded.\",\n      \"metadata\": {},\n      \"occurred_at\": \"2026-05-17T08:42:11Z\"\n    }\n  ],\n  \"alerts\": [],\n  \"rule_runs\": [],\n  \"provider_results\": [],\n  \"travel_rule\": null,\n  \"network_snapshot\": null,\n  \"remediation\": null,\n  \"cost_breakdown\": null\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f47a550a-fb10-481b-a82d-9160fbf27cbb",
+              "name": "Validation failed (missing required fields, duplicate `transaction_id`, unknown enum value, invalid currency, etc.).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transaction_id\": \"your-txn-2026-05-17-001\",\n  \"transaction_category\": \"finance\",\n  \"transaction_details\": {\n    \"direction\": \"outbound\",\n    \"amount\": 1500,\n    \"currency\": \"EUR\",\n    \"action_type\": \"withdrawal\"\n  },\n  \"subject\": {\n    \"entity_type\": \"individual\",\n    \"vendor_data\": \"user-12345\",\n    \"full_name\": \"Maria Garcia\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"transaction_details\": {\n    \"amount\": [\n      \"This field is required.\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6b0a2098-dcfa-464f-9346-c45133643df1",
+              "name": "Missing, invalid, or revoked API key, or the key cannot submit transactions for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transaction_id\": \"your-txn-2026-05-17-001\",\n  \"transaction_category\": \"finance\",\n  \"transaction_details\": {\n    \"direction\": \"outbound\",\n    \"amount\": 1500,\n    \"currency\": \"EUR\",\n    \"action_type\": \"withdrawal\"\n  },\n  \"subject\": {\n    \"entity_type\": \"individual\",\n    \"vendor_data\": \"user-12345\",\n    \"full_name\": \"Maria Garcia\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9fab9eb0-4c86-4549-9721-fc4cb31c84c9",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transaction_id\": \"your-txn-2026-05-17-001\",\n  \"transaction_category\": \"finance\",\n  \"transaction_details\": {\n    \"direction\": \"outbound\",\n    \"amount\": 1500,\n    \"currency\": \"EUR\",\n    \"action_type\": \"withdrawal\"\n  },\n  \"subject\": {\n    \"entity_type\": \"individual\",\n    \"vendor_data\": \"user-12345\",\n    \"full_name\": \"Maria Garcia\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "98221a03-d58b-4fa1-963f-adf2a8e1fa64",
+          "name": "Get transaction",
+          "request": {
+            "name": "Get transaction",
+            "description": {
+              "content": "Retrieve the full monitoring record for one transaction: parties, score/severity, rule runs, alerts, Travel Rule outcome, remediation session.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                ":transaction_id",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "transaction_id",
+                  "description": "(Required) Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "0d2c3c91-ec43-4db0-be19-f36bd7d13dd5",
+              "name": "Full transaction detail.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"abcdef12-3456-4890-abcd-ef1234567890\",\n  \"transaction_number\": 4123,\n  \"txn_id\": \"your-txn-2026-05-17-001\",\n  \"txn_date\": \"2026-05-17T08:42:00Z\",\n  \"zone_id\": \"Europe/Madrid\",\n  \"transaction_type\": \"finance\",\n  \"action_type\": \"withdrawal\",\n  \"direction\": \"OUTBOUND\",\n  \"status\": \"IN_REVIEW\",\n  \"amount\": \"1500\",\n  \"currency\": \"EUR\",\n  \"currency_type\": \"fiat\",\n  \"amount_in_default_currency\": \"1620.45\",\n  \"default_currency_code\": \"USD\",\n  \"preferred_currency_amount\": \"1620.45\",\n  \"preferred_currency_code\": \"USD\",\n  \"payment_details\": \"Withdrawal to crypto wallet\",\n  \"payment_txn_id\": null,\n  \"score\": 78,\n  \"severity\": \"HIGH\",\n  \"decision_reason_code\": \"WALLET_HIGH_RISK\",\n  \"decision_reason_label\": \"Destination wallet flagged as high risk\",\n  \"vendor_data\": \"user-12345\",\n  \"metadata\": {\n    \"subject\": {\n      \"entity_type\": \"individual\",\n      \"vendor_data\": \"user-12345\",\n      \"full_name\": \"Maria Garcia\",\n      \"address\": {},\n      \"institution_details\": {},\n      \"device_context\": {}\n    },\n    \"counterparty\": {}\n  },\n  \"props\": {\n    \"order_id\": \"ord-9988\"\n  },\n  \"tags\": [],\n  \"parties\": [\n    {\n      \"uuid\": \"b1111111-2222-4333-8444-555555555555\",\n      \"role\": \"APPLICANT\",\n      \"entity_type\": \"individual\",\n      \"kind\": \"USER\",\n      \"vendor_data\": \"user-12345\",\n      \"full_name\": \"Maria Garcia\",\n      \"first_name\": null,\n      \"last_name\": null,\n      \"country_code\": null,\n      \"dob\": null,\n      \"address\": {},\n      \"institution_info\": {},\n      \"device\": {},\n      \"external_party_snapshot\": null\n    }\n  ],\n  \"payment_methods\": [],\n  \"activities\": [],\n  \"alerts\": [\n    {\n      \"uuid\": \"a7b8c9d0-1234-4abc-9def-567890abcdef\",\n      \"title\": \"Destination wallet flagged as high risk\",\n      \"description\": \"Provider risk score exceeded the configured threshold.\",\n      \"severity\": \"HIGH\",\n      \"status\": \"OPEN\",\n      \"source\": \"RULE\",\n      \"metadata\": {},\n      \"created_at\": \"2026-05-17T08:42:12Z\",\n      \"due_at\": null\n    }\n  ],\n  \"rule_runs\": [],\n  \"provider_results\": [],\n  \"travel_rule\": null,\n  \"network_snapshot\": null,\n  \"remediation\": null,\n  \"cost_breakdown\": null\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "09acab10-831c-4964-b7dd-9b7097bd43fc",
+              "name": "Missing, invalid, or revoked API key, or the key cannot read this application's transactions. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "43349717-b898-40ca-94c8-01557a9c9ef1",
+              "name": "No transaction with this UUID exists for the application (deleted, never created, belongs to another application, or the path segment is not a valid UUID).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "584e2bfa-76dd-40e5-8d66-0de5049c3d01",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` returned from create / list, **not** your `txn_id`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "3de54a6a-c26d-4e80-beae-71eaca87cf23",
+          "name": "Mint an SDK transaction token",
+          "request": {
+            "name": "Mint an SDK transaction token",
+            "description": {
+              "content": "Mint a short-lived scoped token your app passes to the Didit SDKs so they can submit transactions directly from the end-user's device via `POST /v1/transactions/`. The token is bound to one `vendor_data` (your user id): every transaction submitted with it has its subject identity enforced server-side from that binding, so a tampered client cannot submit on behalf of another user. Mint tokens from your backend - never ship the API key itself in an app. camelCase aliases (`vendorData`, `ttlSeconds`, `maxUses`) are also accepted.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                "sdk-token",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_data\": \"<string>\",\n  \"ttl_seconds\": 900,\n  \"max_uses\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "ae2fa7bd-fa8a-47cc-8b59-207ab124603e",
+              "name": "The minted token. Hand `sdk_token` to your app; it authenticates the device-facing `/v1/transactions/` endpoints via the `X-Transaction-Token` header until `expires_at`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    "sdk-token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-042\",\n  \"ttl_seconds\": 900,\n  \"max_uses\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"sdk_token\": \"q7Zt...urlsafe\",\n  \"expires_at\": \"2026-07-07T12:15:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6476791b-b4f2-41ae-b479-a46cc71191dd",
+              "name": "Validation failed: missing `vendor_data`, or `ttl_seconds` outside the allowed range.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    "sdk-token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-042\",\n  \"ttl_seconds\": 900,\n  \"max_uses\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"vendor_data\": [\n    \"This field is required.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3d8b87f1-2f85-415b-9598-52c71b097857",
+              "name": "Missing, invalid, or revoked API key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    "sdk-token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"user-042\",\n  \"ttl_seconds\": 900,\n  \"max_uses\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Invalid API Key.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5cd4d86f-0d81-4640-909b-2e8e8db27049",
+          "name": "Submit a transaction from an SDK",
+          "request": {
+            "name": "Submit a transaction from an SDK",
+            "description": {
+              "content": "Device-facing endpoint the Didit SDKs call to submit a transaction directly from the end-user's device. Authentication is a scoped token from `POST /v3/transactions/sdk-token/` sent in the `X-Transaction-Token` header instead of an API key, and the endpoint is CORS-enabled so browsers can call it cross-origin. The payload uses the camelCase wire aliases shown below (the SDK `submitTransaction` methods build it for you). Three server-side guarantees: the application is always taken from the token; the subject identity (`externalUserId`) is always enforced from the token's `vendor_data`, so spoofed payload values are ignored; and device intelligence (the SDK device fingerprint plus server-derived IP and user agent) is attached to the subject automatically.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "transactions",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-Transaction-Token"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"<string>\",\n  \"type\": \"<string>\",\n  \"info\": {\n    \"direction\": \"<string>\",\n    \"amount\": \"<number>\",\n    \"currency\": \"<string>\",\n    \"currencyType\": \"<string>\",\n    \"amountInDefaultCurrency\": \"<number>\",\n    \"defaultCurrencyCode\": \"<string>\",\n    \"paymentDetails\": \"<string>\",\n    \"paymentTxnId\": \"<string>\",\n    \"type\": \"<string>\",\n    \"cryptoParams\": \"<object>\"\n  },\n  \"subject\": {\n    \"fullName\": \"<string>\",\n    \"type\": \"<string>\",\n    \"externalUserId\": \"<string>\",\n    \"firstName\": \"<string>\",\n    \"lastName\": \"<string>\",\n    \"dob\": \"<date>\",\n    \"address\": \"<object>\",\n    \"institutionInfo\": \"<object>\",\n    \"device\": \"<object>\",\n    \"paymentMethod\": {\n      \"type\": \"<string>\",\n      \"accountId\": \"<string>\",\n      \"issuingCountry\": \"<string>\"\n    }\n  },\n  \"txnDate\": \"<dateTime>\",\n  \"zoneId\": \"<string>\",\n  \"counterparty\": {\n    \"type\": \"<string>\",\n    \"externalUserId\": \"<string>\",\n    \"fullName\": \"<string>\",\n    \"firstName\": \"<string>\",\n    \"lastName\": \"<string>\",\n    \"dob\": \"<date>\",\n    \"address\": \"<object>\",\n    \"institutionInfo\": \"<object>\",\n    \"device\": \"<object>\",\n    \"paymentMethod\": {\n      \"type\": \"<string>\",\n      \"accountId\": \"<string>\",\n      \"issuingCountry\": \"<string>\"\n    }\n  },\n  \"props\": {\n    \"key_0\": false\n  },\n  \"travelRule\": {\n    \"status\": \"<string>\",\n    \"protocol\": \"<string>\",\n    \"required\": \"<boolean>\",\n    \"obligationsCount\": \"<integer>\",\n    \"originatorData\": \"<object>\",\n    \"beneficiaryData\": \"<object>\",\n    \"metadata\": \"<object>\"\n  },\n  \"includeCryptoScreening\": \"<boolean>\",\n  \"fingerprint_v2\": \"<object>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "5a59fbb0-dbb4-4ef3-a587-c41e28e94431",
+              "name": "Transaction submitted and monitored. Same detail shape as `GET /v3/transactions/{transaction_id}/`, including the `action_required` block when the end user must complete a follow-up action (the SDKs auto-launch it by default).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"txnId\": \"wd-2026-07-07-0042\",\n  \"type\": \"travelRule\",\n  \"info\": {\n    \"direction\": \"out\",\n    \"amount\": \"0.25\",\n    \"currency\": \"ETH\",\n    \"currencyType\": \"crypto\",\n    \"cryptoParams\": {\n      \"crypto_chain\": \"ETH\"\n    }\n  },\n  \"subject\": {\n    \"fullName\": \"Jane Doe\"\n  },\n  \"counterparty\": {\n    \"fullName\": \"Ana Diaz\",\n    \"paymentMethod\": {\n      \"type\": \"unhosted_wallet\",\n      \"accountId\": \"0xBeneficiaryWallet01\"\n    }\n  },\n  \"travelRule\": {\n    \"status\": \"AWAITING_COUNTERPARTY\",\n    \"beneficiaryData\": {\n      \"wallet_address\": \"0xBeneficiaryWallet01\",\n      \"name\": \"Ana Diaz\"\n    }\n  },\n  \"includeCryptoScreening\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"22222222-3333-4444-5555-666666666666\",\n  \"txn_id\": \"wd-2026-07-07-0042\",\n  \"transaction_type\": \"travelRule\",\n  \"direction\": \"OUTBOUND\",\n  \"status\": \"AWAITING_USER\",\n  \"amount\": \"0.25\",\n  \"currency\": \"ETH\",\n  \"travel_rule\": {\n    \"uuid\": \"33333333-4444-5555-6666-777777777777\",\n    \"status\": \"ON_HOLD\",\n    \"required\": true\n  },\n  \"action_required\": {\n    \"type\": \"wallet_ownership\",\n    \"url\": \"https://verification.didit.me/wallet-ownership/3s9x...urlsafe\",\n    \"widget_session_id\": \"77777777-8888-9999-aaaa-bbbbbbbbbbbb\",\n    \"expires_at\": \"2026-07-07T13:00:00Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cc2ae3fb-ff2e-40c8-ae97-15d1519913d0",
+              "name": "Validation failed (missing required fields, duplicate `txnId`, unknown category).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"txnId\": \"wd-2026-07-07-0042\",\n  \"type\": \"travelRule\",\n  \"info\": {\n    \"direction\": \"out\",\n    \"amount\": \"0.25\",\n    \"currency\": \"ETH\",\n    \"currencyType\": \"crypto\",\n    \"cryptoParams\": {\n      \"crypto_chain\": \"ETH\"\n    }\n  },\n  \"subject\": {\n    \"fullName\": \"Jane Doe\"\n  },\n  \"counterparty\": {\n    \"fullName\": \"Ana Diaz\",\n    \"paymentMethod\": {\n      \"type\": \"unhosted_wallet\",\n      \"accountId\": \"0xBeneficiaryWallet01\"\n    }\n  },\n  \"travelRule\": {\n    \"status\": \"AWAITING_COUNTERPARTY\",\n    \"beneficiaryData\": {\n      \"wallet_address\": \"0xBeneficiaryWallet01\",\n      \"name\": \"Ana Diaz\"\n    }\n  },\n  \"includeCryptoScreening\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"info\": {\n    \"currency\": [\n      \"This field is required.\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "45209057-2eba-497c-8ca5-cd761873ea5f",
+              "name": "The transaction token was rejected: missing, unknown, revoked, over its `max_uses`, or expired. Expired-token responses always contain the word `expired` in the detail, which is how the SDKs distinguish `expired_token` from `invalid_token` errors.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"txnId\": \"wd-2026-07-07-0042\",\n  \"type\": \"travelRule\",\n  \"info\": {\n    \"direction\": \"out\",\n    \"amount\": \"0.25\",\n    \"currency\": \"ETH\",\n    \"currencyType\": \"crypto\",\n    \"cryptoParams\": {\n      \"crypto_chain\": \"ETH\"\n    }\n  },\n  \"subject\": {\n    \"fullName\": \"Jane Doe\"\n  },\n  \"counterparty\": {\n    \"fullName\": \"Ana Diaz\",\n    \"paymentMethod\": {\n      \"type\": \"unhosted_wallet\",\n      \"accountId\": \"0xBeneficiaryWallet01\"\n    }\n  },\n  \"travelRule\": {\n    \"status\": \"AWAITING_COUNTERPARTY\",\n    \"beneficiaryData\": {\n      \"wallet_address\": \"0xBeneficiaryWallet01\",\n      \"name\": \"Ana Diaz\"\n    }\n  },\n  \"includeCryptoScreening\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Invalid transaction token.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b4c8d76e-180c-426b-9ef7-92e6e0982f2f",
+          "name": "Get a transaction from an SDK",
+          "request": {
+            "name": "Get a transaction from an SDK",
+            "description": {
+              "content": "Device-facing read endpoint, authenticated with the same `X-Transaction-Token` used to submit. The SDKs poll it after an auto-launched action flow completes or its window closes, so the final state never depends on a single notification. Returns the same transaction detail as the submit response, including the current `action_required` block (`null` once the action is resolved).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "transactions",
+                ":transaction_id",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "transaction_id",
+                  "description": "(Required) Didit-stable transaction UUID (the `uuid` from the submit response, **not** your `txnId`)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-Transaction-Token"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "b9778118-85ef-4757-99d2-4a1bfe4a0d3f",
+              "name": "The full transaction detail, including `action_required` (`null` once the pending action is resolved).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` from the submit response, **not** your `txnId`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"53ec3cb6-b98d-3dc4-5a8d-dce908d0a030\",\n  \"transaction_number\": 9688,\n  \"txn_id\": \"string\",\n  \"txn_date\": \"2005-09-16T06:29:05.547Z\",\n  \"zone_id\": \"string\",\n  \"transaction_type\": \"string\",\n  \"action_type\": \"string\",\n  \"direction\": \"INBOUND\",\n  \"status\": \"AWAITING_USER\",\n  \"amount\": \"string\",\n  \"currency\": \"string\",\n  \"currency_type\": \"string\",\n  \"amount_in_default_currency\": \"string\",\n  \"default_currency_code\": \"string\",\n  \"preferred_currency_amount\": \"string\",\n  \"preferred_currency_code\": \"string\",\n  \"payment_details\": \"string\",\n  \"payment_txn_id\": \"string\",\n  \"score\": 5730,\n  \"severity\": \"LOW\",\n  \"decision_reason_code\": \"string\",\n  \"decision_reason_label\": \"string\",\n  \"vendor_data\": \"string\",\n  \"metadata\": {},\n  \"props\": {},\n  \"tags\": [\n    {\n      \"uuid\": \"133bfcf8-32a7-e8bf-a2bf-7f5a1992814c\",\n      \"name\": \"string\",\n      \"color\": \"string\",\n      \"description\": \"string\",\n      \"source\": \"didit\"\n    },\n    {\n      \"uuid\": \"93cfd6dd-cb08-e903-b191-bc7a9d9adf32\",\n      \"name\": \"string\",\n      \"color\": \"string\",\n      \"description\": \"string\",\n      \"source\": \"didit\"\n    }\n  ],\n  \"parties\": [\n    {\n      \"uuid\": \"b779a951-19c3-5d54-311a-a5915199972d\",\n      \"role\": \"APPLICANT\",\n      \"entity_type\": \"individual\",\n      \"kind\": \"BUSINESS\",\n      \"vendor_data\": \"string\",\n      \"full_name\": \"string\",\n      \"first_name\": \"string\",\n      \"last_name\": \"string\",\n      \"country_code\": \"string\",\n      \"dob\": \"2009-01-13\",\n      \"address\": {},\n      \"institution_info\": {},\n      \"device\": {},\n      \"external_party_snapshot\": {}\n    },\n    {\n      \"uuid\": \"6d28f86d-211b-b859-fc33-8bba90dbf2c6\",\n      \"role\": \"REMITTER\",\n      \"entity_type\": \"unhostedWallet\",\n      \"kind\": \"USER\",\n      \"vendor_data\": \"string\",\n      \"full_name\": \"string\",\n      \"first_name\": \"string\",\n      \"last_name\": \"string\",\n      \"country_code\": \"string\",\n      \"dob\": \"1987-11-01\",\n      \"address\": {},\n      \"institution_info\": {},\n      \"device\": {},\n      \"external_party_snapshot\": {}\n    }\n  ],\n  \"payment_methods\": [\n    {\n      \"uuid\": \"4271a11c-a3aa-ac91-a80a-a6c5644c7f63\",\n      \"payment_method_type\": \"bank_card\",\n      \"label\": \"string\",\n      \"fingerprint\": \"string\",\n      \"account_id\": \"string\",\n      \"issuing_country\": \"string\",\n      \"owner_kind\": \"USER\",\n      \"vendor_data\": \"string\",\n      \"owner_name\": \"string\",\n      \"institution_info\": {},\n      \"details\": {},\n      \"external_owner_snapshot\": {},\n      \"role\": \"BENEFICIARY\"\n    },\n    {\n      \"uuid\": \"c6470992-5943-df3d-1607-fef0f5805540\",\n      \"payment_method_type\": \"unhosted_wallet\",\n      \"label\": \"string\",\n      \"fingerprint\": \"string\",\n      \"account_id\": \"string\",\n      \"issuing_country\": \"string\",\n      \"owner_kind\": \"USER\",\n      \"vendor_data\": \"string\",\n      \"owner_name\": \"string\",\n      \"institution_info\": {},\n      \"details\": {},\n      \"external_owner_snapshot\": {},\n      \"role\": \"BENEFICIARY\"\n    }\n  ],\n  \"activities\": [\n    {\n      \"uuid\": \"2c9f372f-bdd2-9cb0-fdf3-f70275a745d4\",\n      \"activity_type\": \"string\",\n      \"source\": \"string\",\n      \"status\": \"string\",\n      \"title\": \"string\",\n      \"description\": \"string\",\n      \"metadata\": {},\n      \"occurred_at\": \"2025-12-29T11:40:36.607Z\"\n    },\n    {\n      \"uuid\": \"72a070e0-8578-a23c-ddfd-99352eb4a1f4\",\n      \"activity_type\": \"string\",\n      \"source\": \"string\",\n      \"status\": \"string\",\n      \"title\": \"string\",\n      \"description\": \"string\",\n      \"metadata\": {},\n      \"occurred_at\": \"1981-04-01T01:45:39.321Z\"\n    }\n  ],\n  \"alerts\": [\n    {\n      \"uuid\": \"7b09049b-2465-be84-f0e6-67ac1c2c534e\",\n      \"title\": \"string\",\n      \"description\": \"string\",\n      \"severity\": \"MEDIUM\",\n      \"status\": \"AWAITING_USER\",\n      \"source\": \"RULE\",\n      \"metadata\": {},\n      \"created_at\": \"2013-09-12T15:49:53.686Z\",\n      \"due_at\": \"2007-06-08T02:46:48.609Z\"\n    },\n    {\n      \"uuid\": \"05613f16-3e34-704d-613c-22c6f1399e74\",\n      \"title\": \"string\",\n      \"description\": \"string\",\n      \"severity\": \"CRITICAL\",\n      \"status\": \"INVESTIGATING\",\n      \"source\": \"PROVIDER\",\n      \"metadata\": {},\n      \"created_at\": \"1985-04-21T17:43:44.471Z\",\n      \"due_at\": \"2012-04-03T11:13:55.121Z\"\n    }\n  ],\n  \"rule_runs\": [\n    {\n      \"uuid\": \"9e950d1c-4dc9-ee7b-aa81-46c4fac625be\",\n      \"rule\": \"de767165-a349-da13-159f-09fc63879276\",\n      \"rule_title\": \"string\",\n      \"rule_description\": \"string\",\n      \"rule_category\": \"string\",\n      \"matched\": true,\n      \"is_test\": false,\n      \"mode\": \"TEST\",\n      \"severity\": \"string\",\n      \"score_delta\": 1650,\n      \"status_target\": \"string\",\n      \"action_summary\": {},\n      \"metadata\": {},\n      \"created_at\": \"1958-01-30T18:22:13.056Z\"\n    },\n    {\n      \"uuid\": \"4a873e2b-bc0c-24ea-db41-3e8631225705\",\n      \"rule\": \"bce70d19-5ba1-a8d5-6854-ab120ba739e0\",\n      \"rule_title\": \"string\",\n      \"rule_description\": \"string\",\n      \"rule_category\": \"string\",\n      \"matched\": false,\n      \"is_test\": false,\n      \"mode\": \"TEST\",\n      \"severity\": \"string\",\n      \"score_delta\": 6724,\n      \"status_target\": \"string\",\n      \"action_summary\": {},\n      \"metadata\": {},\n      \"created_at\": \"2025-09-07T11:50:15.267Z\"\n    }\n  ],\n  \"provider_results\": [\n    {\n      \"uuid\": \"c42bcdc9-59be-21e9-ef07-81b405eb5ab4\",\n      \"provider\": \"string\",\n      \"result_type\": \"WALLET_SCREENING\",\n      \"status\": \"string\",\n      \"severity\": \"string\",\n      \"score\": 7934,\n      \"summary\": \"string\",\n      \"payload\": {},\n      \"created_at\": \"1999-10-15T04:14:30.772Z\"\n    },\n    {\n      \"uuid\": \"b68d5fe5-fdd6-b929-650f-180d7277ece8\",\n      \"provider\": \"string\",\n      \"result_type\": \"NETWORK_GRAPH\",\n      \"status\": \"string\",\n      \"severity\": \"string\",\n      \"score\": 1676,\n      \"summary\": \"string\",\n      \"payload\": {},\n      \"created_at\": \"1982-10-20T03:11:06.839Z\"\n    }\n  ],\n  \"travel_rule\": {\n    \"uuid\": \"7b7b66b6-5ac0-ab4a-a3c2-7c2b8165a77c\",\n    \"status\": \"string\",\n    \"protocol\": \"string\",\n    \"required\": true,\n    \"obligations_count\": 2651,\n    \"originator_data\": {},\n    \"beneficiary_data\": {},\n    \"metadata\": {}\n  },\n  \"network_snapshot\": {\n    \"uuid\": \"5e73dd93-4d7f-fede-fab7-2d8388738491\",\n    \"metrics\": {}\n  },\n  \"remediation\": {\n    \"session_id\": \"string\",\n    \"session_token\": \"string\",\n    \"url\": \"http://tccFEQIpxTSQLwVOTQHJiwy.wumaST.lgXWIa0LFOcMZ-k5tVxRq2Pa.trNJoM7FkItpm9E.q7h,Fn0ct75SLP,noD+1Hq1YbZhBw\",\n    \"status\": \"string\"\n  },\n  \"action_required\": {\n    \"type\": \"verification_session\",\n    \"url\": \"http://SSNMBE.juuddRRAMR,VdaTQJtQ7SlNnMgp+yNStC1fw7vmZAFm-9K\",\n    \"session_id\": \"bfad8675-3aa1-3bfe-fa4a-244cec780ebd\",\n    \"session_token\": \"string\",\n    \"status\": \"string\"\n  },\n  \"cost_breakdown\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cba88ce7-7d84-4345-942d-0f3da60a838b",
+              "name": "The transaction token was rejected: missing, unknown, revoked, over its `max_uses`, or expired.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` from the submit response, **not** your `txnId`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Transaction token expired.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e3f8ceed-7c0d-497f-9a55-92849fb64ab2",
+              "name": "No transaction with this UUID exists for the token's application, or the path segment is not a valid UUID.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ":transaction_id",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID (the `uuid` from the submit response, **not** your `txnId`)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Transaction-Token",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "9021ce96-15fa-4507-ac3f-411eb71195a1",
+    "name": "Didit Verification Billing Transactions API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

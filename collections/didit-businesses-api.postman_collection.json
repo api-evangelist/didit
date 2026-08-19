@@ -1,0 +1,1880 @@
+{
+  "item": [
+    {
+      "id": "84a69dac-546d-4ae3-9f56-8010d7b27e2e",
+      "name": "Businesses",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "3affa95b-2c16-423d-af17-b725e7f8e167",
+          "name": "List businesses",
+          "request": {
+            "name": "List businesses",
+            "description": {
+              "content": "List [businesses](/entities/businesses) Didit assembles from KYB sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus businesses created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "b2471f04-5547-4229-ac2a-8d4084864a87",
+              "name": "Paginated list of businesses with status, session counts, and feature breakdown.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"didit_internal_id\": \"a1b2c3d4-e5f6-4890-abcd-ef1234567890\",\n      \"vendor_data\": \"company-123\",\n      \"display_name\": null,\n      \"legal_name\": \"Acme Trading Ltd\",\n      \"registration_number\": \"12345678\",\n      \"country_code\": \"GB\",\n      \"effective_name\": \"Acme Trading Ltd\",\n      \"status\": \"ACTIVE\",\n      \"session_count\": 2,\n      \"approved_count\": 1,\n      \"declined_count\": 0,\n      \"in_review_count\": 1,\n      \"features\": {\n        \"KYB\": \"Approved\"\n      },\n      \"features_list\": [\n        {\n          \"feature\": \"KYB\",\n          \"status\": \"Approved\"\n        }\n      ],\n      \"last_session_at\": \"2026-03-15T10:30:00Z\",\n      \"last_activity_at\": \"2026-03-15T10:30:00Z\",\n      \"first_session_at\": \"2026-01-10T08:00:00Z\",\n      \"tags\": [\n        {\n          \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n          \"name\": \"VIP\",\n          \"color\": \"#2567FF\"\n        }\n      ],\n      \"created_at\": \"2026-01-10T08:00:00Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1796b395-c35f-4e78-baae-67cefb36e46b",
+              "name": "Missing, invalid, or revoked API key, or the key cannot list businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b7ce4bba-5a18-43b2-b887-527e8aab6d9e",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "4d2c8d23-0530-495a-af44-965345f4c20c",
+          "name": "Get business",
+          "request": {
+            "name": "Get business",
+            "description": {
+              "content": "Fetch one [business](/entities/businesses) by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                ":vendor_data",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d7db37e1-e1e0-473d-b2a5-c353681def33",
+              "name": "Full business detail including metadata and aggregated session data.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"a1b2c3d4-e5f6-4890-abcd-ef1234567890\",\n  \"vendor_data\": \"company-123\",\n  \"display_name\": null,\n  \"legal_name\": \"Acme Trading Ltd\",\n  \"registration_number\": \"12345678\",\n  \"country_code\": \"GB\",\n  \"effective_name\": \"Acme Trading Ltd\",\n  \"status\": \"ACTIVE\",\n  \"session_count\": 2,\n  \"approved_count\": 1,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"features\": {\n    \"KYB\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"KYB\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2026-03-15T10:30:00Z\",\n  \"last_activity_at\": \"2026-03-15T10:30:00Z\",\n  \"first_session_at\": \"2026-01-10T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"name\": \"VIP\",\n      \"color\": \"#2567FF\"\n    }\n  ],\n  \"created_at\": \"2026-01-10T08:00:00Z\",\n  \"metadata\": {\n    \"industry\": \"fintech\"\n  },\n  \"updated_at\": \"2026-03-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fe9d0756-6d3f-4592-a558-38b6857a5c02",
+              "name": "Missing, invalid, or revoked API key, or the key cannot read this application's businesses. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "714cf478-78fc-4ca8-8bd2-37ed3ca193f0",
+              "name": "No (non-deleted) business with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b5fb3ce7-75b6-46f2-bad7-1ff99f7f6100",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d885c3d7-fe35-4147-9001-c4a2e676b016",
+          "name": "Update business",
+          "request": {
+            "name": "Update business",
+            "description": {
+              "content": "Partial update of a business: `display_name`, `legal_name`, `registration_number`, `country_code`, `status`, `metadata`. `metadata` fully replaces. Setting `status` to `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                ":vendor_data",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"display_name\": \"<string>\",\n  \"legal_name\": \"<string>\",\n  \"registration_number\": \"<string>\",\n  \"country_code\": \"<string>\",\n  \"status\": \"<string>\",\n  \"metadata\": \"<object>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "6c5781af-e1ff-4150-a2d2-9cfb0cb21ecf",
+              "name": "Business updated. The full updated business record is returned.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Acme Corp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"a1b2c3d4-e5f6-4890-abcd-ef1234567890\",\n  \"vendor_data\": \"company-123\",\n  \"display_name\": \"Acme Corp\",\n  \"legal_name\": \"Acme Trading Ltd\",\n  \"registration_number\": \"12345678\",\n  \"country_code\": \"GB\",\n  \"effective_name\": \"Acme Corp\",\n  \"status\": \"FLAGGED\",\n  \"session_count\": 2,\n  \"approved_count\": 1,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"features\": {\n    \"KYB\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"KYB\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2026-03-15T10:30:00Z\",\n  \"last_activity_at\": \"2026-03-15T10:30:00Z\",\n  \"first_session_at\": \"2026-01-10T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"name\": \"VIP\",\n      \"color\": \"#2567FF\"\n    }\n  ],\n  \"created_at\": \"2026-01-10T08:00:00Z\",\n  \"metadata\": {\n    \"industry\": \"fintech\",\n    \"risk_level\": \"low\"\n  },\n  \"updated_at\": \"2026-03-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "39934eaa-eaa1-4994-b205-e3f304d71a50",
+              "name": "Invalid body — typically an unknown `status` or malformed `metadata`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Acme Corp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": [\n    \"Invalid status. Valid options are: ACTIVE, FLAGGED, BLOCKED\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9a819ce0-e989-4d01-b7ff-5cf8161e56eb",
+              "name": "Missing, invalid, or revoked API key, or the key cannot update businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Acme Corp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "abe7dd25-0f22-46d2-9c30-7831ead9314d",
+              "name": "No (non-deleted) business with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Acme Corp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a28d9b73-e32d-4b05-bf40-868ccc45d8fc",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"display_name\": \"Acme Corp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9dd29543-543b-461b-a8f3-1c68df110594",
+          "name": "Update business status",
+          "request": {
+            "name": "Update business status",
+            "description": {
+              "content": "Flip only the lifecycle `status` of a business — VendorBusinessStatusChoices (`ACTIVE`/`FLAGGED`/`BLOCKED`, NOT session statuses). `BLOCKED` adds `vendor_data` to the system blocklist.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                ":vendor_data",
+                "update-status",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "vendor_data",
+                  "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "0b71c50d-27d0-494c-84ad-0c1e5eea899e",
+              "name": "Business status updated. Full business record returned.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FLAGGED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"a1b2c3d4-e5f6-4890-abcd-ef1234567890\",\n  \"vendor_data\": \"company-123\",\n  \"display_name\": null,\n  \"legal_name\": \"Acme Trading Ltd\",\n  \"registration_number\": \"12345678\",\n  \"country_code\": \"GB\",\n  \"effective_name\": \"Acme Trading Ltd\",\n  \"status\": \"BLOCKED\",\n  \"session_count\": 2,\n  \"approved_count\": 1,\n  \"declined_count\": 0,\n  \"in_review_count\": 1,\n  \"features\": {\n    \"KYB\": \"Approved\"\n  },\n  \"features_list\": [\n    {\n      \"feature\": \"KYB\",\n      \"status\": \"Approved\"\n    }\n  ],\n  \"last_session_at\": \"2026-03-15T10:30:00Z\",\n  \"last_activity_at\": \"2026-03-15T10:30:00Z\",\n  \"first_session_at\": \"2026-01-10T08:00:00Z\",\n  \"tags\": [\n    {\n      \"uuid\": \"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d\",\n      \"name\": \"VIP\",\n      \"color\": \"#2567FF\"\n    }\n  ],\n  \"created_at\": \"2026-01-10T08:00:00Z\",\n  \"metadata\": {\n    \"industry\": \"fintech\"\n  },\n  \"updated_at\": \"2026-03-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3aefe67f-babc-46fc-bfb4-d55460d64c62",
+              "name": "Missing or invalid `status`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FLAGGED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": [\n    \"This field is required.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d270ed62-12bf-40c1-b0d5-c7a1064dfcbb",
+              "name": "Missing, invalid, or revoked API key, or the key cannot update businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FLAGGED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1c0c1d79-6e22-49ff-b38c-9719c5b35fe5",
+              "name": "No (non-deleted) business with the supplied `vendor_data` exists for this application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FLAGGED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6a86ecde-ddff-4b9d-bb0c-305a98502b3f",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    ":vendor_data",
+                    "update-status",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "vendor_data",
+                      "description": "(Required) Your unique identifier for the business (free-form string, NOT a UUID)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FLAGGED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "3e7bade5-5f23-4387-b72c-93a6b816036b",
+          "name": "Batch delete businesses",
+          "request": {
+            "name": "Batch delete businesses",
+            "description": {
+              "content": "**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer [Update Business Status](#patch-/v3/businesses/-vendor_data-/update-status/) with `BLOCKED`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                "delete",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"delete_all\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7f909311-1f1f-469e-89ad-0a94ea3aaf98",
+              "name": "Businesses deleted. Returns the number of rows actually removed.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"company-123\",\n    \"company-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"deleted\": 2\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "058c08eb-bcaa-4734-9d6f-bc843c410a02",
+              "name": "No selector supplied (all of `vendor_data_list`, `didit_internal_id_list`, and `delete_all` missing or empty). The error body is a JSON array.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"company-123\",\n    \"company-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  \"Provide vendor_data_list, didit_internal_id_list, or set delete_all=true.\"\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "df8bd8c7-b3ce-40e3-97db-17664d1398a6",
+              "name": "Missing, invalid, or revoked API key, or the key cannot delete businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"company-123\",\n    \"company-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "179e99ab-f1df-4ae0-b2d1-c2c238075525",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "delete",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data_list\": [\n    \"company-123\",\n    \"company-456\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "74262466-6508-41ba-86bd-1730f488fbab",
+          "name": "Create business",
+          "request": {
+            "name": "Create business",
+            "description": {
+              "content": "Pre-create a [business](/entities/businesses) *without* a KYB session. All fields are optional, but you should always send `vendor_data` — without it the record cannot be linked to sessions or transactions. When provided, `vendor_data` must be unique among non-deleted businesses (exact match; conflicts return 400). Not idempotent.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "businesses",
+                "create",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_data\": \"<string>\",\n  \"display_name\": \"<string>\",\n  \"legal_name\": \"<string>\",\n  \"registration_number\": \"<string>\",\n  \"country_code\": \"<string>\",\n  \"status\": \"ACTIVE\",\n  \"metadata\": \"<object>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "4f15c598-6277-4f48-8f61-2099dffabecb",
+              "name": "Business created. Full business record returned (same shape as Get Business).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"company-456\",\n  \"legal_name\": \"New Corp Ltd\",\n  \"country_code\": \"US\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"didit_internal_id\": \"a1b2c3d4-e5f6-4890-abcd-ef1234567890\",\n  \"vendor_data\": \"company-456\",\n  \"display_name\": null,\n  \"legal_name\": \"New Corp Ltd\",\n  \"registration_number\": null,\n  \"country_code\": \"US\",\n  \"effective_name\": \"New Corp Ltd\",\n  \"status\": \"ACTIVE\",\n  \"session_count\": 0,\n  \"approved_count\": 0,\n  \"declined_count\": 0,\n  \"in_review_count\": 0,\n  \"features\": {},\n  \"features_list\": [],\n  \"last_session_at\": null,\n  \"last_activity_at\": \"2026-03-15T10:30:00Z\",\n  \"first_session_at\": null,\n  \"tags\": [],\n  \"created_at\": \"2026-03-15T10:30:00Z\",\n  \"metadata\": {},\n  \"updated_at\": \"2026-03-15T10:30:00Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "475d548a-3407-4261-b72b-b43f0fa3e7e3",
+              "name": "Invalid body — typically a duplicate `vendor_data`, an unknown `status`, or malformed `metadata`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"company-456\",\n  \"legal_name\": \"New Corp Ltd\",\n  \"country_code\": \"US\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"vendor_data\": [\n    \"A business with this vendor_data already exists.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f645dfed-166b-49cc-86c6-bf86669c7e88",
+              "name": "Missing, invalid, or revoked API key, or the key cannot create businesses for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"company-456\",\n  \"legal_name\": \"New Corp Ltd\",\n  \"country_code\": \"US\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ce6e8841-e310-4093-86d9-335cd9236fdc",
+              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "businesses",
+                    "create",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vendor_data\": \"company-456\",\n  \"legal_name\": \"New Corp Ltd\",\n  \"country_code\": \"US\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "007922f0-27c5-4bdf-bc87-2436dcf06022",
+    "name": "Didit Verification Billing Businesses API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

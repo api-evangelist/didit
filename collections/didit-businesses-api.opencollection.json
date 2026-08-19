@@ -1,0 +1,174 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Businesses API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Businesses",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List businesses",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/businesses/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List [businesses](/entities/businesses) Didit assembles from KYB sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus businesses created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side."
+        },
+        {
+          "info": {
+            "name": "Get business",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/businesses/:vendor_data/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "company-123",
+                "type": "path",
+                "description": "Your unique identifier for the business — a free-form string (NOT a UUID), matched exactly as sent."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Fetch one [business](/entities/businesses) by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404."
+        },
+        {
+          "info": {
+            "name": "Update business",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/businesses/:vendor_data/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "company-123",
+                "type": "path",
+                "description": "Your unique identifier for the business (free-form string, NOT a UUID)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Partial update of a business: `display_name`, `legal_name`, `registration_number`, `country_code`, `status`, `metadata`. `metadata` fully replaces. Setting `status` to `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry."
+        },
+        {
+          "info": {
+            "name": "Update business status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/businesses/:vendor_data/update-status/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "company-123",
+                "type": "path",
+                "description": "Your unique identifier for the business (free-form string, NOT a UUID)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Flip only the lifecycle `status` of a business — VendorBusinessStatusChoices (`ACTIVE`/`FLAGGED`/`BLOCKED`, NOT session statuses). `BLOCKED` adds `vendor_data` to the system blocklist."
+        },
+        {
+          "info": {
+            "name": "Batch delete businesses",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/businesses/delete/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer [Update Business Status](#patch-/v3/businesses/-vendor_data-/update-status/) with `BLOCKED`."
+        },
+        {
+          "info": {
+            "name": "Create business",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/businesses/create/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Pre-create a [business](/entities/businesses) *without* a KYB session. All fields are optional, but you should always send `vendor_data` — without it the record cannot be linked to sessions or transactions. When provided, `vendor_data` must be unique among non-deleted businesses (exact match; conflicts return 400). Not idempotent."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

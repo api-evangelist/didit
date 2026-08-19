@@ -1,0 +1,598 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Standalone APIs API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Standalone APIs",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "ID Verification (document OCR + fraud checks)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/id-verification/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "front_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "front_image_password",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "back_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "back_image_password",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "perform_document_liveness",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "minimum_age",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "expiration_date_not_detected_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "invalid_mrz_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "inconsistent_data_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "preferred_characters",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "OCR an identity document and run document fraud checks in one call — returns the extracted holder fields, the parsed MRZ, an `Approved`/`Declined` `status`, and a `warnings` list explaining every issue found. Supports 14,000+ document types from 220+ countries and territories.\n\n**How it works.** Send the document's `front_image` (required) and, for two-sided documents, the `back_image`. Upload uncropped photos with all four corners of the document visible — the service detects, aligns, and crops"
+        },
+        {
+          "info": {
+            "name": "Face Match",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/face-match/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "user_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "ref_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "face_match_score_decline_threshold",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "rotate_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Compare two face images (1:1) and get back a similarity `score` (0–100) plus an `Approved`/`Declined` `status`.\n\n**How it works.** Both images are decoded and analyzed by a biometric model (set `rotate_image=true` if captures may be sideways or upside down), then a similarity score between the two faces is computed. A score **strictly above** `face_match_score_decline_threshold` (default `30`) returns `status: \"Approved\"`; a score at or below it returns `Declined` with a `LOW_FACE_MATCH_SIMILARI"
+        },
+        {
+          "info": {
+            "name": "Age Estimation (face age + passive liveness)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/age-estimation/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "user_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "face_liveness_score_decline_threshold",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "age_estimation_decline_threshold",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "rotate_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Estimate a person's age from a single face photo and run a passive liveness check in the same call — returns the model-predicted `age_estimation` (in years), a liveness `score` (0–100), and an `Approved`/`Declined` `status`. The age is **model-predicted from the face, not verified against a document** — use it for age gates and low-friction checks, not as legal proof of age.\n\n**How it works.** The image is analyzed for faces (set `rotate_image=true` if captures may be sideways or upside down); e"
+        },
+        {
+          "info": {
+            "name": "Proof of Address (document OCR + address checks)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/poa/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "document",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "document_password",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "expected_address",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "expected_country",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "expected_first_name",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "expected_last_name",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_languages_allowed",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_document_age_months",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_name_mismatch_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_document_issues_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_document_authenticity_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_unsupported_language_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_address_mismatch_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "poa_issuer_not_identified_action",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Extract and validate a Proof of Address document — utility bills, bank statements, and government-issued documents — in one call. Returns the issuer, issue/expiry dates, the holder name, the raw and parsed/geocoded address, an `Approved`/`Declined` `status`, and a `warnings` list explaining every issue found.\n\n**Latency.** Extraction is LLM-based: typical calls take **5–15 seconds**, multi-page PDFs up to **~30 seconds**. Configure a client timeout of **at least 45 seconds** and do not retry bef"
+        },
+        {
+          "info": {
+            "name": "AML screening (standalone)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/aml/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Screen a person or company against PEP, sanctions, warning/watchlist, and adverse-media datasets in one call.\n\n**Two-score model.** Each hit carries a `match_score` (0–100, identity confidence) and a `risk_score` (0–100, entity risk). Hits whose `match_score` is below `aml_match_score_threshold` (default **93**) are tagged `review_status: \"False Positive\"` and ignored for risk purposes; the highest `risk_score` among the remaining hits becomes `aml.score`. The final `aml.status` follows your thr"
+        },
+        {
+          "info": {
+            "name": "Face Search",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/face-search/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "user_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "search_type",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "rotate_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Search a face image (1:N) against your application's face search index — faces enrolled from verification sessions, saved standalone API calls, direct user-profile face uploads, and your block/allow lists — and get back ranked similarity matches plus blocklist and duplicate warnings.\n\n**How it works.** The largest detected face in `user_image` is embedded and searched against the index, scoped to your application. Up to **5 matches** above the similarity floor are returned in `matches`, each wit"
+        },
+        {
+          "info": {
+            "name": "KYB registry company search (standalone)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/kyb/search/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Search official company registries for candidate companies by name and/or registration number. This is step 1 of the two-step registry flow: **search** returns lightweight candidates, then `POST /v3/kyb/select/` retrieves the full profile of one candidate.\n\n**The search is free** — no balance check, no billing. Candidates always come back with `fetch_status: \"pending\"`: the full company data is only fetched (and billed) on select.\n\n**`kyb_response_id` is ephemeral.** It is a per-search handle, n"
+        },
+        {
+          "info": {
+            "name": "KYB registry company select (standalone)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/kyb/select/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve the full registry profile of one candidate returned by `POST /v3/kyb/search/` — company details, officers, beneficial owners, addresses, industries, filings, and the complete raw registry payload.\n\n**Pairing with search.** Pass the candidate's `kyb_response_id` exactly as returned by the search. The handle is ephemeral and scoped to that search — select promptly, and re-search for a fresh handle rather than storing it.\n\n**Billing.** Each select is billed at the KYB registry price (searc"
+        },
+        {
+          "info": {
+            "name": "Passive Liveness",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/passive-liveness/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "user_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "face_liveness_score_decline_threshold",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "rotate_image",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "save_api_request",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "vendor_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "metadata",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Detect presentation attacks — printed photos, screen replays, masks, deepfakes — from a single face image. No video, motion, or user interaction required.\n\n**How it works.** The image is analyzed by a biometric model; the largest detected face is evaluated and a liveness `score` (0–100) is computed. `status` is `Declined` when any `error`-severity warning fires:\n- `NO_FACE_DETECTED` — the liveness model found no face,\n- `LOW_LIVENESS_SCORE` — score at or below `face_liveness_score_decline_thresh"
+        },
+        {
+          "info": {
+            "name": "Database Validation (standalone)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/database-validation/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Validate a person's identity data against official government and registry sources — CPF in Brazil, RENAPER in Argentina, DNI registries in Spain and Peru, INE in Mexico, and 100+ more services across 60+ countries.\n\n**Service selection.** Each country exposes one or more catalog services identified by a `service_id` (e.g. `bra_cpf`, `arg_renaper`, `pan_cedula_sib`). Pin the services you want with the `services` array — if you omit it, exactly **one** default service runs (the longest-establishe"
+        },
+        {
+          "info": {
+            "name": "Send Phone Code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/phone/send/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Send a one-time passcode (OTP) to a phone number over WhatsApp, SMS, or another supported channel, then verify it with [`POST /v3/phone/check/`](/standalone-apis/phone-check).\n\n**How send and check pair up.** Verification state is keyed by your application plus the E.164 `phone_number` — the check call does not take `request_id`. Each new send creates a pending verification that lives for **5 minutes**: call the check with the same number and the code the user received before the window closes. "
+        },
+        {
+          "info": {
+            "name": "Check Phone Code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/phone/check/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Verify the OTP delivered by [`POST /v3/phone/send/`](/standalone-apis/phone-send) and get the final verification result plus phone intelligence: carrier name and line type, virtual (VoIP) and disposable flags, and duplicate usage of the number across your sessions.\n\n**How the check finds the verification.** Matching is by your application plus the E.164 `phone_number` — `request_id` is not an input. The most recent pending verification created within the last **5 minutes** is checked. If there i"
+        },
+        {
+          "info": {
+            "name": "Send Email Code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/email/send/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Send a one-time passcode (OTP) to an email address, then verify it with [`POST /v3/email/check/`](/standalone-apis/email-check).\n\n**How send and check pair up.** Verification state is keyed by your application plus the `email` address — the check call does not take `request_id`. Each new send creates a pending verification that lives for **5 minutes**: call the check with the same address and the code the user received before the window closes. Calling send again for the same address while a ver"
+        },
+        {
+          "info": {
+            "name": "Check Email Code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/email/check/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Verify the OTP delivered by [`POST /v3/email/send/`](/standalone-apis/email-send) and get the final verification result plus email intelligence: deliverability, breach exposure (`is_breached` and the `breaches` list from a breach-intelligence database), disposable-provider detection, and duplicate usage of the address across your sessions.\n\n**How the check finds the verification.** Matching is by your application plus the `email` address — `request_id` is not an input. The most recent pending ve"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

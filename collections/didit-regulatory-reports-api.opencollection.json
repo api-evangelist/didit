@@ -1,0 +1,376 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Regulatory Reports API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Regulatory Reports",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List reports for case",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/regulatory-reports/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset."
+              }
+            ]
+          },
+          "docs": "List FIU reports generated for the case."
+        },
+        {
+          "info": {
+            "name": "Create report from case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/regulatory-reports/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a draft FIU report for the case: DRAFT status, auto-populated from the optional template plus the case's subject, linked transactions, and narrative. Validate then finalize to produce the goAML XML and PDF."
+        },
+        {
+          "info": {
+            "name": "List reports",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter by status."
+              },
+              {
+                "name": "report_type",
+                "value": "",
+                "type": "query",
+                "description": "Filter by report type."
+              },
+              {
+                "name": "case",
+                "value": "",
+                "type": "query",
+                "description": "Filter to reports on this case."
+              }
+            ]
+          },
+          "docs": "Application-wide FIU report list, optionally filtered by status, report_type, or case."
+        },
+        {
+          "info": {
+            "name": "Create standalone report",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a draft FIU report from the standalone Reports page: both case and template are required (unlike the case-scoped create, which can omit template)."
+        },
+        {
+          "info": {
+            "name": "Get report",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              }
+            ]
+          },
+          "docs": "Retrieve a regulatory report."
+        },
+        {
+          "info": {
+            "name": "Update report",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Edit a draft or validated report's fields. Finalized reports cannot be edited (409)."
+        },
+        {
+          "info": {
+            "name": "Delete report",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              }
+            ]
+          },
+          "docs": "Soft-delete a draft or validated report. Finalized reports cannot be deleted (409)."
+        },
+        {
+          "info": {
+            "name": "Validate report",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/validate/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              }
+            ]
+          },
+          "docs": "Check the report against the obligatory goAML header fields (reporting entity ID, submission code, local currency, action taken, submission date), plus at least one attached transaction and a 2-letter jurisdiction, without generating any files. Also stores the result on the report: validation_errors and validated_at are updated, and a non-finalized report's status moves to VALIDATED (no errors) or back to DRAFT (errors)."
+        },
+        {
+          "info": {
+            "name": "Finalize report",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/finalize/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              }
+            ]
+          },
+          "docs": "Re-validate, then render the goAML XML and PDF and upload both to S3. On SAR/STR/TFR reports, this also moves the case's transaction alerts from Pending SAR to SAR filed."
+        },
+        {
+          "info": {
+            "name": "Get report download URL",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/regulatory-reports/:report_uuid/download-url/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "report_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report UUID."
+              },
+              {
+                "name": "file",
+                "value": "",
+                "type": "query",
+                "description": "Which file to download."
+              }
+            ]
+          },
+          "docs": "Mint a presigned URL for a finalized report's goAML XML or PDF."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

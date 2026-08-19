@@ -1,0 +1,1906 @@
+{
+  "item": [
+    {
+      "id": "6b27d08f-54ef-485e-929d-94fc7006efba",
+      "name": "Regulatory Reports",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "059eb117-8d79-4d4b-93ef-e2911931fd2a",
+          "name": "List reports for case",
+          "request": {
+            "name": "List reports for case",
+            "description": {
+              "content": "List FIU reports generated for the case.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                ":case_uuid",
+                "regulatory-reports",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset."
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "case_uuid",
+                  "description": "(Required) Case UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "846d8617-3f4f-47b9-a5c7-724a97f1e226",
+              "name": "Paginated reports for the case.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    ":case_uuid",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "case_uuid",
+                      "description": "(Required) Case UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 7087,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"uuid\": \"2c2acaa7-3b4e-8eaa-f32e-fc61d56850b9\",\n      \"case_uuid\": \"c6b75695-dee2-4cc7-b913-6f0b1026fb86\",\n      \"case_number\": \"string\",\n      \"report_type\": \"TTR\",\n      \"report_type_display\": \"string\",\n      \"report_code\": \"string\",\n      \"report_number\": \"string\",\n      \"status\": \"DRAFT\",\n      \"status_display\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"rentity_id\": \"string\",\n      \"rentity_branch\": \"string\",\n      \"submission_code\": \"E\",\n      \"entity_reference\": \"string\",\n      \"fiu_ref_number\": \"string\",\n      \"currency_code_local\": \"str\",\n      \"submission_date\": \"1970-04-14T00:23:48.814Z\",\n      \"reporting_person\": {},\n      \"location\": {},\n      \"reason\": \"string\",\n      \"action\": \"string\",\n      \"activity\": \"string\",\n      \"narrative\": {\n        \"who\": \"string\",\n        \"what\": \"string\",\n        \"when\": \"string\",\n        \"where\": \"string\",\n        \"why\": \"string\",\n        \"how\": \"string\"\n      },\n      \"report_indicators\": [\n        \"string\",\n        \"string\"\n      ],\n      \"included_fields\": [\n        \"string\",\n        \"string\"\n      ],\n      \"transactions\": [\n        \"334f3e90-82c8-35f7-5a48-86b1fdea2088\",\n        \"000ae884-6ba5-06cb-e0a2-455aabda733a\"\n      ],\n      \"validation_errors\": [\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        },\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        }\n      ],\n      \"validated_at\": \"1975-10-05T13:35:27.531Z\",\n      \"finalized_at\": \"2005-08-26T13:25:55.186Z\",\n      \"created_by_email\": \"string\",\n      \"created_by_name\": \"string\",\n      \"created_at\": \"1988-08-28T04:08:03.451Z\",\n      \"updated_at\": \"1987-01-12T04:56:36.833Z\"\n    },\n    {\n      \"uuid\": \"4c7ef9a8-622b-80d9-fcf0-a3281508d936\",\n      \"case_uuid\": \"360b5c2d-1c9d-626e-8918-cafef5c5dac4\",\n      \"case_number\": \"string\",\n      \"report_type\": \"CBR\",\n      \"report_type_display\": \"string\",\n      \"report_code\": \"string\",\n      \"report_number\": \"string\",\n      \"status\": \"DRAFT\",\n      \"status_display\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"rentity_id\": \"string\",\n      \"rentity_branch\": \"string\",\n      \"submission_code\": \"E\",\n      \"entity_reference\": \"string\",\n      \"fiu_ref_number\": \"string\",\n      \"currency_code_local\": \"str\",\n      \"submission_date\": \"1953-06-02T00:21:30.900Z\",\n      \"reporting_person\": {},\n      \"location\": {},\n      \"reason\": \"string\",\n      \"action\": \"string\",\n      \"activity\": \"string\",\n      \"narrative\": {\n        \"who\": \"string\",\n        \"what\": \"string\",\n        \"when\": \"string\",\n        \"where\": \"string\",\n        \"why\": \"string\",\n        \"how\": \"string\"\n      },\n      \"report_indicators\": [\n        \"string\",\n        \"string\"\n      ],\n      \"included_fields\": [\n        \"string\",\n        \"string\"\n      ],\n      \"transactions\": [\n        \"68be174b-62b4-2d58-3820-a900358dd12a\",\n        \"30316426-9455-a940-c122-e7c95aee3b8f\"\n      ],\n      \"validation_errors\": [\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        },\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        }\n      ],\n      \"validated_at\": \"1963-11-14T13:14:15.701Z\",\n      \"finalized_at\": \"1990-08-12T17:59:57.885Z\",\n      \"created_by_email\": \"string\",\n      \"created_by_name\": \"string\",\n      \"created_at\": \"1989-04-16T00:07:38.165Z\",\n      \"updated_at\": \"1989-05-09T12:46:12.604Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "8310217e-7403-4daa-81fe-7c11b96f2cd3",
+          "name": "Create report from case",
+          "request": {
+            "name": "Create report from case",
+            "description": {
+              "content": "Create a draft FIU report for the case: DRAFT status, auto-populated from the optional template plus the case's subject, linked transactions, and narrative. Validate then finalize to produce the goAML XML and PDF.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "cases",
+                ":case_uuid",
+                "regulatory-reports",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "case_uuid",
+                  "description": "(Required) Case UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"template\": \"<uuid>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "242b30dd-209b-4238-9a41-ddcc1d574a58",
+              "name": "Draft report created.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    ":case_uuid",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "case_uuid",
+                      "description": "(Required) Case UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"template\": \"<uuid>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"4a1e101d-abc9-bd5b-8e9b-f480367214ff\",\n  \"case_uuid\": \"88bcb323-9ed6-ba7a-3910-e26ee0c28497\",\n  \"case_number\": \"string\",\n  \"report_type\": \"STR\",\n  \"report_type_display\": \"string\",\n  \"report_code\": \"string\",\n  \"report_number\": \"string\",\n  \"status\": \"FINALIZED\",\n  \"status_display\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"rentity_id\": \"string\",\n  \"rentity_branch\": \"string\",\n  \"submission_code\": \"M\",\n  \"entity_reference\": \"string\",\n  \"fiu_ref_number\": \"string\",\n  \"currency_code_local\": \"str\",\n  \"submission_date\": \"1984-10-09T13:37:30.760Z\",\n  \"reporting_person\": {},\n  \"location\": {},\n  \"reason\": \"string\",\n  \"action\": \"string\",\n  \"activity\": \"string\",\n  \"narrative\": {\n    \"who\": \"string\",\n    \"what\": \"string\",\n    \"when\": \"string\",\n    \"where\": \"string\",\n    \"why\": \"string\",\n    \"how\": \"string\"\n  },\n  \"report_indicators\": [\n    \"string\",\n    \"string\"\n  ],\n  \"included_fields\": [\n    \"string\",\n    \"string\"\n  ],\n  \"transactions\": [\n    \"b38b0e43-d59e-6ccf-3900-d557830b8969\",\n    \"96e39613-ab06-0b4c-920b-8334d2c252ff\"\n  ],\n  \"validation_errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ],\n  \"validated_at\": \"2022-01-09T00:45:01.637Z\",\n  \"finalized_at\": \"1996-04-12T00:46:25.930Z\",\n  \"created_by_email\": \"string\",\n  \"created_by_name\": \"string\",\n  \"created_at\": \"1950-02-19T20:41:36.006Z\",\n  \"updated_at\": \"1978-09-29T13:10:30.850Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f3b32516-e6e3-43a4-bc64-c5a047efa046",
+              "name": "The referenced template was not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "cases",
+                    ":case_uuid",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "case_uuid",
+                      "description": "(Required) Case UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"template\": \"<uuid>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ffc04b0c-4cdc-409a-8ac6-b70c62fba988",
+          "name": "List reports",
+          "request": {
+            "name": "List reports",
+            "description": {
+              "content": "Application-wide FIU report list, optionally filtered by status, report_type, or case.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Page size."
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Zero-based offset."
+                },
+                {
+                  "disabled": false,
+                  "key": "status",
+                  "value": "<string>",
+                  "description": "Filter by status."
+                },
+                {
+                  "disabled": false,
+                  "key": "report_type",
+                  "value": "<string>",
+                  "description": "Filter by report type."
+                },
+                {
+                  "disabled": false,
+                  "key": "case",
+                  "value": "<uuid>",
+                  "description": "Filter to reports on this case."
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "25171e39-783d-4db8-826e-ee89ed2b9db2",
+              "name": "Paginated reports across the application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    },
+                    {
+                      "key": "status",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "report_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "case",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 1910,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"uuid\": \"bde5a4e0-c40d-fc36-9aa8-a0c78f68c9a4\",\n      \"case_uuid\": \"ee6392e2-1366-103a-3910-9dee3a19569b\",\n      \"case_number\": \"string\",\n      \"report_type\": \"STR\",\n      \"report_type_display\": \"string\",\n      \"report_code\": \"string\",\n      \"report_number\": \"string\",\n      \"status\": \"DRAFT\",\n      \"status_display\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"rentity_id\": \"string\",\n      \"rentity_branch\": \"string\",\n      \"submission_code\": \"M\",\n      \"entity_reference\": \"string\",\n      \"fiu_ref_number\": \"string\",\n      \"currency_code_local\": \"str\",\n      \"submission_date\": \"2017-01-01T10:56:16.106Z\",\n      \"reporting_person\": {},\n      \"location\": {},\n      \"reason\": \"string\",\n      \"action\": \"string\",\n      \"activity\": \"string\",\n      \"narrative\": {\n        \"who\": \"string\",\n        \"what\": \"string\",\n        \"when\": \"string\",\n        \"where\": \"string\",\n        \"why\": \"string\",\n        \"how\": \"string\"\n      },\n      \"report_indicators\": [\n        \"string\",\n        \"string\"\n      ],\n      \"included_fields\": [\n        \"string\",\n        \"string\"\n      ],\n      \"transactions\": [\n        \"60b69d89-97d9-3402-9c2e-65d4bb01f80d\",\n        \"3c2eaaf2-3bee-c2b4-72a4-fe45e7547a51\"\n      ],\n      \"validation_errors\": [\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        },\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        }\n      ],\n      \"validated_at\": \"2023-02-25T18:00:17.061Z\",\n      \"finalized_at\": \"1971-07-16T18:41:39.432Z\",\n      \"created_by_email\": \"string\",\n      \"created_by_name\": \"string\",\n      \"created_at\": \"1992-08-12T21:50:38.070Z\",\n      \"updated_at\": \"1991-05-30T15:54:33.581Z\"\n    },\n    {\n      \"uuid\": \"6444e3dd-91b3-6a97-d1e5-8b99418db3bb\",\n      \"case_uuid\": \"a0feaae9-c4f1-80e0-e7fc-17b7baf40f4a\",\n      \"case_number\": \"string\",\n      \"report_type\": \"TTR\",\n      \"report_type_display\": \"string\",\n      \"report_code\": \"string\",\n      \"report_number\": \"string\",\n      \"status\": \"DRAFT\",\n      \"status_display\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"rentity_id\": \"string\",\n      \"rentity_branch\": \"string\",\n      \"submission_code\": \"M\",\n      \"entity_reference\": \"string\",\n      \"fiu_ref_number\": \"string\",\n      \"currency_code_local\": \"str\",\n      \"submission_date\": \"1978-08-21T03:00:08.359Z\",\n      \"reporting_person\": {},\n      \"location\": {},\n      \"reason\": \"string\",\n      \"action\": \"string\",\n      \"activity\": \"string\",\n      \"narrative\": {\n        \"who\": \"string\",\n        \"what\": \"string\",\n        \"when\": \"string\",\n        \"where\": \"string\",\n        \"why\": \"string\",\n        \"how\": \"string\"\n      },\n      \"report_indicators\": [\n        \"string\",\n        \"string\"\n      ],\n      \"included_fields\": [\n        \"string\",\n        \"string\"\n      ],\n      \"transactions\": [\n        \"930b5964-6330-cf14-2f8a-2f926f80b8af\",\n        \"f4b7a0d2-e2bb-772d-236c-21c5f5362825\"\n      ],\n      \"validation_errors\": [\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        },\n        {\n          \"field\": \"string\",\n          \"message\": \"string\"\n        }\n      ],\n      \"validated_at\": \"1961-07-26T22:48:49.837Z\",\n      \"finalized_at\": \"2024-07-09T13:32:51.931Z\",\n      \"created_by_email\": \"string\",\n      \"created_by_name\": \"string\",\n      \"created_at\": \"1979-11-07T19:38:12.155Z\",\n      \"updated_at\": \"2022-01-18T02:33:35.374Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "69201685-290b-40b8-9849-dd4782aee3f7",
+          "name": "Create standalone report",
+          "request": {
+            "name": "Create standalone report",
+            "description": {
+              "content": "Create a draft FIU report from the standalone Reports page: both case and template are required (unlike the case-scoped create, which can omit template).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"case\": \"<uuid>\",\n  \"template\": \"<uuid>\",\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c91d420e-88ab-444b-897a-a17846424b0d",
+              "name": "Draft report created.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"case\": \"<uuid>\",\n  \"template\": \"<uuid>\",\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"4a1e101d-abc9-bd5b-8e9b-f480367214ff\",\n  \"case_uuid\": \"88bcb323-9ed6-ba7a-3910-e26ee0c28497\",\n  \"case_number\": \"string\",\n  \"report_type\": \"STR\",\n  \"report_type_display\": \"string\",\n  \"report_code\": \"string\",\n  \"report_number\": \"string\",\n  \"status\": \"FINALIZED\",\n  \"status_display\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"rentity_id\": \"string\",\n  \"rentity_branch\": \"string\",\n  \"submission_code\": \"M\",\n  \"entity_reference\": \"string\",\n  \"fiu_ref_number\": \"string\",\n  \"currency_code_local\": \"str\",\n  \"submission_date\": \"1984-10-09T13:37:30.760Z\",\n  \"reporting_person\": {},\n  \"location\": {},\n  \"reason\": \"string\",\n  \"action\": \"string\",\n  \"activity\": \"string\",\n  \"narrative\": {\n    \"who\": \"string\",\n    \"what\": \"string\",\n    \"when\": \"string\",\n    \"where\": \"string\",\n    \"why\": \"string\",\n    \"how\": \"string\"\n  },\n  \"report_indicators\": [\n    \"string\",\n    \"string\"\n  ],\n  \"included_fields\": [\n    \"string\",\n    \"string\"\n  ],\n  \"transactions\": [\n    \"b38b0e43-d59e-6ccf-3900-d557830b8969\",\n    \"96e39613-ab06-0b4c-920b-8334d2c252ff\"\n  ],\n  \"validation_errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ],\n  \"validated_at\": \"2022-01-09T00:45:01.637Z\",\n  \"finalized_at\": \"1996-04-12T00:46:25.930Z\",\n  \"created_by_email\": \"string\",\n  \"created_by_name\": \"string\",\n  \"created_at\": \"1950-02-19T20:41:36.006Z\",\n  \"updated_at\": \"1978-09-29T13:10:30.850Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cab4bdb1-9253-4e85-bba2-53d08fa280cc",
+              "name": "The referenced template was not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"case\": \"<uuid>\",\n  \"template\": \"<uuid>\",\n  \"report_type\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"transactions\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ],\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "77b9c641-e494-4416-9a92-985443d0db11",
+          "name": "Get report",
+          "request": {
+            "name": "Get report",
+            "description": {
+              "content": "Retrieve a regulatory report.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "36ae732a-0b78-4325-89ac-f2c05924fa75",
+              "name": "Report detail.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"4a1e101d-abc9-bd5b-8e9b-f480367214ff\",\n  \"case_uuid\": \"88bcb323-9ed6-ba7a-3910-e26ee0c28497\",\n  \"case_number\": \"string\",\n  \"report_type\": \"STR\",\n  \"report_type_display\": \"string\",\n  \"report_code\": \"string\",\n  \"report_number\": \"string\",\n  \"status\": \"FINALIZED\",\n  \"status_display\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"rentity_id\": \"string\",\n  \"rentity_branch\": \"string\",\n  \"submission_code\": \"M\",\n  \"entity_reference\": \"string\",\n  \"fiu_ref_number\": \"string\",\n  \"currency_code_local\": \"str\",\n  \"submission_date\": \"1984-10-09T13:37:30.760Z\",\n  \"reporting_person\": {},\n  \"location\": {},\n  \"reason\": \"string\",\n  \"action\": \"string\",\n  \"activity\": \"string\",\n  \"narrative\": {\n    \"who\": \"string\",\n    \"what\": \"string\",\n    \"when\": \"string\",\n    \"where\": \"string\",\n    \"why\": \"string\",\n    \"how\": \"string\"\n  },\n  \"report_indicators\": [\n    \"string\",\n    \"string\"\n  ],\n  \"included_fields\": [\n    \"string\",\n    \"string\"\n  ],\n  \"transactions\": [\n    \"b38b0e43-d59e-6ccf-3900-d557830b8969\",\n    \"96e39613-ab06-0b4c-920b-8334d2c252ff\"\n  ],\n  \"validation_errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ],\n  \"validated_at\": \"2022-01-09T00:45:01.637Z\",\n  \"finalized_at\": \"1996-04-12T00:46:25.930Z\",\n  \"created_by_email\": \"string\",\n  \"created_by_name\": \"string\",\n  \"created_at\": \"1950-02-19T20:41:36.006Z\",\n  \"updated_at\": \"1978-09-29T13:10:30.850Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5d6448d8-f9e2-4b34-993f-06d56449203f",
+          "name": "Update report",
+          "request": {
+            "name": "Update report",
+            "description": {
+              "content": "Edit a draft or validated report's fields. Finalized reports cannot be edited (409).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jurisdiction\": \"<string>\",\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "621ba3e7-7a21-49dc-ac80-37a0b581da36",
+              "name": "Updated report.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jurisdiction\": \"<string>\",\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"4a1e101d-abc9-bd5b-8e9b-f480367214ff\",\n  \"case_uuid\": \"88bcb323-9ed6-ba7a-3910-e26ee0c28497\",\n  \"case_number\": \"string\",\n  \"report_type\": \"STR\",\n  \"report_type_display\": \"string\",\n  \"report_code\": \"string\",\n  \"report_number\": \"string\",\n  \"status\": \"FINALIZED\",\n  \"status_display\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"rentity_id\": \"string\",\n  \"rentity_branch\": \"string\",\n  \"submission_code\": \"M\",\n  \"entity_reference\": \"string\",\n  \"fiu_ref_number\": \"string\",\n  \"currency_code_local\": \"str\",\n  \"submission_date\": \"1984-10-09T13:37:30.760Z\",\n  \"reporting_person\": {},\n  \"location\": {},\n  \"reason\": \"string\",\n  \"action\": \"string\",\n  \"activity\": \"string\",\n  \"narrative\": {\n    \"who\": \"string\",\n    \"what\": \"string\",\n    \"when\": \"string\",\n    \"where\": \"string\",\n    \"why\": \"string\",\n    \"how\": \"string\"\n  },\n  \"report_indicators\": [\n    \"string\",\n    \"string\"\n  ],\n  \"included_fields\": [\n    \"string\",\n    \"string\"\n  ],\n  \"transactions\": [\n    \"b38b0e43-d59e-6ccf-3900-d557830b8969\",\n    \"96e39613-ab06-0b4c-920b-8334d2c252ff\"\n  ],\n  \"validation_errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ],\n  \"validated_at\": \"2022-01-09T00:45:01.637Z\",\n  \"finalized_at\": \"1996-04-12T00:46:25.930Z\",\n  \"created_by_email\": \"string\",\n  \"created_by_name\": \"string\",\n  \"created_at\": \"1950-02-19T20:41:36.006Z\",\n  \"updated_at\": \"1978-09-29T13:10:30.850Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "127055a6-3add-4fd5-b6cb-c789df63e66a",
+              "name": "Report is already finalized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jurisdiction\": \"<string>\",\n  \"rentity_id\": \"<string>\",\n  \"rentity_branch\": \"<string>\",\n  \"submission_code\": \"E\",\n  \"entity_reference\": \"<string>\",\n  \"fiu_ref_number\": \"<string>\",\n  \"currency_code_local\": \"<string>\",\n  \"submission_date\": \"<dateTime>\",\n  \"reporting_person\": \"<object>\",\n  \"location\": \"<object>\",\n  \"reason\": \"<string>\",\n  \"action\": \"<string>\",\n  \"activity\": \"<string>\",\n  \"narrative\": {\n    \"who\": \"<string>\",\n    \"what\": \"<string>\",\n    \"when\": \"<string>\",\n    \"where\": \"<string>\",\n    \"why\": \"<string>\",\n    \"how\": \"<string>\"\n  },\n  \"report_indicators\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"included_fields\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "71b45f19-0fe3-44d8-9b2b-d7b5c0f764e6",
+          "name": "Delete report",
+          "request": {
+            "name": "Delete report",
+            "description": {
+              "content": "Soft-delete a draft or validated report. Finalized reports cannot be deleted (409).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "e93fcb73-41ca-4f2f-8411-7f57d1cd0748",
+              "name": "Report deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "5f0ebe68-57a5-43b8-b35d-04315b592b43",
+              "name": "Report is already finalized.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "da1f2d63-8dc7-46f6-a9ea-849883936fac",
+          "name": "Validate report",
+          "request": {
+            "name": "Validate report",
+            "description": {
+              "content": "Check the report against the obligatory goAML header fields (reporting entity ID, submission code, local currency, action taken, submission date), plus at least one attached transaction and a 2-letter jurisdiction, without generating any files. Also stores the result on the report: validation_errors and validated_at are updated, and a non-finalized report's status moves to VALIDATED (no errors) or back to DRAFT (errors).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                "validate",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "e9e3dd41-61f1-4269-a188-32c53105aee0",
+              "name": "Validation result.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "validate",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"FINALIZED\",\n  \"is_valid\": true,\n  \"errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "dd531328-ec16-4c62-8ede-6456776c33f8",
+          "name": "Finalize report",
+          "request": {
+            "name": "Finalize report",
+            "description": {
+              "content": "Re-validate, then render the goAML XML and PDF and upload both to S3. On SAR/STR/TFR reports, this also moves the case's transaction alerts from Pending SAR to SAR filed.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                "finalize",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "ecfe6ce6-8f93-4b4c-b15b-1d583d98ebae",
+              "name": "Report finalized; xml_s3_key and pdf_s3_key are set.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "finalize",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"4a1e101d-abc9-bd5b-8e9b-f480367214ff\",\n  \"case_uuid\": \"88bcb323-9ed6-ba7a-3910-e26ee0c28497\",\n  \"case_number\": \"string\",\n  \"report_type\": \"STR\",\n  \"report_type_display\": \"string\",\n  \"report_code\": \"string\",\n  \"report_number\": \"string\",\n  \"status\": \"FINALIZED\",\n  \"status_display\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"rentity_id\": \"string\",\n  \"rentity_branch\": \"string\",\n  \"submission_code\": \"M\",\n  \"entity_reference\": \"string\",\n  \"fiu_ref_number\": \"string\",\n  \"currency_code_local\": \"str\",\n  \"submission_date\": \"1984-10-09T13:37:30.760Z\",\n  \"reporting_person\": {},\n  \"location\": {},\n  \"reason\": \"string\",\n  \"action\": \"string\",\n  \"activity\": \"string\",\n  \"narrative\": {\n    \"who\": \"string\",\n    \"what\": \"string\",\n    \"when\": \"string\",\n    \"where\": \"string\",\n    \"why\": \"string\",\n    \"how\": \"string\"\n  },\n  \"report_indicators\": [\n    \"string\",\n    \"string\"\n  ],\n  \"included_fields\": [\n    \"string\",\n    \"string\"\n  ],\n  \"transactions\": [\n    \"b38b0e43-d59e-6ccf-3900-d557830b8969\",\n    \"96e39613-ab06-0b4c-920b-8334d2c252ff\"\n  ],\n  \"validation_errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ],\n  \"validated_at\": \"2022-01-09T00:45:01.637Z\",\n  \"finalized_at\": \"1996-04-12T00:46:25.930Z\",\n  \"created_by_email\": \"string\",\n  \"created_by_name\": \"string\",\n  \"created_at\": \"1950-02-19T20:41:36.006Z\",\n  \"updated_at\": \"1978-09-29T13:10:30.850Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "977ef20d-31d2-4620-b3e0-dea4f191941b",
+              "name": "Report failed validation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "finalize",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\",\n  \"errors\": [\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    },\n    {\n      \"field\": \"string\",\n      \"message\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a2765cdd-1862-4b29-9aeb-c1a5684561b4",
+              "name": "Report is not in a finalizable state.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "finalize",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f13b21a2-ec57-45b9-96c2-928a46e2d1bc",
+          "name": "Get report download URL",
+          "request": {
+            "name": "Get report download URL",
+            "description": {
+              "content": "Mint a presigned URL for a finalized report's goAML XML or PDF.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "organization",
+                ":organization_id",
+                "application",
+                ":application_id",
+                "regulatory-reports",
+                ":report_uuid",
+                "download-url",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "file",
+                  "value": "pdf",
+                  "description": "Which file to download."
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "organization_id",
+                  "description": "(Required) Organization UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "application_id",
+                  "description": "(Required) Application UUID."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "report_uuid",
+                  "description": "(Required) Report UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "178b8001-919a-4f23-95ce-c2e9ce6901a8",
+              "name": "Presigned download URL.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "download-url",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "file",
+                      "value": "pdf"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"download_url\": \"https://GMhmpIuZMzMfNYrCzNFnTc.vzDop5LS2zZakc6,MgM.isAxrj5CLjBqgZk6OurEt1u8k4SWniluvTlPkxaHD9O0GdT13gYw\",\n  \"file\": \"pdf\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4b6e812e-49e8-4183-8c3a-edb46ecf0110",
+              "name": "Report is not finalized yet.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "organization",
+                    ":organization_id",
+                    "application",
+                    ":application_id",
+                    "regulatory-reports",
+                    ":report_uuid",
+                    "download-url",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "file",
+                      "value": "pdf"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "organization_id",
+                      "description": "(Required) Organization UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "application_id",
+                      "description": "(Required) Application UUID."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "report_uuid",
+                      "description": "(Required) Report UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"string\",\n  \"status\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "de2b33b2-59c4-40c0-bd1f-9566a6ff7a21",
+    "name": "Didit Verification Billing Regulatory Reports API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

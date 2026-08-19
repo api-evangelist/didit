@@ -1,0 +1,549 @@
+{
+  "item": [
+    {
+      "id": "bff25d75-6e06-48ab-b76f-65db15991e82",
+      "name": "Customization",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "4a369472-fd3f-4e06-a6f3-8500b3b746ca",
+          "name": "Get branding customization",
+          "request": {
+            "name": "Get branding customization",
+            "description": {
+              "content": "Returns the white-label branding for the application resolved from the API key: colors, fonts, border radii, logo URLs and UI/UX options. Custom domain and white-label email settings are managed only in the Business Console and are not part of this response.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "customization",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "a41835e1-b1a6-4ba0-9a92-f7740add2680",
+              "name": "Current branding customization for the application.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"color_primary\": \"#000000\",\n  \"color_secondary\": \"#9DA1A1\",\n  \"color_background\": \"#FFFFFF\",\n  \"color_panel\": \"#2567FF\",\n  \"color_panel_10\": \"#1A1A1A\",\n  \"color_on_panel_1\": \"#9DA1A1\",\n  \"color_on_panel_2\": \"#F4F4F6\",\n  \"color_on_background\": \"#000000\",\n  \"color_button_1\": \"#2567FF\",\n  \"color_button_2\": \"#F8F8F8\",\n  \"color_button_text_1\": \"#FFFFFF\",\n  \"color_button_text_2\": \"#000000\",\n  \"color_pill_text\": \"#111827\",\n  \"border_radius_panel\": 10,\n  \"border_radius_buttons\": 12,\n  \"font_family\": \"Inter\",\n  \"font_weight\": \"regular\",\n  \"font_url\": \"https://fonts.googleapis.com/css2?family=Inter\",\n  \"logo_square\": null,\n  \"logo_rectangular\": null,\n  \"favicon\": null,\n  \"app_public_name\": \"Acme Verify\",\n  \"privacy_policy_url\": \"https://acme.com/privacy\",\n  \"skip_welcome_screen\": false,\n  \"disable_login_with_didit\": false,\n  \"hide_progress_bar\": false,\n  \"callback_seconds\": 3\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f8e72d8a-bbcf-41bb-873c-3561b257b97d",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2d2b2373-eedd-488f-8f54-2f1b6b157804",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "47abe227-323c-40c1-82da-aad96ad303b2",
+          "name": "Update branding customization",
+          "request": {
+            "name": "Update branding customization",
+            "description": {
+              "content": "Partial update of the application's white-label branding. Send `application/json` to change colors, fonts, radii and UI options, or `multipart/form-data` to upload logo images. Only the fields you include are changed. Custom domain and white-label email cannot be set through this endpoint — use the Business Console for those.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "customization",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image_square",
+                  "type": "file",
+                  "description": "Square logo (1:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`."
+                },
+                {
+                  "key": "image_rectangular",
+                  "type": "file",
+                  "description": "Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`."
+                },
+                {
+                  "key": "image_favicon",
+                  "type": "file",
+                  "description": "Favicon image. Max **500 KB**."
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "0a44e4fd-f760-48c6-8e95-fd9418399c4e",
+              "name": "Branding updated. The FULL branding object is returned (all fields, not just the ones you changed).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_rectangular",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "Favicon image. Max **500 KB**.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_favicon",
+                      "type": "file"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"color_primary\": \"#123456\",\n  \"color_secondary\": \"#9DA1A1\",\n  \"color_background\": \"#FFFFFF\",\n  \"color_panel\": \"#2567FF\",\n  \"color_panel_10\": \"#1A1A1A\",\n  \"color_on_panel_1\": \"#9DA1A1\",\n  \"color_on_panel_2\": \"#F4F4F6\",\n  \"color_on_background\": \"#000000\",\n  \"color_button_1\": \"#2567FF\",\n  \"color_button_2\": \"#F8F8F8\",\n  \"color_button_text_1\": \"#FFFFFF\",\n  \"color_button_text_2\": \"#000000\",\n  \"color_pill_text\": \"#111827\",\n  \"border_radius_panel\": 10,\n  \"border_radius_buttons\": 16,\n  \"font_family\": \"AR One Sans\",\n  \"font_weight\": \"400\",\n  \"font_url\": \"https://fonts.googleapis.com/css2?family=AR+One+Sans\",\n  \"logo_square\": null,\n  \"logo_rectangular\": \"https://cdn.didit.me/white_label/logo_rectangular/...\",\n  \"favicon\": null,\n  \"app_public_name\": \"Acme Verify\",\n  \"privacy_policy_url\": \"https://acme.com/privacy\",\n  \"skip_welcome_screen\": true,\n  \"disable_login_with_didit\": false,\n  \"hide_progress_bar\": false,\n  \"callback_seconds\": 3\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dc4d39c7-5713-40fe-abe3-8fddbcfc8ff7",
+              "name": "Invalid body — e.g. malformed hex color, unknown font family or weight, a logo failing the size/aspect-ratio check, or a Business-Console-only field (`domain`, `from_email`, `verify_domain`, `force_remove_domain`, `verify_email_domain`, `force_remove_email_domain`, and their read-only companions). Also returned when setting `disable_login_with_didit` to `false` while a custom domain is configured.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_rectangular",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "Favicon image. Max **500 KB**.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_favicon",
+                      "type": "file"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"color_primary\": [\n    \"Invalid color format. Use '#RRGGBB' or '#RRGGBBAA' format.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8e9d6a1d-c5f8-410e-854a-1c8eadf6b5d7",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_rectangular",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "Favicon image. Max **500 KB**.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_favicon",
+                      "type": "file"
+                    }
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "de6fdc13-9ec1-4096-9278-38209fc4a95f",
+              "name": "Rate limit exceeded. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "customization",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "Rectangular logo (2:1 aspect ratio). Max **1 MB**. Allowed: `png`, `jpg`, `jpeg`, `webp`.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_rectangular",
+                      "type": "file"
+                    },
+                    {
+                      "description": {
+                        "content": "Favicon image. Max **500 KB**.",
+                        "type": "text/plain"
+                      },
+                      "key": "image_favicon",
+                      "type": "file"
+                    }
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "3cb36961-0e48-45e2-aa6d-2d191a751132",
+    "name": "Didit Verification Billing Customization API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

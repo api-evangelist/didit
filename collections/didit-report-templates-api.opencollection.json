@@ -1,0 +1,181 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Report Templates API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Report Templates",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List report templates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/report-templates/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset."
+              }
+            ]
+          },
+          "docs": "List FIU report templates for the application."
+        },
+        {
+          "info": {
+            "name": "Create report template",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/report-templates/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a reusable per-jurisdiction, per-report-type goAML header template. Rejected with 400 if any of the template-level obligatory fields (rentity_id, submission_code, currency_code_local) is missing from field_config; an invalid template cannot be saved or used to create a report. Per-filing header fields (action, submission_date, transactions) are enforced at report validate/finalize time instead."
+        },
+        {
+          "info": {
+            "name": "Get report template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "template_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report template UUID."
+              }
+            ]
+          },
+          "docs": "Retrieve a report template."
+        },
+        {
+          "info": {
+            "name": "Update report template",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "template_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report template UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Partially update a report template. Re-validates obligatory goAML fields on save."
+        },
+        {
+          "info": {
+            "name": "Delete report template",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "template_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Report template UUID."
+              }
+            ]
+          },
+          "docs": "Soft-delete a report template. Reports already created from it are unaffected."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

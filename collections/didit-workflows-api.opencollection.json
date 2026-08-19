@@ -1,0 +1,149 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Workflows API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Workflows",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/workflows/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size (number of workflows per page)."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of rows to skip before the first returned workflow."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List your workflows, newest first, in a limit/offset pagination envelope (`{count, next, previous, results}`, default page size 50). Each row is one version; `workflow_id` is the stable group ID and new sessions use the latest `published` version."
+        },
+        {
+          "info": {
+            "name": "Create workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/workflows/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Create a simple workflow. Send `features` in execution order (ordering rules apply); defaults to `published` v1. The body accepts ONLY the fields listed in `SimpleWorkflowRequest` — any other key (including `workflow_type`) is rejected with a 400. Not idempotent — each call creates a new workflow. Maximum 50 workflows per application."
+        },
+        {
+          "info": {
+            "name": "Get workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/workflows/:settings_uuid/",
+            "params": [
+              {
+                "name": "settings_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the workflow (the `uuid` value returned by the list endpoint). Each version of a workflow has its own `settings_uuid`."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Fetch full configuration for one workflow version by `settings_uuid`: feature toggles, thresholds, allowed documents, graph, retry policy, callbacks, and pricing."
+        },
+        {
+          "info": {
+            "name": "Update workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/workflows/:settings_uuid/",
+            "params": [
+              {
+                "name": "settings_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the workflow to update."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Update a workflow. Versioning depends on the `status` field you send and the current state of the version: (1) no `status` on a **published** version → the published version is updated in place (same `uuid`, same `version`); (2) no `status` on a **draft** → the draft is updated and immediately published; (3) `status: \"published\"` on a **published** version → a NEW published version is created under the same `workflow_id` (new `uuid`, `version` + 1) and returned, and any existing draft in the gro"
+        },
+        {
+          "info": {
+            "name": "Delete workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/workflows/:settings_uuid/",
+            "params": [
+              {
+                "name": "settings_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Per-version UUID of the workflow to delete."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Permanently delete one workflow version (hard delete, no undo). Existing sessions keep their verification results but their workflow reference is cleared; other versions in the same `workflow_id` group are not deleted."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

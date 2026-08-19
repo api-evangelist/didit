@@ -1,0 +1,164 @@
+{
+  "item": [
+    {
+      "id": "5019f930-f751-48f1-9005-b98c8903fee9",
+      "name": "System",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "36c1a706-dbc5-4959-ac39-aba828b4f05b",
+          "name": "Service healthcheck (public, unauthenticated)",
+          "request": {
+            "name": "Service healthcheck (public, unauthenticated)",
+            "description": {
+              "content": "Public unauthenticated liveness probe. Returns `HTTP 200` with `{status: \"ok\", timestamp}` when service, DB, cache, and broker are healthy.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "system",
+                "healthcheck"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "b2c6e066-711c-4f66-8b2b-89678523eb3a",
+              "name": "Service is healthy and accepting requests. Body is always `{\"status\": \"ok\", \"timestamp\": \"<iso8601>\"}`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "system",
+                    "healthcheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2026-04-21T16:42:50.445Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "46c14d20-ec1e-44ec-b8c4-480a36ad9faf",
+              "name": "Service is unhealthy — one of the configured health-check plugins (database, cache, broker) is failing. The response body is intentionally minimal; the HTTP status is the load-bearing signal. Retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "system",
+                    "healthcheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "3597252b-1a05-433d-9c2d-4a224a689398",
+              "name": "Verification service is degraded or unreachable. Treat any non-2xx response as \"unhealthy\" and retry with exponential backoff.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "system",
+                    "healthcheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "8ee062ba-df2b-4cb1-b693-423fcfeccf84",
+    "name": "Didit Verification Billing System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

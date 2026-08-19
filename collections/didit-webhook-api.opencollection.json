@@ -1,0 +1,135 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Webhook API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Webhook",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List webhook destinations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/webhook/destinations/",
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List all webhook destinations (unpaginated array, oldest first). Each row includes URL, subscribed events, and delivery health metrics. The signing secret is NOT included in the list — fetch a single destination (`GET /v3/webhook/destinations/{destination_uuid}/`) to read `secret_shared_key`."
+        },
+        {
+          "info": {
+            "name": "Create webhook destination",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/webhook/destinations/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Create a webhook destination. The response includes the auto-generated `secret_shared_key` HMAC signing secret (also readable later via `GET /v3/webhook/destinations/{destination_uuid}/`). Always send `subscribed_events` with at least one event (no wildcards): an explicit empty list is rejected with 400, and omitting the field creates a destination subscribed to nothing, which never receives a webhook. The `(application, url)` pair must be unique among non-deleted destinations."
+        },
+        {
+          "info": {
+            "name": "Get webhook destination",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/webhook/destinations/:destination_uuid/",
+            "params": [
+              {
+                "name": "destination_uuid",
+                "value": "11111111-2222-3333-4444-555555555555",
+                "type": "path",
+                "description": "UUID of the destination (the `uuid` returned from create / list)."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve one webhook destination with its `secret_shared_key` signing secret and delivery health summary. API-key callers always receive the secret in full; Console users without `read:webhooks` see an empty string."
+        },
+        {
+          "info": {
+            "name": "Update webhook destination",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/webhook/destinations/:destination_uuid/",
+            "params": [
+              {
+                "name": "destination_uuid",
+                "value": "11111111-2222-3333-4444-555555555555",
+                "type": "path",
+                "description": "UUID of the destination to update."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Update a webhook destination. **`subscribed_events` is REPLACED wholesale, not merged** — fetch first, append, resend. Secret is not rotated."
+        },
+        {
+          "info": {
+            "name": "Delete webhook destination",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/webhook/destinations/:destination_uuid/",
+            "params": [
+              {
+                "name": "destination_uuid",
+                "value": "11111111-2222-3333-4444-555555555555",
+                "type": "path",
+                "description": "UUID of the destination to delete."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Soft-delete a webhook destination. Future events stop; historical delivery records are retained for audit. Calling again returns 404."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

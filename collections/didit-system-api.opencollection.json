@@ -1,0 +1,29 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing System API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "System",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Service healthcheck (public, unauthenticated)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/system/healthcheck"
+          },
+          "docs": "Public unauthenticated liveness probe. Returns `HTTP 200` with `{status: \"ok\", timestamp}` when service, DB, cache, and broker are healthy."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

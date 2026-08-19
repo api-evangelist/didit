@@ -1,0 +1,56 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Customization API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Customization",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get branding customization",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/customization/",
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns the white-label branding for the application resolved from the API key: colors, fonts, border radii, logo URLs and UI/UX options. Custom domain and white-label email settings are managed only in the Business Console and are not part of this response."
+        },
+        {
+          "info": {
+            "name": "Update branding customization",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/customization/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Partial update of the application's white-label branding. Send `application/json` to change colors, fonts, radii and UI options, or `multipart/form-data` to upload logo images. Only the fields you include are changed. Custom domain and white-label email cannot be set through this endpoint — use the Business Console for those."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

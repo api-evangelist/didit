@@ -1,0 +1,762 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Sessions API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Sessions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/session/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Create a User Verification (KYC) or Business Verification (KYB) session and receive a hosted verification `url` plus a `session_token` to redirect or embed for your end user. The `workflow_id` selects which verification steps run and whether the session is KYC or KYB.\n\nCall this from your backend (never the browser — the API key is a secret) whenever a user or business needs to be verified: at signup, before a sensitive action, or when re-verification is required. Prerequisites: a published work"
+        },
+        {
+          "info": {
+            "name": "Create a verification import job",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/session/imports/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Create an asynchronous import job for historical User Verification sessions, Business Verification sessions, transaction monitoring records, or workflow custom status rules. Use this to migrate from providers such as Sumsub, MetaMap, Veriff, Onfido, Persona, Trulioo, Jumio, Incode, iDenfy, or any other provider after transforming the export into Didit's canonical CSV/NDJSON format. Imports are disabled by default and must be enabled per organization by Didit."
+        },
+        {
+          "info": {
+            "name": "Download verification import template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/session/imports/template/",
+            "params": [
+              {
+                "name": "import_type",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Download the canonical CSV header for verification imports. The column set is determined by `import_type`. The first column of session templates is the idempotency key `external_id`."
+        },
+        {
+          "info": {
+            "name": "Retrieve a verification import job",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/session/imports/:importId/",
+            "params": [
+              {
+                "name": "importId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve import progress counters and terminal status for one job. Poll until `status` is `COMPLETED` or `FAILED`; `failed_count` > 0 means some rows were rejected — list them via the errors endpoint."
+        },
+        {
+          "info": {
+            "name": "List verification import row errors",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/session/imports/:importId/errors/",
+            "params": [
+              {
+                "name": "importId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size. Defaults to 50 when omitted."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset of the first record to return."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List row-level errors for a verification import job, ordered by `row_number`. Use this endpoint to produce a corrected retry file containing only failed rows."
+        },
+        {
+          "info": {
+            "name": "Soft-delete a verification session (KYC or KYB)",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/session/:sessionId/delete/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID (`session_id`) of the User Verification (KYC) or Business Verification (KYB) session to delete, as returned when the session was created. Must be a canonical hyphenated UUID — a non-UUID value does not match the route and returns `404`."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Soft-delete a single verification session — User Verification (KYC) or Business Verification (KYB) — by its `session_id`. The id is resolved against KYC sessions first, then KYB sessions, so both kinds are deleted through this one URL.\n\n**What happens on deletion:**\n- The session is stamped with a deletion timestamp and immediately disappears from every read endpoint — `GET /v3/session/{sessionId}/decision/` returns `404` and `GET /v3/sessions/` stops listing it.\n- For KYC sessions, related face"
+        },
+        {
+          "info": {
+            "name": "Download a PDF report for a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/session/:sessionId/generate-pdf/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the User Verification (KYC) or Business Verification (KYB) session to render — the `session_id` returned by `POST /v3/session/`. The same path works for both session kinds; use the `Content-Disposition` filename on the response to tell which report type you received.\n\n**Must be a well-formed, lowercase UUID.** The route only matches valid UUIDs, so a malformed value is rejected by the URL router before any application code runs and the response is a `404` **HTML** page rather than the JSON `{\"detail\": ...}` envelope shown below. The route's UUID converter only matches the canonical lowercase form — uppercase-hex UUIDs are rejected with the HTML 404."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Render and download a compliance-ready PDF report for a finished verification session. The same path serves both User Verification (KYC) and Business Verification (KYB) sessions — the server looks the `sessionId` up in both tables and picks the matching report template.\n\n**Eligible statuses.** The session must already carry a final or reviewable status:\n\n- KYC sessions: `Approved`, `Declined`, `In Review`, or `Kyc Expired`.\n- KYB sessions: `Approved`, `Declined`, or `In Review`.\n\nAny other statu"
+        },
+        {
+          "info": {
+            "name": "Arm a sandbox scenario on a session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/session/:sessionId/sandbox/arm/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the sandbox verification session to arm. Must match the session encoded in the Session-Token used to authenticate."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "Session-Token",
+              "value": "{{Session-Token}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Persist a sandbox scenario on a `Not Started` session and expand its bundled magic values (email, phone, or `expected_details` fields) onto the session, so the mocked providers reproduce the scenario's outcome once the flow runs. This is the endpoint the pre-flow scenario picker in Didit's hosted verification UI calls when a tester chooses an outcome before starting capture. Build your own picker against it, or call it directly from a sandbox test harness.\n\nAuthenticate with the session's own `S"
+        },
+        {
+          "info": {
+            "name": "Approve, decline, or request resubmission for a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/update-status/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the verification session to update. Accepts both user (KYC) and business (KYB) session IDs — the service resolves the ID across both session types."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Manually override the final decision of a KYC or KYB verification session. Set `new_status` to `Approved` or `Declined` to record a manual decision, or to `Resubmitted` to clear specific verification steps and let the user redo them through the same verification URL. The endpoint accepts both user (KYC) and business (KYB) session IDs.\n\nCall it once a session has reached a reviewable state: the current status must be `Approved`, `Declined`, `In Review`, `Kyc Expired`, `Abandoned`, or `Resubmitted"
+        },
+        {
+          "info": {
+            "name": "List verification sessions (KYC and/or KYB) with filters and pagination",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/sessions/",
+            "params": [
+              {
+                "name": "session_kind",
+                "value": "all",
+                "type": "query",
+                "description": "Which kind of sessions to list: `user` (KYC only, default), `business` (KYB only), or `all` (both, concatenated - see the description for merged-pagination semantics). Matching is case-insensitive (`BUSINESS` works); any value other than a case variant of `user`/`business`/`all` returns `400`."
+              },
+              {
+                "name": "limit",
+                "value": "20",
+                "type": "query",
+                "description": "Maximum number of rows per page (per kind when `session_kind=all`). Defaults to 50."
+              },
+              {
+                "name": "offset",
+                "value": "20",
+                "type": "query",
+                "description": "Number of rows to skip before the first returned row. Defaults to 0. Prefer following the `next`/`previous` URLs from the response."
+              },
+              {
+                "name": "status",
+                "value": "Approved,In Review",
+                "type": "query",
+                "description": "Comma-separated list of session statuses to include, e.g. `Approved,In Review`. Values are case-sensitive; see [Verification Statuses](/integration/verification-statuses). Unknown values match nothing."
+              },
+              {
+                "name": "vendor_data",
+                "value": "your-user-id-123",
+                "type": "query",
+                "description": "Exact-match filter on the `vendor_data` you sent at session creation (your own user/business identifier). For partial matches use `search` instead."
+              },
+              {
+                "name": "search",
+                "value": "jane doe",
+                "type": "query",
+                "description": "Smart free-text search. A full UUID matches `session_id`; numeric input matches session-number prefix, document/personal numbers, phone prefix, or `vendor_data`; input containing `@` matches email prefixes; other text matches names (accent-insensitive) and `vendor_data`. Free text containing digits additionally matches document/personal-number search fields and session-number prefixes."
+              },
+              {
+                "name": "workflow_id",
+                "value": "9f9b1234-aaaa-bbbb-cccc-1234567890ab",
+                "type": "query",
+                "description": "Comma-separated workflow UUIDs (find them on the Workflows page in the Console). Malformed UUIDs in the list are ignored; if none are valid the result is empty."
+              },
+              {
+                "name": "date_from",
+                "value": "2026-06-01",
+                "type": "query",
+                "description": "Only sessions created on or after this date (UTC), format `YYYY-MM-DD`. Malformed dates return `400`."
+              },
+              {
+                "name": "date_to",
+                "value": "2026-06-30",
+                "type": "query",
+                "description": "Only sessions created up to this date (UTC), format `YYYY-MM-DD`. For KYC rows the entire day is included; for KYB rows the comparison is `created_at <= date_to` (midnight), so use the next day's date to include a full day of KYB sessions."
+              },
+              {
+                "name": "country",
+                "value": "ESP,USA",
+                "type": "query",
+                "description": "Comma-separated country filter. For KYC rows: ISO 3166-1 alpha-3 codes of the ID document's issuing state (e.g. `ESP,USA`), which may differ from nationality. For KYB rows: the registry company's country code."
+              },
+              {
+                "name": "document_type",
+                "value": "P,ID",
+                "type": "query",
+                "description": "Comma-separated ID-document type codes verified in the session (KYC rows only): `P` (Passport), `ID` (Identity Card), `DL` (Driver's License), `RP` (Residence Permit), `SSC` (Social Security Card), `HIC` (Health Insurance Card), `WP` (Work Permit), `TC` (Tax Card), `VISA`, `PSC` (Public Service Card), `BC` (Birth Certificate), `OTHER`. Note the response field `document_type` contains the display name, not the code."
+              },
+              {
+                "name": "document_name",
+                "value": "Spain - Id Card (2021)",
+                "type": "query",
+                "description": "Exact document names; multiple names can be passed comma-separated, but the value is only split on commas when it contains more than one ` - ` separator (a lone name with an embedded comma is matched whole). Names are as recognized by document verification (front or back side), e.g. `Spain - Id Card (2021)`. KYC rows only."
+              },
+              {
+                "name": "region",
+                "value": "CA,TX",
+                "type": "query",
+                "description": "Comma-separated document region/state values (for documents issued per region, such as US driver's licenses). KYC rows only."
+              },
+              {
+                "name": "didit_internal_id",
+                "value": "d9e78474-6c8d-4f2a-bb90-6f5c2f3a1147",
+                "type": "query",
+                "description": "Filter by Didit's internal user identifier (the `didit_internal_id` response field) to list all sessions of one verified user. Must be a valid UUID; malformed values return `400`. KYC rows only."
+              },
+              {
+                "name": "session_type",
+                "value": "HOSTED",
+                "type": "query",
+                "description": "Comma-separated session creation channels: `API`, `HOSTED`, `MIGRATED`. The special value `ALL` (or omitting the parameter) disables the filter. KYC rows only."
+              },
+              {
+                "name": "api_service",
+                "value": "AML",
+                "type": "query",
+                "description": "Filter standalone API sessions by service. Invalid values return `400`. KYC rows only."
+              },
+              {
+                "name": "screened_full_name",
+                "value": "Jane Doe",
+                "type": "query",
+                "description": "Accent-insensitive name search inside AML and database-validation screened data. When combined with `api_service=AML` or `api_service=DATABASE_VALIDATION`, the search is restricted to that feature's screened data. KYC rows only."
+              },
+              {
+                "name": "warning",
+                "value": "POSSIBLE_FRAUD",
+                "type": "query",
+                "description": "Comma-separated warning risk codes; returns sessions that raised any of them (e.g. `POSSIBLE_FRAUD`). Risk codes are listed per feature in the [warnings documentation](/integration/webhooks). Applies to KYC rows and, with business warning codes, to KYB rows."
+              },
+              {
+                "name": "status_initialized_as_in_review",
+                "value": "true",
+                "type": "query",
+                "description": "When `true`, only sessions whose decision initially landed in `In Review` (useful to audit manual-review volume). KYC rows only."
+              },
+              {
+                "name": "is_kyc_to_be_reviewed",
+                "value": "true",
+                "type": "query",
+                "description": "`true` returns sessions whose document verification is flagged for manual review; `false` returns sessions with document verification explicitly not flagged. Omit to disable. KYC rows only."
+              },
+              {
+                "name": "euuid",
+                "value": "0f8fad5b-d9cb-469f-a165-70867728950e",
+                "type": "query",
+                "description": "Filter by the end user's euuid (UUID assigned to the verifying user, used by Console deep links). Must be a valid UUID; malformed values return a 400 field error. KYC rows only."
+              },
+              {
+                "name": "organization_name",
+                "value": "Acme Inc",
+                "type": "query",
+                "description": "Comma-separated organization names. Console-oriented; with an API key (already scoped to one application) it only matches your own organization's name."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Returns a paginated list of verification sessions for the application identified by your API key, newest first (descending `session_number`).\n\n**Canonical URL:** the route is `/v3/sessions/` (trailing slash). Requests to `/v3/sessions` without the slash receive a `301` redirect to the slashed URL with the query string preserved; most HTTP clients follow it transparently on GET.\n\n**When to use this endpoint vs webhooks.** Use this endpoint for dashboards, back-office search, reconciliation, and b"
+        },
+        {
+          "info": {
+            "name": "Mint a share token for a finished verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/session/:sessionId/share/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the source verification session to mint a token for."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Mint a short-lived JWT that lets a specific Didit application import this finished session. Pair with `POST /v3/session/import-shared/`."
+        },
+        {
+          "info": {
+            "name": "Redeem a share token to clone a verification session into your application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/session/import-shared/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Redeem a share token to clone a KYC or KYB session into the calling application with a fresh `session_id`. Not idempotent — a token redeems once per receiver."
+        },
+        {
+          "info": {
+            "name": "Bulk soft-delete KYC sessions by session_number",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/sessions/delete/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Bulk soft-delete User Verification (KYC) sessions by their numeric `session_number`, or wipe every KYC session in your application with `delete_all: true`.\n\n`session_number` is the human-friendly incrementing counter shown in the Console session list and returned as `session_number` by the create-session and decision endpoints — it is **not** the `session_id` UUID. To delete a session by UUID — or to delete a Business Verification (KYB) session, which this endpoint never touches — use `DELETE /v"
+        },
+        {
+          "info": {
+            "name": "List session reviews and activity log",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/sessions/:session_id/reviews/",
+            "params": [
+              {
+                "name": "session_id",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the User Verification (KYC) session. Must belong to the same application as the API key — cross-application UUIDs, deleted sessions, and Business Verification (KYB) session IDs all return `404`."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size. Defaults to `50`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of entries to skip from the start of the (ordered) feed. Defaults to `0`. The `next` / `previous` URLs in the response carry the right values for walking the feed."
+              },
+              {
+                "name": "ordering",
+                "value": "",
+                "type": "query",
+                "description": "Sort order. The feed defaults to newest first (`-created_at`); pass `created_at` to read it oldest first. Unknown values are silently ignored (default order is used); other serializer field names are also accepted."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Return the audit trail / activity feed for a User Verification (KYC) session, newest first, in a paginated envelope (`count` / `next` / `previous` / `results`, 50 entries per page by default).\n\nFeed entries are written by every actor that touches the session: manual decisions made through `PATCH /v3/session/{session_id}/update-status/` (which records `previous_status` → `new_status`), Console reviewer activity (comments with `@email` mentions, KYC/POA data edits, file uploads/removals, tag chang"
+        },
+        {
+          "info": {
+            "name": "Add a review note to a session's audit trail",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/sessions/:session_id/reviews/",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "session_id",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the User Verification (KYC) session. Must belong to the same application as the API key — cross-application UUIDs, deleted sessions, and Business Verification (KYB) session IDs all return `404`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Append a note to a User Verification (KYC) session's review / activity feed. **This endpoint only records an entry — it never changes the session.** The session's `status` is left untouched, no status-transition validation runs, and no webhook fires. To actually approve, decline, or re-open a session (which also writes a fully-attributed `STATUS_UPDATED` entry to this feed), use `PATCH /v3/session/{session_id}/update-status/` instead.\n\nBoth body fields are optional and an empty JSON object is ac"
+        },
+        {
+          "info": {
+            "name": "Update KYC data extracted from the ID document on a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/update-data/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the User Verification (KYC) session whose extracted document data you are correcting. Business (KYB) session IDs are not valid here — for company data use [Update KYB Company Data](#patch-/v3/session/-sessionId-/kyb/-companyUuid-/update-data/)."
+              },
+              {
+                "name": "node_id",
+                "value": "",
+                "type": "query",
+                "description": "Workflow graph node whose KYC record to patch, for graph workflows with multiple ID-verification steps (also accepted as a `node_id` body field). When omitted, the most recent KYC record on the session is patched. If no KYC exists for the given node, the call returns `404` (`\"The session does not have a KYC for node '<node_id>'.\"`)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Correct the identity fields that were extracted (OCR / NFC) from the user's ID document — misread names, dates, document numbers, and so on — after the verification has finished. Typical callers are a compliance analyst working from your own back office, or an automated reconciliation job. Every field in the body is optional: only the keys you send are written, everything else is left untouched (`PATCH` semantics).\n\nThe session must belong to your application and be in `Approved`, `Declined`, `I"
+        },
+        {
+          "info": {
+            "name": "Update an individual feature (step) status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/features/:nodeId/update-status/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the verification session. Accepts both user (KYC) and business (KYB) session IDs — the service resolves the ID across both session types."
+              },
+              {
+                "name": "nodeId",
+                "value": "",
+                "type": "path",
+                "description": "Workflow graph node ID of the feature to update (for example `feature_ocr_1`). Use the literal value `default` for non-graph (single-step) workflows where the feature has no node ID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Set the status of a single verification feature (step) within a session **without changing the overall session decision**. Target the feature by its workflow graph `nodeId` (use `default` for non-graph workflows where the step has no node).\n\nWorks for both User Verification (KYC) and Business Verification (KYB) sessions and every step type — ID/OCR, Liveness, Face Match, NFC, AML, Proof of Address, Phone, Email, Database Validation, Questionnaire, and the KYB registry / documents / key-people ch"
+        },
+        {
+          "info": {
+            "name": "Update an AML hit review status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/update-aml-hit-status/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the verification session. Accepts both user (KYC) and business (KYB) session IDs — the service resolves the ID across both session types."
+              },
+              {
+                "name": "node_id",
+                "value": "",
+                "type": "query",
+                "description": "Workflow graph node ID. Required only when the session has multiple AML checks (one per node); omit it for single-AML sessions."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Set the review status of a **single AML hit** (a potential sanction / PEP / watchlist / adverse-media match) returned by AML screening, without changing the overall session decision. Identify the hit by its `hit_id` (the `id` of an entry in the AML check's `hits` array — see the session decision).\n\n`review_status` is one of `Unreviewed`, `Confirmed Match`, `False Positive`, or `Inconclusive`. Reviewer decisions are preserved across ongoing-monitoring updates, so a hit you mark `False Positive` s"
+        },
+        {
+          "info": {
+            "name": "Bulk update AML hit review statuses",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/bulk-update-aml-hit-status/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the verification session. Accepts both user (KYC) and business (KYB) session IDs — the service resolves the ID across both session types."
+              },
+              {
+                "name": "node_id",
+                "value": "",
+                "type": "query",
+                "description": "Workflow graph node ID. Required only when the session has multiple AML checks (one per node); omit it for single-AML sessions."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Update the review status of **multiple AML hits** in one call. Provide `hit_updates`, a list of `{ hit_id, review_status }` pairs. `review_status` is one of `Unreviewed`, `Confirmed Match`, `False Positive`, or `Inconclusive`.\n\nThe update is all-or-nothing: if any `hit_id` is not found in the AML check, the request returns `404` and no hit is changed. A successful call fires a single `data.updated` webhook and records one activity entry covering all changes. For graph workflows with multiple AML"
+        },
+        {
+          "info": {
+            "name": "Update Proof of Address data extracted from the POA document on a verification session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/update-poa-data/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the User Verification (KYC) session whose attached POA record you are correcting."
+              },
+              {
+                "name": "node_id",
+                "value": "",
+                "type": "query",
+                "description": "Workflow graph node whose POA record to patch, for graph workflows with multiple Proof of Address steps (also accepted as a `node_id` body field). When omitted, the most recent POA record on the session is patched. If no POA exists for the given node, the call returns `404` (`\"The session does not have a POA for node '<node_id>'.\"`)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Correct the fields extracted from the user's Proof of Address document — utility bill, bank statement, or other address evidence — after the verification has finished: issuer, dates, the printed name, the address itself, and banking details. Every field in the body is optional: only the keys you send are written, everything else is left untouched (`PATCH` semantics).\n\nThe session must belong to your application and be in `Approved`, `Declined`, `In Review`, or `Kyc Expired` status. Sessions in a"
+        },
+        {
+          "info": {
+            "name": "Update registry-extracted company data on a Business Verification (KYB) session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/session/:sessionId/kyb/:companyUuid/update-data/",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the parent Business Verification (KYB) session."
+              },
+              {
+                "name": "companyUuid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the company record to update (`registry_checks[].company.uuid` on the business session decision). Must belong to the session referenced by `sessionId`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Correct the registry-extracted company data on a Business Verification (KYB) session — company name, registration number, addresses, status, contact details — identified by `companyUuid`. Typical callers are a compliance analyst fixing a registry misread, or your back office syncing corrected company data. Every field in the body is optional (`PATCH` semantics); an empty JSON body (`{}`) is a no-op that simply echoes the current company record.\n\nEdits are written in two places at once: fields wi"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

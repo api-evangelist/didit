@@ -1,0 +1,352 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Travel Rule API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Travel Rule",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Travel Rule settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/travel-rule/settings/",
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Read the application's Travel Rule settings and VASP profile. Auto-creates a default (disabled) settings row and an empty profile on first read."
+        },
+        {
+          "info": {
+            "name": "Update Travel Rule settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://verification.didit.me/v3/travel-rule/settings/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Upsert the application's Travel Rule settings and VASP profile. Partial update — only send the fields you want to change. Setting `is_enabled: true` requires a non-blank `legal_name` (already stored or included in the same request), otherwise returns 400."
+        },
+        {
+          "info": {
+            "name": "List wallet address book entries",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/travel-rule/wallet-addresses/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Paginated list of your application's Travel Rule wallet address book, newest first."
+        },
+        {
+          "info": {
+            "name": "Register a wallet address",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/travel-rule/wallet-addresses/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Add an entry to your Travel Rule wallet address book so inbound INTERNAL-rail transfers can resolve against it."
+        },
+        {
+          "info": {
+            "name": "Update wallet address holder metadata",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/travel-rule/wallet-addresses/:entry_uuid/",
+            "params": [
+              {
+                "name": "entry_uuid",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Partial update of holder_name, holder_vendor_data, entity_type, and travel_address. Setting travel_address attaches a TRP routing address to the entry; invalid values are rejected with 400. The response echoes only these four fields."
+        },
+        {
+          "info": {
+            "name": "Soft-delete a wallet address",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/travel-rule/wallet-addresses/:entry_uuid/",
+            "params": [
+              {
+                "name": "entry_uuid",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Soft-deletes the entry (deleted_at is set). The address is freed up for re-registration; ownership proofs are retained for audit."
+        },
+        {
+          "info": {
+            "name": "Search the VASP directory",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/travel-rule/vasps/",
+            "params": [
+              {
+                "name": "search",
+                "value": "",
+                "type": "query",
+                "description": "Case-insensitive substring match on VASP name."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Paginated search across discoverable Didit customers with Travel Rule enabled, plus VASPs catalogued in the internal counterparty registry. Excludes your own application's profile."
+        },
+        {
+          "info": {
+            "name": "Finish, cancel, or resend a Travel Rule transfer",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/transactions/:transaction_id/travel-rule/",
+            "params": [
+              {
+                "name": "transaction_id",
+                "value": "",
+                "type": "path",
+                "description": "Didit-stable transaction UUID that owns the transfer."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Provide `payment_txn_id` to report the on-chain hash and move an outbound COMPLETED transfer to FINISHED (its INTERNAL-rail counterpart also moves to FINISHED), `{\"action\": \"cancel\"}` to cancel a non-terminal transfer, or `{\"action\": \"resend\"}` to re-run routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA (improve the counterparty data first, e.g. add a travel_address to the destination wallet entry)."
+        },
+        {
+          "info": {
+            "name": "Confirm or deny wallet ownership",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/transactions/:transaction_id/travel-rule/ownership/",
+            "params": [
+              {
+                "name": "transaction_id",
+                "value": "",
+                "type": "path",
+                "description": "Didit-stable transaction UUID that owns the transfer (the beneficiary side's transaction)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Called by the beneficiary's application when its INTERNAL-rail transfer is UNCONFIRMED_OWNERSHIP. Confirming marks the matching wallet address book entry as ownership-verified and runs the beneficiary name match on both sides of the transfer; denying declines both sides."
+        },
+        {
+          "info": {
+            "name": "Get email-rail pickup info",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/travel-rule/pickup/:token/",
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Public, unauthenticated. Lets a non-Didit counterparty VASP preview the pending exchange from the emailed pickup link. The token itself is the authentication."
+        },
+        {
+          "info": {
+            "name": "Respond to an email-rail pickup",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/travel-rule/pickup/:token/respond/",
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Public, unauthenticated. Accepts or declines the exchange from the emailed pickup link. On accept, beneficiary_name is checked against the originator's name_matching_strictness policy."
+        },
+        {
+          "info": {
+            "name": "Register an after-deposit (sunrise) inbound transfer",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/travel-rule/inbound/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Register Travel Rule data for a crypto deposit that already settled on-chain before any exchange took place. Creates an inbound travelRule transaction (or reuses an unclaimed deposit) and resolves the transfer against your wallet address book. A transaction.created webhook fires for newly-created transactions."
+        },
+        {
+          "info": {
+            "name": "Mint a wallet-ownership widget session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/travel-rule/widget-session/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Mint a hosted wallet-ownership widget URL/token. Send the customer to the returned url to prove control of a wallet (message signing, Satoshi test, screenshot, or self-declaration). The widget is web-only in this release - open the url in the system browser or a custom tab, never inside a mobile SDK webview."
+        },
+        {
+          "info": {
+            "name": "Get wallet-ownership widget context",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/travel-rule/widget/:token/",
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "path",
+                "description": "Opaque session token returned when the widget session was minted."
+              }
+            ]
+          },
+          "docs": "Public read endpoint keyed by the widget session token - no API key required. Returns the widget context plus the status of every proof, so you can poll it to detect completion; completed_at becomes non-null once a proof is verified. A SATOSHI_TEST proof can sit at status PENDING while its deposit is seen on-chain but unconfirmed - a background job automatically rechecks it and completes it once the deposit confirms, so no client action is needed while it waits. Each proof carries the fields its"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

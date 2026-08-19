@@ -1,0 +1,2302 @@
+{
+  "item": [
+    {
+      "id": "af81d0cf-2855-4413-b71c-2f11c6a2e1fe",
+      "name": "Travel Rule",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "5850d2e0-67f9-49c8-a3e1-e0ca212d1206",
+          "name": "Get Travel Rule settings",
+          "request": {
+            "name": "Get Travel Rule settings",
+            "description": {
+              "content": "Read the application's Travel Rule settings and VASP profile. Auto-creates a default (disabled) settings row and an empty profile on first read.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "settings",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "10393ed1-7094-4c52-8bbd-f96ff020bc40",
+              "name": "Current Travel Rule settings and VASP profile.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "settings",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"is_enabled\": false,\n  \"jurisdiction\": \"EU\",\n  \"name_matching_strictness\": \"DEFAULT\",\n  \"confirmation_timeout_hours\": 48,\n  \"timeout_outcome\": \"HOLD\",\n  \"threshold_amount\": \"0.00\",\n  \"legal_name\": \"\",\n  \"lei\": \"\",\n  \"compliance_email\": \"\",\n  \"is_discoverable\": true\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "fc75274e-8f35-4dcb-b16c-efec8ce1dcd4",
+          "name": "Update Travel Rule settings",
+          "request": {
+            "name": "Update Travel Rule settings",
+            "description": {
+              "content": "Upsert the application's Travel Rule settings and VASP profile. Partial update — only send the fields you want to change. Setting `is_enabled: true` requires a non-blank `legal_name` (already stored or included in the same request), otherwise returns 400.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "settings",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"legal_name\": \"<string>\",\n  \"lei\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"name_matching_strictness\": \"<string>\",\n  \"confirmation_timeout_hours\": \"<integer>\",\n  \"timeout_outcome\": \"<string>\",\n  \"compliance_email\": \"<email>\",\n  \"is_discoverable\": \"<boolean>\",\n  \"threshold_amount\": \"<string>\",\n  \"inbound_auto_accept\": \"<boolean>\",\n  \"allow_self_declaration\": \"<boolean>\",\n  \"allow_screenshot_proof\": \"<boolean>\",\n  \"auto_wallet_verification\": \"<boolean>\",\n  \"vasp_attribution_enabled\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "49495815-147d-4369-96bf-47f2f849b974",
+              "name": "Updated settings and profile, in the same shape as GET.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "settings",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"is_enabled\": true,\n  \"legal_name\": \"Origin CASP SL\",\n  \"jurisdiction\": \"EU\",\n  \"name_matching_strictness\": \"DEFAULT\",\n  \"confirmation_timeout_hours\": 48,\n  \"timeout_outcome\": \"HOLD\",\n  \"is_discoverable\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"is_enabled\": true,\n  \"jurisdiction\": \"string\",\n  \"name_matching_strictness\": \"STRICT\",\n  \"confirmation_timeout_hours\": 2841,\n  \"timeout_outcome\": \"PROCEED\",\n  \"threshold_amount\": \"string\",\n  \"legal_name\": \"string\",\n  \"lei\": \"string\",\n  \"compliance_email\": \"wAZ-4k6pdvg@E.anff\",\n  \"is_discoverable\": false,\n  \"inbound_auto_accept\": false,\n  \"allow_self_declaration\": true,\n  \"allow_screenshot_proof\": false,\n  \"auto_wallet_verification\": true,\n  \"vasp_attribution_enabled\": false,\n  \"travel_address\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "aedc66a6-7f8d-4491-80f0-2b1a78f689f6",
+              "name": "Validation error, e.g. enabling without a legal_name.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "settings",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"is_enabled\": true,\n  \"legal_name\": \"Origin CASP SL\",\n  \"jurisdiction\": \"EU\",\n  \"name_matching_strictness\": \"DEFAULT\",\n  \"confirmation_timeout_hours\": 48,\n  \"timeout_outcome\": \"HOLD\",\n  \"is_discoverable\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"legal_name\": [\n    \"legal_name is required to enable travel rule.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e8f84fd8-3445-4943-b942-dabf627f344e",
+          "name": "List wallet address book entries",
+          "request": {
+            "name": "List wallet address book entries",
+            "description": {
+              "content": "Paginated list of your application's Travel Rule wallet address book, newest first.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "wallet-addresses",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "93656d0d-cb15-4258-bd76-72ca44edafba",
+              "name": "Paginated wallet address book entries.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "wallet-addresses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 9428,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"uuid\": \"1a84ea55-7870-6c48-cfd2-e7c2c6205198\",\n      \"address\": \"string\",\n      \"chain\": \"string\",\n      \"holder_vendor_data\": \"string\",\n      \"holder_name\": \"string\",\n      \"entity_type\": \"string\",\n      \"is_ownership_verified\": false,\n      \"created_at\": \"1952-11-28T12:52:45.220Z\",\n      \"self_declared\": false,\n      \"travel_address\": \"string\"\n    },\n    {\n      \"uuid\": \"cea1f073-b065-fa86-2bb2-04b667f345c9\",\n      \"address\": \"string\",\n      \"chain\": \"string\",\n      \"holder_vendor_data\": \"string\",\n      \"holder_name\": \"string\",\n      \"entity_type\": \"string\",\n      \"is_ownership_verified\": true,\n      \"created_at\": \"2007-06-18T00:06:48.422Z\",\n      \"self_declared\": false,\n      \"travel_address\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "69361144-c2ac-4398-9f11-2d5af28aac20",
+          "name": "Register a wallet address",
+          "request": {
+            "name": "Register a wallet address",
+            "description": {
+              "content": "Add an entry to your Travel Rule wallet address book so inbound INTERNAL-rail transfers can resolve against it.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "wallet-addresses",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"<string>\",\n  \"chain\": \"<string>\",\n  \"holder_vendor_data\": \"<string>\",\n  \"holder_name\": \"<string>\",\n  \"entity_type\": \"individual\",\n  \"self_declared\": false,\n  \"travel_address\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "b0d6f52c-cfdd-44f9-97ec-74b4e7a6befd",
+              "name": "The created entry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "wallet-addresses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"0xBeneficiaryWallet01\",\n  \"chain\": \"ethereum\",\n  \"holder_name\": \"Ana Diaz\",\n  \"holder_vendor_data\": \"user-042\",\n  \"self_declared\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"cdcb997a-9f0c-7a4c-0244-0bf167356a9a\",\n  \"address\": \"string\",\n  \"chain\": \"string\",\n  \"holder_vendor_data\": \"string\",\n  \"holder_name\": \"string\",\n  \"entity_type\": \"string\",\n  \"is_ownership_verified\": false,\n  \"created_at\": \"2023-06-18T09:10:07.327Z\",\n  \"self_declared\": false,\n  \"travel_address\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c2b3b8bf-d0e8-405a-a7e8-459ec2bdf3ee",
+              "name": "Duplicate address for this application and chain.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "wallet-addresses",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"0xBeneficiaryWallet01\",\n  \"chain\": \"ethereum\",\n  \"holder_name\": \"Ana Diaz\",\n  \"holder_vendor_data\": \"user-042\",\n  \"self_declared\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"address\": [\n    \"A wallet address entry with this address and chain already exists.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9d60884e-61ec-42c5-a337-631f74c79a38",
+          "name": "Update wallet address holder metadata",
+          "request": {
+            "name": "Update wallet address holder metadata",
+            "description": {
+              "content": "Partial update of holder_name, holder_vendor_data, entity_type, and travel_address. Setting travel_address attaches a TRP routing address to the entry; invalid values are rejected with 400. The response echoes only these four fields.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "wallet-addresses",
+                ":entry_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "entry_uuid",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"holder_name\": \"<string>\",\n  \"holder_vendor_data\": \"<string>\",\n  \"entity_type\": \"<string>\",\n  \"travel_address\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7657d649-ee3b-4af3-a420-4658f4065ec5",
+              "name": "The updated fields.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "wallet-addresses",
+                    ":entry_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "entry_uuid",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"holder_name\": \"Ana Updated\",\n  \"travel_address\": \"ta...\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"holder_name\": \"<string>\",\n  \"holder_vendor_data\": \"<string>\",\n  \"entity_type\": \"<string>\",\n  \"travel_address\": \"<string>\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9ee9ce8c-6fdc-4a0c-9b2e-b61b302fce44",
+          "name": "Soft-delete a wallet address",
+          "request": {
+            "name": "Soft-delete a wallet address",
+            "description": {
+              "content": "Soft-deletes the entry (deleted_at is set). The address is freed up for re-registration; ownership proofs are retained for audit.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "wallet-addresses",
+                ":entry_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "entry_uuid",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "ff425fd1-210e-4a49-bf69-f3ab622d7b14",
+              "name": "Deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "wallet-addresses",
+                    ":entry_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "entry_uuid",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "0c92dddd-c824-4c03-a8a6-98c4c52b70da",
+          "name": "Search the VASP directory",
+          "request": {
+            "name": "Search the VASP directory",
+            "description": {
+              "content": "Paginated search across discoverable Didit customers with Travel Rule enabled, plus VASPs catalogued in the internal counterparty registry. Excludes your own application's profile.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "vasps",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "search",
+                  "value": "<string>",
+                  "description": "Case-insensitive substring match on VASP name."
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "disabled": false,
+                  "key": "offset",
+                  "value": "0"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "8e2975c1-dcf2-4cc1-b672-7a003288c9b6",
+              "name": "Paginated, name-sorted VASP directory results.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "vasps",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"count\": 2131,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"name\": \"string\",\n      \"lei\": \"string\",\n      \"jurisdiction\": \"string\",\n      \"dd_status\": \"REJECTED\",\n      \"dd_score\": 188,\n      \"reachable_rails\": [\n        \"GTR\",\n        \"TRP\"\n      ],\n      \"is_didit_customer\": true,\n      \"dd_score_breakdown\": {\n        \"key_0\": 8626,\n        \"key_1\": 8321\n      },\n      \"dd_assessed_at\": \"1981-07-26T06:43:45.001Z\"\n    },\n    {\n      \"name\": \"string\",\n      \"lei\": \"string\",\n      \"jurisdiction\": \"string\",\n      \"dd_status\": \"COMPLETED\",\n      \"dd_score\": 5665,\n      \"reachable_rails\": [\n        \"EMAIL\",\n        \"TRP\"\n      ],\n      \"is_didit_customer\": false,\n      \"dd_score_breakdown\": {\n        \"key_0\": 4369,\n        \"key_1\": 8038,\n        \"key_2\": 7117\n      },\n      \"dd_assessed_at\": \"1989-02-16T19:35:16.243Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f1887884-df7c-4e8c-bd7b-c42da86cc3e2",
+          "name": "Finish, cancel, or resend a Travel Rule transfer",
+          "request": {
+            "name": "Finish, cancel, or resend a Travel Rule transfer",
+            "description": {
+              "content": "Provide `payment_txn_id` to report the on-chain hash and move an outbound COMPLETED transfer to FINISHED (its INTERNAL-rail counterpart also moves to FINISHED), `{\"action\": \"cancel\"}` to cancel a non-terminal transfer, or `{\"action\": \"resend\"}` to re-run routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA (improve the counterparty data first, e.g. add a travel_address to the destination wallet entry).",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                ":transaction_id",
+                "travel-rule",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "transaction_id",
+                  "description": "(Required) Didit-stable transaction UUID that owns the transfer."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_txn_id\": \"<string>\",\n  \"action\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "9253da18-627a-4724-bc74-a576d0d5107f",
+              "name": "The updated transfer.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    "travel-rule",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID that owns the transfer."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payment_txn_id\": \"0xchainhash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"47dd52a6-1b08-c859-b878-fa57b94a20a8\",\n  \"status\": \"ON_HOLD\",\n  \"direction\": \"INBOUND\",\n  \"rail\": \"EMAIL\",\n  \"protocol\": \"string\",\n  \"ivms_version\": \"ivms101.2023\",\n  \"required\": false,\n  \"ownership_confirmed\": false,\n  \"deadline_at\": \"1970-10-27T15:38:32.647Z\",\n  \"timeline\": [\n    {\n      \"status\": \"string\",\n      \"at\": \"1983-05-25T05:02:11.442Z\",\n      \"detail\": \"string\"\n    },\n    {\n      \"status\": \"string\",\n      \"at\": \"1995-04-25T08:07:47.544Z\",\n      \"detail\": \"string\"\n    }\n  ],\n  \"counterparty_vasp\": {\n    \"name\": \"string\",\n    \"lei\": \"string\",\n    \"dd_score\": 9651\n  },\n  \"originator_data\": {},\n  \"beneficiary_data\": {},\n  \"created_at\": \"1994-05-15T23:55:47.460Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "be26b0f6-3706-4010-9d5c-c60130c84a90",
+              "name": "Neither payment_txn_id nor a supported action (cancel, resend) was provided.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    "travel-rule",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID that owns the transfer."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payment_txn_id\": \"0xchainhash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "a69a3583-e8b8-4313-9728-21421d046b39",
+              "name": "The transfer is not in a state that allows this operation (e.g. not COMPLETED/outbound for finish, already terminal for cancel, or not an outbound transfer in a resendable status for resend).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    "travel-rule",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID that owns the transfer."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payment_txn_id\": \"0xchainhash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "614884eb-6dcf-4da0-bc04-9a6b2b3cb2b9",
+          "name": "Confirm or deny wallet ownership",
+          "request": {
+            "name": "Confirm or deny wallet ownership",
+            "description": {
+              "content": "Called by the beneficiary's application when its INTERNAL-rail transfer is UNCONFIRMED_OWNERSHIP. Confirming marks the matching wallet address book entry as ownership-verified and runs the beneficiary name match on both sides of the transfer; denying declines both sides.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "transactions",
+                ":transaction_id",
+                "travel-rule",
+                "ownership",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "transaction_id",
+                  "description": "(Required) Didit-stable transaction UUID that owns the transfer (the beneficiary side's transaction)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmed\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "a8d5fd10-5875-423e-b6af-df8b9459cb5d",
+              "name": "The updated transfer. originator_data/beneficiary_data are omitted until ownership_confirmed is true on an inbound transfer.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    "travel-rule",
+                    "ownership",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID that owns the transfer (the beneficiary side's transaction)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"confirmed\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"674b7639-cc54-a798-29df-248e57d374a8\",\n  \"status\": \"NOT_APPLICABLE\",\n  \"direction\": \"OUTBOUND\",\n  \"rail\": null,\n  \"protocol\": \"string\",\n  \"ivms_version\": \"ivms101.2023\",\n  \"required\": true,\n  \"ownership_confirmed\": true,\n  \"deadline_at\": \"1950-02-20T22:25:49.983Z\",\n  \"timeline\": [\n    {\n      \"status\": \"string\",\n      \"at\": \"2003-08-12T04:32:52.728Z\",\n      \"detail\": \"string\"\n    },\n    {\n      \"status\": \"string\",\n      \"at\": \"1963-12-15T09:27:45.209Z\",\n      \"detail\": \"string\"\n    }\n  ],\n  \"counterparty_vasp\": {\n    \"name\": \"string\",\n    \"lei\": \"string\",\n    \"dd_score\": 746\n  },\n  \"originator_data\": {},\n  \"beneficiary_data\": {},\n  \"created_at\": \"2019-05-07T02:45:14.803Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "28a18b89-9be1-4095-85b1-b08c53fc2975",
+              "name": "The transfer is not currently UNCONFIRMED_OWNERSHIP, or its matching wallet address book entry was deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "transactions",
+                    ":transaction_id",
+                    "travel-rule",
+                    "ownership",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "transaction_id",
+                      "description": "(Required) Didit-stable transaction UUID that owns the transfer (the beneficiary side's transaction)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"confirmed\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "058a7ba2-1e3f-44c0-9ebd-a3a5ca004dbb",
+          "name": "Get email-rail pickup info",
+          "request": {
+            "name": "Get email-rail pickup info",
+            "description": {
+              "content": "Public, unauthenticated. Lets a non-Didit counterparty VASP preview the pending exchange from the emailed pickup link. The token itself is the authentication.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "pickup",
+                ":token",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "token",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "79ab490d-4368-4395-8b15-ed25f3a80ef4",
+              "name": "Pickup preview.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"originator_vasp_name\": \"string\",\n  \"amount\": \"string\",\n  \"currency\": \"string\",\n  \"beneficiary_wallet\": \"string\",\n  \"status\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fe0d12de-cd45-4e13-a40b-9c7d03c5f53f",
+              "name": "Unknown token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "564876a3-8127-481a-bd58-d6155dc35660",
+              "name": "The pickup window has closed (expired, or the transfer already left AWAITING_COUNTERPARTY).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gone",
+              "code": 410,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "76a303e4-959f-4e9f-8dd5-b22644f3d092",
+          "name": "Respond to an email-rail pickup",
+          "request": {
+            "name": "Respond to an email-rail pickup",
+            "description": {
+              "content": "Public, unauthenticated. Accepts or declines the exchange from the emailed pickup link. On accept, beneficiary_name is checked against the originator's name_matching_strictness policy.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "pickup",
+                ":token",
+                "respond",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "token",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"<string>\",\n  \"beneficiary_name\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c1475319-5b08-46db-9a30-383976eaf8fa",
+              "name": "The resulting exchange status.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    "respond",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"accept\",\n  \"beneficiary_name\": \"Carlos Ruiz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"COMPLETED\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f6ebbc03-8dbf-46f1-899d-081181ce830e",
+              "name": "Unknown token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    "respond",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"accept\",\n  \"beneficiary_name\": \"Carlos Ruiz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "42eb7f93-dd7a-4edf-a9de-3a7b04a9ee86",
+              "name": "The pickup window has closed.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "pickup",
+                    ":token",
+                    "respond",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"accept\",\n  \"beneficiary_name\": \"Carlos Ruiz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Gone",
+              "code": 410,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "1f0d1a37-37ef-4927-a799-0a7578413836",
+          "name": "Register an after-deposit (sunrise) inbound transfer",
+          "request": {
+            "name": "Register an after-deposit (sunrise) inbound transfer",
+            "description": {
+              "content": "Register Travel Rule data for a crypto deposit that already settled on-chain before any exchange took place. Creates an inbound travelRule transaction (or reuses an unclaimed deposit) and resolves the transfer against your wallet address book. A transaction.created webhook fires for newly-created transactions.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "inbound",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chain\": \"<string>\",\n  \"txid\": \"<string>\",\n  \"wallet_address\": \"<string>\",\n  \"amount\": \"<string>\",\n  \"currency\": \"<string>\",\n  \"originator_data\": {\n    \"key_0\": \"string\",\n    \"key_1\": \"string\"\n  },\n  \"beneficiary_data\": {\n    \"key_0\": true\n  },\n  \"originating_vasp\": {\n    \"name\": \"<string>\",\n    \"lei\": \"<string>\",\n    \"travel_address\": \"<string>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7272ac82-aa87-44a7-b366-7123e0d0f322",
+              "name": "An existing unclaimed deposit was reused (created is false).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "inbound",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chain\": \"ethereum\",\n  \"txid\": \"0xdeposit-hash\",\n  \"wallet_address\": \"0xYourDepositWallet\",\n  \"amount\": \"500.00\",\n  \"currency\": \"USDC\",\n  \"originator_data\": {\n    \"name\": \"Origin CASP SL\"\n  },\n  \"beneficiary_data\": {\n    \"name\": \"Ana Diaz\"\n  },\n  \"originating_vasp\": {\n    \"name\": \"Origin CASP SL\",\n    \"lei\": \"\",\n    \"travel_address\": \"ta...\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"transaction_id\": \"f5c718bb-5c31-d87e-2d21-aff86a8d414a\",\n  \"txn_id\": \"string\",\n  \"created\": false,\n  \"travel_rule\": {\n    \"uuid\": \"8d24b1a0-9988-a46e-6d73-90a21c2261a9\",\n    \"status\": \"COUNTERPARTY_VASP_NOT_FOUND\",\n    \"direction\": \"OUTBOUND\",\n    \"rail\": null,\n    \"protocol\": \"string\",\n    \"ivms_version\": \"ivms101.2023\",\n    \"required\": false,\n    \"ownership_confirmed\": false,\n    \"deadline_at\": \"1958-11-04T02:07:33.722Z\",\n    \"timeline\": [\n      {\n        \"status\": \"string\",\n        \"at\": \"1980-05-25T21:06:54.167Z\",\n        \"detail\": \"string\"\n      },\n      {\n        \"status\": \"string\",\n        \"at\": \"2022-11-24T10:52:02.733Z\",\n        \"detail\": \"string\"\n      }\n    ],\n    \"counterparty_vasp\": {\n      \"name\": \"string\",\n      \"lei\": \"string\",\n      \"dd_score\": 8913\n    },\n    \"originator_data\": {},\n    \"beneficiary_data\": {},\n    \"created_at\": \"2003-08-16T18:02:28.562Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "920a8573-2ada-4e45-919a-ac1af8950e32",
+              "name": "A new inbound transaction and transfer were created.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "inbound",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chain\": \"ethereum\",\n  \"txid\": \"0xdeposit-hash\",\n  \"wallet_address\": \"0xYourDepositWallet\",\n  \"amount\": \"500.00\",\n  \"currency\": \"USDC\",\n  \"originator_data\": {\n    \"name\": \"Origin CASP SL\"\n  },\n  \"beneficiary_data\": {\n    \"name\": \"Ana Diaz\"\n  },\n  \"originating_vasp\": {\n    \"name\": \"Origin CASP SL\",\n    \"lei\": \"\",\n    \"travel_address\": \"ta...\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"transaction_id\": \"f5c718bb-5c31-d87e-2d21-aff86a8d414a\",\n  \"txn_id\": \"string\",\n  \"created\": false,\n  \"travel_rule\": {\n    \"uuid\": \"8d24b1a0-9988-a46e-6d73-90a21c2261a9\",\n    \"status\": \"COUNTERPARTY_VASP_NOT_FOUND\",\n    \"direction\": \"OUTBOUND\",\n    \"rail\": null,\n    \"protocol\": \"string\",\n    \"ivms_version\": \"ivms101.2023\",\n    \"required\": false,\n    \"ownership_confirmed\": false,\n    \"deadline_at\": \"1958-11-04T02:07:33.722Z\",\n    \"timeline\": [\n      {\n        \"status\": \"string\",\n        \"at\": \"1980-05-25T21:06:54.167Z\",\n        \"detail\": \"string\"\n      },\n      {\n        \"status\": \"string\",\n        \"at\": \"2022-11-24T10:52:02.733Z\",\n        \"detail\": \"string\"\n      }\n    ],\n    \"counterparty_vasp\": {\n      \"name\": \"string\",\n      \"lei\": \"string\",\n      \"dd_score\": 8913\n    },\n    \"originator_data\": {},\n    \"beneficiary_data\": {},\n    \"created_at\": \"2003-08-16T18:02:28.562Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "855d3ee1-7543-4b9a-8375-10a993e2c4f4",
+          "name": "Mint a wallet-ownership widget session",
+          "request": {
+            "name": "Mint a wallet-ownership widget session",
+            "description": {
+              "content": "Mint a hosted wallet-ownership widget URL/token. Send the customer to the returned url to prove control of a wallet (message signing, Satoshi test, screenshot, or self-declaration). The widget is web-only in this release - open the url in the system browser or a custom tab, never inside a mobile SDK webview.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "widget-session",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_address\": \"<string>\",\n  \"chain\": \"<string>\",\n  \"holder_name\": \"<string>\",\n  \"vendor_data\": \"<string>\",\n  \"transaction_id\": \"<uuid>\",\n  \"satoshi_deposit_address\": \"<string>\",\n  \"callback_url\": \"<string>\",\n  \"expires_in_minutes\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8b16ee24-e173-420c-8428-f5da04a8b4bf",
+              "name": "The minted widget session.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "widget-session",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"wallet_address\": \"0xBeneficiaryWallet01\",\n  \"chain\": \"ethereum\",\n  \"holder_name\": \"Ana Diaz\",\n  \"vendor_data\": \"user-042\",\n  \"transaction_id\": \"22222222-3333-4444-5555-666666666666\",\n  \"expires_in_minutes\": 60\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"widget_session_id\": \"557ff6ba-13fa-a927-07dd-19b35d261629\",\n  \"token\": \"string\",\n  \"url\": \"string\",\n  \"expires_at\": \"1996-11-13T00:25:44.666Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "940635aa-998e-472d-bd5c-fee6af315472",
+          "name": "Get wallet-ownership widget context",
+          "request": {
+            "name": "Get wallet-ownership widget context",
+            "description": {
+              "content": "Public read endpoint keyed by the widget session token - no API key required. Returns the widget context plus the status of every proof, so you can poll it to detect completion; completed_at becomes non-null once a proof is verified. A SATOSHI_TEST proof can sit at status PENDING while its deposit is seen on-chain but unconfirmed - a background job automatically rechecks it and completes it once the deposit confirms, so no client action is needed while it waits. Each proof carries the fields its method needs: deposit_address, expected_amount, and its own expires_at for SATOSHI_TEST; challenge for MESSAGE_SIGNING. Prefer the travel_rule.status.updated webhook over polling when the session is linked to a transfer.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "travel-rule",
+                "widget",
+                ":token",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "token",
+                  "description": "(Required) Opaque session token returned when the widget session was minted."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "792890c1-ed7f-4806-95e4-3ace99b2ae24",
+              "name": "The widget context and proof statuses.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "widget",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) Opaque session token returned when the widget session was minted."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"vasp_name\": \"string\",\n  \"wallet_address\": \"string\",\n  \"chain\": \"string\",\n  \"holder_name\": \"string\",\n  \"allowed_methods\": [\n    \"SATOSHI_TEST\",\n    \"SELF_DECLARATION\"\n  ],\n  \"transfer_status\": \"string\",\n  \"callback_url\": \"string\",\n  \"expires_at\": \"2012-10-13T02:15:07.459Z\",\n  \"completed_at\": \"1949-02-07T13:30:47.817Z\",\n  \"proofs\": [\n    {\n      \"proof_id\": \"f7ffffea-c8f7-6761-1beb-0de44fe24f5f\",\n      \"method\": \"SCREENSHOT\",\n      \"status\": \"EXPIRED\",\n      \"wallet_address\": \"string\",\n      \"chain\": \"string\",\n      \"deposit_address\": \"string\",\n      \"expected_amount\": \"string\",\n      \"expires_at\": \"2008-11-27T01:25:04.123Z\",\n      \"challenge\": \"string\",\n      \"created_at\": \"1967-08-02T09:27:05.277Z\"\n    },\n    {\n      \"proof_id\": \"84114230-32f7-76c4-9199-22c30973e83f\",\n      \"method\": \"SATOSHI_TEST\",\n      \"status\": \"PENDING\",\n      \"wallet_address\": \"string\",\n      \"chain\": \"string\",\n      \"deposit_address\": \"string\",\n      \"expected_amount\": \"string\",\n      \"expires_at\": \"1994-07-07T09:36:48.645Z\",\n      \"challenge\": \"string\",\n      \"created_at\": \"1987-07-27T04:11:45.970Z\"\n    }\n  ],\n  \"customization\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ceb83863-c63d-4d85-9794-2b1dbf1eb7fe",
+              "name": "Unknown token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "widget",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) Opaque session token returned when the widget session was minted."
+                    }
+                  ]
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "f0efd37e-b242-40e9-a460-caf39f9b2ab2",
+              "name": "The session expired without completing.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "travel-rule",
+                    "widget",
+                    ":token",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) Opaque session token returned when the widget session was minted."
+                    }
+                  ]
+                },
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Gone",
+              "code": 410,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "348db619-040f-4909-9a05-1bb888cc54b6",
+    "name": "Didit Verification Billing Travel Rule API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}

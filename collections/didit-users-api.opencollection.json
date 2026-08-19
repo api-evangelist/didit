@@ -1,0 +1,215 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Users API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Users",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/users/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size. Defaults to 50 when omitted. There is no enforced maximum, but keep pages small for latency."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page over computing this by hand."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List [users](/entities/users) Didit assembles from KYC sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus users created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side."
+        },
+        {
+          "info": {
+            "name": "Get user",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/users/:vendor_data/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "user-abc-123",
+                "type": "path",
+                "description": "Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the session that first introduced this user, matched exactly as sent."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Fetch one [user](/entities/users) by `vendor_data` (exact match). Adds `metadata`, `comments`, and `updated_at` to the list view, and switches `tags` to the detailed tag-link shape. Returns soft-deleted users too."
+        },
+        {
+          "info": {
+            "name": "Update user",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/users/:vendor_data/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "user-abc-123",
+                "type": "path",
+                "description": "Your unique identifier for the user (free-form string, NOT a UUID)."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Partial update of a user: `display_name`, `full_name`, `date_of_birth`, `status`, `metadata`, `approved_emails`/`approved_phones`/`issuing_states`. `metadata` fully replaces. **Note:** unlike [Update User Status](#patch-/v3/users/-vendor_data-/update-status/), changing `status` here does NOT record a status-change activity and does NOT sync the system blocklist — use the dedicated update-status endpoint for `BLOCKED`/unblock flows."
+        },
+        {
+          "info": {
+            "name": "Batch delete users",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/users/delete/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "**Hard delete** users — rows are removed permanently (including previously soft-deleted records). For everyday blocking prefer [Update User Status](#patch-/v3/users/-vendor_data-/update-status/) with `BLOCKED`. Unlike the businesses endpoint, this endpoint only accepts `vendor_data_list` or `delete_all` (no `didit_internal_id_list`)."
+        },
+        {
+          "info": {
+            "name": "Update user status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/users/:vendor_data/update-status/",
+            "params": [
+              {
+                "name": "vendor_data",
+                "value": "",
+                "type": "path",
+                "description": "Your unique identifier for the user."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Flip only the lifecycle `status` of a user — `ACTIVE`/`FLAGGED`/`BLOCKED` (NOT session statuses). `BLOCKED` adds the `vendor_data` to the system blocklist; moving away from `BLOCKED` removes that entry. Each change is recorded as a `STATUS_CHANGED` activity on the user."
+        },
+        {
+          "info": {
+            "name": "Create user",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/users/create/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Pre-create a [user](/entities/users) by `vendor_data` *without* a verification session. `vendor_data` must be unique among non-deleted users for the application (exact match; conflicts return 400). Not idempotent."
+        },
+        {
+          "info": {
+            "name": "Upload user face",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/vendor-users/by-id/:didit_internal_id/faces/upload/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID that owns the application."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID that owns the User profile."
+              },
+              {
+                "name": "didit_internal_id",
+                "value": "",
+                "type": "path",
+                "description": "Didit's internal User UUID, returned as `didit_internal_id` by `GET /v3/users/{vendor_data}/` and `POST /v3/users/create/`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Attach a trusted imported face image to an existing User profile. Use this after creating or retrieving a User by `vendor_data` and reading its `didit_internal_id`. The uploaded face is stored on the User profile and indexed for duplicate detection and face search. It is not added to a face blocklist."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

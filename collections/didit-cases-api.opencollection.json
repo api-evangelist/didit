@@ -1,0 +1,1126 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Didit Verification Billing Cases API",
+    "version": "3.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Cases",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List cases",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size. Defaults to 50."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset of the first record."
+              },
+              {
+                "name": "status__in",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated statuses to include, e.g. OPEN,AWAITING_USER."
+              },
+              {
+                "name": "priority",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated priorities to include."
+              },
+              {
+                "name": "source__in",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated sources to include."
+              },
+              {
+                "name": "blueprint",
+                "value": "",
+                "type": "query",
+                "description": "Filter to cases on this blueprint."
+              },
+              {
+                "name": "assigned_to",
+                "value": "",
+                "type": "query",
+                "description": "Filter to cases assigned to this user."
+              },
+              {
+                "name": "unassigned",
+                "value": "",
+                "type": "query",
+                "description": "true for unassigned cases, false for assigned cases."
+              },
+              {
+                "name": "tag",
+                "value": "",
+                "type": "query",
+                "description": "Filter to cases carrying this exact tag."
+              },
+              {
+                "name": "search",
+                "value": "",
+                "type": "query",
+                "description": "Matches title, case_number, tag, subject name/UUID/external ID, linked session UUID, or linked transaction UUID."
+              },
+              {
+                "name": "date_from",
+                "value": "",
+                "type": "query",
+                "description": "Created-at lower bound (inclusive)."
+              },
+              {
+                "name": "date_to",
+                "value": "",
+                "type": "query",
+                "description": "Created-at upper bound (inclusive)."
+              },
+              {
+                "name": "due_before",
+                "value": "",
+                "type": "query",
+                "description": "due_at upper bound."
+              },
+              {
+                "name": "overdue",
+                "value": "",
+                "type": "query",
+                "description": "true to return only overdue open/awaiting-user cases."
+              },
+              {
+                "name": "ordering",
+                "value": "",
+                "type": "query",
+                "description": "Sort order. due_at sorts nulls last."
+              }
+            ]
+          },
+          "docs": "List cases for the application, newest first. Supports filtering, search, and sorting; see query parameters. Paginated with `limit`/`offset`."
+        },
+        {
+          "info": {
+            "name": "Create case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a case anchored to exactly one subject (a user or a business), directly or by deriving the subject from an attached session/transaction link. Source is always `MANUAL` for API-created cases."
+        },
+        {
+          "info": {
+            "name": "Get case",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Retrieve a case with its subject, blueprint, notes, events, links, and checklist."
+        },
+        {
+          "info": {
+            "name": "Update case",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update the case's title, priority, due date, or tags. Logs PRIORITY_CHANGED/DUE_DATE_CHANGED/TAG_ADDED/TAG_REMOVED events as applicable."
+        },
+        {
+          "info": {
+            "name": "Delete case",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Soft-delete a case. There is no undelete endpoint; the row is retained internally for audit purposes only."
+        },
+        {
+          "info": {
+            "name": "Assign or unassign case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/assign/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assign the case to a user, or unassign it by sending assignee_user_id: null. assignee_email/assignee_name auto-provision a User row when the assignee does not exist yet."
+        },
+        {
+          "info": {
+            "name": "Resolve case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/resolve/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Resolve the case as false_positive or valid_threat. Blocked with 400 if the blueprint's checklist is not optional and items remain incomplete, or if the blueprint requires a resolution note and none is given. When the case's blueprint has a four_eyes_checker_blueprint configured, the resolution is staged (case.pending_resolution) and the case moves to the checker blueprint instead of resolving immediately; a different user must call approve or reject-approval."
+        },
+        {
+          "info": {
+            "name": "Reopen case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/reopen/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Move an awaiting-user or resolved case back to open, clearing resolution, resolution_notes, resolved_at, and resolved_by_email."
+        },
+        {
+          "info": {
+            "name": "Request info (awaiting user)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/request-info/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Move an open case to awaiting_user while more information is collected from the verified user. Fails with 400 if a resolution is currently pending 4-eyes approval."
+        },
+        {
+          "info": {
+            "name": "Escalate case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/escalate/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Move the case to its blueprint's configured escalation_blueprint. Requires the current blueprint to have escalation_enabled and an escalation_blueprint set, otherwise 400."
+        },
+        {
+          "info": {
+            "name": "Transfer case",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/transfer/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Move the case to a different, active blueprint of the same application. Requires the current blueprint to have transfer_enabled, otherwise 400."
+        },
+        {
+          "info": {
+            "name": "Approve staged resolution (4-eyes)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/approve/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Apply a resolution staged by resolve on a maker blueprint. The caller must be a different user than the one who submitted it, otherwise 403."
+        },
+        {
+          "info": {
+            "name": "Reject staged resolution (4-eyes)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/reject-approval/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Reject a resolution staged by resolve and return the case to its maker blueprint. The caller must be a different user than the one who submitted it, otherwise 403."
+        },
+        {
+          "info": {
+            "name": "Apply entity action",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/entity-actions/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Act on the case's subject without leaving the case: set_status changes the user/business status, add_tags applies applicant tags, add_note posts an internal case note, and add_to_blocklist adds the subject's latest document and face to the blocklist. Logs an ENTITY_ACTION event."
+        },
+        {
+          "info": {
+            "name": "Print case (PDF)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/print/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "Render the full case (summary, subject, checklist state, notes, attached sessions/transactions, events, FIU report list) as a PDF and return a presigned download URL."
+        },
+        {
+          "info": {
+            "name": "List case notes",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/notes/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset."
+              }
+            ]
+          },
+          "docs": "List notes on the case, newest first."
+        },
+        {
+          "info": {
+            "name": "Create case note",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/notes/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Post a plain-text note, optionally mentioning teammates, tagging it, or attaching files uploaded via notes/presign/."
+        },
+        {
+          "info": {
+            "name": "Delete case note",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/notes/:note_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "note_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Note UUID."
+              }
+            ]
+          },
+          "docs": "Soft-delete a note."
+        },
+        {
+          "info": {
+            "name": "Get note attachment URL",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/notes/presign/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "s3_key",
+                "value": "",
+                "type": "query",
+                "description": "The attachment's s3_key, as returned by upload or listed on the note."
+              }
+            ]
+          },
+          "docs": "Mint a fresh presigned download URL for an attachment already stored on one of the case's notes."
+        },
+        {
+          "info": {
+            "name": "Upload note attachment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/notes/presign/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "file",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Upload a file (JPEG, PNG, WebP, PDF, plain text, or CSV; max 5 MB) to attach to a note. Returns the s3_key to pass in the note's attachments array."
+        },
+        {
+          "info": {
+            "name": "List case links",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/links/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "List sessions, business sessions, and transactions attached to the case."
+        },
+        {
+          "info": {
+            "name": "Add case link",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/links/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Attach a session, business session, or transaction to the case. Rejected with 400 if the entity belongs to a different subject than the case."
+        },
+        {
+          "info": {
+            "name": "Remove case link",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/links/:link_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "link_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Link UUID."
+              }
+            ]
+          },
+          "docs": "Detach a linked session, business session, or transaction from the case."
+        },
+        {
+          "info": {
+            "name": "List case events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/events/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Page size."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Zero-based offset."
+              }
+            ]
+          },
+          "docs": "Read-only audit timeline of the case (created, status changes, assignment, resolution, escalation, transfers, tag/priority/due-date changes, entity actions, and more)."
+        },
+        {
+          "info": {
+            "name": "List case checklist",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/checklist/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "List the case's checklist items, copied from the blueprint's content_config.checklist.items at creation, ordered."
+        },
+        {
+          "info": {
+            "name": "Toggle checklist item",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/checklist/:item_uuid/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              },
+              {
+                "name": "item_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Checklist item UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Mark a checklist item complete or incomplete. Resolution is blocked while any item is incomplete, unless the blueprint marks the checklist optional."
+        },
+        {
+          "info": {
+            "name": "List case AML hits",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/:case_uuid/aml/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "case_uuid",
+                "value": "",
+                "type": "path",
+                "description": "Case UUID."
+              }
+            ]
+          },
+          "docs": "List AML screening hits for the case's subject. Same shape as the hits returned by POST /v3/aml/."
+        },
+        {
+          "info": {
+            "name": "Case analytics",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/statistics/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              },
+              {
+                "name": "date_from",
+                "value": "",
+                "type": "query",
+                "description": "Range start (inclusive). Defaults to 30 days ago."
+              },
+              {
+                "name": "date_to",
+                "value": "",
+                "type": "query",
+                "description": "Range end (inclusive). Defaults to today."
+              }
+            ]
+          },
+          "docs": "Aggregate case analytics for the date range (defaults to the last 30 days; max 731 days): a created-vs-reviewed time series, per-officer/blueprint/source/status tables, rollup totals, and the live open/overdue queue depth."
+        },
+        {
+          "info": {
+            "name": "Bulk update case status",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/bulk/status/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Apply the same status transition to several cases in one call: OPEN reopens, AWAITING_USER requests info, RESOLVED resolves (resolution required). Each case is evaluated independently; gate failures (incomplete checklist, missing required note) are reported per case without aborting the batch."
+        },
+        {
+          "info": {
+            "name": "Bulk assign cases",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://verification.didit.me/v3/organization/:organization_id/application/:application_id/cases/bulk/assign/",
+            "params": [
+              {
+                "name": "organization_id",
+                "value": "",
+                "type": "path",
+                "description": "Organization UUID."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "Application UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assign (or unassign, with assignee_user_id: null) several cases at once. All cases must share the same blueprint; mismatches are reported per case without aborting the batch."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

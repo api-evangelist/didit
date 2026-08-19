@@ -1,0 +1,1460 @@
+{
+  "item": [
+    {
+      "id": "268508e3-a6a1-4895-891d-3355fc8459dc",
+      "name": "Webhook",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c55c4bf2-4f05-4d11-9e15-ceaa2396984e",
+          "name": "List webhook destinations",
+          "request": {
+            "name": "List webhook destinations",
+            "description": {
+              "content": "List all webhook destinations (unpaginated array, oldest first). Each row includes URL, subscribed events, and delivery health metrics. The signing secret is NOT included in the list — fetch a single destination (`GET /v3/webhook/destinations/{destination_uuid}/`) to read `secret_shared_key`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "webhook",
+                "destinations",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "e20194ac-04a9-47b1-9e51-bda0c9f336eb",
+              "name": "List of webhook destinations (unpaginated, oldest first).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"uuid\": \"11111111-2222-3333-4444-555555555555\",\n    \"label\": \"Production session webhooks\",\n    \"url\": \"https://yourapp.com/webhooks/didit\",\n    \"enabled\": true,\n    \"webhook_version\": \"v3\",\n    \"subscribed_events\": [\n      \"status.updated\",\n      \"data.updated\"\n    ],\n    \"subscribed_events_count\": 2,\n    \"deliveries_count\": 12453,\n    \"failed_deliveries_count\": 14,\n    \"average_response_time_ms\": 187,\n    \"error_rate_percentage\": 0,\n    \"last_delivery_at\": \"2026-05-17T09:21:18Z\",\n    \"created_at\": \"2026-01-04T08:00:00Z\",\n    \"updated_at\": \"2026-04-22T14:09:11Z\"\n  },\n  {\n    \"uuid\": \"22222222-3333-4444-5555-666666666666\",\n    \"label\": \"Staging mirror\",\n    \"url\": \"https://staging.yourapp.com/webhooks/didit\",\n    \"enabled\": false,\n    \"webhook_version\": \"v3\",\n    \"subscribed_events\": [\n      \"status.updated\"\n    ],\n    \"subscribed_events_count\": 1,\n    \"deliveries_count\": 0,\n    \"failed_deliveries_count\": 0,\n    \"average_response_time_ms\": null,\n    \"error_rate_percentage\": 0,\n    \"last_delivery_at\": null,\n    \"created_at\": \"2026-03-12T10:15:02Z\",\n    \"updated_at\": \"2026-03-12T10:15:02Z\"\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0e62dd0c-7963-433d-843b-74f4d7d9584a",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b357f466-bb38-4206-985b-132750cc72f1",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d5164ce6-3b2d-46a3-8d10-aef04a1ed3bb",
+          "name": "Create webhook destination",
+          "request": {
+            "name": "Create webhook destination",
+            "description": {
+              "content": "Create a webhook destination. The response includes the auto-generated `secret_shared_key` HMAC signing secret (also readable later via `GET /v3/webhook/destinations/{destination_uuid}/`). Always send `subscribed_events` with at least one event (no wildcards): an explicit empty list is rejected with 400, and omitting the field creates a destination subscribed to nothing, which never receives a webhook. The `(application, url)` pair must be unique among non-deleted destinations.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "webhook",
+                "destinations",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"<string>\",\n  \"url\": \"<uri>\",\n  \"enabled\": true,\n  \"webhook_version\": \"<string>\",\n  \"subscribed_events\": [\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "5a053131-3458-44e6-98d3-10d380c46786",
+              "name": "Destination created. `secret_shared_key` is the HMAC signing secret — store it now.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"webhook_version\": \"v3\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"11111111-2222-3333-4444-555555555555\",\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"enabled\": true,\n  \"webhook_version\": \"v3\",\n  \"secret_shared_key\": \"tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ],\n  \"created_at\": \"2026-05-17T10:00:00Z\",\n  \"updated_at\": \"2026-05-17T10:00:00Z\",\n  \"summary\": {\n    \"total_deliveries\": 0,\n    \"failed_deliveries\": 0,\n    \"error_rate_percentage\": 0,\n    \"min_response_time_ms\": null,\n    \"avg_response_time_ms\": null,\n    \"max_response_time_ms\": null,\n    \"last_delivery_at\": null\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a014fc7c-8e24-4de6-a23f-85ffda4d2e6b",
+              "name": "Validation failed — usually a duplicate URL, missing/invalid `subscribed_events`, or unknown event name.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"webhook_version\": \"v3\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"url\": [\n    \"This webhook destination already exists for the application.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e490a212-9116-4c07-a701-1fbe6c32a3ad",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"webhook_version\": \"v3\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b91e0a5c-ca67-4655-a60b-8d497ec30533",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"webhook_version\": \"v3\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "92630fce-c54d-4eeb-82b6-12c3b5238963",
+          "name": "Get webhook destination",
+          "request": {
+            "name": "Get webhook destination",
+            "description": {
+              "content": "Retrieve one webhook destination with its `secret_shared_key` signing secret and delivery health summary. API-key callers always receive the secret in full; Console users without `read:webhooks` see an empty string.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "webhook",
+                "destinations",
+                ":destination_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "destination_uuid",
+                  "description": "(Required) UUID of the destination (the `uuid` returned from create / list)."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "3b183f4b-3f0d-49a7-8171-c92e087fbf6b",
+              "name": "Webhook destination details.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination (the `uuid` returned from create / list)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"11111111-2222-3333-4444-555555555555\",\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"enabled\": true,\n  \"webhook_version\": \"v3\",\n  \"secret_shared_key\": \"tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ],\n  \"created_at\": \"2026-01-04T08:00:00Z\",\n  \"updated_at\": \"2026-04-22T14:09:11Z\",\n  \"summary\": {\n    \"total_deliveries\": 12453,\n    \"failed_deliveries\": 14,\n    \"error_rate_percentage\": 0,\n    \"min_response_time_ms\": 41,\n    \"avg_response_time_ms\": 187,\n    \"max_response_time_ms\": 2103,\n    \"last_delivery_at\": \"2026-05-17T09:21:18Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ab3abf7f-0a9f-421b-b795-392bbf2f611d",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination (the `uuid` returned from create / list)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b69a393c-44af-4492-8cf5-67d992560bff",
+              "name": "No destination with this UUID exists, or it belongs to a different application, or it has been deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination (the `uuid` returned from create / list)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Webhook destination not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7aa91626-698f-4a94-ad6e-c37a9bdeab04",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination (the `uuid` returned from create / list)."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "841f864e-575c-40f6-bc26-547624c3e429",
+          "name": "Update webhook destination",
+          "request": {
+            "name": "Update webhook destination",
+            "description": {
+              "content": "Update a webhook destination. **`subscribed_events` is REPLACED wholesale, not merged** — fetch first, append, resend. Secret is not rotated.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "webhook",
+                "destinations",
+                ":destination_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "destination_uuid",
+                  "description": "(Required) UUID of the destination to update."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"<string>\",\n  \"url\": \"<uri>\",\n  \"enabled\": \"<boolean>\",\n  \"webhook_version\": \"<string>\",\n  \"subscribed_events\": [\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "0846b35e-c53b-4289-a3cb-2b0fb59dc6a4",
+              "name": "Updated webhook destination. Body has the same shape as `GET /v3/webhook/destinations/{destination_uuid}/`.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"uuid\": \"11111111-2222-3333-4444-555555555555\",\n  \"label\": \"Production session webhooks\",\n  \"url\": \"https://yourapp.com/webhooks/didit\",\n  \"enabled\": false,\n  \"webhook_version\": \"v3\",\n  \"secret_shared_key\": \"tno2NTeRC1ZK3sBOYlBJDyEzBVENl3pQ1AcZyAW0xnQ\",\n  \"subscribed_events\": [\n    \"status.updated\",\n    \"data.updated\"\n  ],\n  \"created_at\": \"2026-01-04T08:00:00Z\",\n  \"updated_at\": \"2026-05-17T11:02:55Z\",\n  \"summary\": {\n    \"total_deliveries\": 12453,\n    \"failed_deliveries\": 14,\n    \"error_rate_percentage\": 0,\n    \"min_response_time_ms\": 41,\n    \"avg_response_time_ms\": 187,\n    \"max_response_time_ms\": 2103,\n    \"last_delivery_at\": \"2026-05-17T09:21:18Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4414fadf-14d5-48ce-9c5b-c4204ec22743",
+              "name": "Validation failed (duplicate URL, empty/unknown events list, malformed body).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"url\": [\n    \"This webhook destination already exists for the application.\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "be88a9fa-082d-40c9-a505-a8f84806c2ab",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "be22b313-166c-4bcf-b36f-9ff84071407f",
+              "name": "Destination with this UUID does not exist (or is deleted, or belongs to another application).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Webhook destination not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "26366234-0a66-4530-ad1a-4bd8c0654a9c",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to update."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "13ce77d2-d9c3-4b3f-b8a1-1c386d0a93a6",
+          "name": "Delete webhook destination",
+          "request": {
+            "name": "Delete webhook destination",
+            "description": {
+              "content": "Soft-delete a webhook destination. Future events stop; historical delivery records are retained for audit. Calling again returns 404.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v3",
+                "webhook",
+                "destinations",
+                ":destination_uuid",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "destination_uuid",
+                  "description": "(Required) UUID of the destination to delete."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "7e8d72cf-3dd7-45aa-afc3-0809d9fc7ede",
+              "name": "Destination deleted. No response body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "60db624e-9909-47f9-99a4-3f8b9e178321",
+              "name": "API key missing, malformed, expired, or scoped to a different application. Didit returns 403 (never 401) for all authentication failures on this endpoint.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e4d3b178-3c98-47d6-9116-e034b5eb8a11",
+              "name": "No destination with this UUID exists for the application (already deleted or never existed).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Webhook destination not found.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "98fb0881-b548-4a8f-bcc3-d5c7f8fcd570",
+              "name": "Rate limit exceeded; back off and retry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v3",
+                    "webhook",
+                    "destinations",
+                    ":destination_uuid",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "destination_uuid",
+                      "description": "(Required) UUID of the destination to delete."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://verification.didit.me",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "9f84c2d5-8db0-4ce4-8c87-b995b11893b4",
+    "name": "Didit Verification Billing Webhook API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Identity verification API. Authenticate with x-api-key header.",
+      "type": "text/plain"
+    }
+  }
+}
