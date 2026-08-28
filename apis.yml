@@ -10,6 +10,18 @@ description: >-
   $0.30 and a 500-verification monthly free tier. The v3 REST API authenticates with an
   x-api-key header, ships Web/iOS/Android/React Native/Flutter SDKs, HMAC-signed webhooks,
   a live hosted MCP server, and Agent Skills. Backed by Y Combinator and Robinhood Ventures.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
