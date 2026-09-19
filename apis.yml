@@ -85,6 +85,8 @@ apis:
   humanURL: https://docs.didit.me
   baseURL: https://verification.didit.me
   tags:
+  - Business
+  tags_raw:
   - Businesses
   properties:
   - type: OpenAPI
@@ -141,6 +143,8 @@ apis:
   humanURL: https://docs.didit.me
   baseURL: https://verification.didit.me
   tags:
+  - Questionnaire
+  tags_raw:
   - Questionnaires
   properties:
   - type: OpenAPI
@@ -183,6 +187,8 @@ apis:
   humanURL: https://docs.didit.me
   baseURL: https://verification.didit.me
   tags:
+  - Sessions
+  tags_raw:
   - Session
   properties:
   - type: OpenAPI
