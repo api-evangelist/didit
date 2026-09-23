@@ -1,39 +1,59 @@
-generated: '2026-07-18'
+generated: '2026-09-19'
 method: searched
-note: >-
-  Probed /.well-known/ discovery surface across Didit hosts. The verification
-  API and docs/marketing hosts expose none; the Business Console host
-  (business.didit.me) publishes RFC 8414 OAuth 2.0 Authorization Server metadata
-  (used by the MCP server's OAuth 2.1 sign-in).
+note: 'Probed /.well-known/ discovery surface across Didit hosts. The verification API and docs/marketing
+  hosts expose none; the Business Console host (business.didit.me) publishes RFC 8414 OAuth 2.0 Authorization
+  Server metadata (used by the MCP server''s OAuth 2.1 sign-in).
+
+
+  MCP-host OAuth discovery added 2026-09-19 (roadmap#321/#337): the harvest visits a provider''s primary
+  hosts, and RFC 9728 protected-resource metadata lives on the MCP host, so these documents existed and
+  were invisible to the scorer. Fetched live and validated on `resource`/`issuer`; one negative control
+  per host.'
 hosts:
-  - host: https://business.didit.me
-    documents:
-      - path: /.well-known/oauth-authorization-server
-        status: 200
-        file: didit-oauth-authorization-server.json
-      - path: /.well-known/openid-configuration
-        status: 404
-      - path: /.well-known/security.txt
-        status: 404
-      - path: /.well-known/api-catalog
-        status: 404
-      - path: /.well-known/ai-plugin.json
-        status: 404
-  - host: https://verification.didit.me
-    documents:
-      - path: /.well-known/security.txt
-        status: 404
-      - path: /.well-known/openid-configuration
-        status: 404
-      - path: /.well-known/oauth-authorization-server
-        status: 404
-  - host: https://docs.didit.me
-    documents:
-      - path: /.well-known/security.txt
-        status: 404
-      - path: /.well-known/ai-plugin.json
-        status: 404
-  - host: https://didit.me
-    documents:
-      - path: /.well-known/security.txt
-        status: 404
+- host: https://business.didit.me
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: didit-oauth-authorization-server.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://verification.didit.me
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+- host: https://docs.didit.me
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://didit.me
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+- host: https://mcp.didit.me
+  documents:
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: didit-mcp-oauth-protected-resource.json
+    bytes: 196
+  path_echo_control: passed
+x-mcp-probe:
+  probed: '2026-09-19'
+  issue: roadmap#321, roadmap#337
+  documents:
+  - host: https://mcp.didit.me
+    path: /.well-known/oauth-protected-resource
+    file: didit-mcp-oauth-protected-resource.json
+  validated_on: resource (RFC 9728) / issuer (RFC 8414, OIDC)
+  negative_control: one per host; a 2xx JSON object at an impossible path discards the host

@@ -1,23 +1,7 @@
 {
   "provider": "didit",
   "sources": [
-    "didit-billing-api-openapi.yml",
-    "didit-businesses-api-openapi.yml",
-    "didit-case-blueprints-api-openapi.yml",
-    "didit-cases-api-openapi.yml",
-    "didit-customization-api-openapi.yml",
-    "didit-questionnaires-api-openapi.yml",
-    "didit-regulatory-reports-api-openapi.yml",
-    "didit-report-templates-api-openapi.yml",
-    "didit-session-api-openapi.yml",
-    "didit-sessions-api-openapi.yml",
-    "didit-standalone-apis-api-openapi.yml",
-    "didit-system-api-openapi.yml",
-    "didit-transactions-api-openapi.yml",
-    "didit-travel-rule-api-openapi.yml",
-    "didit-users-api-openapi.yml",
-    "didit-webhook-api-openapi.yml",
-    "didit-workflows-api-openapi.yml"
+    "_original/didit-openapi-original.json"
   ],
   "outputs": [
     "didit-billing-api-openapi.yml",
@@ -41,6 +25,46 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "didit-openapi-original.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "didit-openapi-original.json: tagged paths GET /v3/session/{sessionId}/decision/ -> Session",
+    "didit-openapi-original.json: declared missing tag: Billing",
+    "didit-openapi-original.json: declared missing tag: Businesses",
+    "didit-openapi-original.json: declared missing tag: Case Blueprints",
+    "didit-openapi-original.json: declared missing tag: Cases",
+    "didit-openapi-original.json: declared missing tag: Customization",
+    "didit-openapi-original.json: declared missing tag: Questionnaires",
+    "didit-openapi-original.json: declared missing tag: Regulatory Reports",
+    "didit-openapi-original.json: declared missing tag: Report Templates",
+    "didit-openapi-original.json: declared missing tag: Session",
+    "didit-openapi-original.json: declared missing tag: Sessions",
+    "didit-openapi-original.json: declared missing tag: Standalone APIs",
+    "didit-openapi-original.json: declared missing tag: System",
+    "didit-openapi-original.json: declared missing tag: Transactions",
+    "didit-openapi-original.json: declared missing tag: Travel Rule",
+    "didit-openapi-original.json: declared missing tag: Users",
+    "didit-openapi-original.json: declared missing tag: Webhook",
+    "didit-openapi-original.json: declared missing tag: Workflows",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "didit-billing-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-businesses-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-case-blueprints-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-cases-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-customization-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-questionnaires-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-regulatory-reports-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-report-templates-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-session-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-sessions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-standalone-apis-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-system-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-transactions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-travel-rule-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-users-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-webhook-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "didit-workflows-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

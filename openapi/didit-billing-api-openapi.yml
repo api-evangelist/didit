@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
   title: Didit Verification Billing API
@@ -43,12 +43,14 @@ paths:
                     type: boolean
                     description: When `true`, Didit will automatically charge the saved Stripe payment method to add credits once the balance crosses `auto_refill_threshold`. Configured from Console → Billing.
                   auto_refill_amount:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: USD amount that will be charged on each auto-refill. `null` when auto-refill is disabled or unset.
                   auto_refill_threshold:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Trigger threshold in USD. Auto-refill fires when `balance` falls below this value. `null` when auto-refill is disabled or unset.
               examples:
                 Healthy balance with auto-refill:

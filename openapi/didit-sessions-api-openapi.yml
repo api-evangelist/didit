@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Sessions API
+  title: Didit Verification Sessions API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -14,7 +14,7 @@ paths:
       description: 'Create a User Verification (KYC) or Business Verification (KYB) session and receive a hosted verification `url` plus a `session_token` to redirect or embed for your end user. The `workflow_id` selects which verification steps run and whether the session is KYC or KYB.
 
 
-        Call this from your backend (never the browser — the API key is a secret) whenever a user or business needs to be verified: at signup, before a sensitive action, or when re-verification is required. Prerequisites: a published workflow (created in the Console [Workflows](https://docs.didit.me/console/workflows) page) and an application API key with available credits. Sandbox applications bypass the credit check.
+        Call this from your backend (never the browser — the API key is a secret) whenever a user or business needs to be verified: at signup, before a sensitive action, or when re-verification is required. Prerequisites: a published workflow (created in the Console Workflows page) and an application API key with available credits. Sandbox applications bypass the credit check.
 
 
         **Idempotency:** when `vendor_data` is provided and an unfinished session (`Not Started`, `In Progress`, `Resubmitted`, or `Awaiting User`) with the same `vendor_data` already exists on the workflow''s **current latest published version** (and that session already has a hosted verification URL), the existing session is returned (still `201`) instead of creating a duplicate — with its `callback` and `metadata` updated to the newly provided values. An unfinished session created on an older version of the workflow (one that has since been republished) is **not** reused; a new session pinned to the latest published version is created instead. Sessions in `Approved`, `Declined`, `In Review`, `Expired`, `Abandoned`, or `Kyc Expired` are never reused.
@@ -62,8 +62,9 @@ paths:
                     description: Hosted verification URL to redirect the end user to. The URL embeds the `session_token` and, if configured, uses your white-label domain. When the request includes `language`, the URL contains a language path segment — `https://verify.didit.me/{language}/session/{session_token}` (e.g. `/es/session/...`); without `language`, the segment is omitted.
                     example: https://verify.didit.me/session/3FaJ9wLqX2Mz
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Identifier you passed in the request to link the session to a user or business in your own system. Echoed back verbatim. Null when not provided.
                     example: user-123
                   metadata:
@@ -87,9 +88,10 @@ paths:
                     description: Current status of the session. Newly created sessions return `Not Started`. If a non-finished session already existed for the same `vendor_data` on the workflow's latest published version, the returned status reflects that existing session.
                     example: Not Started
                   callback:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uri
-                    nullable: true
                     description: Final redirect URL the user is sent to after completing the flow. Didit appends `?verificationSessionId={session_id}&status={status}` to this URL. Falls back to the workflow's configured callback URL when not provided in the request; `null` when neither is set.
                     example: https://example.com/verification/callback
                   workflow_id:
@@ -476,8 +478,9 @@ paths:
                       example: '1990-05-15'
                       x-readme-id: '1.2'
                     gender:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       enum:
                       - M
                       - F
@@ -911,12 +914,14 @@ paths:
                     type: integer
                     description: Number of error rows — exact up to 100, capped at 100 beyond that. Rely on `next` being `null` to detect the last page.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or `null` on the last page.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or `null` on the first page.
                   results:
                     type: array
@@ -969,7 +974,7 @@ paths:
 
         - For KYC sessions, related face, liveness, and face-match records are soft-deleted together with the session.
 
-        - A background job then moves every stored media file owned by the session to a quarantined storage prefix: document front/back photos (full, cropped, and privacy-blurred variants), document-capture videos, portrait crops, NFC chip portrait and signature images, face reference images, liveness videos, face-match source/target images, Proof of Address documents, and any extra uploaded files (KYC); uploaded company documents and extra files (KYB). Previously issued media URLs (`https://<media-host>/...`) stop resolving once the move completes — the move is asynchronous, so a URL issued just before deletion may keep working for a short window after the `204`.
+        - A background job then moves every stored media file owned by the session to a quarantined storage prefix: document front/back photos (full, cropped, and privacy-blurred variants), document-capture videos, portrait crops, NFC chip portrait and signature images, face reference images, liveness videos, face-match source/target images, Proof of Address documents, and any extra uploaded files (KYC); uploaded company documents and extra files (KYB). Previously issued media URLs (`https:///...`) stop resolving once the move completes — the move is asynchronous, so a URL issued just before deletion may keep working for a short window after the `204`.
 
 
         **What is retained:** the underlying database records (decision, extracted data, audit events) are kept internally, marked with the deletion timestamp — they become unreachable through the API but are not erased at the moment of the call. Blocklist entries created from this session (face or document) are **not** removed — manage those with the blocklist endpoints. Credits already consumed are not refunded.
@@ -1250,10 +1255,10 @@ paths:
       description: 'Persist a sandbox scenario on a `Not Started` session and expand its bundled magic values (email, phone, or `expected_details` fields) onto the session, so the mocked providers reproduce the scenario''s outcome once the flow runs. This is the endpoint the pre-flow scenario picker in Didit''s hosted verification UI calls when a tester chooses an outcome before starting capture. Build your own picker against it, or call it directly from a sandbox test harness.
 
 
-        Authenticate with the session''s own `Session-Token` (returned in `session_token` by [Create Session](/sessions-api/create-session)), not your application `x-api-key`: this endpoint is meant to be called from the client, not your backend. A scenario is only accepted while `status` is `Not Started`. Calling it again while still `Not Started` re-arms the session: it swaps in the new scenario''s magic values and clears only the values the *previous* scenario wrote, so any value the user already typed by hand (email, first name, etc.) survives the re-arm. Arming a session that has moved past `Not Started`, or that belongs to a live (non-sandbox) application, is rejected.
+        Authenticate with the session''s own `Session-Token` (returned in `session_token` by Create Session), not your application `x-api-key`: this endpoint is meant to be called from the client, not your backend. A scenario is only accepted while `status` is `Not Started`. Calling it again while still `Not Started` re-arms the session: it swaps in the new scenario''s magic values and clears only the values the *previous* scenario wrote, so any value the user already typed by hand (email, first name, etc.) survives the re-arm. Arming a session that has moved past `Not Started`, or that belongs to a live (non-sandbox) application, is rejected.
 
 
-        See [Sandbox & Test Data](/integration/sandbox-testing) for the full scenario catalog and the other two ways to drive an outcome: `sandbox_scenario` at session create, and typing magic values directly.'
+        See Sandbox & Test Data for the full scenario catalog and the other two ways to drive an outcome: `sandbox_scenario` at session create, and typing magic values directly.'
       operationId: post_v3_session_sandbox_arm
       tags:
       - Sessions
@@ -1355,7 +1360,7 @@ paths:
         For `Resubmitted`, pass `nodes_to_resubmit` to choose which workflow steps the user must redo, or omit it to auto-select existing feature attempts in a resubmittable state (`Declined`, `In Review`, `Not Finished`, `Expired`). Never-attempted features are not auto-selected — list them explicitly in `nodes_to_resubmit`, or the request returns `400` when no recorded attempt needs resubmission. Captured data for the selected steps is deleted, the steps are reordered to match the workflow graph, the session''s expiration window restarts, and the original verification URL becomes usable again. Backend-only steps (`AML`, `DATABASE_VALIDATION`, `IP_ANALYSIS`) at the head of the list run immediately without user interaction; if every resubmitted step is backend-only, the session re-finalizes within the same request. `KYB_REGISTRY` and `KYB_KEY_PEOPLE` cannot be resubmitted directly — resubmit the relevant child KYC sessions instead and the parent business session recomputes automatically.
 
 
-        Every successful call fires the `status.updated` [webhook](/integration/webhooks) once the change commits and appends an activity entry — with actor attribution and your `comment` — to the session''s `reviews`, visible in [Get Decision](#get-/v3/session/-sessionId-/decision/) and in the console activity timeline. The user-profile aggregates linked to the session''s `vendor_data` update as well. Declining disables ongoing AML monitoring for the session; re-approving re-enables it (from `Resubmitted`, `Declined`, or `Kyc Expired`) when the workflow has monitoring turned on. Approving or declining a child KYC that belongs to a KYB key-people check recomputes the parent business session''s status. Set `send_email: true` (with `email_address`) to notify the user: a status notice for `Approved`/`Declined`, or a resubmission email containing the verification link and per-step reasons for `Resubmitted`.
+        Every successful call fires the `status.updated` webhook once the change commits and appends an activity entry — with actor attribution and your `comment` — to the session''s `reviews`, visible in Get Decision and in the console activity timeline. The user-profile aggregates linked to the session''s `vendor_data` update as well. Declining disables ongoing AML monitoring for the session; re-approving re-enables it (from `Resubmitted`, `Declined`, or `Kyc Expired`) when the workflow has monitoring turned on. Approving or declining a child KYC that belongs to a KYB key-people check recomputes the parent business session''s status. Set `send_email: true` (with `email_address`) to notify the user: a status notice for `Approved`/`Declined`, or a resubmission email containing the verification link and per-step reasons for `Resubmitted`.
 
 
         The operation is intentionally not repeatable with the same value: re-sending the current status returns `400` (`The new status is the same as the current status.`), so accidental double-submissions are harmless. Authentication and permission failures both return `403` — this API never responds `401`.'
@@ -1583,7 +1588,7 @@ paths:
         **Canonical URL:** the route is `/v3/sessions/` (trailing slash). Requests to `/v3/sessions` without the slash receive a `301` redirect to the slashed URL with the query string preserved; most HTTP clients follow it transparently on GET.
 
 
-        **When to use this endpoint vs webhooks.** Use this endpoint for dashboards, back-office search, reconciliation, and batch exports. Do not poll it to track the progress of individual verifications - configure [webhooks](/integration/webhooks) instead, which push `status.updated` events the moment a session changes. For one session''s full result, call `GET /v3/session/{sessionId}/decision/`.
+        **When to use this endpoint vs webhooks.** Use this endpoint for dashboards, back-office search, reconciliation, and batch exports. Do not poll it to track the progress of individual verifications - configure webhooks instead, which push `status.updated` events the moment a session changes. For one session''s full result, call `GET /v3/session/{sessionId}/decision/`.
 
 
         **KYC and KYB rows.** `session_kind` selects which tables are listed:
@@ -1809,15 +1814,17 @@ paths:
                     description: Number of sessions matching the filters. Exact for KYC rows; for KYB rows it is capped at 100 (use `next` to know whether more pages exist). For `session_kind=all` it is the sum of both kinds.
                     example: 2
                   next:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uri
-                    nullable: true
                     description: Absolute URL of the next page, or `null` on the last page.
                     example: https://verification.didit.me/v3/sessions/?limit=20&offset=20
                   previous:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uri
-                    nullable: true
                     description: Absolute URL of the previous page, or `null` on the first page.
                     example: null
                   results:
@@ -1862,18 +1869,21 @@ paths:
                             description: Human-friendly sequential number of the session within your application. Also matched by the `search` parameter.
                             example: 720
                           session_url:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Hosted verification URL the end user opens to complete the flow. `null` when the session has no hosted URL.
                             example: https://verify.didit.me/session/CuXoBYCYVO5Y
                           portrait_image:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: 'Expiring (presigned) URL of the best available portrait: the NFC chip photo when available, otherwise the ID document portrait, otherwise the liveness reference image. `null` until one of those exists. Download promptly; the link expires.'
                             example: https://<media-host>/portraits/5b3720ed.jpg?X-Amz-Expires=3600&X-Amz-Signature=...
                           document_type:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             enum:
                             - Passport
                             - Identity Card
@@ -1884,13 +1894,15 @@ paths:
                             description: 'Human-readable type of the verified ID document. `null` before document verification completes, and also `null` after completion when the verified code has no display mapping (`SSC`, `WP`, `VISA`, `PSC`, `BC`, `OTHER`). Note: the `document_type` query parameter filters by short codes (`P`, `ID`, `DL`, `RP`, ...), not by these display values.'
                             example: Passport
                           full_name:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: 'Best available full name for the session, resolved in order: ID document OCR, AML screened data, database-validation screened data, proof-of-address document, then the expected details provided at session creation. `null` when none is available yet.'
                             example: Jane Marie Doe
                           country:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: 'ISO 3166-1 alpha-3 country associated with the session, resolved in order: ID document issuing state, database-validation issuing state, proof-of-address issuing state, expected details, then the verified phone''s country. May differ from nationality.'
                             example: ESP
                           status:
@@ -1909,14 +1921,16 @@ paths:
                             description: Overall session status. See the [Verification Statuses](/integration/verification-statuses) page for the lifecycle.
                             example: Approved
                           vendor_data:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Your own identifier for the end user, echoed back exactly as sent at session creation.
                             example: your-user-id-123
                           didit_internal_id:
-                            type: string
+                            type:
+                            - string
+                            - 'null'
                             format: uuid
-                            nullable: true
                             description: Didit's internal identifier for the verified user profile behind this session. Stable across multiple sessions of the same user; filterable via the `didit_internal_id` query parameter.
                             example: d9e78474-6c8d-4f2a-bb90-6f5c2f3a1147
                           created_at:
@@ -1961,8 +1975,9 @@ paths:
                                   description: Status of this feature. `Not Finished` until the step completes.
                                   example: Approved
                           phone_number:
-                            type: object
-                            nullable: true
+                            type:
+                            - object
+                            - 'null'
                             description: 'Phone associated with the session: the verified phone when phone verification ran, otherwise the contact phone provided at session creation. `null` when neither exists.'
                             required:
                             - number
@@ -1977,8 +1992,9 @@ paths:
                                 description: '`true` only when the phone-verification feature approved this number.'
                                 example: true
                           email_address:
-                            type: object
-                            nullable: true
+                            type:
+                            - object
+                            - 'null'
                             description: 'Email associated with the session: the verified email when email verification ran, otherwise the contact email provided at session creation. `null` when neither exists.'
                             required:
                             - email
@@ -1993,8 +2009,9 @@ paths:
                                 description: '`true` only when the email-verification feature approved this address.'
                                 example: true
                           additional_details:
-                            type: object
-                            nullable: true
+                            type:
+                            - object
+                            - 'null'
                             description: Compact per-feature extras. Only features that produced data appear as keys; `null` when no feature produced extras. Fields excluded by the workflow's response-attributes configuration are omitted.
                             properties:
                               aml:
@@ -2163,8 +2180,9 @@ paths:
                             description: Overall session status. See the [Verification Statuses](/integration/verification-statuses) page.
                             example: Approved
                           vendor_data:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Your own identifier for the business, echoed back exactly as sent at session creation.
                             example: your-company-id-77
                           created_at:
@@ -2173,34 +2191,40 @@ paths:
                             description: UTC timestamp when the session was created.
                             example: '2026-06-08T09:14:02.118450Z'
                           workflow_id:
-                            type: string
+                            type:
+                            - string
+                            - 'null'
                             format: uuid
-                            nullable: true
                             description: Identifier of the workflow this session was created with.
                             example: 9f9b1234-aaaa-bbbb-cccc-1234567890ab
                           workflow_type:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Workflow type. `kyb` for business workflows.
                             example: kyb
                           workflow_label:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Display name of the workflow.
                             example: Standard KYB
                           company_name:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Name of the company being verified, from the registry company linked to the session. `null` until a company is selected.
                             example: Acme Holdings S.L.
                           registration_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Company registration number from the registry company linked to the session.
                             example: B12345678
                           country:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Country code of the registry company linked to the session.
                             example: ES
               examples:
@@ -2611,8 +2635,9 @@ paths:
                   description: UUID of a workflow in the calling application. Cross-application IDs are rejected with `404`.
                   example: 9f9b1234-aaaa-bbbb-cccc-1234567890ab
                 vendor_data:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Optional override for the cloned session's `vendor_data`.
                   example: user-1
             example:
@@ -2836,13 +2861,15 @@ paths:
                     description: Total number of feed entries for this session (across all pages).
                     example: 3
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: URL of the next page, or `null` on the last page.
                     example: null
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: URL of the previous page, or `null` on the first page.
                     example: null
                   results:
@@ -3028,8 +3055,9 @@ paths:
               type: object
               properties:
                 new_status:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   enum:
                   - Not Started
                   - In Progress
@@ -3044,8 +3072,9 @@ paths:
                   description: Optional status label to record on the entry. Accepts any session status value, case-sensitive (`"approved"` is rejected with `400`). Recording a status here does **not** change the session's actual status — use the update-status endpoint for that.
                   example: In Review
                 comment:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Optional free-text note (no enforced length limit). Stored verbatim; `@email` mentions are not processed on this endpoint.
                   example: Flagging for manual document re-check.
             examples:
@@ -3071,8 +3100,9 @@ paths:
                     description: Display name of the entry's author. Always `"Unknown"` for entries created through this endpoint, because it records no actor attribution.
                     example: Unknown
                   new_status:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     enum:
                     - Not Started
                     - In Progress
@@ -3087,8 +3117,9 @@ paths:
                     description: The status label recorded on the entry, or `null` if none was sent. The session's actual status is not affected.
                     example: In Review
                   comment:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: The note recorded on the entry, or `null` if none was sent.
                     example: Flagging for manual document re-check.
                   created_at:
@@ -3186,7 +3217,7 @@ paths:
         Two derived fields are recomputed on every call: `full_name` (from `first_name` + `last_name`) and `issuing_state_name` (from `issuing_state`). If the free-text `address` changes, the server may also re-geocode it and refresh `parsed_address` (skipped for sandbox sessions). `extra_fields` and `parsed_address` are merged key-by-key rather than replaced — see the per-field descriptions for the `null`-to-delete semantics.
 
 
-        Submitting at least one valid field fires the `data.updated` [webhook](/integration/webhooks) (trigger `manual_review`) — even when the submitted values equal the stored ones. When values actually change, a `KYC_DATA_UPDATED` activity entry recording the changed fields with previous and new values is appended to the session''s `reviews`, visible in [Get Decision](#get-/v3/session/-sessionId-/decision/) and the console activity timeline. The session''s status and decision are **not** re-evaluated — use [Update Status](#patch-/v3/session/-sessionId-/update-status/) to change the outcome. An empty JSON body (`{}`) is accepted and simply returns the current KYC data without firing the webhook.
+        Submitting at least one valid field fires the `data.updated` webhook (trigger `manual_review`) — even when the submitted values equal the stored ones. When values actually change, a `KYC_DATA_UPDATED` activity entry recording the changed fields with previous and new values is appended to the session''s `reviews`, visible in Get Decision and the console activity timeline. The session''s status and decision are **not** re-evaluated — use Update Status to change the outcome. An empty JSON body (`{}`) is accepted and simply returns the current KYC data without firing the webhook.
 
 
         Accepts an API key or a console user token; either way the credential needs the `write:sessions` permission. Authentication and permission failures both return `403` — this API never responds `401`. Note that the session lookup runs before credential checks, so an unknown `sessionId` returns `404` even with missing credentials. This endpoint has a dedicated rate limit of 10 requests per minute per API key (invalid requests count too); the shared write budget of 300 requests per minute also applies.'
@@ -3220,7 +3251,9 @@ paths:
               description: All fields optional — send only what you want to change.
               properties:
                 document_type:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   description: 'Document type code. Accepts the short codes listed in the enum, plus six long-form aliases normalized server-side before validation: `Passport` → `P`, `Identity Card` → `ID`, `Driver''s License` → `DL`, `Residence Permit` → `RP`, `Health Insurance Card` → `HIC`, `Tax Card` → `TC`. Any other value (including `PASSPORT` in caps) returns `400`.'
                   enum:
                   - P
@@ -3235,80 +3268,92 @@ paths:
                   - PSC
                   - BC
                   - OTHER
-                  nullable: true
                   example: P
                 document_subtype:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 128
-                  nullable: true
                   description: Document subtype from the document registry, including the region prefix when the registry distinguishes regional variants.
                 document_number:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Document number as printed on the ID.
                   example: PAB123456
                 personal_number:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Personal / national identification number where the document carries one (e.g. Spanish DNI on a passport).
                   example: 99999999R
                 date_of_birth:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Date of birth in `YYYY-MM-DD`. Any other format returns `400`.
                   example: '1980-01-01'
                 date_of_issue:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Issue date of the document in `YYYY-MM-DD`.
                 expiration_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Expiration date of the document in `YYYY-MM-DD`.
                 issuing_state:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Issuing country as an ISO 3166-1 alpha-3 code. Case-insensitive (`esp` is stored as `ESP`); the human-readable `issuing_state_name` shown in [Get Decision](#get-/v3/session/-sessionId-/decision/) is recomputed from this value. Invalid codes return `400`.
                   example: ESP
                 first_name:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Given name(s). The stored `full_name` is recomputed as `first_name + ' ' + last_name` on every call to this endpoint.
                   example: Carmen
                 last_name:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Family name(s). Also feeds the recomputed `full_name`.
                   example: Espanola Espanola
                 gender:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   enum:
                   - M
                   - F
                   - U
-                  nullable: true
                   description: 'Sex as printed on the document: `M` (male), `F` (female), or `U` (unknown). Any other value — including `X` — returns `400`.'
                 address:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Free-text address as printed on the document. When this value changes (non-sandbox sessions only) and the structured address is still missing or incomplete, the server re-geocodes it synchronously before responding — the 200 body already reflects the refreshed `parsed_address`. The re-geocode also requires `issuing_state` to be present on the KYC record.
                 place_of_birth:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Place of birth as printed on the document.
                 nationality:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 32
-                  nullable: true
                   description: Nationality as printed on the document. Free text up to 32 characters — typically an ISO 3166-1 alpha-3 code (e.g. `ESP`), but not validated as one.
                 marital_status:
                   type: string
@@ -3320,41 +3365,50 @@ paths:
                   - UNKNOWN
                   description: Marital status where the document carries it. Any other value returns `400`.
                 extra_fields:
-                  type: object
+                  type:
+                  - object
+                  - 'null'
                   additionalProperties: true
-                  nullable: true
                   description: 'Per-key overrides for document-specific extra fields (e.g. `blood_group`, `dl_categories`, `mrz_string`). Keys are merged into the existing override map: send a key with a value to set it, or with `null` / `""` to remove that key from the merged view. Send the whole field as `null` to clear all previously applied overrides. Must be a JSON object, otherwise `400`. The response always returns the merged view (OCR-extracted values with your overrides applied).'
                 parsed_address:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: 'Structured address. Only these nested keys are accepted: `address_type`, `city`, `region`, `street_1`, `street_2`, `postal_code`, `country` — any other key returns `400`. Per-key semantics: a value sets the key, `null` removes it. `formatted_address` is recomputed server-side by joining `street_1`, `street_2`, `city`, `region`, `postal_code`, and `country` and is returned in the response — you cannot set it directly.'
                   properties:
                     address_type:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Free-form address classification (e.g. `home`).
                     city:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: Madrid
                     region:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: State / province / autonomous community.
                     street_1:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: Avda de Madrid 34
                     street_2:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                     postal_code:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: '28013'
                     country:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: ISO 3166-1 alpha-2 country code. Lowercase input is normalized to uppercase; alpha-3 codes are rejected with `400`.
                       example: ES
             examples:
@@ -3391,7 +3445,9 @@ paths:
                 type: object
                 properties:
                   document_type:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     description: 'Document type code. Accepts the short codes listed in the enum, plus six long-form aliases normalized server-side before validation: `Passport` → `P`, `Identity Card` → `ID`, `Driver''s License` → `DL`, `Residence Permit` → `RP`, `Health Insurance Card` → `HIC`, `Tax Card` → `TC`. Any other value (including `PASSPORT` in caps) returns `400`.'
                     enum:
                     - P
@@ -3406,80 +3462,92 @@ paths:
                     - PSC
                     - BC
                     - OTHER
-                    nullable: true
                     example: P
                   document_subtype:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 128
-                    nullable: true
                     description: Document subtype from the document registry, including the region prefix when the registry distinguishes regional variants.
                   document_number:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Document number as printed on the ID.
                     example: PAB123456
                   personal_number:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Personal / national identification number where the document carries one (e.g. Spanish DNI on a passport).
                     example: 99999999R
                   date_of_birth:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date
-                    nullable: true
                     description: Date of birth in `YYYY-MM-DD`. Any other format returns `400`.
                     example: '1980-01-01'
                   date_of_issue:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date
-                    nullable: true
                     description: Issue date of the document in `YYYY-MM-DD`.
                   expiration_date:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date
-                    nullable: true
                     description: Expiration date of the document in `YYYY-MM-DD`.
                   issuing_state:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Issuing country as an ISO 3166-1 alpha-3 code. Case-insensitive (`esp` is stored as `ESP`); the human-readable `issuing_state_name` shown in [Get Decision](#get-/v3/session/-sessionId-/decision/) is recomputed from this value. Invalid codes return `400`.
                     example: ESP
                   first_name:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Given name(s). The stored `full_name` is recomputed as `first_name + ' ' + last_name` on every call to this endpoint.
                     example: Carmen
                   last_name:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Family name(s). Also feeds the recomputed `full_name`.
                     example: Espanola Espanola
                   gender:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     enum:
                     - M
                     - F
                     - U
-                    nullable: true
                     description: 'Sex as printed on the document: `M` (male), `F` (female), or `U` (unknown). Any other value — including `X` — returns `400`.'
                   address:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Free-text address as printed on the document. When this value changes (non-sandbox sessions only) and the structured address is still missing or incomplete, the server re-geocodes it in the background of the same request and may overwrite `parsed_address` with the geocoder result.
                   place_of_birth:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Place of birth as printed on the document.
                   nationality:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 32
-                    nullable: true
                     description: Nationality as printed on the document. Free text up to 32 characters — typically an ISO 3166-1 alpha-3 code (e.g. `ESP`), but not validated as one.
                   marital_status:
                     type: string
@@ -3491,46 +3559,56 @@ paths:
                     - UNKNOWN
                     description: Marital status where the document carries it. Any other value returns `400`.
                   extra_fields:
-                    type: object
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
-                    nullable: true
                     description: 'Merged view of the document''s extra fields: the OCR-extracted values with all operator overrides applied. Keys removed via a `null` override are absent from this map.'
                   parsed_address:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Current structured address (with internal bookkeeping keys stripped), or `null` when none exists. Includes the recomputed `formatted_address` alongside the seven editable keys.
                     properties:
                       address_type:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Free-form address classification (e.g. `home`).
                       city:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Madrid
                       region:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: State / province / autonomous community.
                       street_1:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Avda de Madrid 34
                       street_2:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                       postal_code:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: '28013'
                       country:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: ISO 3166-1 alpha-2 country code. Lowercase input is normalized to uppercase; alpha-3 codes are rejected with `400`.
                         example: ES
                       formatted_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Joined, human-readable form of the structured address. Recomputed server-side after every `parsed_address` edit.
                         example: Avda de Madrid 34, Madrid, 28013, ES
               examples:
@@ -4010,7 +4088,7 @@ paths:
         source: "import requests\n\nresponse = requests.patch(\n    \"https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/bulk-update-aml-hit-status/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\", \"Content-Type\": \"application/json\"},\n    json={\n        \"hit_updates\": [\n            {\"hit_id\": \"abc123\", \"review_status\": \"Confirmed Match\"},\n            {\"hit_id\": \"def456\", \"review_status\": \"False Positive\"},\n        ]\n    },\n)\nprint(response.json())"
   /v3/session/{sessionId}/update-poa-data/:
     patch:
-      summary: Update Proof of Address data extracted from the POA document on a verification session
+      summary: Update Proof of Address data extracted from the POA document on a verification…
       description: 'Correct the fields extracted from the user''s Proof of Address document — utility bill, bank statement, or other address evidence — after the verification has finished: issuer, dates, the printed name, the address itself, and banking details. Every field in the body is optional: only the keys you send are written, everything else is left untouched (`PATCH` semantics).
 
 
@@ -4020,7 +4098,7 @@ paths:
         `extra_fields` is merged key-by-key: nine known keys (`bank_iban`, `additional_names`, …) write through to dedicated POA columns, any other key is kept as a custom extra, and `null` / `""` deletes a key. `poa_parsed_address` accepts only the seven documented keys and recomputes `formatted_address` / `poa_formatted_address` after every edit. If the free-text `poa_address` changes, the server may also re-geocode it and refresh the structured address (skipped for sandbox sessions).
 
 
-        Unlike the KYC variant of this endpoint, the `data.updated` [webhook](/integration/webhooks) (trigger `manual_review`) fires only when at least one stored value **actually changed** — re-sending identical values is a silent no-op. When values change, a `POA_DATA_UPDATED` activity entry recording the changed fields with previous and new values is appended to the session''s `reviews`, visible in [Get Decision](#get-/v3/session/-sessionId-/decision/) and the console activity timeline. The session''s status and decision are **not** re-evaluated — use [Update Status](#patch-/v3/session/-sessionId-/update-status/) to change the outcome.
+        Unlike the KYC variant of this endpoint, the `data.updated` webhook (trigger `manual_review`) fires only when at least one stored value **actually changed** — re-sending identical values is a silent no-op. When values change, a `POA_DATA_UPDATED` activity entry recording the changed fields with previous and new values is appended to the session''s `reviews`, visible in Get Decision and the console activity timeline. The session''s status and decision are **not** re-evaluated — use Update Status to change the outcome.
 
 
         Accepts an API key or a console user token; either way the credential needs the `write:sessions` permission. Authentication and permission failures both return `403` — this API never responds `401`. Note that the session lookup runs before credential checks, so an unknown `sessionId` returns `404` even with missing credentials. This endpoint has a dedicated rate limit of 10 requests per minute per API key (invalid requests count too); the shared write budget of 300 requests per minute also applies.
@@ -4057,8 +4135,9 @@ paths:
               description: All fields optional — send only what you want to change.
               properties:
                 issuing_state:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Country that issued the POA document, ISO 3166-1 alpha-3. Case-insensitive (normalized to uppercase); invalid codes return `400`.
                   example: ESP
                 document_type:
@@ -4072,70 +4151,84 @@ paths:
                   description: POA document category. Values are uppercase — lowercase variants like `utility_bill` return `400`.
                   example: UTILITY_BILL
                 document_language:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 50
-                  nullable: true
                   description: Language of the document, typically an ISO 639-1 code (e.g. `es`). Free text — not validated as a language code.
                   example: es
                 issuer:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Organization that issued the document (utility company, bank, government agency).
                   example: Energy Provider S.A.
                 issue_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Issue date of the POA document in `YYYY-MM-DD`. Any other format returns `400`.
                   example: '2026-04-12'
                 poa_address:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Free-text address as printed on the document. When this value changes (non-sandbox sessions only) and the structured address is still missing or incomplete, the server re-geocodes it in the background of the same request and may overwrite `poa_parsed_address` / `poa_formatted_address` with the geocoder result. The re-geocode also requires `issuing_state` to be present on the POA record.
                   example: Avda de Madrid 34, 28013 Madrid
                 name_on_document:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
-                  nullable: true
                   description: Recipient name as printed on the document.
                   example: Carmen Espanola
                 extra_fields:
-                  type: object
+                  type:
+                  - object
+                  - 'null'
                   additionalProperties: true
-                  nullable: true
                   description: 'Document-specific extras, merged key-by-key. Nine keys map to dedicated POA columns: `bank_account_number`, `bank_iban`, `bank_sort_code`, `bank_routing_number`, `bank_swift_bic`, `bank_branch_name`, `bank_branch_address`, `document_phone_number`, and `additional_names` (must be a list of strings or `null`, otherwise `400`). Any other key is stored as a custom extra field. Per-key semantics: a value sets the key; `null` or `""` deletes it. Must be a JSON object, otherwise `400`.'
                 poa_parsed_address:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: 'Structured address. Only these nested keys are accepted: `address_type`, `city`, `region`, `street_1`, `street_2`, `postal_code`, `country` — any other key returns `400`. Per-key semantics: a value sets the key, `null` removes it. `formatted_address` (and the top-level `poa_formatted_address`) is recomputed server-side by joining `street_1`, `street_2`, `city`, `region`, `postal_code`, and `country` — you cannot set it directly.'
                   properties:
                     address_type:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Free-form address classification (e.g. `home`).
                     city:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: Madrid
                     region:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: State / province / autonomous community.
                     street_1:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: Avda de Madrid 34
                     street_2:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                     postal_code:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       example: '28013'
                     country:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: ISO 3166-1 alpha-2 country code. Lowercase input is normalized to uppercase; alpha-3 codes are rejected with `400`.
                       example: ES
             examples:
@@ -4171,8 +4264,9 @@ paths:
                 type: object
                 properties:
                   issuing_state:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Country that issued the POA document, ISO 3166-1 alpha-3. Case-insensitive (normalized to uppercase); invalid codes return `400`.
                     example: ESP
                   document_type:
@@ -4186,80 +4280,96 @@ paths:
                     description: POA document category. Values are uppercase — lowercase variants like `utility_bill` return `400`.
                     example: UTILITY_BILL
                   document_language:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 50
-                    nullable: true
                     description: Language of the document, typically an ISO 639-1 code (e.g. `es`). Free text — not validated as a language code.
                     example: es
                   issuer:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Organization that issued the document (utility company, bank, government agency).
                     example: Energy Provider S.A.
                   issue_date:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date
-                    nullable: true
                     description: Issue date of the POA document in `YYYY-MM-DD`. Any other format returns `400`.
                     example: '2026-04-12'
                   poa_address:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Free-text address as printed on the document. When this value changes (non-sandbox sessions only) and the structured address is still missing or incomplete, the server re-geocodes it in the background of the same request and may overwrite `poa_parsed_address` / `poa_formatted_address` with the geocoder result.
                     example: Avda de Madrid 34, 28013 Madrid
                   name_on_document:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     maxLength: 255
-                    nullable: true
                     description: Recipient name as printed on the document.
                     example: Carmen Espanola
                   extra_fields:
-                    type: object
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
-                    nullable: true
                     description: 'Always present in the response: the nine known keys (with `null` for unset ones, `additional_names` defaulting to `[]`) plus any custom keys previously stored.'
                   poa_parsed_address:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Current structured address, or `null` when none exists. Includes the recomputed `formatted_address` alongside the seven editable keys. Returned as stored — after a server-side geocode it can contain bookkeeping keys (e.g. `raw_results`) alongside the editable keys.
                     properties:
                       address_type:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Free-form address classification (e.g. `home`).
                       city:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Madrid
                       region:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: State / province / autonomous community.
                       street_1:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Avda de Madrid 34
                       street_2:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                       postal_code:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: '28013'
                       country:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: ISO 3166-1 alpha-2 country code. Lowercase input is normalized to uppercase; alpha-3 codes are rejected with `400`.
                         example: ES
                       formatted_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Joined, human-readable form of the structured address. Recomputed server-side after every `poa_parsed_address` edit.
                         example: Avda de Madrid 34, Madrid, 28013, ES
                   poa_formatted_address:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Top-level copy of the recomputed `formatted_address`, kept in sync when the structured address changes.
                     example: Avda de Madrid 34, Madrid, 28013, ES
               examples:
@@ -4388,7 +4498,7 @@ paths:
         Edits are written in two places at once: fields with a canonical company column (name, registration number, country, incorporation date, tax number, type, statuses, capital fields (`registered_capital`, `registered_capital_amount`, `registered_capital_currency`), alternative names, nature of business, website, email, phone, LEI, location, and `legal_address` → `registered_address`) update that column, and **every** submitted key is also merged into the `registry_data` snapshot (dates as ISO strings) so the "extracted from registry" view reflects the correction. Fields without a column — `region`, `registration_date`, `dissolution_date`, `control_scheme` — land in `registry_data` only. `user_provided_data` (what the end user confirmed in the hosted flow) is never touched, and `last_console_edit_at` is stamped on every non-empty PATCH.
 
 
-        Unlike the KYC/POA update endpoints, there is **no session-status gate**: the company can be edited at any point in the business session''s lifecycle. The company must belong to the session in the path (`404` with `"KYB company does not belong to the given session."` otherwise) and to your application. Every non-empty PATCH fires the `data.updated` [webhook](/integration/webhooks) on the business session (trigger `console_registry_edit`) — even when the submitted values equal the stored ones. The session''s status and decision are **not** re-evaluated, and no review/audit entry is recorded.
+        Unlike the KYC/POA update endpoints, there is **no session-status gate**: the company can be edited at any point in the business session''s lifecycle. The company must belong to the session in the path (`404` with `"KYB company does not belong to the given session."` otherwise) and to your application. Every non-empty PATCH fires the `data.updated` webhook on the business session (trigger `console_registry_edit`) — even when the submitted values equal the stored ones. The session''s status and decision are **not** re-evaluated, and no review/audit entry is recorded.
 
 
         Accepts an API key or a console user token; either way the credential needs the `write:businesses` permission. Authentication and permission failures both return `403` — this API never responds `401`. Note that the session lookup runs before credential checks, so an unknown `sessionId` returns `404` even with missing credentials. The shared write budget of 300 requests per minute per API key applies.
@@ -4441,9 +4551,10 @@ paths:
                   description: Country of incorporation, ISO 3166-1 alpha-2. Case-insensitive (`us` is stored as `US`). Alpha-3 codes fail the 2-character limit with `400`.
                   example: US
                 region:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 10
-                  nullable: true
                   description: Subdivision / region tag where the registry has one (e.g. US state). Stored in the registry snapshot only — it has no canonical column.
                 incorporation_date:
                   type: string
@@ -4451,14 +4562,16 @@ paths:
                   description: Incorporation date in `YYYY-MM-DD`. Optional like every other field — the `PATCH` is partial. Any other date format returns `400`.
                   example: '2015-04-12'
                 registration_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Registration date where the registry distinguishes it from incorporation. Stored in the registry snapshot only.
                 dissolution_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date
-                  nullable: true
                   description: Dissolution date for companies that are no longer active. Stored in the registry snapshot only.
                 tax_number:
                   type: string
@@ -4474,7 +4587,9 @@ paths:
                   description: Legal entity type (e.g. `Limited Liability Company`, `PLC`, `GmbH`).
                   example: Limited Liability Company
                 registry_status:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   enum:
                   - active
                   - dissolved
@@ -4487,16 +4602,16 @@ paths:
                   - no longer authorised
                   - closed
                   - struck off
-                  nullable: true
                   description: Registry-reported company status. Lowercase, some values contain spaces (e.g. `struck off`, `no longer authorised`). Any other value returns `400`.
                   example: active
                 verification_status:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   enum:
                   - verified
                   - failed
                   - unknown
-                  nullable: true
                   description: Outcome of the registry verification. Any other value returns `400`.
                   example: verified
                 alternative_names:
@@ -4512,14 +4627,16 @@ paths:
                   description: Human-readable registered capital (e.g. `USD 50000`). Use `registered_capital_amount` + `registered_capital_currency` for structured values, or this field for free-form text.
                   example: USD 50000
                 registered_capital_amount:
-                  type: number
+                  type:
+                  - number
+                  - 'null'
                   format: double
-                  nullable: true
                   description: Numeric registered-capital amount (up to 20 digits, 2 decimal places). Sets the `registered_capital_amount` column and is mirrored into `registry_data` as a decimal string; the response echoes it as a decimal string (e.g. `"1500000.50"`).
                 registered_capital_currency:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 3
-                  nullable: true
                   description: ISO 4217 currency code for `registered_capital_amount`. Case-insensitive (`usd` is stored as `USD`); values that are not exactly 3 letters return `400` with the ISO 4217 message. Sets the canonical `registered_capital_currency` column and is mirrored into `registry_data`.
                   example: USD
                 website:
@@ -4590,95 +4707,119 @@ paths:
                     format: uuid
                     description: Company record identifier (the `companyUuid` path parameter).
                   node_id:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Workflow graph node this company record belongs to, when the workflow is graph-based.
                   status:
                     type: string
                     description: Feature lifecycle status of the registry check (e.g. `Not Finished`, `Approved`, `Declined`, `In Review`).
                   registry_status:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Registry-reported company status (e.g. `active`, `dissolved`, `struck off`).
                   data_resolved:
                     type: boolean
                     description: '`true` when the company data is complete — always `true` for manual-entry companies; for registry-sourced companies, `true` once the registry fetch resolved.'
                   company_name:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   registration_number:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   country_code:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: ISO 3166-1 alpha-2 country of incorporation.
                   region:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   company_type:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   incorporation_date:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date
-                    nullable: true
                   registered_address:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Canonical registered address — updated when you send `legal_address`.
                   tax_number:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   risk_level:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   verification_status:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: '`verified`, `failed`, or `unknown`.'
                   is_from_registry:
                     type: boolean
                     description: '`true` when the company was pre-filled from a registry search rather than entered manually.'
                   fetch_status:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Registry fetch lifecycle for registry-sourced companies (`pending` / `resolved`); `null` for manual entries.
                   alternative_names:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   nature_of_business:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   registered_capital:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   registered_capital_amount:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Canonical column. Returned as a decimal string (e.g. `"2750000.00"`).
                   registered_capital_currency:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Canonical column. Set by the registry flow or by console/API edits via this endpoint.
                   website:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   email:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   phone:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   legal_entity_identifier:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   location_of_registration:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   vat_number:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: EU VAT number, when collected during the hosted registry step or edited afterwards.
                   vat_validation_status:
                     type: string
@@ -4689,21 +4830,25 @@ paths:
                     - not_applicable
                     description: Result of the EU VIES check run at registry submit. `not_applicable` when no VAT number was provided or the company is outside the EU VAT area (EU-27 plus Northern Ireland).
                   vat_validated_name:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Trader name registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                   vat_validated_address:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Trader address registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                   vat_checked_at:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date-time
-                    nullable: true
                     description: Timestamp of the VIES check. `null` when no check ran.
                   financial_summary:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                   officers:
                     type: array
@@ -4718,45 +4863,52 @@ paths:
                       additionalProperties: true
                     description: Beneficial owners attached to the company, including per-person KYC progress.
                   addresses:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     items:
                       type: object
                       additionalProperties: true
                     description: Registry address detail, when the registry returned any.
                   industries:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     items:
                       type: object
                       additionalProperties: true
                     description: Registry industry classification, when available.
                   accounts:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     items:
                       type: object
                       additionalProperties: true
                     description: Registry filing-accounts detail, when available.
                   registry_data:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Raw registry payload snapshot. Every key you PATCH is merged into this map (dates serialized as ISO strings), so the "extracted from registry" view reflects operator corrections.
                   user_provided_data:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: What the end user typed during the hosted registry-confirmation step. Never modified by this endpoint.
                   confirmed_by_user_at:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date-time
-                    nullable: true
                     description: When the end user confirmed the company data in the hosted flow.
                   last_console_edit_at:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date-time
-                    nullable: true
                     description: Stamped on every successful non-empty PATCH, so UIs can surface "edited by operator" context.
                   is_editable:
                     type: boolean
@@ -4918,148 +5070,6 @@ paths:
         source: "const response = await fetch(\n  'https://verification.didit.me/v3/session/33333333-4444-5555-6666-777777777777/kyb/' +\n    '88888888-9999-aaaa-bbbb-cccccccccccc/update-data/',\n  {\n    method: 'PATCH',\n    headers: {\n      'x-api-key': process.env.DIDIT_API_KEY,\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({\n      company_name: 'Docs Probe Corp',\n      registration_number: 'DPC-001',\n      country_code: 'US',\n      incorporation_date: '2015-04-12',\n      legal_address: '1 Example Plaza, Wilmington, DE 19801',\n      registry_status: 'active',\n    }),\n  },\n);\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst company = await response.json(); // full company record"
 components:
   schemas:
-    ReviewItem:
-      type: object
-      description: One entry in a session's review / activity feed. Status changes carry `previous_status`, `new_status`, `previous_value`, `new_value`, and `changed_fields`; comments carry `comment` and (for Console comments) `mentioned_emails`; the remaining fields are `null` or empty when they do not apply to the activity type.
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          description: Unique identifier of this feed entry.
-          example: de0561bc-5583-4409-9171-1a31a4c8a5f4
-        activity_type:
-          type: string
-          enum:
-          - COMMENT
-          - STATUS_UPDATED
-          - KYC_DATA_UPDATED
-          - POA_DATA_UPDATED
-          - FILE_ADDED
-          - FILE_REMOVED
-          - AML_ONGOING_MATCH
-          - AML_STATUS_UPDATED
-          - AML_HIT_STATUS_UPDATED
-          - KYB_DATA_UPDATED
-          - KYB_DOCUMENT_UPLOADED
-          - TAG_ADDED
-          - TAG_REMOVED
-          description: What kind of activity this entry records. `STATUS_UPDATED` rows come from manual decisions (`PATCH /v3/session/{session_id}/update-status/`) and from entries added via `POST …/reviews/` (which default to this type even when no status is recorded). `COMMENT` rows come from Console reviewers; Console detail-page views are also stored as `COMMENT` rows flagged with `metadata.system_event = "DETAIL_VIEWED"`. The remaining types track data edits, file changes, tags, and AML monitoring activity. STATUS_UPDATED rows are also written by system actors (e.g. AML ongoing monitoring with actor_type SYSTEM, and automatic feature-status updates), not only by the update-status endpoint and manual review posts.
-          example: STATUS_UPDATED
-        actor_display:
-          type: string
-          description: 'Human-readable author label, resolved in order: actor''s full name → Console account identifier → local part of `actor_email` → `"API Client"` (for `API_KEY` actors) → `"System"` (for `SYSTEM` actors) → `"Unknown"`. Entries created via `POST …/reviews/` always display `"Unknown"` because that endpoint records no actor attribution.'
-          example: API Client
-        actor_email:
-          type: string
-          nullable: true
-          description: Email of the Console user who performed the action. `null` for API-key and system actors.
-          example: null
-        actor_type:
-          type: string
-          enum:
-          - API_KEY
-          - CONSOLE_USER
-          - SYSTEM
-          description: 'Who performed the action: an API key, a Console user, or Didit itself (`SYSTEM`, e.g. AML ongoing monitoring). Entries created via `POST …/reviews/` carry the default `CONSOLE_USER` regardless of the caller.'
-          example: API_KEY
-        new_status:
-          type: string
-          nullable: true
-          enum:
-          - Not Started
-          - In Progress
-          - Approved
-          - Declined
-          - In Review
-          - Expired
-          - Abandoned
-          - Kyc Expired
-          - Resubmitted
-          - Awaiting User
-          description: Session status recorded by this entry (for status updates). `null` for comments and data-change entries.
-          example: Approved
-        previous_status:
-          type: string
-          nullable: true
-          enum:
-          - Not Started
-          - In Progress
-          - Approved
-          - Declined
-          - In Review
-          - Expired
-          - Abandoned
-          - Kyc Expired
-          - Resubmitted
-          - Awaiting User
-          description: Status the session had before the change. Populated on `STATUS_UPDATED` entries written by the update-status endpoint; `null` on entries added via `POST …/reviews/`. Also populated on system-written STATUS_UPDATED rows.
-          example: In Review
-        comment:
-          type: string
-          nullable: true
-          description: Free-text note attached to the entry, or `null`.
-          example: Document re-checked manually; address matches.
-        mentioned_emails:
-          type: array
-          items:
-            type: string
-            format: email
-          description: Console users `@email`-mentioned in the comment. Always empty for entries created via this API — mention processing is a Console-only feature.
-          example: []
-        previous_value:
-          type: object
-          nullable: true
-          description: 'Snapshot of the changed data before the action, e.g. `{"status": "In Review"}` on a status change. `null` when nothing was changed.'
-          example:
-            status: In Review
-        new_value:
-          type: object
-          nullable: true
-          description: 'Snapshot of the changed data after the action, e.g. `{"status": "Approved"}`. `null` when nothing was changed.'
-          example:
-            status: Approved
-        changed_fields:
-          type: array
-          items:
-            type: string
-          description: Names of the fields modified by this activity (e.g. `["status"]`). Empty for comments and for entries added via `POST …/reviews/`.
-          example:
-          - status
-        metadata:
-          type: object
-          nullable: true
-          description: 'Extra context for system-generated entries. Console detail-page views carry `{"system_event": "DETAIL_VIEWED", "detail_type": "verification"}` so they can be filtered out of notification logic. `null` for ordinary entries.'
-          example: null
-        created_at:
-          type: string
-          format: date-time
-          description: When the entry was written, ISO 8601 UTC.
-          example: '2026-06-12T00:19:31.918735Z'
-    SessionImportError:
-      type: object
-      required:
-      - uuid
-      - row_number
-      - error
-      - raw_row
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        row_number:
-          type: integer
-          format: int64
-        external_id:
-          type: string
-          nullable: true
-        error:
-          type: string
-        raw_row:
-          type: object
-          additionalProperties: true
-        created_at:
-          type: string
-          format: date-time
     SessionImportJob:
       type: object
       required:
@@ -5127,8 +5137,9 @@ components:
           type: integer
           format: int64
         last_error:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         created_at:
           type: string
           format: date-time
@@ -5136,13 +5147,165 @@ components:
           type: string
           format: date-time
         started_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
         completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    SessionImportError:
+      type: object
+      required:
+      - uuid
+      - row_number
+      - error
+      - raw_row
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        row_number:
+          type: integer
+          format: int64
+        external_id:
+          type:
+          - string
+          - 'null'
+        error:
+          type: string
+        raw_row:
+          type: object
+          additionalProperties: true
+        created_at:
           type: string
           format: date-time
-          nullable: true
+    ReviewItem:
+      type: object
+      description: One entry in a session's review / activity feed. Status changes carry `previous_status`, `new_status`, `previous_value`, `new_value`, and `changed_fields`; comments carry `comment` and (for Console comments) `mentioned_emails`; the remaining fields are `null` or empty when they do not apply to the activity type.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Unique identifier of this feed entry.
+          example: de0561bc-5583-4409-9171-1a31a4c8a5f4
+        activity_type:
+          type: string
+          enum:
+          - COMMENT
+          - STATUS_UPDATED
+          - KYC_DATA_UPDATED
+          - POA_DATA_UPDATED
+          - FILE_ADDED
+          - FILE_REMOVED
+          - AML_ONGOING_MATCH
+          - AML_STATUS_UPDATED
+          - AML_HIT_STATUS_UPDATED
+          - KYB_DATA_UPDATED
+          - KYB_DOCUMENT_UPLOADED
+          - TAG_ADDED
+          - TAG_REMOVED
+          description: What kind of activity this entry records. `STATUS_UPDATED` rows come from manual decisions (`PATCH /v3/session/{session_id}/update-status/`) and from entries added via `POST …/reviews/` (which default to this type even when no status is recorded). `COMMENT` rows come from Console reviewers; Console detail-page views are also stored as `COMMENT` rows flagged with `metadata.system_event = "DETAIL_VIEWED"`. The remaining types track data edits, file changes, tags, and AML monitoring activity. STATUS_UPDATED rows are also written by system actors (e.g. AML ongoing monitoring with actor_type SYSTEM, and automatic feature-status updates), not only by the update-status endpoint and manual review posts.
+          example: STATUS_UPDATED
+        actor_display:
+          type: string
+          description: 'Human-readable author label, resolved in order: actor''s full name → Console account identifier → local part of `actor_email` → `"API Client"` (for `API_KEY` actors) → `"System"` (for `SYSTEM` actors) → `"Unknown"`. Entries created via `POST …/reviews/` always display `"Unknown"` because that endpoint records no actor attribution.'
+          example: API Client
+        actor_email:
+          type:
+          - string
+          - 'null'
+          description: Email of the Console user who performed the action. `null` for API-key and system actors.
+          example: null
+        actor_type:
+          type: string
+          enum:
+          - API_KEY
+          - CONSOLE_USER
+          - SYSTEM
+          description: 'Who performed the action: an API key, a Console user, or Didit itself (`SYSTEM`, e.g. AML ongoing monitoring). Entries created via `POST …/reviews/` carry the default `CONSOLE_USER` regardless of the caller.'
+          example: API_KEY
+        new_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Not Started
+          - In Progress
+          - Approved
+          - Declined
+          - In Review
+          - Expired
+          - Abandoned
+          - Kyc Expired
+          - Resubmitted
+          - Awaiting User
+          description: Session status recorded by this entry (for status updates). `null` for comments and data-change entries.
+          example: Approved
+        previous_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - Not Started
+          - In Progress
+          - Approved
+          - Declined
+          - In Review
+          - Expired
+          - Abandoned
+          - Kyc Expired
+          - Resubmitted
+          - Awaiting User
+          description: Status the session had before the change. Populated on `STATUS_UPDATED` entries written by the update-status endpoint; `null` on entries added via `POST …/reviews/`. Also populated on system-written STATUS_UPDATED rows.
+          example: In Review
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Free-text note attached to the entry, or `null`.
+          example: Document re-checked manually; address matches.
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Console users `@email`-mentioned in the comment. Always empty for entries created via this API — mention processing is a Console-only feature.
+          example: []
+        previous_value:
+          type:
+          - object
+          - 'null'
+          description: 'Snapshot of the changed data before the action, e.g. `{"status": "In Review"}` on a status change. `null` when nothing was changed.'
+          example:
+            status: In Review
+        new_value:
+          type:
+          - object
+          - 'null'
+          description: 'Snapshot of the changed data after the action, e.g. `{"status": "Approved"}`. `null` when nothing was changed.'
+          example:
+            status: Approved
+        changed_fields:
+          type: array
+          items:
+            type: string
+          description: Names of the fields modified by this activity (e.g. `["status"]`). Empty for comments and for entries added via `POST …/reviews/`.
+          example:
+          - status
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: 'Extra context for system-generated entries. Console detail-page views carry `{"system_event": "DETAIL_VIEWED", "detail_type": "verification"}` so they can be filtered out of notification logic. `null` for ordinary entries.'
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          description: When the entry was written, ISO 8601 UTC.
+          example: '2026-06-12T00:19:31.918735Z'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

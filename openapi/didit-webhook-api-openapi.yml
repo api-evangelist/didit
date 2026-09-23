@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Webhook API
+  title: Didit Verification Webhook API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -68,16 +68,18 @@ paths:
                       type: integer
                       description: Delivery attempts whose target responded with HTTP ≥ 400 (or did not respond).
                     average_response_time_ms:
-                      type: integer
-                      nullable: true
+                      type:
+                      - integer
+                      - 'null'
                       description: Average target response time in milliseconds, rounded to an integer. `null` if no deliveries yet.
                     error_rate_percentage:
                       type: integer
                       description: '`round(failed_deliveries_count / deliveries_count * 100)`; `0` when there are no deliveries.'
                     last_delivery_at:
-                      type: string
+                      type:
+                      - string
+                      - 'null'
                       format: date-time
-                      nullable: true
                       description: Timestamp of the most recent delivery attempt (success or failure). `null` if never delivered.
                     created_at:
                       type: string
@@ -264,18 +266,22 @@ paths:
                       error_rate_percentage:
                         type: integer
                       min_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       avg_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       max_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       last_delivery_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
               examples:
                 Created:
                   value:
@@ -405,18 +411,22 @@ paths:
                       error_rate_percentage:
                         type: integer
                       min_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       avg_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       max_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       last_delivery_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
               examples:
                 Healthy destination:
                   value:
@@ -575,18 +585,22 @@ paths:
                       error_rate_percentage:
                         type: integer
                       min_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       avg_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       max_response_time_ms:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                       last_delivery_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
               examples:
                 Paused:
                   value:
@@ -704,6 +718,16 @@ paths:
       - ApiKeyAuth: []
 components:
   schemas:
+    WebhookSubscribedEvents:
+      type: array
+      description: Event filter for this webhook destination. Didit delivers only webhooks whose event type exactly matches one of these values — there is no wildcard subscription. When sent, the list must contain at least one valid event (an explicit `[]` is rejected with 400); a destination whose list is empty (field omitted at create) receives nothing. On update the list is replaced wholesale, never merged.
+      minItems: 1
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/WebhookEvent'
+      example:
+      - status.updated
+      - data.updated
     WebhookEvent:
       type: string
       description: Supported webhook event name. Use these exact strings in `subscribed_events`; unsupported values are rejected.
@@ -718,16 +742,6 @@ components:
       - transaction.created
       - transaction.status.updated
       - travel_rule.status.updated
-    WebhookSubscribedEvents:
-      type: array
-      description: Event filter for this webhook destination. Didit delivers only webhooks whose event type exactly matches one of these values — there is no wildcard subscription. When sent, the list must contain at least one valid event (an explicit `[]` is rejected with 400); a destination whose list is empty (field omitted at create) receives nothing. On update the list is replaced wholesale, never merged.
-      minItems: 1
-      uniqueItems: true
-      items:
-        $ref: '#/components/schemas/WebhookEvent'
-      example:
-      - status.updated
-      - data.updated
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

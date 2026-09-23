@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Cases API
+  title: Didit Verification Cases API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -139,12 +139,14 @@ paths:
                     type: integer
                     description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or null.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or null.
                   results:
                     type: array
@@ -184,9 +186,10 @@ paths:
                   type: string
                   maxLength: 255
                 blueprint:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: uuid
-                  nullable: true
                   description: CaseBlueprint UUID. Omit for no blueprint.
                 priority:
                   type: string
@@ -196,9 +199,10 @@ paths:
                   - HIGH
                   default: MEDIUM
                 due_at:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date-time
-                  nullable: true
                 tags:
                   type: array
                   items:
@@ -221,9 +225,10 @@ paths:
                   items:
                     type: object
                 assigned_to:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: uuid
-                  nullable: true
                   description: User UUID to assign immediately.
       x-codeSamples:
       - lang: curl
@@ -341,9 +346,10 @@ paths:
                   - MEDIUM
                   - HIGH
                 due_at:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date-time
-                  nullable: true
                 tags:
                   type: array
                   items:
@@ -435,17 +441,20 @@ paths:
               - assignee_user_id
               properties:
                 assignee_user_id:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: uuid
-                  nullable: true
                   description: null to unassign.
                 assignee_email:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: email
-                  nullable: true
                 assignee_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
       x-codeSamples:
       - lang: curl
         label: curl
@@ -502,8 +511,9 @@ paths:
                   - FALSE_POSITIVE
                   - VALID_THREAT
                 note:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Required when the blueprint sets require_resolution_note.
       x-codeSamples:
       - lang: curl
@@ -801,8 +811,9 @@ paths:
               type: object
               properties:
                 notes:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
       x-codeSamples:
       - lang: curl
         label: curl
@@ -879,8 +890,9 @@ paths:
                   - add_note
                   - add_to_blocklist
                 status:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Required for set_status; a valid VendorUser/VendorBusiness status.
                 tags:
                   type: array
@@ -888,8 +900,9 @@ paths:
                     type: string
                   description: Required for add_tags.
                 note:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Required for add_note.
       x-codeSamples:
       - lang: curl
@@ -1033,12 +1046,14 @@ paths:
                     type: integer
                     description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or null.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or null.
                   results:
                     type: array
@@ -1509,12 +1524,14 @@ paths:
                     type: integer
                     description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or null.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or null.
                   results:
                     type: array
@@ -1966,8 +1983,9 @@ paths:
                   - VALID_THREAT
                   description: Required when status is RESOLVED.
                 note:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
       x-codeSamples:
       - lang: curl
         label: curl
@@ -2031,16 +2049,19 @@ paths:
                     format: uuid
                   minItems: 1
                 assignee_user_id:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: uuid
-                  nullable: true
                 assignee_email:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: email
-                  nullable: true
                 assignee_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
       x-codeSamples:
       - lang: curl
         label: curl
@@ -2067,30 +2088,293 @@ paths:
                           type: string
 components:
   schemas:
-    CaseLink:
+    CaseDetail:
       type: object
       properties:
         uuid:
           type: string
           format: uuid
-        linked_entity_type:
+        case_number:
+          type:
+          - string
+          - 'null'
+        title:
+          type: string
+        status:
           type: string
           enum:
-          - session
-          - business_session
-          - transaction
-          nullable: true
-        linked_entity_uuid:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type:
+          - string
+          - 'null'
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+        resolution_notes:
+          type:
+          - string
+          - 'null'
+        priority:
           type: string
-          format: uuid
-          nullable: true
-        linked_entity_summary:
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        due_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        resolved_by_email:
+          type:
+          - string
+          - 'null'
+        pending_resolution:
+          type:
+          - object
+          - 'null'
+          description: Set only while a 4-eyes resolution is staged on the checker blueprint, awaiting approve or reject-approval.
+          properties:
+            resolution:
+              type: string
+              enum:
+              - FALSE_POSITIVE
+              - VALID_THREAT
+            resolution_notes:
+              type:
+              - string
+              - 'null'
+            maker_email:
+              type: string
+              format: email
+            maker_name:
+              type:
+              - string
+              - 'null'
+            maker_blueprint_id:
+              type: string
+              format: uuid
+            staged_at:
+              type: string
+              format: date-time
+        metadata:
           type: object
-          nullable: true
-          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintDetail'
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseNote'
+          description: Newest 50 notes.
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseEvent'
+          description: Newest 100 events.
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseLink'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        checklist_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseChecklistItem'
         created_at:
           type: string
           format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        comment:
+          type: string
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+        actor_name:
+          type:
+          - string
+          - 'null'
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+        is_internal:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              s3_key:
+                type: string
+              filename:
+                type: string
+              file_size:
+                type: integer
+              url:
+                type: string
+                format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+    CaseSubject:
+      type:
+      - object
+      - 'null'
+      description: The single user or business the case is anchored to.
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+          - business
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: The subject's vendor_data.
+    CaseListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        case_number:
+          type:
+          - string
+          - 'null'
+          description: Auto-assigned, e.g. CS-0001.
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type:
+          - string
+          - 'null'
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        due_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        created_by_email:
+          type:
+          - string
+          - 'null'
+        created_by_name:
+          type:
+          - string
+          - 'null'
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintSummary'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        application_id:
+          type: string
+          format: uuid
+        application_name:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+        organization_name:
+          type: string
     CaseEvent:
       type: object
       properties:
@@ -2123,31 +2407,109 @@ components:
           - APPROVAL_REJECTED
           - ENTITY_ACTION
         actor_email:
-          type: string
+          type:
+          - string
+          - 'null'
           format: email
-          nullable: true
         actor_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         previous_status:
-          type: string
+          type:
+          - string
+          - 'null'
           enum:
           - OPEN
           - AWAITING_USER
           - RESOLVED
-          nullable: true
         new_status:
-          type: string
+          type:
+          - string
+          - 'null'
           enum:
           - OPEN
           - AWAITING_USER
           - RESOLVED
-          nullable: true
         metadata:
           type: object
         created_at:
           type: string
           format: date-time
+    CaseLink:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        linked_entity_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - session
+          - business_session
+          - transaction
+        linked_entity_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        linked_entity_summary:
+          type:
+          - object
+          - 'null'
+          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        created_at:
+          type: string
+          format: date-time
+    CaseChecklistItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        label:
+          type: string
+          maxLength: 255
+        is_completed:
+          type: boolean
+        completed_by:
+          type:
+          - string
+          - 'null'
+          format: email
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        order:
+          type: integer
+    CaseBlueprintSummary:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+    CaseAssignee:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
     CaseBlueprintDetail:
       type: object
       properties:
@@ -2158,8 +2520,9 @@ components:
           type: string
           maxLength: 24
         description:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         assignment_method:
           type: string
           enum:
@@ -2171,8 +2534,9 @@ components:
             type: string
             format: uuid
         max_active_cases:
-          type: integer
-          nullable: true
+          type:
+          - integer
+          - 'null'
         escalation_enabled:
           type: boolean
         transfer_enabled:
@@ -2182,25 +2546,30 @@ components:
         is_active:
           type: boolean
         preset_key:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         created_at:
           type: string
           format: date-time
         escalation_blueprint:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
-          nullable: true
         escalation_blueprint_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         four_eyes_checker_blueprint:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
-          nullable: true
         four_eyes_checker_blueprint_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         content_config:
           type: object
           description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
@@ -2301,315 +2670,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseSubject:
-      type: object
-      nullable: true
-      description: The single user or business the case is anchored to.
-      properties:
-        type:
-          type: string
-          enum:
-          - user
-          - business
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-        external_id:
-          type: string
-          nullable: true
-          description: The subject's vendor_data.
-    CaseBlueprintSummary:
-      type: object
-      nullable: true
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-    CaseDetail:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        case_number:
-          type: string
-          nullable: true
-        title:
-          type: string
-        status:
-          type: string
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        resolution:
-          type: string
-          enum:
-          - FALSE_POSITIVE
-          - VALID_THREAT
-          nullable: true
-        resolution_notes:
-          type: string
-          nullable: true
-        priority:
-          type: string
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-        source:
-          type: string
-          enum:
-          - MANUAL
-          - AML_SCREENING
-          - TRANSACTION_RULE
-          - WORKFLOW_BUILDER
-        tags:
-          type: array
-          items:
-            type: string
-        subject:
-          $ref: '#/components/schemas/CaseSubject'
-        assigned_to:
-          $ref: '#/components/schemas/CaseAssignee'
-        assigned_at:
-          type: string
-          format: date-time
-          nullable: true
-        due_at:
-          type: string
-          format: date-time
-          nullable: true
-        resolved_at:
-          type: string
-          format: date-time
-          nullable: true
-        resolved_by_email:
-          type: string
-          nullable: true
-        pending_resolution:
-          type: object
-          nullable: true
-          description: Set only while a 4-eyes resolution is staged on the checker blueprint, awaiting approve or reject-approval.
-          properties:
-            resolution:
-              type: string
-              enum:
-              - FALSE_POSITIVE
-              - VALID_THREAT
-            resolution_notes:
-              type: string
-              nullable: true
-            maker_email:
-              type: string
-              format: email
-            maker_name:
-              type: string
-              nullable: true
-            maker_blueprint_id:
-              type: string
-              format: uuid
-            staged_at:
-              type: string
-              format: date-time
-        metadata:
-          type: object
-        blueprint:
-          $ref: '#/components/schemas/CaseBlueprintDetail'
-        notes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseNote'
-          description: Newest 50 notes.
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseEvent'
-          description: Newest 100 events.
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseLink'
-        links_count:
-          type: integer
-        notes_count:
-          type: integer
-        checklist_items:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseChecklistItem'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    CaseAssignee:
-      type: object
-      nullable: true
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-    CaseChecklistItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        label:
-          type: string
-          maxLength: 255
-        is_completed:
-          type: boolean
-        completed_by:
-          type: string
-          format: email
-          nullable: true
-        completed_at:
-          type: string
-          format: date-time
-          nullable: true
-        order:
-          type: integer
-    CaseNote:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        comment:
-          type: string
-        actor_email:
-          type: string
-          format: email
-          nullable: true
-        actor_name:
-          type: string
-          nullable: true
-        mentioned_emails:
-          type: array
-          items:
-            type: string
-            format: email
-        is_internal:
-          type: boolean
-        attachments:
-          type: array
-          items:
-            type: object
-            properties:
-              s3_key:
-                type: string
-              filename:
-                type: string
-              file_size:
-                type: integer
-              url:
-                type: string
-                format: uri
-        tags:
-          type: array
-          items:
-            type: string
-        created_at:
-          type: string
-          format: date-time
-    CaseListItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        case_number:
-          type: string
-          nullable: true
-          description: Auto-assigned, e.g. CS-0001.
-        title:
-          type: string
-        status:
-          type: string
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        resolution:
-          type: string
-          enum:
-          - FALSE_POSITIVE
-          - VALID_THREAT
-          nullable: true
-        priority:
-          type: string
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-        source:
-          type: string
-          enum:
-          - MANUAL
-          - AML_SCREENING
-          - TRANSACTION_RULE
-          - WORKFLOW_BUILDER
-        tags:
-          type: array
-          items:
-            type: string
-        subject:
-          $ref: '#/components/schemas/CaseSubject'
-        assigned_to:
-          $ref: '#/components/schemas/CaseAssignee'
-        assigned_at:
-          type: string
-          format: date-time
-          nullable: true
-        due_at:
-          type: string
-          format: date-time
-          nullable: true
-        resolved_at:
-          type: string
-          format: date-time
-          nullable: true
-        created_by_email:
-          type: string
-          nullable: true
-        created_by_name:
-          type: string
-          nullable: true
-        blueprint:
-          $ref: '#/components/schemas/CaseBlueprintSummary'
-        links_count:
-          type: integer
-        notes_count:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        application_id:
-          type: string
-          format: uuid
-        application_name:
-          type: string
-        organization_id:
-          type: string
-          format: uuid
-        organization_name:
-          type: string
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

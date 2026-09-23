@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Businesses API
+  title: Didit Verification Businesses API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -11,7 +11,7 @@ paths:
   /v3/businesses/:
     get:
       summary: List businesses
-      description: List [businesses](/entities/businesses) Didit assembles from KYB sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus businesses created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.
+      description: List businesses Didit assembles from KYB sessions sharing the same `vendor_data` (free-form string, NOT a UUID), plus businesses created via the API. Paginated, ordered by `last_session_at` desc. This endpoint does not support filtering or search parameters — fetch pages and filter client-side.
       operationId: list_businesses
       tags:
       - Businesses
@@ -52,12 +52,14 @@ paths:
                     type: integer
                     description: Number of matching rows — exact up to 100, capped at 100 beyond that for performance. Do not use it to detect the last page; rely on `next` being `null` instead.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or `null` on the last page.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or `null` on the first page.
                   results:
                     type: array
@@ -116,7 +118,7 @@ paths:
   /v3/businesses/{vendor_data}/:
     get:
       summary: Get business
-      description: Fetch one [business](/entities/businesses) by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404.
+      description: Fetch one business by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404.
       operationId: get_business
       tags:
       - Businesses
@@ -225,20 +227,24 @@ paths:
               description: Partial-update body. Provide only the fields you want to change.
               properties:
                 display_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Friendly display name shown in the console (takes precedence over `legal_name` for UI display).
                 legal_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Official legal name from registry or manual entry.
                 registration_number:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Company registration or incorporation number.
                 country_code:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
                 status:
                   type: string
@@ -248,8 +254,9 @@ paths:
                   - BLOCKED
                   description: Business lifecycle status. Setting `BLOCKED` automatically adds the `vendor_data` to the system blocklist; flipping away from `BLOCKED` removes that blocklist entry.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Arbitrary JSON object you attach to the business. **Fully replaces** the existing metadata on update — merge client-side if you only want to add keys.
             examples:
               Update name:
@@ -494,7 +501,7 @@ paths:
   /v3/businesses/delete/:
     post:
       summary: Batch delete businesses
-      description: '**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer [Update Business Status](#patch-/v3/businesses/-vendor_data-/update-status/) with `BLOCKED`.'
+      description: '**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer Update Business Status with `BLOCKED`.'
       operationId: batch_delete_businesses
       tags:
       - Businesses
@@ -595,7 +602,7 @@ paths:
   /v3/businesses/create/:
     post:
       summary: Create business
-      description: Pre-create a [business](/entities/businesses) *without* a KYB session. All fields are optional, but you should always send `vendor_data` — without it the record cannot be linked to sessions or transactions. When provided, `vendor_data` must be unique among non-deleted businesses (exact match; conflicts return 400). Not idempotent.
+      description: Pre-create a business *without* a KYB session. All fields are optional, but you should always send `vendor_data` — without it the record cannot be linked to sessions or transactions. When provided, `vendor_data` must be unique among non-deleted businesses (exact match; conflicts return 400). Not idempotent.
       operationId: create_business
       tags:
       - Businesses
@@ -607,27 +614,32 @@ paths:
               type: object
               properties:
                 vendor_data:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   description: Your unique identifier for this business (free-form string, NOT a UUID). Optional but strongly recommended. When provided, must be unique among non-deleted businesses for the application; matched exactly as sent.
                 display_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
                   description: Friendly display name shown in the console (takes precedence over `legal_name` for UI display).
                 legal_name:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 255
                   description: Official legal name of the company.
                 registration_number:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 100
                   description: Company registration or incorporation number.
                 country_code:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                   maxLength: 10
                   description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
                 status:
@@ -639,8 +651,9 @@ paths:
                   default: ACTIVE
                   description: Initial lifecycle status. Defaults to `ACTIVE`.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Arbitrary JSON object you attach to the business. Defaults to `{}`.
             examples:
               Basic:
@@ -739,6 +752,19 @@ paths:
       - ApiKeyAuth: []
 components:
   schemas:
+    BusinessDetailItem:
+      type: object
+      description: Full business detail. Extends BusinessListItem with metadata and updated_at.
+      allOf:
+      - $ref: '#/components/schemas/BusinessListItem'
+      - type: object
+        properties:
+          metadata:
+            type: object
+            description: Custom metadata JSON you attached to this business. Defaults to `{}`.
+          updated_at:
+            type: string
+            format: date-time
     BusinessListItem:
       type: object
       description: A verified business.
@@ -748,28 +774,34 @@ components:
           format: uuid
           description: Didit's stable internal UUID for this business.
         vendor_data:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Your unique identifier for this business (passed when creating sessions). This can be null when no vendor identifier was supplied.
         display_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Custom display name set by you
         legal_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Official legal name from registry or manual entry
         registration_number:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Company registration or incorporation number
         country_code:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `US`).
         effective_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: 'Best available name: display_name if set, otherwise legal_name'
         status:
           type: string
@@ -804,19 +836,22 @@ components:
                 type: string
           description: Same data as `features`, as an ordered array of `{feature, status}` objects.
         last_session_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
           description: Timestamp of the most recent session
         first_session_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
           description: Timestamp of the first session
         last_activity_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
           description: Timestamp of the most recent activity (status change, session update, etc.)
         tags:
           type: array
@@ -834,19 +869,6 @@ components:
         created_at:
           type: string
           format: date-time
-    BusinessDetailItem:
-      type: object
-      description: Full business detail. Extends BusinessListItem with metadata and updated_at.
-      allOf:
-      - $ref: '#/components/schemas/BusinessListItem'
-      - type: object
-        properties:
-          metadata:
-            type: object
-            description: Custom metadata JSON you attached to this business. Defaults to `{}`.
-          updated_at:
-            type: string
-            format: date-time
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

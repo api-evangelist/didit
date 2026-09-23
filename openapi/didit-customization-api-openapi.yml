@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Customization API
+  title: Didit Verification Customization API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -250,27 +250,33 @@ components:
         font_weight:
           type: string
         font_url:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Read-only. Resolved Google Fonts stylesheet URL for the selected family.
         logo_square:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Read-only URL of the square logo. Upload via `image_square`.
         logo_rectangular:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Read-only URL of the rectangular logo. Upload via `image_rectangular`.
         favicon:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Read-only URL of the favicon. Upload via `image_favicon`.
         app_public_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         privacy_policy_url:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         skip_welcome_screen:
           type: boolean
         disable_login_with_didit:
@@ -337,12 +343,14 @@ components:
           type: string
           description: Font weight available for the selected family (e.g. `regular`, `500`, `700`).
         app_public_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Public name shown in the verification flow.
         privacy_policy_url:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Privacy policy URL shown to the end user.
         skip_welcome_screen:
           type: boolean

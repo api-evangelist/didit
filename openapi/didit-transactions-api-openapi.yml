@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Transactions API
+  title: Didit Verification Transactions API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -114,8 +114,9 @@ paths:
                     type: boolean
                     description: True if the address has direct or indirect sanctions exposure.
                   dominant_risk_category:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Highest-weighted high-risk category, or `null` when none is dominant (e.g. `sanctioned`, `mixer`, `stolen_funds`).
                   source_of_funds:
                     type: array
@@ -374,12 +375,14 @@ paths:
                     type: integer
                     description: Capped count of matching transactions (exact up to 100, capped thereafter). Use `total_transactions` for the true count when paginating.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the next page, or `null` on the last page.
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Absolute URL of the previous page, or `null` on the first page.
                   total_transactions:
                     type: integer
@@ -426,23 +429,27 @@ paths:
                           type: string
                           description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
                         preferred_currency_amount:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: '`amount` converted to the application''s preferred currency, when available.'
                         preferred_currency_code:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Preferred currency code used for `preferred_currency_amount`.
                         payment_details:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Free-text payment reference or memo from the submission.
                         score:
                           type: integer
                           description: Risk score (typically 0–100). Higher = riskier.
                         severity:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           enum:
                           - UNKNOWN
                           - LOW
@@ -451,28 +458,34 @@ paths:
                           - CRITICAL
                           description: Categorical risk severity set by rules/providers (`UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). `null` until something sets it.
                         subject_name:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Full name of the `APPLICANT` party.
                         subject_vendor_data:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Your internal user/business identifier for the applicant.
                         subject_country:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Country code of the applicant, from the submitted `address.country` (typically ISO 3166-1 alpha-3).
                         counterparty_name:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Full name of the `COUNTERPARTY` party, if any.
                         counterparty_vendor_data:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Your internal identifier for the counterparty.
                         counterparty_country:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Country code of the counterparty, from the submitted `address.country`.
                         tags:
                           type: array
@@ -488,8 +501,9 @@ paths:
                               color:
                                 type: string
                               description:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               source:
                                 type: string
                                 enum:
@@ -505,16 +519,19 @@ paths:
                           format: date-time
                           description: When Didit recorded the submission.
                         decision_reason_code:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Machine-readable reason for the current `status` (e.g. `WALLET_HIGH_RISK`).
                         decision_reason_label:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Human-readable label for `decision_reason_code`.
                         assigned_to_name:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Display name of the Console reviewer assigned to this transaction.
               examples:
                 Single transaction:
@@ -650,23 +667,27 @@ paths:
                       type: string
                       description: Whether the currency is `fiat` or `crypto`.
                     amount_in_default_currency:
-                      type: number
-                      nullable: true
+                      type:
+                      - number
+                      - 'null'
                       description: Pre-converted amount in the default currency. If omitted, automatic FX conversion is attempted.
                     default_currency:
                       type: string
                       description: The default currency code for the converted amount.
                     payment_details:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Free-text payment reference or memo.
                     payment_reference_id:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: External payment system reference. For crypto AML transaction-hash screening, send the blockchain transaction hash and also provide `subject.payment_method.account_id` with the related address.
                     action_type:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Sub-type of the transaction, e.g. `deposit`, `withdrawal`, `transfer`.
                 subject:
                   type: object
@@ -818,8 +839,9 @@ paths:
                     metrics:
                       type: object
                 include_crypto_screening:
-                  type: boolean
-                  nullable: true
+                  type:
+                  - boolean
+                  - 'null'
                   description: 'Per-transaction override for crypto blockchain analytics screening. When `true`, crypto screening is performed regardless of the application default. When `false`, crypto screening is skipped even if enabled in the application settings. When omitted or `null`, the application-level default configured in the Console is used. Crypto screening requires `transaction_details.direction`, `currency_kind: "crypto"`, a chain/currency, and the wallet address selected by the direction: inbound pre-transfer screening uses `counterparty.payment_method.account_id`, inbound transaction-hash screening uses `subject.payment_method.account_id`, and outbound screening uses `counterparty.payment_method.account_id`. When `transaction_details.payment_reference_id` contains a blockchain transaction hash, Didit performs transaction screening and returns transaction summary enrichment when available.'
               required:
               - transaction_id
@@ -1266,8 +1288,9 @@ paths:
                   maximum: 86400
                   description: Token lifetime in seconds. Defaults to 900 (15 minutes); maximum 86400 (24 hours).
                 max_uses:
-                  type: integer
-                  nullable: true
+                  type:
+                  - integer
+                  - 'null'
                   description: Maximum number of successful submissions allowed with this token. Omit or null for unlimited uses within the TTL.
               required:
               - vendor_data
@@ -1372,23 +1395,27 @@ paths:
                       type: string
                       description: Whether the currency is `fiat` or `crypto` (maps to `currency_kind`).
                     amountInDefaultCurrency:
-                      type: number
-                      nullable: true
+                      type:
+                      - number
+                      - 'null'
                       description: Pre-converted amount in the default currency (maps to `amount_in_default_currency`). If omitted, automatic FX conversion is attempted.
                     defaultCurrencyCode:
                       type: string
                       description: The default currency code for the converted amount (maps to `default_currency`).
                     paymentDetails:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Free-text payment reference or memo (maps to `payment_details`).
                     paymentTxnId:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: External payment reference (maps to `payment_reference_id`); the on-chain transaction hash for crypto transactions.
                     type:
-                      type: string
-                      nullable: true
+                      type:
+                      - string
+                      - 'null'
                       description: Sub-type of the transaction (maps to `action_type`), e.g. `deposit`, `withdrawal`, `transfer`.
                     cryptoParams:
                       type: object
@@ -1500,8 +1527,9 @@ paths:
                     metadata:
                       type: object
                 includeCryptoScreening:
-                  type: boolean
-                  nullable: true
+                  type:
+                  - boolean
+                  - 'null'
                   description: Per-transaction override for crypto blockchain analytics screening (maps to `include_crypto_screening`).
                 fingerprint_v2:
                   type: object
@@ -1654,8 +1682,9 @@ components:
           format: date-time
           description: When the transaction occurred (from `transaction_at`; defaults to submission time).
         zone_id:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: IANA time zone identifier provided at create time.
         transaction_type:
           type: string
@@ -1684,37 +1713,45 @@ components:
           type: string
           description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
         currency_type:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: '`fiat` or `crypto`, as submitted in `currency_kind`.'
         amount_in_default_currency:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Pre-converted amount you supplied, as a decimal string with trailing zeros stripped.
         default_currency_code:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         preferred_currency_amount:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: '`amount` converted to the application''s preferred currency, when available.'
         preferred_currency_code:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         payment_details:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Free-text payment reference or memo from the submission.
         payment_txn_id:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: External payment system reference (e.g. blockchain transaction hash) from `payment_reference_id`.
         score:
           type: integer
           description: Risk score accumulated by rules (typically 0–100). Higher = riskier.
         severity:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           enum:
           - UNKNOWN
           - LOW
@@ -1723,16 +1760,19 @@ components:
           - CRITICAL
           description: Categorical risk severity set by rules/providers (`UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). `null` until something sets it.
         decision_reason_code:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Machine-readable reason for the current `status`.
         decision_reason_label:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Human-readable label for `decision_reason_code`.
         vendor_data:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Convenience copy of the applicant's `vendor_data`.
         metadata:
           type: object
@@ -1753,8 +1793,9 @@ components:
               color:
                 type: string
               description:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               source:
                 type: string
                 enum:
@@ -1793,26 +1834,32 @@ components:
                 - EXTERNAL
                 description: '`USER`/`BUSINESS` parties link back to a Didit-owned entity via `vendor_data`. `EXTERNAL` parties have no Didit entity behind them.'
               vendor_data:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: Your internal user/business identifier.
               full_name:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               first_name:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               last_name:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               country_code:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: Country code from the submitted `address.country` (typically ISO 3166-1 alpha-3).
               dob:
-                type: string
+                type:
+                - string
+                - 'null'
                 format: date
-                nullable: true
                 description: Date of birth from the submitted `date_of_birth`.
               address:
                 type: object
@@ -1824,8 +1871,9 @@ components:
                 type: object
                 description: Normalized device context, including server-side IP enrichment under `network_context` (geolocation, VPN/data-center flags) when an IP was provided.
               external_party_snapshot:
-                type: object
-                nullable: true
+                type:
+                - object
+                - 'null'
                 description: Frozen copy of the party data for `EXTERNAL` parties (or after the linked entity was deleted). `null` while linked to a live entity.
           description: Transaction parties (applicant, counterparty).
         payment_methods:
@@ -1846,19 +1894,23 @@ components:
                 - unhosted_wallet
                 - other
               label:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               fingerprint:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: SHA-256 over `type:account_id:issuing_country` — stable identifier to correlate reuse of the same instrument.
               account_id:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: Account identifier (IBAN, wallet address, card token, …).
               issuing_country:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               owner_kind:
                 type: string
                 enum:
@@ -1866,20 +1918,23 @@ components:
                 - BUSINESS
                 - EXTERNAL
               vendor_data:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: Your identifier for the owning user/business.
               owner_name:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               institution_info:
                 type: object
               details:
                 type: object
                 description: Raw `payment_method` object as submitted.
               external_owner_snapshot:
-                type: object
-                nullable: true
+                type:
+                - object
+                - 'null'
               role:
                 type: string
                 enum:
@@ -1903,14 +1958,17 @@ components:
               source:
                 type: string
               status:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               title:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               description:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               metadata:
                 type: object
               occurred_at:
@@ -1928,8 +1986,9 @@ components:
               title:
                 type: string
               description:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               severity:
                 type: string
                 enum:
@@ -1960,9 +2019,10 @@ components:
                 type: string
                 format: date-time
               due_at:
-                type: string
+                type:
+                - string
+                - 'null'
                 format: date-time
-                nullable: true
           description: Alerts raised by rules and providers.
         rule_runs:
           type: array
@@ -1979,8 +2039,9 @@ components:
               rule_title:
                 type: string
               rule_description:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               rule_category:
                 type: string
               matched:
@@ -1996,14 +2057,16 @@ components:
                 - DISABLED
                 - TEST
               severity:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               score_delta:
                 type: integer
                 description: Score added by this rule's `add_score` actions.
               status_target:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
                 description: Status set by a `change_status` action, if any.
               action_summary:
                 type: object
@@ -2036,13 +2099,15 @@ components:
               status:
                 type: string
               severity:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               score:
                 type: integer
               summary:
-                type: string
-                nullable: true
+                type:
+                - string
+                - 'null'
               payload:
                 type: object
                 description: Raw provider response payload.
@@ -2051,8 +2116,9 @@ components:
                 format: date-time
           description: Raw provider payloads (AML screening, blockchain analytics, etc.).
         travel_rule:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Travel Rule compliance check, present when `travel_rule_details` was submitted.
           properties:
             uuid:
@@ -2061,8 +2127,9 @@ components:
             status:
               type: string
             protocol:
-              type: string
-              nullable: true
+              type:
+              - string
+              - 'null'
             required:
               type: boolean
             obligations_count:
@@ -2074,8 +2141,9 @@ components:
             metadata:
               type: object
         network_snapshot:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Graph snapshot of related transactions/parties used by the rules engine, present when submitted.
           properties:
             uuid:
@@ -2092,8 +2160,9 @@ components:
             metrics:
               type: object
         remediation:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Remediation session offered to the user when re-verification is required. Superseded by `action_required`, which is the canonical block; kept for backward compatibility.
           properties:
             session_id:
@@ -2106,8 +2175,9 @@ components:
             status:
               type: string
         action_required:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: 'Pending end-user action required to complete this transaction, or null when there is none. The Didit SDKs auto-launch the action by default and refresh the transaction when it finishes. Two variants, discriminated by `type`: `verification_session` (a hosted verification session created by a rule action) and `wallet_ownership` (a wallet-ownership widget session auto-minted for a Travel Rule transfer that needs proof of wallet control, gated by the `auto_wallet_verification` Travel Rule setting). When both could apply, `wallet_ownership` takes precedence because it blocks the Travel Rule exchange.'
           oneOf:
           - title: Verification session
@@ -2157,8 +2227,9 @@ components:
             - type
             - url
         cost_breakdown:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Per-feature credit cost breakdown for this transaction.
   securitySchemes:
     ApiKeyAuth:

@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Session API
+  title: Didit Verification Session API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -1546,14 +1546,16 @@ paths:
                     - business
                     description: Discriminator indicating whether this is a User Verification (KYC) or Business Verification (KYB) session. When `user`, the KYC feature arrays (`id_verifications`, `nfc_verifications`, `liveness_checks`, `face_matches`, `poa_verifications`, `document_ai_documents`, `database_validations`, ...) apply and the business arrays are absent. When `business`, the payload instead carries `registry_checks`, `document_verifications`, `key_people_checks` plus the shared arrays (`aml_screenings`, `phone_verifications`, `email_verifications`, `ip_analyses`, `questionnaire_responses`). **Omitted when `include=events` is passed** — the events shape only exists for user sessions, so the discriminator is dropped from that variant.
                   session_number:
-                    type: integer
+                    type:
+                    - integer
+                    - 'null'
                     description: The number of the session.
-                    nullable: true
                   session_url:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uri
                     description: The URL of the session.
-                    nullable: true
                   status:
                     type: string
                     enum:
@@ -1569,10 +1571,11 @@ paths:
                     - Abandoned
                     description: Overall lifecycle status of the session — the rolled-up workflow result. Terminal values are `Approved`, `Declined`, `In Review`, `Expired`, `Kyc Expired`, and `Abandoned`; `Not Started`, `In Progress`, `Awaiting User`, and `Resubmitted` indicate the session is still moving through the workflow.
                   workflow_id:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uuid
                     description: Stable identifier of the workflow group that produced this session. Workflows are versioned — this value identifies the workflow itself, not the specific version.
-                    nullable: true
                   features:
                     type: array
                     items:
@@ -1580,15 +1583,19 @@ paths:
                       description: The feature of the session.
                     description: 'List of verification features configured for this session, as display names: `ID_VERIFICATION`, `NFC`, `LIVENESS`, `FACE_MATCH`, `POA`, `PHONE`, `EMAIL_VERIFICATION`, `AML`, `IP_ANALYSIS`, `DATABASE_VALIDATION`, `QUESTIONNAIRE`, `AGE_ESTIMATION`, `FACE_SEARCH` (Business Verification sessions use the KYB feature set: `KYB_REGISTRY`, `KYB_DOCUMENTS`, `KYB_KEY_PEOPLE`, `AML`, `PHONE`, `EMAIL_VERIFICATION`, `IP_ANALYSIS`, `QUESTIONNAIRE`). With `include=events` each entry becomes an object `{feature, node_id}` instead of a plain string, and the email feature is renamed: it appears as `EMAIL` in events mode instead of the `EMAIL_VERIFICATION` used here.'
                   vendor_data:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     description: The vendor data of the session.
-                    nullable: true
                   metadata:
-                    type: object
+                    type:
+                    - object
+                    - 'null'
                     description: The metadata of the session.
-                    nullable: true
                   expected_details:
-                    type: object
+                    type:
+                    - object
+                    - 'null'
                     description: Expected details supplied at session creation — used for cross-validation against extracted data (KYC) or to pre-fill the company registry search (KYB). Echoes back exactly the keys that were provided; `null` when none were supplied. KYC sessions carry the person fields; Business (KYB) sessions carry `company_name`, `registry_country` and `registration_number`.
                     properties:
                       first_name:
@@ -1602,8 +1609,9 @@ paths:
                         format: date
                         description: 'User''s date of birth with format: YYYY-MM-DD. For example, `1990-05-15`.'
                       gender:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         enum:
                         - M
                         - F
@@ -1639,13 +1647,15 @@ paths:
                           - TC
                           - SSC
                       id_country:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Expected ID-document issuing country (ISO 3166-1 alpha-3), when restricted at creation time.
                         example: ESP
                       poa_country:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Expected Proof of Address document country (ISO 3166-1 alpha-3), when restricted at creation time.
                         example: ESP
                       company_name:
@@ -1657,9 +1667,10 @@ paths:
                       registration_number:
                         type: string
                         description: Expected company registration number. Business (KYB) sessions only.
-                    nullable: true
                   contact_details:
-                    type: object
+                    type:
+                    - object
+                    - 'null'
                     description: Contact details supplied when the session was created (used for notification emails, prefilled phone/email verification, and communication language). `null` when neither an email nor a phone number was provided.
                     properties:
                       email:
@@ -1673,18 +1684,20 @@ paths:
                         default: false
                         description: If true and an email is provided, Didit sends the initial "Verify your identity" email asynchronously when the User Verification (KYC) or Business Verification (KYB) session is created. Didit also sends verification status notifications for sessions requiring manual review to the provided email address.
                       phone:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: 'Phone number of the user in E.164 format if available (e.g., +14155552671). `null` when only an email was supplied at session creation. Note: This field returns the original phone number provided during session creation. If the number was invalid, it may not be in E.164 format.'
-                    nullable: true
                   callback:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: uri
                     description: The callback URL of the session.
-                    nullable: true
                   id_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of ID verification (OCR) reports** produced by ID-document steps in the workflow graph. Always a JSON array — read `id_verifications[0]` and iterate if your workflow can run more than one ID check (for example a primary check plus a step-up). `null` until at least one ID step has produced data. Each item is the full report, including `node_id`, feature-level `status`, extracted document fields, image URLs, quality scores, MRZ, address parsing, cross-session matches, and `warnings[]`.'
                     items:
                       type: object
@@ -1706,8 +1719,9 @@ paths:
                           type: string
                           description: Type of identity document
                         document_subtype:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: 'Accepted document subtype code from the workflow document settings, including the document region when applicable. Examples: `ID_CARD_GENERIC`, `QUEENSLAND_DRIVER_LICENSE_GENERIC`.'
                         document_number:
                           type: string
@@ -1809,8 +1823,9 @@ paths:
                               items:
                                 type: string
                             blood_group:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             first_name_non_latin:
                               type: string
                               description: First name in the non-Latin script when `preferred_characters=latin` and a non-Latin version is present on the document (e.g. `Айна` for a Kyrgyz ID).
@@ -1848,8 +1863,9 @@ paths:
                               type: string
                               description: Place of birth in Latin script. Same rules as `first_name_latin`.
                         mrz:
-                          type: object
-                          nullable: true
+                          type:
+                          - object
+                          - 'null'
                           description: Parsed Machine-Readable Zone (MRZ) fields extracted from the document. `null` if no MRZ was detected.
                           properties:
                             surname:
@@ -1940,8 +1956,9 @@ paths:
                             street_1:
                               type: string
                             street_2:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             is_verified:
                               type: boolean
                               description: Whether the address has been verified
@@ -2030,16 +2047,19 @@ paths:
                             format: uri
                           description: Additional document verification files
                         front_image_camera_front_face_match_score:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Face match score between the portrait extracted from the front document image and the front camera image
                         back_image_camera_front_face_match_score:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Face match score between the portrait extracted from the back document image and the front camera image
                         front_image_quality_score:
-                          type: object
-                          nullable: true
+                          type:
+                          - object
+                          - 'null'
                           description: Quality metrics for the front document image. Each sub-score ranges from 0 to 100.
                           properties:
                             focus_score:
@@ -2056,8 +2076,9 @@ paths:
                               - too_bright
                               description: Indicates the direction of the brightness problem when the brightness_score is low. 'ok' means brightness is acceptable, 'too_dark' means the image is underexposed, 'too_bright' means the image is overexposed.
                             is_document_fully_visible:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: true if all four corners of the document are fully visible inside the image frame, false if any corner is cut off. Null when corner coordinates are unavailable.
                             resolution_score:
                               type: number
@@ -2066,8 +2087,9 @@ paths:
                               type: number
                               description: Weighted composite of sub-scores (focus 45%, brightness 30%, resolution 25%).
                         back_image_quality_score:
-                          type: object
-                          nullable: true
+                          type:
+                          - object
+                          - 'null'
                           description: Quality metrics for the back document image. Same structure as front_image_quality_score.
                           properties:
                             focus_score:
@@ -2084,8 +2106,9 @@ paths:
                               - too_bright
                               description: Indicates the direction of the brightness problem when the brightness_score is low. 'ok' means brightness is acceptable, 'too_dark' means the image is underexposed, 'too_bright' means the image is overexposed.
                             is_document_fully_visible:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: true if all four corners of the document are fully visible inside the image frame, false if any corner is cut off. Null when corner coordinates are unavailable.
                             resolution_score:
                               type: number
@@ -2120,8 +2143,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Additional contextual data about the warning
                               log_type:
                                 type: string
@@ -2148,8 +2172,9 @@ paths:
                                 type: integer
                                 description: Session number of the matching document
                               vendor_data:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Vendor data associated with the matching session
                               verification_date:
                                 type: string
@@ -2174,17 +2199,20 @@ paths:
                                 type: boolean
                                 description: Whether the matching document is blocklisted
                               api_service:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: API service type of the matching session
                               front_image_url:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uri
-                                nullable: true
                                 description: URL of the front document image from the matching document
                   nfc_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of NFC / ePassport reports** produced by NFC steps in the workflow graph. **This is always a JSON array, never a singular `nfc` object** — read `nfc_verifications[0]` and iterate if your workflow can run NFC more than once. `null` until at least one NFC step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `chip_data`, `authenticity` (SOD + DG integrity), `certificate_summary`, and `warnings[]`.'
                     items:
                       type: object
@@ -2284,8 +2312,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -2296,8 +2325,9 @@ paths:
                                 type: string
                                 description: The workflow graph node ID that generated this warning
                   liveness_checks:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of liveness reports** produced by liveness steps in the workflow graph. Always a JSON array — never a singular `liveness` object. `null` until at least one liveness step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `method`, `score`, `reference_image`, `video_url`, optional `age_estimation`, cross-session `matches[]`, and `warnings[]`.'
                     items:
                       type: object
@@ -2339,43 +2369,53 @@ paths:
                             type: object
                             properties:
                               session_id:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uuid
-                                nullable: true
                                 description: Session ID of the matching face. `null` when `source` is `imported` or `list_entry`.
                               session_number:
-                                type: integer
-                                nullable: true
+                                type:
+                                - integer
+                                - 'null'
                               similarity_percentage:
                                 type: number
                                 description: Face similarity between the two images, clamped to 0–100.
                               vendor_data:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               verification_date:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: date-time
-                                nullable: true
                               user_details:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 properties:
                                   full_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   document_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   document_number:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                               match_image_url:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uri
-                                nullable: true
                               status:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Lifecycle status of the matching session. `null` for non-session sources.
                               is_blocklisted:
                                 type: boolean
@@ -2384,8 +2424,9 @@ paths:
                                 type: boolean
                                 description: Whether the matching face is on an allowlist.
                               api_service:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Standalone API service of the matching session (e.g. `PASSIVE_LIVENESS`, `FACE_MATCH`); `null` for workflow sessions and non-session sources.
                               source:
                                 type: string
@@ -2421,8 +2462,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -2433,16 +2475,19 @@ paths:
                                 type: string
                                 description: The workflow graph node ID that generated this warning
                         face_quality:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Face image quality score (0-100%). Only available for passive liveness.
                         face_luminance:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Face luminance/brightness score (0-100%). Only available for passive liveness.
                   face_matches:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of face-match reports** produced by face-match steps in the workflow graph. Always a JSON array — never a singular `face_match` object. `null` until at least one face-match step has produced data. Each item is the full report, including `node_id`, feature-level `status`, similarity `score`, `source_image`, `target_image`, and `warnings[]`.'
                     items:
                       type: object
@@ -2464,9 +2509,10 @@ paths:
                           type: number
                           description: Confidence score of the face match
                         source_image_session_id:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: uuid
-                          nullable: true
                           description: Session id under which the source (reference) portrait is stored. In biometric-authentication flows this is the session's own id (the submitted portrait is stored under the new session). `null` when the source image is the same session's document portrait.
                         source_image:
                           type: string
@@ -2503,8 +2549,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -2516,8 +2563,9 @@ paths:
                                 description: The workflow graph node ID that generated this warning
                           description: Face match verification warnings
                   phone_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of phone verification reports** — always a JSON array, never a singular `phone` object. `null` until at least one phone step has produced data. Each item is the full report, including `node_id`, feature-level `status`, the phone number and country metadata, `lifecycle[]`, `matches[]`, and `warnings[]`.'
                     items:
                       type: object
@@ -2586,21 +2634,25 @@ paths:
                                 type: string
                                 format: date-time
                               details:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Event-specific payload. Send events carry `status`, `reason`, `channel`, `actual_channel`; delivery events carry `channel`, `status`; code-check events carry `code_tried`, `status`; final status events carry `reason` — or `null` when there is no reason to report (e.g. `PHONE_VERIFICATION_APPROVED`).
                                 properties:
                                   status:
                                     type: string
                                   reason:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   channel:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   actual_channel:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   code_tried:
                                     type: string
                               fee:
@@ -2633,8 +2685,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -2651,29 +2704,35 @@ paths:
                             type: object
                             properties:
                               session_id:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uuid
-                                nullable: true
                               session_number:
-                                type: integer
-                                nullable: true
+                                type:
+                                - integer
+                                - 'null'
                               vendor_data:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               verification_date:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: date-time
-                                nullable: true
                               phone_number:
                                 type: string
                               status:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               is_blocklisted:
                                 type: boolean
                               api_service:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               source:
                                 type: string
                                 enum:
@@ -2681,8 +2740,9 @@ paths:
                                 - list_entry
                                 description: Where this match came from. `session` means another verification session in your application matched on this value. `list_entry` means the value was hit against an org-managed list (allowlist/blocklist) — see the management API lists overview at `/management-api/lists/overview` for how to manage those lists.
                   email_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of email verification reports** — always a JSON array, never a singular `email` object. `null` until at least one email step has produced data. Each item is the full report, including `node_id`, feature-level `status`, the email address, breach data, `lifecycle[]`, `matches[]`, and `warnings[]`.'
                     items:
                       type: object
@@ -2779,8 +2839,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -2802,15 +2863,17 @@ paths:
                                 type: string
                                 format: date-time
                               details:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Event-specific payload. Send events carry `status`, `reason`; code-check events carry `code_tried`, `status`; final status events carry `reason` — or `null` when there is no reason to report (e.g. `EMAIL_VERIFICATION_APPROVED`).
                                 properties:
                                   status:
                                     type: string
                                   reason:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   code_tried:
                                     type: string
                               fee:
@@ -2822,30 +2885,36 @@ paths:
                             type: object
                             properties:
                               session_id:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uuid
-                                nullable: true
                               session_number:
-                                type: integer
-                                nullable: true
+                                type:
+                                - integer
+                                - 'null'
                               vendor_data:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               verification_date:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: date-time
-                                nullable: true
                               email:
                                 type: string
                                 format: email
                               status:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               is_blocklisted:
                                 type: boolean
                               api_service:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                               source:
                                 type: string
                                 enum:
@@ -2853,8 +2922,9 @@ paths:
                                 - list_entry
                                 description: Where this match came from. `session` means another verification session in your application matched on this value. `list_entry` means the value was hit against an org-managed list (allowlist/blocklist) — see the management API lists overview at `/management-api/lists/overview` for how to manage those lists.
                   poa_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of Proof of Address (POA) reports** — always a JSON array, never a singular `poa` object. `null` until at least one POA step has produced data. Each item is the full report, including `node_id`, feature-level `status`, the document file URL, issuer, dates, parsed address, and `warnings[]`.'
                     items:
                       type: object
@@ -2882,14 +2952,17 @@ paths:
                           type: string
                           description: Type of proof of address document
                         document_subtype:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: More specific classification of the POA document within its `document_type`, when one was detected. `null` otherwise.
                         document_language:
                           type: string
                           description: Language code of the document
                         document_metadata:
-                          type: object
+                          type:
+                          - object
+                          - 'null'
                           properties:
                             file_size:
                               type: integer
@@ -2906,8 +2979,9 @@ paths:
                               format: date
                               description: Date when the document was modified
                             overlay_manipulation:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: PDF forensic analysis for suspected overlay-text manipulation. Null when no overlay manipulation evidence was found or the document was not a PDF.
                               properties:
                                 detected:
@@ -2942,51 +3016,61 @@ paths:
                                       page_height:
                                         type: number
                             creator:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Creator application recorded in the document metadata.
                             producer:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Producer software recorded in the PDF metadata.
                             software:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Editing/processing software recorded in the file metadata.
                             encryption:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Encryption scheme of the document, when encrypted.
                             is_signed:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: Whether the PDF carries a digital signature.
                             is_tampered:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: Whether signature validation indicates the file was modified after signing.
                             signature_info:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Details of the digital signature(s), when present.
                             exif_original_date:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: EXIF original capture date, for image uploads.
                             exif_digitized_date:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: EXIF digitization date, for image uploads.
                             processed_by_known_editor:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: Whether the file metadata indicates processing by a known document editor.
                             has_different_creation_mod_date:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: Whether the creation and modification dates differ — a common manipulation signal.
                           description: File-forensics metadata extracted from the uploaded POA document. Always contains the keys below (values are `null` when not applicable, e.g. EXIF dates for PDFs). `null` when no metadata could be extracted.
-                          nullable: true
                         issuer:
                           type: string
                           description: Name of the document issuer
@@ -2995,9 +3079,10 @@ paths:
                           format: date
                           description: Date when the document was issued
                         expiration_date:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: date
-                          nullable: true
                           description: Expiration date of the document, if available
                         poa_address:
                           type: string
@@ -3015,8 +3100,9 @@ paths:
                               type: string
                               description: Primary street address
                             street_2:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Secondary street address
                             city:
                               type: string
@@ -3040,24 +3126,29 @@ paths:
                                   type: number
                                   description: Longitude coordinate
                         name_on_document:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Account-holder / addressee name extracted from the POA document, used for name matching. `null` when no name could be extracted.
                         name_match_score_expected_details:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Similarity score (0-100) between `name_on_document` and the expected name supplied at session creation. `null` when either side is missing.
                         name_match_score_id_verification:
-                          type: number
-                          nullable: true
+                          type:
+                          - number
+                          - 'null'
                           description: Similarity score (0-100) between `name_on_document` and the name extracted by the ID verification step. `null` when either side is missing.
                         expected_details_address:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Expected raw address for verification
                         expected_details_formatted_address:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Expected formatted address for verification
                         expected_details_parsed_address:
                           type: object
@@ -3067,29 +3158,37 @@ paths:
                           description: Additional banking and contact details extracted from the document.
                           properties:
                             bank_account_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_iban:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_sort_code:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_routing_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_swift_bic:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_branch_name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             bank_branch_address:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             document_phone_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             additional_names:
                               type: array
                               items:
@@ -3127,8 +3226,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -3139,8 +3239,9 @@ paths:
                                 type: string
                                 description: The workflow graph node ID that generated this warning
                   document_ai_documents:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Document AI reports grouped by workflow node** — always a JSON array, never a singular object. `null` until at least one Document AI step has produced data. Present only when `session_kind = user`. Each item is a node group with an aggregate `status`, the `node_id`, an `items[]` array of the per-document results (extracted data keyed by the configured field key), and `warnings`.'
                     items:
                       type: object
@@ -3155,8 +3256,9 @@ paths:
                           - In Review
                           - Not Finished
                         node_id:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Unique identifier for this Document AI step in the workflow graph.
                         items:
                           type: array
@@ -3167,24 +3269,28 @@ paths:
                                 type: string
                                 format: uuid
                               node_id:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Workflow graph node that produced this document.
                               document_key:
                                 type: string
                                 description: Key of the configured Document AI document this file corresponds to.
                               original_filename:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Filename as uploaded by the user.
                               file_size:
-                                type: integer
-                                nullable: true
+                                type:
+                                - integer
+                                - 'null'
                                 description: File size in bytes.
                               file_url:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uri
-                                nullable: true
                                 description: Short-lived presigned link to the uploaded file.
                               status:
                                 type: string
@@ -3195,9 +3301,10 @@ paths:
                                 - Not Finished
                                 description: Per-document Document AI status.
                               extracted_data:
-                                type: object
+                                type:
+                                - object
+                                - 'null'
                                 additionalProperties: true
-                                nullable: true
                                 description: Values extracted by Document AI, keyed by the configured field `key`. Each value is a string, number, or `null`.
                               fields:
                                 type: array
@@ -3225,25 +3332,29 @@ paths:
                                       type: boolean
                                       description: Whether this field is required.
                               document_metadata:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: File-forensics metadata extracted from the uploaded document (e.g. `is_tampered`). `null` when nothing could be extracted.
                               cross_check_result:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Cross-reference of the extracted document fields against other session data. `null` when no cross-check was performed.
                               created_at:
                                 type: string
                                 format: date-time
                         warnings:
-                          type: array
-                          nullable: true
+                          type:
+                          - array
+                          - 'null'
                           items:
                             type: object
                           description: Warning logs raised for this Document AI node.
                   questionnaire_responses:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of questionnaire response reports** — always a JSON array, never a singular `questionnaire` object. `null` until at least one questionnaire step has produced data. Each item is the full report, including `node_id`, the questionnaire metadata, sections with form elements, and the user''s answers.'
                     items:
                       type: object
@@ -3275,18 +3386,21 @@ paths:
                           type: boolean
                           description: Whether the questionnaire is a simple linear form (no branching graph).
                         questionnaire_group_id:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: uuid
-                          nullable: true
                           description: Stable identifier of the questionnaire group across versions.
                         version:
-                          type: integer
-                          nullable: true
+                          type:
+                          - integer
+                          - 'null'
                           description: Version number of the questionnaire that was answered.
                         published_at:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: date-time
-                          nullable: true
                           description: Timestamp at which this questionnaire version was published.
                         sections:
                           type: array
@@ -3294,12 +3408,14 @@ paths:
                             type: object
                             properties:
                               title:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Section title
                               description:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Section description
                               items:
                                 type: array
@@ -3310,8 +3426,9 @@ paths:
                                       type: string
                                       description: Unique identifier for the item
                                     value:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: Stable node identifier of this form element within the questionnaire graph.
                                     element_type:
                                       type: string
@@ -3323,16 +3440,19 @@ paths:
                                       type: string
                                       description: Title of the item
                                     description:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: Description of the item
                                     placeholder:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: Placeholder text
                                     choices:
-                                      type: array
-                                      nullable: true
+                                      type:
+                                      - array
+                                      - 'null'
                                       items:
                                         type: object
                                         properties:
@@ -3341,39 +3461,46 @@ paths:
                                           value:
                                             type: string
                                           requires_text_input:
-                                            type: boolean
+                                            type:
+                                            - boolean
+                                            - 'null'
                                             description: Whether this choice requires additional text input
-                                            nullable: true
                                         required:
                                         - label
                                         - value
                                       description: Choices for dropdown or single choice elements
                                     max_files:
-                                      type: integer
+                                      type:
+                                      - integer
+                                      - 'null'
                                       description: Maximum number of files allowed
-                                      nullable: true
                                     answer:
                                       type: object
                                       description: Answer provided for the item
                                       properties:
                                         value:
-                                          type: string
-                                          nullable: true
+                                          type:
+                                          - string
+                                          - 'null'
                                         text:
-                                          type: string
-                                          nullable: true
+                                          type:
+                                          - string
+                                          - 'null'
                                         files:
-                                          type: array
+                                          type:
+                                          - array
+                                          - 'null'
                                           items:
                                             type: string
-                                          nullable: true
                                     required_if:
-                                      type: object
-                                      nullable: true
+                                      type:
+                                      - object
+                                      - 'null'
                                       description: Conditional-requirement rule, when the element is only required for certain answers.
                                     repeatable_config:
-                                      type: object
-                                      nullable: true
+                                      type:
+                                      - object
+                                      - 'null'
                                       description: Configuration for repeatable element groups, when applicable.
                                   required:
                                   - uuid
@@ -3385,8 +3512,9 @@ paths:
                           type: string
                           description: Status of the questionnaire
                   aml_screenings:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of AML screening reports** — always a JSON array, never a singular `aml` object. `null` until at least one AML step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `total_hits`, `entity_type`, `hits[]`, `score`, `screened_data`, `is_ongoing_monitoring_enabled`, and `warnings[]`.'
                     items:
                       type: object
@@ -3425,16 +3553,18 @@ paths:
                                 type: boolean
                                 description: Whether this is a confirmed match
                               score:
-                                type: number
+                                type:
+                                - number
+                                - 'null'
                                 format: float
-                                nullable: true
                                 minimum: 0
                                 maximum: 1
                                 description: Deprecated weighted match score in the 0-1 range (e.g. `0.73`). Use `match_score` (0-100) instead.
                                 deprecated: true
                               target:
-                                type: boolean
-                                nullable: true
+                                type:
+                                - boolean
+                                - 'null'
                                 description: Whether the matched entity is the direct target of the listing (as opposed to a related party). `null` when the source does not specify it.
                               caption:
                                 type: string
@@ -3458,8 +3588,9 @@ paths:
                                   - Insolvency
                                 description: List of dataset categories where the match was found. Indicates whether the entity appeared in PEP lists (with level), sanctions databases, adverse media, warnings/regulatory enforcement, or other compliance datasets.
                               features:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Additional features of the match
                               rca_name:
                                 type: string
@@ -3526,46 +3657,57 @@ paths:
                                     items:
                                       type: string
                                   title:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   gender:
                                     type: array
                                     items:
                                       type: string
                                   height:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   topics:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   weight:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   address:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   country:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   website:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   eyeColor:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   keywords:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   lastName:
                                     type: array
                                     items:
                                       type: string
                                   position:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   religion:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   birthDate:
                                     type: array
                                     items:
@@ -3575,39 +3717,47 @@ paths:
                                     items:
                                       type: string
                                   ethnicity:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   firstName:
                                     type: array
                                     items:
                                       type: string
                                   hairColor:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   weakAlias:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   birthPlace:
                                     type: array
                                     items:
                                       type: string
                                   modifiedAt:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   wikidataId:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   citizenship:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                               match_score:
-                                type: number
+                                type:
+                                - number
+                                - 'null'
                                 description: Weighted identity confidence score (0-100) calculated from name similarity, date of birth, and country matching. Used to determine if hit is a False Positive or Possible Match.
                                 format: float
-                                nullable: true
                               risk_score:
                                 type: number
                                 description: Entity risk score (0-100). Used to determine final AML status (Approved/In Review/Declined) based on the highest risk_score among non-False-Positive hits.
@@ -3759,18 +3909,21 @@ paths:
                                         type: string
                                       description: Additional source URLs
                                     countries:
-                                      type: array
+                                      type:
+                                      - array
+                                      - 'null'
                                       items:
                                         type: string
-                                      nullable: true
                                       description: Countries associated with the warning
                                     created_at:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: Date the warning entry was created
                                     updated_at:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: Date the warning entry was last updated
                                     additional_data:
                                       type: object
@@ -3808,10 +3961,11 @@ paths:
                                   type: object
                                   properties:
                                     list_name:
-                                      type: array
+                                      type:
+                                      - array
+                                      - 'null'
                                       items:
                                         type: string
-                                      nullable: true
                                       description: Name(s) of the sanction list(s)
                                     matched_name:
                                       type: string
@@ -3820,8 +3974,9 @@ paths:
                                       type: string
                                       description: Description of the sanction entry
                                     reason:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                       description: 'Free-text reason why the entity was sanctioned. Joined from the sanction list''s reason entries. Examples: ''Executive Order 13224 (Terrorism)'', ''Support for actions undermining Ukraine''s sovereignty'', ''Listed due to national security concerns.'''
                                     source_url:
                                       type: string
@@ -3843,16 +3998,18 @@ paths:
                                         type: string
                                       description: Legal basis for the sanction
                                     listed_on:
-                                      type: array
+                                      type:
+                                      - array
+                                      - 'null'
                                       items:
                                         type: string
-                                      nullable: true
                                       description: Date(s) when the entity was listed
                                     sanction_list:
-                                      type: array
+                                      type:
+                                      - array
+                                      - 'null'
                                       items:
                                         type: string
-                                      nullable: true
                                       description: Sanction list identifier(s)
                                     sanction_program:
                                       type: array
@@ -3905,8 +4062,9 @@ paths:
                                       type: string
                                       format: uri
                                     author_name:
-                                      type: string
-                                      nullable: true
+                                      type:
+                                      - string
+                                      - 'null'
                                     other_sources:
                                       type: array
                                       items:
@@ -3923,9 +4081,10 @@ paths:
                               additional_information:
                                 type: object
                         score:
-                          type: number
+                          type:
+                          - number
+                          - 'null'
                           format: float
-                          nullable: true
                           minimum: 0
                           maximum: 100
                           description: Overall AML screening score — the highest risk score across all hits (float, 0-100). `null` until computed.
@@ -3940,15 +4099,17 @@ paths:
                               type: string
                               format: date
                             document_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                         is_ongoing_monitoring_enabled:
                           type: boolean
                           description: Whether AML ongoing monitoring is enabled for this screening. When `true`, the entity is re-screened periodically and any new hits update the report.
                         next_ongoing_monitoring_bill_date:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: date
-                          nullable: true
                           description: Date (YYYY-MM-DD) when this ongoing-monitoring subscription will next be billed. Computed as the date of the last ongoing-monitoring billing plus 365 days when `is_ongoing_monitoring_enabled = true`; otherwise `null`.
                         warnings:
                           type: array
@@ -3977,8 +4138,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -3989,8 +4151,9 @@ paths:
                                 type: string
                                 description: The workflow graph node ID that generated this warning
                   ip_analyses:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of Device & IP Analysis reports** — always a JSON array, never a singular `ip_analysis` object. `null` until at least one IP-analysis step has produced data. Each item is the full report, including `node_id`, feature-level `status`, IP and geolocation data, device fingerprint, and `warnings[]`. Entries with duplicate `(node_id, ip_address, device_fingerprint)` are deduplicated server-side.'
                     items:
                       type: object
@@ -4023,8 +4186,9 @@ paths:
                           type: string
                           description: Platform type (mobile, desktop, etc)
                         device_fingerprint:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Unique device fingerprint identifier
                         ip_country:
                           type: string
@@ -4048,12 +4212,14 @@ paths:
                           type: string
                           description: IP address
                         isp:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Internet Service Provider
                         organization:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                           description: Organization associated with IP
                         is_vpn_or_tor:
                           type: boolean
@@ -4072,8 +4238,9 @@ paths:
                           description: IP geolocation of this entry plus great-circle distances (km) to the ID document address and the POA document address. Distances are `null` when either side has no resolvable location.
                           properties:
                             location:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               properties:
                                 latitude:
                                   type: number
@@ -4083,20 +4250,23 @@ paths:
                                   example: 1.9770097
                               description: Coordinates, or `null` when unavailable.
                             distance_from_id_document:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 23.4
                             distance_from_poa_document:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 12.3
                         id_document:
                           type: object
                           description: Location extracted from the ID document address plus distances (km) to the IP geolocation and the POA document address. `location` is `null` when no document address could be geocoded.
                           properties:
                             location:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               properties:
                                 latitude:
                                   type: number
@@ -4106,20 +4276,23 @@ paths:
                                   example: 1.9770097
                               description: Coordinates, or `null` when unavailable.
                             distance_from_ip:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 23.4
                             distance_from_poa_document:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 18.7
                         poa_document:
                           type: object
                           description: Location extracted from the Proof of Address document plus distances (km) to the IP geolocation and the ID document address. `location` is `null` when the session has no POA step or the address could not be geocoded.
                           properties:
                             location:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               properties:
                                 latitude:
                                   type: number
@@ -4129,12 +4302,14 @@ paths:
                                   example: 1.9770097
                               description: Coordinates, or `null` when unavailable.
                             distance_from_ip:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 12.3
                             distance_from_id_document:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               example: 18.7
                         warnings:
                           type: array
@@ -4163,8 +4338,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -4189,13 +4365,15 @@ paths:
                                 type: integer
                                 description: Sequential number of the matching session.
                               vendor_data:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: '`vendor_data` of the matching session — always different from the current session''s vendor user.'
                               verification_date:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: date-time
-                                nullable: true
                                 description: Creation date of the matching session (`YYYY-MM-DDTHH:MM:SSZ`).
                               match_type:
                                 type: string
@@ -4212,8 +4390,9 @@ paths:
                                 - recovered_high
                                 description: 'How this match was reached: `ip_address` (shared IP address — network co-location, not a device-identity claim), `persistent_id` (exact stored persistent device identifier), `legacy_fp` (legacy `didit-fp-*` device-fingerprint hash), or `recovered_high` (high-confidence fuzzy fingerprint-recovery hit). Lower-confidence recovery candidates surface as risk warnings only, never in this array.'
                               matched_value:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: 'The value that matched: the shared IP address, the persistent device identifier or legacy fingerprint hash, or — for `recovered_high` — the UUID of the recovered device.'
                               status:
                                 type: string
@@ -4222,8 +4401,9 @@ paths:
                                 type: boolean
                                 description: Whether the matched value is on a blocklist. Currently always `false` for device/IP matches.
                               api_service:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Standalone API service of the matching session; `null` for workflow sessions.
                               source:
                                 type: string
@@ -4235,42 +4415,53 @@ paths:
                                 description: Device details observed on the matching session.
                                 properties:
                                   device_brand:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   device_model:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   browser_family:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   os_family:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   platform:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   device_fingerprint:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                               location_info:
                                 type: object
                                 description: Network and geolocation details observed on the matching session.
                                 properties:
                                   ip_address:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   ip_country:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   ip_country_code:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   ip_state:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   ip_city:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   is_vpn_or_tor:
                                     type: boolean
                                   is_data_center:
@@ -4297,8 +4488,9 @@ paths:
                                 type: string
                                 description: 'Why the recovery match passed the false-positive hard gate: `hardware_root_match` (a hardware-rooted device identifier matched exactly) or, on configurations that admit probe-only evidence, `exact_composite_plus_<n>_families` / `very_high_similarity_plus_<n>_families`. Present only when `match_source` is `recovered_high`.'
                   database_validations:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: '**Array of Database Validation reports** — always a JSON array, never a singular `database_validation` object. `null` until at least one DB validation step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `screened_data`, the per-service `validations[]` (each with its registry `source_data`), and `warnings[]`. The `screened_data` and `source_data` fields vary by country:
 
 
@@ -4425,12 +4617,14 @@ paths:
                                     type: string
                                     description: Match result for identification number.
                               outcome_code:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Machine-readable outcome of the registry lookup (e.g. `MATCH`, `NO_MATCH`, `PARTIAL_MATCH`, `INCONCLUSIVE`, source-specific codes). Present when the service reports one.
                               outcome_detail:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Human-readable explanation of `outcome_code`, when provided by the service.
                               source_data:
                                 type: object
@@ -4444,17 +4638,19 @@ paths:
                             description: The upstream service's error object spread as-is — its keys vary by service (commonly a message/code and any provider-specific details) — plus `service_id` identifying the service that errored.
                             properties:
                               service_id:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Identifier of the registry service that errored.
                             additionalProperties: true
                         match_type:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           enum:
                           - no_match
                           - partial_match
                           - full_match
-                          nullable: true
                           description: The aggregate match outcome across the queried services. `null` until the validation has been evaluated.
                         status:
                           type: string
@@ -4492,8 +4688,9 @@ paths:
                               risk:
                                 type: string
                               additional_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               log_type:
                                 type: string
                               short_description:
@@ -4524,13 +4721,15 @@ paths:
                     format: date-time
                     description: Timestamp at which the session was created (ISO 8601, UTC).
                   expires_at:
-                    type: string
+                    type:
+                    - string
+                    - 'null'
                     format: date-time
-                    nullable: true
                     description: Timestamp at which this session is scheduled to expire. Set on User Verification (KYC) sessions when an expiration was configured at creation time (or once `Approved` status triggers KYC expiry computation). `null` for sessions without a configured expiration, and for kinds that do not use expiry (e.g. Business Verification (KYB) sessions that never received an `expires_at`).
                   registry_checks:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: Company registry checks. Present only when `session_kind = business`. Each item wraps the full company-registry payload.
                     items:
                       type: object
@@ -4540,8 +4739,9 @@ paths:
                           type: string
                           description: Feature lifecycle status.
                         node_id:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                         data_resolved:
                           type: boolean
                         company:
@@ -4552,93 +4752,114 @@ paths:
                               type: string
                               format: uuid
                             node_id:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             status:
                               type: string
                             registry_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             data_resolved:
                               type: boolean
                             company_name:
                               type: string
                             registration_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             country_code:
                               type: string
                               description: Country of incorporation (ISO 3166-1 alpha-2, e.g. `GB`, `DE`, `US`).
                             region:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: ISO 3166-2 subdivision code when applicable (e.g. `CA`, `NY` for US states).
                             company_type:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             incorporation_date:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date
-                              nullable: true
                             registered_address:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             tax_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             risk_level:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               enum:
                               - LOW
                               - MEDIUM
                               - HIGH
-                              nullable: true
                             verification_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             is_from_registry:
                               type: boolean
                             fetch_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             alternative_names:
                               type: array
                               items:
                                 type: string
                             nature_of_business:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             registered_capital:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             registered_capital_amount:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: decimal
-                              nullable: true
                               description: Registered/share capital amount as a decimal string (e.g. `"100.00"`), parsed from the registry filing. `null` when not available.
                             registered_capital_currency:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: ISO 4217 currency code of `registered_capital_amount` (e.g. `"GBP"`). `null` when not available.
                             website:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             email:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: email
-                              nullable: true
                             phone:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             legal_entity_identifier:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             location_of_registration:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             vat_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: EU VAT number, when collected during the hosted registry step or edited afterwards.
                             vat_validation_status:
                               type: string
@@ -4649,21 +4870,25 @@ paths:
                               - not_applicable
                               description: Result of the EU VIES check run at registry submit. `not_applicable` when no VAT number was provided or the company is outside the EU VAT area (EU-27 plus Northern Ireland).
                             vat_validated_name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Trader name registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                             vat_validated_address:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Trader address registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                             vat_checked_at:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                               description: Timestamp of the VIES check. `null` when no check ran.
                             financial_summary:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                             officers:
                               type: array
                               items:
@@ -4675,27 +4900,32 @@ paths:
                                   name:
                                     type: string
                                   designation:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   role:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   is_active:
                                     type: boolean
                                   kyc_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Approved
                                     - Declined
                                     - Pending
-                                    nullable: true
                                   kyc_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                             beneficial_owners:
                               type: array
                               items:
@@ -4707,11 +4937,13 @@ paths:
                                   name:
                                     type: string
                                   first_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   last_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   entity_type:
                                     type: string
                                     enum:
@@ -4722,42 +4954,50 @@ paths:
                                     items:
                                       type: string
                                   ownership_min_shares:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Lower bound of the ownership percentage as reported by the registry. Free-form string (e.g. `"25.00"`, `"50"`); use `effective_ownership_percent` for a parsed numeric value.
                                   ownership_max_shares:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Upper bound of the ownership percentage as reported by the registry. Free-form string; use `effective_ownership_percent` for a parsed numeric value.
                                   is_active:
                                     type: boolean
                                   kyc_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Approved
                                     - Declined
                                     - Pending
-                                    nullable: true
                                   kyc_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                                   effective_ownership_percent:
-                                    type: number
-                                    nullable: true
+                                    type:
+                                    - number
+                                    - 'null'
                             addresses:
-                              type: array
-                              nullable: true
+                              type:
+                              - array
+                              - 'null'
                               items:
                                 type: object
                             industries:
-                              type: array
-                              nullable: true
+                              type:
+                              - array
+                              - 'null'
                               items:
                                 type: object
                             accounts:
-                              type: array
-                              nullable: true
+                              type:
+                              - array
+                              - 'null'
                               items:
                                 type: object
                             registry_data:
@@ -4767,13 +5007,15 @@ paths:
                               type: object
                               description: Data confirmed or edited by the end user.
                             confirmed_by_user_at:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                             last_console_edit_at:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                             is_editable:
                               type: boolean
                         ownership_structure:
@@ -4784,8 +5026,9 @@ paths:
                           items:
                             type: object
                   key_people_checks:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: Aggregate key-people checks. Present only when `session_kind = business`. Each item uses the two-bucket shape (`registry`, `submitted`, `ubo_kyc_summary`).
                     items:
                       type: object
@@ -4794,8 +5037,9 @@ paths:
                         status:
                           type: string
                         node_id:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                         registry:
                           type: object
                           description: Parties discovered via the registry check.
@@ -4813,8 +5057,9 @@ paths:
                                     type: string
                                     description: Officer's full name as recorded in the registry.
                                   designation:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Free-text designation from the registry (e.g. `Director`, `Company Secretary`).
                                   role:
                                     type: string
@@ -4838,36 +5083,43 @@ paths:
                                     - other
                                     description: Normalized officer role.
                                   nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   appointment_date:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date
-                                    nullable: true
                                     description: Date the officer was appointed, when the registry provides it.
                                   termination_date:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date
-                                    nullable: true
                                     description: Date the appointment ended. `null` for active officers.
                                   is_active:
                                     type: boolean
                                   address:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Officer's address as recorded in the registry.
                                   aml_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Finished
                                     - Approved
                                     - Declined
                                     - In Review
                                     - Resub Requested
-                                    nullable: true
                                     description: Status of the AML screening run for this officer. `null` when no AML screening was run.
                                   kyc_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Started
                                     - In Progress
@@ -4879,34 +5131,39 @@ paths:
                                     - Kyc Expired
                                     - Resubmitted
                                     - Awaiting User
-                                    nullable: true
                                     description: Raw lifecycle status of the child KYC session spawned for this officer. This is the full session status enum (not a reduced Approved/Declined/Pending set). `null` when no child KYC session exists.
                                   kyc_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                                     description: Shareable URL of the child KYC session. `null` when no child session exists.
                                   kyc_session_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Session id of the child KYC session. Pass it to this same decision endpoint to fetch the person's full KYC report. `null` when no child session exists.
                                   verification_workflow_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Base workflow type of the child session's workflow (e.g. `kyc`). `null` for graph-based workflows or when no child session exists.
                                   verification_workflow_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Workflow id used by the child session. `null` when no child session exists.
                                   verification_workflow_label:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Human-readable label of the child session's workflow. `null` when unset.
                                   verification_workflow_features:
-                                    type: array
-                                    nullable: true
+                                    type:
+                                    - array
+                                    - 'null'
                                     description: 'Per-feature progress of the child verification session, e.g. `[{"feature": "ID_VERIFICATION", "status": "Approved"}]`. `null` when the child session has no resolvable feature list.'
                                     items:
                                       type: object
@@ -4924,29 +5181,35 @@ paths:
                                           - Resub Requested
                                           description: Feature-level status inside the child session.
                                   didit_internal_id:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Stable internal identifier of the verified individual behind the child session — useful for cross-session linking. `null` when no child session exists or the user has not been resolved yet.
                                   kyc_document_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Document type presented in the child KYC session (e.g. `P`, `ID`, `DL`). `null` until the child session has an ID verification result.
                                   kyc_nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Nationality extracted from the document in the child KYC session. `null` until available.
                                   kyc_liveness_passed:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether the child KYC session's liveness check passed. `null` when no liveness check has run.
                                   kyc_verified_at:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date-time
-                                    nullable: true
                                     description: When the child KYC session reached `Approved`. `null` while the child session has any other status.
                                   kyc_aml_categories:
-                                    type: object
-                                    nullable: true
+                                    type:
+                                    - object
+                                    - 'null'
                                     description: Per-category summary derived from the person's AML hits. `null` when there are no hits.
                                     properties:
                                       sanctions:
@@ -4970,8 +5233,9 @@ paths:
                                         - match
                                         - clear
                                   kyc_notification_sent_at:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: ISO 8601 timestamp of the last verification-invite notification sent for this person's child session. `null` when none was sent.
                             beneficial_owners:
                               type: array
@@ -4986,29 +5250,36 @@ paths:
                                     type: string
                                     description: Beneficial owner's full name (or company name for corporate UBOs).
                                   first_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   last_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   date_of_birth:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date
-                                    nullable: true
                                   country_of_birth:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   email:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: email
-                                    nullable: true
                                   company_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: 'For corporate UBOs (`entity_type = company`): the owning company''s name.'
                                   registration_number:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: 'For corporate UBOs: the owning company''s registration number.'
                                   entity_type:
                                     type: string
@@ -5016,38 +5287,45 @@ paths:
                                     - person
                                     - company
                                   nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   designation:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   roles:
                                     type: array
                                     description: Role names held by this owner, e.g. `["ubo", "shareholder"]`.
                                     items:
                                       type: string
                                   ownership_min_shares:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Lower bound of the ownership percentage as reported by the registry. Free-form string (e.g. `"25"`, `"25-50%"`); use `effective_ownership_percent` for a parsed numeric value.
                                   ownership_max_shares:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Upper bound of the ownership percentage as reported by the registry. Free-form string; use `effective_ownership_percent` for a parsed numeric value.
                                   is_active:
                                     type: boolean
                                   aml_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Finished
                                     - Approved
                                     - Declined
                                     - In Review
                                     - Resub Requested
-                                    nullable: true
                                     description: Status of the AML screening run for this beneficial owner. `null` when no AML screening was run.
                                   kyc_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Started
                                     - In Progress
@@ -5059,34 +5337,39 @@ paths:
                                     - Kyc Expired
                                     - Resubmitted
                                     - Awaiting User
-                                    nullable: true
                                     description: Raw lifecycle status of the child KYC session spawned for this beneficial owner. This is the full session status enum (not a reduced Approved/Declined/Pending set). `null` when no child KYC session exists.
                                   kyc_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                                     description: Shareable URL of the child KYC session. `null` when no child session exists.
                                   kyc_session_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Session id of the child KYC session. Pass it to this same decision endpoint to fetch the person's full KYC report. `null` when no child session exists.
                                   verification_workflow_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Base workflow type of the child session's workflow (e.g. `kyc`). `null` for graph-based workflows or when no child session exists.
                                   verification_workflow_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Workflow id used by the child session. `null` when no child session exists.
                                   verification_workflow_label:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Human-readable label of the child session's workflow. `null` when unset.
                                   verification_workflow_features:
-                                    type: array
-                                    nullable: true
+                                    type:
+                                    - array
+                                    - 'null'
                                     description: 'Per-feature progress of the child verification session, e.g. `[{"feature": "ID_VERIFICATION", "status": "Approved"}]`. `null` when the child session has no resolvable feature list.'
                                     items:
                                       type: object
@@ -5104,29 +5387,35 @@ paths:
                                           - Resub Requested
                                           description: Feature-level status inside the child session.
                                   didit_internal_id:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Stable internal identifier of the verified individual behind the child session — useful for cross-session linking. `null` when no child session exists or the user has not been resolved yet.
                                   kyc_document_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Document type presented in the child KYC session (e.g. `P`, `ID`, `DL`). `null` until the child session has an ID verification result.
                                   kyc_nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Nationality extracted from the document in the child KYC session. `null` until available.
                                   kyc_liveness_passed:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether the child KYC session's liveness check passed. `null` when no liveness check has run.
                                   kyc_verified_at:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date-time
-                                    nullable: true
                                     description: When the child KYC session reached `Approved`. `null` while the child session has any other status.
                                   kyc_aml_categories:
-                                    type: object
-                                    nullable: true
+                                    type:
+                                    - object
+                                    - 'null'
                                     description: Per-category summary derived from the person's AML hits. `null` when there are no hits.
                                     properties:
                                       sanctions:
@@ -5150,8 +5439,9 @@ paths:
                                         - match
                                         - clear
                                   kyc_notification_sent_at:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: ISO 8601 timestamp of the last verification-invite notification sent for this person's child session. `null` when none was sent.
                                   child_beneficial_owners:
                                     type: array
@@ -5159,8 +5449,9 @@ paths:
                                     items:
                                       type: object
                                   effective_ownership_percent:
-                                    type: number
-                                    nullable: true
+                                    type:
+                                    - number
+                                    - 'null'
                                     description: Parsed numeric ownership percentage — the max bound when available, otherwise the min bound. `null` when neither bound could be parsed.
                         submitted:
                           type: object
@@ -5188,35 +5479,44 @@ paths:
                                   name:
                                     type: string
                                   first_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   last_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   company_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   registration_number:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   email:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: email
-                                    nullable: true
                                   nationality:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Nationality for persons; country of incorporation for company parties.
                                   phone_number:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   date_of_birth:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: date
-                                    nullable: true
                                   position:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Free-text job title / position (persons only).
                                   custom_fields:
                                     type: object
@@ -5256,18 +5556,23 @@ paths:
                                           - investor
                                           - other
                                         ownership_percent:
-                                          type: number
-                                          nullable: true
+                                          type:
+                                          - number
+                                          - 'null'
                                         voting_percent:
-                                          type: number
-                                          nullable: true
+                                          type:
+                                          - number
+                                          - 'null'
                                   kyc_session_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Child KYC session id for person parties requiring verification. `null` otherwise.
                                   kyc_session_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Started
                                     - In Progress
@@ -5279,19 +5584,22 @@ paths:
                                     - Kyc Expired
                                     - Resubmitted
                                     - Awaiting User
-                                    nullable: true
                                     description: Lifecycle status of the child KYC session. `null` when no child KYC session exists.
                                   kyc_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                                   kyb_sub_session_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Child KYB sub-session id for corporate parties requiring verification. `null` otherwise.
                                   kyb_sub_session_status:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     enum:
                                     - Not Started
                                     - In Progress
@@ -5303,29 +5611,33 @@ paths:
                                     - Kyc Expired
                                     - Resubmitted
                                     - Awaiting User
-                                    nullable: true
                                     description: Lifecycle status of the child KYB sub-session. `null` when no sub-session exists.
                                   kyb_sub_session_url:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uri
-                                    nullable: true
                                     description: Shareable URL of the child KYB sub-session. `null` when no sub-session exists.
                                   verification_workflow_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Base workflow type of the child session's workflow (KYC session preferred, falling back to the KYB sub-session). `null` for graph-based workflows or when no child session exists.
                                   verification_workflow_id:
-                                    type: string
+                                    type:
+                                    - string
+                                    - 'null'
                                     format: uuid
-                                    nullable: true
                                     description: Workflow id used by the child session. `null` when no child session exists.
                                   verification_workflow_label:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Human-readable label of the child session's workflow. `null` when unset.
                                   verification_workflow_features:
-                                    type: array
-                                    nullable: true
+                                    type:
+                                    - array
+                                    - 'null'
                                     description: 'Per-feature progress of the child verification session, e.g. `[{"feature": "ID_VERIFICATION", "status": "Approved"}]`. `null` when the child session has no resolvable feature list.'
                                     items:
                                       type: object
@@ -5343,12 +5655,14 @@ paths:
                                           - Resub Requested
                                           description: Feature-level status inside the child session.
                                   didit_internal_id:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Stable internal identifier of the verified individual behind the child session. `null` when not resolved.
                         ubo_kyc_summary:
-                          type: object
-                          nullable: true
+                          type:
+                          - object
+                          - 'null'
                           description: Aggregate UBO KYC progress, or null when no UBOs have linked KYC sessions.
                           properties:
                             total:
@@ -5365,8 +5679,9 @@ paths:
                           items:
                             type: object
                   document_verifications:
-                    type: array
-                    nullable: true
+                    type:
+                    - array
+                    - 'null'
                     description: Document verification checks grouped by workflow node. Present only when `session_kind = business`.
                     items:
                       type: object
@@ -5375,8 +5690,9 @@ paths:
                         status:
                           type: string
                         node_id:
-                          type: string
-                          nullable: true
+                          type:
+                          - string
+                          - 'null'
                         items:
                           type: array
                           items:
@@ -5386,41 +5702,47 @@ paths:
                                 type: string
                                 format: uuid
                               document_type:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 enum:
                                 - LEGAL_PRESENCE
                                 - COMPANY_DETAILS
                                 - OWNERSHIP_STRUCTURE
                                 - REPRESENTATIVES_AUTHORIZATION
                                 - OTHER
-                                nullable: true
                                 description: High-level KYB document group the file was classified into. `null` while unclassified.
                               document_subtype:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Specific OCR-detected subtype (e.g. `CERTIFICATE_OF_INCORPORATION`, `SHAREHOLDER_REGISTRY`); `UNKNOWN` when the OCR could not confidently classify the document.
                               document_group:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 enum:
                                 - LEGAL_PRESENCE
                                 - COMPANY_DETAILS
                                 - OWNERSHIP_STRUCTURE
                                 - REPRESENTATIVES_AUTHORIZATION
                                 - OTHER
-                                nullable: true
                                 description: Alias of `document_type` — the group name used by `groups` and `required_groups`.
                               file_url:
-                                type: string
+                                type:
+                                - string
+                                - 'null'
                                 format: uri
-                                nullable: true
                                 description: Short-lived presigned link to the uploaded file. `null` for analyst-created document request placeholders (`is_requested = true`) that have not been fulfilled yet.
                               original_filename:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Filename as uploaded by the user or analyst.
                               file_size:
-                                type: integer
-                                nullable: true
+                                type:
+                                - integer
+                                - 'null'
                                 description: File size in bytes.
                               status:
                                 type: string
@@ -5435,77 +5757,95 @@ paths:
                                 type: string
                                 format: date-time
                               cross_check_result:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: 'Cross-reference of the OCR-extracted document fields against the registry company profile. An object with `critical`, `non_critical` and `people` sections, each mapping a field name (e.g. `company_name`, `registration_number`, `incorporation_date`, `registered_address`) to a comparison record like `{"document": "...", "registry": "...", "match": true, "score": 0.97}`. `null` when the document had no OCR data or there was no registry company to compare against.'
                               document_metadata:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Metadata extracted from the uploaded corporate document. When metadata extraction succeeded, all 16 keys are always present (individual values are `null` when not applicable to the file type); the whole object is `null` when nothing could be extracted. For PDFs, `overlay_manipulation` carries forensic overlay-text analysis.
                                 properties:
                                   file_size:
-                                    type: integer
-                                    nullable: true
+                                    type:
+                                    - integer
+                                    - 'null'
                                     description: Size of the document.
                                   content_type:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Content type of the document.
                                   creation_date:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Date when the document was created.
                                   modified_date:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Date when the document was modified.
                                   creator:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Authoring tool/user recorded in the file metadata (PDF `Creator`).
                                   producer:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Software that produced the file (PDF `Producer`).
                                   software:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Editing software recorded in the file metadata.
                                   encryption:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: Encryption scheme of the file, when encrypted.
                                   is_signed:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether the document carries a digital signature.
                                   is_tampered:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether the digital signature failed validation (post-signing modification).
                                   signature_info:
-                                    type: object
-                                    nullable: true
+                                    type:
+                                    - object
+                                    - 'null'
                                     description: Details of the digital signature(s), when present.
                                   exif_original_date:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: EXIF original capture date, for image uploads.
                                   exif_digitized_date:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                     description: EXIF digitization date, for image uploads.
                                   processed_by_known_editor:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether metadata indicates the file passed through a known image/PDF editor.
                                   has_different_creation_mod_date:
-                                    type: boolean
-                                    nullable: true
+                                    type:
+                                    - boolean
+                                    - 'null'
                                     description: Whether creation and modification dates differ — a possible (but not conclusive) editing signal.
                                   overlay_manipulation:
-                                    type: object
-                                    nullable: true
+                                    type:
+                                    - object
+                                    - 'null'
                                     description: PDF forensic analysis for suspected overlay-text manipulation. Null when no overlay manipulation evidence was found or the document was not a PDF.
                                     properties:
                                       detected:
@@ -5540,15 +5880,17 @@ paths:
                                             page_height:
                                               type: number
                               description:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Analyst-provided label or reason for a document request. `null` for regular uploads.
                               is_requested:
                                 type: boolean
                                 description: True for analyst-created document request placeholders awaiting an upload.
                               ocr_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                               is_console_upload:
                                 type: boolean
                                 description: True for documents uploaded from the console rather than the end-user flow. Console uploads never change the feature-level aggregate status.

@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Regulatory Reports API
+  title: Didit Verification Regulatory Reports API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -68,11 +68,13 @@ paths:
                     type: integer
                     description: Number of matching rows, capped at 100 for performance.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   results:
                     type: array
                     items:
@@ -131,23 +133,27 @@ paths:
                   maxLength: 2
                   description: Required unless a template is given.
                 template:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: uuid
-                  nullable: true
                   description: Report template UUID; its field_config seeds the draft before case-derived data is merged in.
                 transactions:
-                  type: array
+                  type:
+                  - array
+                  - 'null'
                   items:
                     type: string
                     format: uuid
-                  nullable: true
                   description: Transactions to attach; defaults to the case's linked transactions.
                 rentity_id:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 rentity_branch:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 submission_code:
                   type: string
                   enum:
@@ -155,33 +161,40 @@ paths:
                   - M
                   default: E
                 entity_reference:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 fiu_ref_number:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 currency_code_local:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   minLength: 3
                   maxLength: 3
-                  nullable: true
                 submission_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date-time
-                  nullable: true
                 reporting_person:
                   type: object
                 location:
                   type: object
                 reason:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 action:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 activity:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 narrative:
                   type: object
                   properties:
@@ -306,11 +319,13 @@ paths:
                     type: integer
                     description: Number of matching rows, capped at 100 for performance.
                   next:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   previous:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                   results:
                     type: array
                     items:
@@ -370,18 +385,21 @@ paths:
                   maxLength: 2
                   description: Required unless a template is given.
                 transactions:
-                  type: array
+                  type:
+                  - array
+                  - 'null'
                   items:
                     type: string
                     format: uuid
-                  nullable: true
                   description: Transactions to attach; defaults to the case's linked transactions.
                 rentity_id:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 rentity_branch:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 submission_code:
                   type: string
                   enum:
@@ -389,33 +407,40 @@ paths:
                   - M
                   default: E
                 entity_reference:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 fiu_ref_number:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 currency_code_local:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   minLength: 3
                   maxLength: 3
-                  nullable: true
                 submission_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date-time
-                  nullable: true
                 reporting_person:
                   type: object
                 location:
                   type: object
                 reason:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 action:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 activity:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 narrative:
                   type: object
                   properties:
@@ -541,11 +566,13 @@ paths:
                   minLength: 2
                   maxLength: 2
                 rentity_id:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 rentity_branch:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 submission_code:
                   type: string
                   enum:
@@ -553,33 +580,40 @@ paths:
                   - M
                   default: E
                 entity_reference:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 fiu_ref_number:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 currency_code_local:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   minLength: 3
                   maxLength: 3
-                  nullable: true
                 submission_date:
-                  type: string
+                  type:
+                  - string
+                  - 'null'
                   format: date-time
-                  nullable: true
                 reporting_person:
                   type: object
                 location:
                   type: object
                 reason:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 action:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 activity:
-                  type: string
-                  nullable: true
+                  type:
+                  - string
+                  - 'null'
                 narrative:
                   type: object
                   properties:
@@ -881,8 +915,9 @@ components:
           type: string
           format: uuid
         case_number:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         report_type:
           type: string
           enum:
@@ -900,8 +935,9 @@ components:
           type: string
           description: goAML report code derived from report_type, e.g. STR, CTR, BCR.
         report_number:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         status:
           type: string
           enum:
@@ -915,45 +951,54 @@ components:
           minLength: 2
           maxLength: 2
         rentity_id:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Reporting entity ID issued by the FIU.
         rentity_branch:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         submission_code:
           type: string
           enum:
           - E
           - M
         entity_reference:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         fiu_ref_number:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         currency_code_local:
-          type: string
+          type:
+          - string
+          - 'null'
           minLength: 3
           maxLength: 3
-          nullable: true
         submission_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
         reporting_person:
           type: object
         location:
           type: object
         reason:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         action:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         activity:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         narrative:
           type: object
           description: Five Ws narrative sections.
@@ -994,19 +1039,23 @@ components:
               message:
                 type: string
         validated_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
         finalized_at:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date-time
-          nullable: true
         created_by_email:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         created_by_name:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
         created_at:
           type: string
           format: date-time

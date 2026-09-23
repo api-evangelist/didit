@@ -1,7 +1,7 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   version: 3.0.0
-  title: Didit Verification Billing Standalone APIs API
+  title: Didit Verification Standalone APIs API
   description: Identity verification API. Authenticate with x-api-key header.
 servers:
 - url: https://verification.didit.me
@@ -23,7 +23,7 @@ paths:
         **Billing.** Each `200` response consumes one ID Verification API credit (standalone APIs have no free tier). When the organization''s balance cannot cover the call, the endpoint returns `403` with the not-enough-credits error before any image processing.
 
 
-        **Session persistence (`save_api_request`, default `true`).** When `true`, the call is persisted as an API-type session: it appears in the Business Console, the returned `request_id` is a real session id you can pass to `GET /v3/session/{sessionId}/decision/`, the cropped document/portrait images are stored and returned as short-lived media URLs (`https://<media-host>/ocr/...`), and a `status.updated` webhook is emitted to your configured webhook endpoints. When `false`, nothing is stored, `request_id` is a one-off correlation UUID, and `portrait_image`/`front_image`/`back_image` are returned inline as base64-encoded JPEG strings.
+        **Session persistence (`save_api_request`, default `true`).** When `true`, the call is persisted as an API-type session: it appears in the Business Console, the returned `request_id` is a real session id you can pass to `GET /v3/session/{sessionId}/decision/`, the cropped document/portrait images are stored and returned as short-lived media URLs (`https:///ocr/...`), and a `status.updated` webhook is emitted to your configured webhook endpoints. When `false`, nothing is stored, `request_id` is a one-off correlation UUID, and `portrait_image`/`front_image`/`back_image` are returned inline as base64-encoded JPEG strings.
 
 
         **Sandbox.** Sandbox API keys skip all processing and billing: after request validation (malformed input still returns `400`), the endpoint returns a static `Approved` mock payload (a fictional "Sandbox User" USA identity card), no session is persisted, and no credits are consumed.
@@ -68,8 +68,9 @@ paths:
                   description: 'When `true`, also screens both images for presentation fraud: screen replays (`SCREEN_CAPTURE_DETECTED`), printed copies (`PRINTED_COPY_DETECTED`), and portrait manipulation (`PORTRAIT_MANIPULATION_DETECTED`). Any of these auto-declines. Adds latency, so enable it only when you need fraud screening.'
                   example: true
                 minimum_age:
-                  type: integer
-                  nullable: true
+                  type:
+                  - integer
+                  - 'null'
                   default: null
                   minimum: 1
                   maximum: 120
@@ -337,55 +338,67 @@ paths:
                         - Declined
                         description: '`Approved` when no warning resolves to a decline; `Declined` otherwise — the `warnings` list explains why.'
                       document_type:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: 'Detected document type display name: `Identity Card`, `Passport`, `Driver''s License`, `Residence Permit`, `Health Insurance Card`, or `Tax Card`. `null` when the document could not be classified.'
                         example: Identity Card
                       document_subtype:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Finer-grained subtype when available (e.g. `ID_CARD_GENERIC`, `EPASSPORT`).
                         example: ID_CARD_GENERIC
                       document_number:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: CBX164224
                       personal_number:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Secondary personal/national number printed on some documents.
                         example: 20446581H
                       portrait_image:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Cropped portrait photo from the document. A short-lived media URL (`https://<media-host>/ocr/...`) when `save_api_request=true` (default); an inline base64-encoded JPEG string when `save_api_request=false`. `null` when no portrait was detected.
                       front_image:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Aligned crop of the document front. Media URL when saved, inline base64 JPEG otherwise.
                       back_image:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Aligned crop of the document back. `null` when no `back_image` was uploaded.
                       front_image_camera_front:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Always `null` on this endpoint (populated only in camera-capture verification sessions).
                       back_image_camera_front:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Always `null` on this endpoint.
                       front_image_camera_front_face_match_score:
-                        type: number
-                        nullable: true
+                        type:
+                        - number
+                        - 'null'
                         description: Always `null` on this endpoint.
                       back_image_camera_front_face_match_score:
-                        type: number
-                        nullable: true
+                        type:
+                        - number
+                        - 'null'
                         description: Always `null` on this endpoint.
                       front_image_quality_score:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Capture-quality diagnostics for the uploaded image (`null` when the side was not provided or scoring failed). All scores are 0–100.
                         properties:
                           focus_score:
@@ -397,12 +410,14 @@ paths:
                             format: float
                             description: Exposure quality (higher is better).
                           brightness_issue:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: '`ok` when exposure is fine, otherwise the detected issue (e.g. too dark / too bright).'
                           is_document_fully_visible:
-                            type: boolean
-                            nullable: true
+                            type:
+                            - boolean
+                            - 'null'
                             description: Whether all four corners of the document are inside the frame.
                           resolution_score:
                             type: number
@@ -413,8 +428,9 @@ paths:
                             format: float
                             description: Aggregate quality score.
                       back_image_quality_score:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Capture-quality diagnostics for the uploaded image (`null` when the side was not provided or scoring failed). All scores are 0–100.
                         properties:
                           focus_score:
@@ -426,12 +442,14 @@ paths:
                             format: float
                             description: Exposure quality (higher is better).
                           brightness_issue:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: '`ok` when exposure is fine, otherwise the detected issue (e.g. too dark / too bright).'
                           is_document_fully_visible:
-                            type: boolean
-                            nullable: true
+                            type:
+                            - boolean
+                            - 'null'
                             description: Whether all four corners of the document are inside the frame.
                           resolution_score:
                             type: number
@@ -442,76 +460,92 @@ paths:
                             format: float
                             description: Aggregate quality score.
                       date_of_birth:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         example: '1980-01-13'
                       age:
-                        type: integer
-                        nullable: true
+                        type:
+                        - integer
+                        - 'null'
                         description: Holder age in years, computed from `date_of_birth`.
                         example: 46
                       expiration_date:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         example: '2032-03-31'
                       date_of_issue:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         example: '2022-03-31'
                       issuing_state:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Issuing country (ISO 3166-1 alpha-3).
                         example: ESP
                       issuing_state_name:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Spain
                       first_name:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Julio Francisco
                       last_name:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Fores Sena
                       full_name:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Julio Francisco Fores Sena
                       gender:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: '`M`, `F`, or `null` when not printed/detected.'
                         example: M
                       address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Address exactly as printed on the document.
                       formatted_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Geocoded, normalized version of `address`.
                       place_of_birth:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Valencia, Valencia
                       marital_status:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: '`UNKNOWN` unless the document prints marital status.'
                         example: UNKNOWN
                       nationality:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Holder nationality (ISO 3166-1 alpha-3).
                         example: ESP
                       extra_fields:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         additionalProperties: true
                         description: Document-specific extras that have no dedicated column (e.g. `first_surname`/`second_surname` on Spanish IDs, license classes on driving licenses).
                       mrz:
@@ -551,12 +585,14 @@ paths:
                             type: string
                             example: CBX164224
                           optional_data:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: 20446581H
                           optional_data_2:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: ''
                           birth_date_hash:
                             type: string
@@ -575,8 +611,9 @@ paths:
                             description: Composite MRZ check digit.
                             example: '3'
                           personal_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: 20446581H
                           warnings:
                             type: array
@@ -599,42 +636,51 @@ paths:
                             type: string
                             description: Composite key (document number + check digits) used for cross-checks.
                       parsed_address:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Structured, geocoded breakdown of `address`. `null` when the document carries no address or it could not be parsed.
                         properties:
                           street_1:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Avenida el Cardonal 52
                           street_2:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: b
                           city:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: La Laguna
                           region:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Canarias
                           country:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: ISO 3166-1 alpha-2 country code.
                             example: ES
                           postal_code:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: '38108'
                           address_type:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Avenida
                           formatted_address:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Canonical geocoded address string.
                             example: Av. el Cardonal, 52, b, 38108 La Laguna, Santa Cruz de Tenerife, Spain
                           raw_results:
@@ -642,8 +688,9 @@ paths:
                             additionalProperties: true
                             description: Raw geocoding payload (`address_components`, `geometry.location`, `place_id`, …) for advanced consumers.
                           document_location:
-                            type: object
-                            nullable: true
+                            type:
+                            - object
+                            - 'null'
                             properties:
                               latitude:
                                 type: number
@@ -651,16 +698,18 @@ paths:
                                 type: number
                             description: Geocoded coordinates of the document address.
                           label:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Which document field the address was read from.
                             example: Spain Identity Card Address
                           is_verified:
                             type: boolean
                             description: Whether geocoding confirmed the address exists.
                           category:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Address category (e.g. `Residential`, `Commercial`).
                             example: Residential
                       warnings:
@@ -679,8 +728,9 @@ paths:
                               - ID_VERIFICATION
                               description: Feature that raised the warning. Always `ID_VERIFICATION` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: Extra context for some risks (e.g. `POSSIBLE_DUPLICATED_USER` includes `duplicated_session_id`); `null` for most.
                             log_type:
@@ -706,8 +756,9 @@ paths:
                               type: string
                               description: Barcode type (e.g. `PDF417`, `QR_CODE`, `UNKNOWN`).
                             position:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: Location of the barcode in the image, when available.
                             data:
@@ -717,16 +768,19 @@ paths:
                               type: string
                               description: Raw (undecoded) payload, when different.
                             side:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: '`front` or `back`.'
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -998,9 +1052,10 @@ paths:
                         - Declined
                         description: '`Approved` when the similarity score is strictly above `face_match_score_decline_threshold` and a score could be computed; `Declined` otherwise (a warning explains why).'
                       score:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         minimum: 0
                         maximum: 100
                         description: 'Similarity score from 0 to 100 — the model''s confidence that both images depict the same person. Rounded to two decimals only when `save_api_request` is true; with `save_api_request=false` the raw float is returned. `null` when no face pair could be scored (with the default `save_api_request=true`); with `save_api_request=false` the same condition can surface as `score: 0`. Either way a `NO_REFERENCE_IMAGE` warning is present and `status` is `Declined`.'
@@ -1043,8 +1098,9 @@ paths:
                                   description: Model-predicted gender of the detected face (`male` or `female`). Informational only.
                                   example: male
                                 race:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   description: Reserved field — always `null` in responses from this endpoint.
                                   example: null
                             description: One entry per detected face.
@@ -1090,8 +1146,9 @@ paths:
                                   description: Model-predicted gender of the detected face (`male` or `female`). Informational only.
                                   example: male
                                 race:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   description: Reserved field — always `null` in responses from this endpoint.
                                   example: null
                             description: One entry per detected face.
@@ -1116,8 +1173,9 @@ paths:
                               - FACEMATCH
                               description: Feature that raised the warning. Always `FACEMATCH` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: Always `null` for face-match warnings.
                             log_type:
@@ -1134,12 +1192,14 @@ paths:
                               type: string
                               description: Human-readable explanation of the risk.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -1409,9 +1469,10 @@ paths:
                         - PASSIVE
                         description: Liveness method. Always `PASSIVE` on this endpoint (single-image, no user challenge).
                       score:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         minimum: 0
                         maximum: 100
                         description: Passive-liveness score from 0 to 100 — the model's confidence that the photo shows a live person. Compared against `face_liveness_score_decline_threshold`; at or below it the call declines with `LOW_LIVENESS_SCORE`. `null` when the liveness model returns no confidence — the call still declines with `LOW_LIVENESS_SCORE` because null is treated as 0 for the threshold comparison.
@@ -1455,14 +1516,16 @@ paths:
                                   description: Model-predicted gender of the detected face (`male` or `female`). Informational only.
                                   example: male
                           best_angle:
-                            type: integer
-                            nullable: true
+                            type:
+                            - integer
+                            - 'null'
                             description: 'Rotation (degrees: 0, 90, 180, or 270) that produced the best face detection. Only non-zero when `rotate_image=true` corrected the orientation.'
                             example: 0
                       age_estimation:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         description: Model-predicted age in years of the **largest** detected face. `null` when no face age could be estimated (an `AGE_NOT_DETECTED` warning is added and the call declines).
                         example: 27.33
                       warnings:
@@ -1486,8 +1549,9 @@ paths:
                               - LIVENESS
                               description: Feature that raised the warning. Always `LIVENESS` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: Always `null` for age-estimation warnings.
                             log_type:
@@ -1502,12 +1566,14 @@ paths:
                               type: string
                               description: Human-readable explanation of the risk.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -1891,8 +1957,9 @@ paths:
                         - Declined
                         description: '`Approved` when no warning resolves to a decline; `Declined` otherwise — the `warnings` list explains why.'
                       issuing_state:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Country the document was issued in, as extracted from the document — usually ISO 3166-1 alpha-3 (e.g. `ARG`).
                         example: ARG
                       document_type:
@@ -1909,67 +1976,81 @@ paths:
                         description: Finer-grained classification within `document_type` — e.g. `ELECTRICITY_BILL`, `WATER_BILL`, `GAS_BILL`, `INTERNET_BILL`, `PHONE_BILL` (utility bills); `ACCOUNT_STATEMENT`, `CREDIT_CARD_STATEMENT` (bank statements); `TAX_ASSESSMENT`, `RESIDENCY_CERTIFICATE` (government documents). `UNKNOWN` when no subtype could be determined. Never null — classification failures fall back to `UNKNOWN`.
                         example: WATER_BILL
                       document_language:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Detected document language (ISO 639-1).
                         example: es
                       issuer:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Company or organization that issued the document. `null` adds `ISSUER_NOT_IDENTIFIED`.
                         example: Aguas del Norte
                       issue_date:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         description: Document issue date (`YYYY-MM-DD`). `null` when it could not be extracted — that declines with `UNABLE_TO_EXTRACT_ISSUE_DATE` on this endpoint.
                         example: '2021-02-10'
                       expiration_date:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         description: Explicit expiry/validity date printed on the document, when present. Independent of the `poa_document_age_months` age check.
                       poa_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Address exactly as printed on the document. `null` auto-declines with `MISSING_ADDRESS_INFORMATION`.
                       poa_formatted_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Geocoded, normalized version of `poa_address`.
                         example: Av. Monseñor Tavella 1291 b, A4400 Salta, Argentina
                       poa_parsed_address:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Structured, geocoded breakdown of the document address. `null` when the address could not be parsed.
                         properties:
                           street_1:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Avenida Monseñor Tavella 1291
                           street_2:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           city:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Salta
                           region:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: Salta
                           country:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: ISO 3166-1 alpha-2 country code.
                             example: AR
                           postal_code:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             example: A4400
                           document_location:
-                            type: object
-                            nullable: true
+                            type:
+                            - object
+                            - 'null'
                             properties:
                               latitude:
                                 type: number
@@ -1977,21 +2058,25 @@ paths:
                                 type: number
                             description: Geocoded coordinates of the document address.
                       expected_details_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Echo of the `expected_address` you sent, or `null`.
                       expected_details_formatted_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Geocoded, normalized version of `expected_address`; `null` when not provided or not geocodable.
                       expected_details_parsed_address:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         additionalProperties: true
                         description: Full geocoding result for `expected_address` (street/city/region/country/postal code plus raw geocoder output and an `is_verified` flag). `null` when `expected_address` was not provided.
                       name_on_document:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Primary holder name extracted from the document; compared against `expected_first_name`/`expected_last_name` when provided. `null` declines with `POA_NAME_NOT_DETECTED` on this endpoint.
                         example: OESTE EMBOTELLADORA S.A.
                       extra_fields:
@@ -1999,29 +2084,37 @@ paths:
                         description: Document-specific extras. Bank fields are populated for bank statements when printed on the document; `null` otherwise.
                         properties:
                           bank_account_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_iban:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_sort_code:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_routing_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_swift_bic:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_branch_name:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           bank_branch_address:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           document_phone_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                             description: Contact phone number printed on the document.
                           additional_names:
                             type: array
@@ -2044,8 +2137,9 @@ paths:
                               - PROOF_OF_ADDRESS
                               description: Feature that raised the warning. Always `PROOF_OF_ADDRESS` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: Extra context for some risks — e.g. `POA_DOCUMENT_EXPIRED` includes `max_age_months`, `document_type`, `document_subtype`, and `issue_date`; `SUSPECTED_DOCUMENT_MANIPULATION` includes `reason` and `detection_method`. `null` for most risks.
                             log_type:
@@ -2061,12 +2155,14 @@ paths:
                               type: string
                               description: Human-readable explanation of the risk.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -2267,8 +2363,9 @@ paths:
                   type: string
                   description: Your identifier for the screened user; echoed back and stored with the session.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Free-form JSON stored with the request and echoed back.
       x-codeSamples:
       - lang: curl
@@ -2318,52 +2415,64 @@ paths:
                           description: 'One screening hit. `match_score` (0–100) measures identity confidence — hits below `aml_match_score_threshold` are tagged `review_status: "False Positive"` and excluded from the risk assessment; hits at or above it are `"Unreviewed"` possible matches. `risk_score` (0–100) measures how risky the matched entity is and drives the top-level `aml.score`.'
                           properties:
                             id:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Stable identifier of the matched entity in the screening datasets.
                             url:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Source URL for the matched entity, when available.
                             match:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                               description: Legacy exact-match flag. Prefer `match_score` + `review_status`.
                             score:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               description: DEPRECATED weighted match score in the 0–1 range. Use `match_score` instead.
                             match_score:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               description: Identity confidence (0–100). Compared against `aml_match_score_threshold` to split False Positives from Possible Matches.
                             risk_score:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               description: Entity risk score (0–100). The highest `risk_score` among non-false-positive hits becomes the top-level `aml.score`.
                             target:
-                              type: boolean
-                              nullable: true
+                              type:
+                              - boolean
+                              - 'null'
                             caption:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Display name of the matched entity.
                             datasets:
-                              type: array
-                              nullable: true
+                              type:
+                              - array
+                              - 'null'
                               items:
                                 type: string
                               description: Datasets the entity appears in (e.g. `PEP`, `PEP Level 1`, sanctions list names).
                             features:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                             properties:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: 'Entity profile: `name`, `alias`, `notes`, `gender`, `birthDate`, `birthPlace`, `nationality`, `position`, and other biographical arrays (each nullable).'
                             rca_name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Name of the related close associate through which the entity was matched, when the hit is an RCA.
                             pep_matches:
                               type: array
@@ -2426,17 +2535,21 @@ paths:
                                   source_url:
                                     type: string
                                   thumbnail:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   country:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   author_name:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   publication_date:
-                                    type: string
-                                    nullable: true
+                                    type:
+                                    - string
+                                    - 'null'
                                   adverse_keywords:
                                     type: array
                                     items:
@@ -2446,18 +2559,21 @@ paths:
                                     items:
                                       type: string
                             adverse_media_details:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Aggregated adverse-media sentiment for the entity (`sentiment`, `sentiment_score`, `adverse_keywords` frequency map). Populated only when `include_adverse_media=true`.
                             first_seen:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                               description: When the entity first appeared in the datasets.
                             last_seen:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                               description: Most recent dataset refresh that included the entity.
                             linked_entities:
                               type: array
@@ -2486,16 +2602,19 @@ paths:
                                     items:
                                       type: string
                             risk_view:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Per-dimension risk breakdown (`crimes`, `countries`, `categories`, `custom_list`), each with `score`, `weightage`, `risk_level`, and a `risk_scores` map.
                             additional_information:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Free-form extra context, e.g. a `flag_summary` array explaining why the entity is flagged.
                             review_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               enum:
                               - False Positive
                               - Unreviewed
@@ -2503,77 +2622,94 @@ paths:
                               - Inconclusive
                               description: '`False Positive` — `match_score` below `aml_match_score_threshold`, excluded from risk assessment. `Unreviewed` — possible match awaiting review. `Confirmed Match` / `Inconclusive` — set manually by a reviewer (via the Business Console) on saved sessions; that review capability is not part of this spec.'
                             score_breakdown:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: 'How `match_score` was computed. Name, date of birth, and country each contribute `<component>_score` × `<component>_weight_normalized` points; weights are re-normalized when a component is missing from the screened data. The document number is not weighted — it acts as a ''golden key'': `MATCH` overrides the score to 100, `NEUTRAL` leaves it unchanged, `HARD_MISMATCH` applies a penalty.'
                               properties:
                                 name_score:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Raw name similarity (0–100).
                                 name_weight:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Configured name weight (`aml_name_weight`).
                                 name_weight_normalized:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: Name weight after re-normalization (0–100).
                                 name_contribution:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: Points the name contributed to `total_score`.
                                 dob_score:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Date-of-birth score as a percentage of its weight (−100 to 100).
                                 dob_weight:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Configured DOB weight (`aml_dob_weight`).
                                 dob_weight_normalized:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: DOB weight after re-normalization (0–100).
                                 dob_contribution:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: Points the DOB contributed to `total_score`.
                                 country_score:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Country score as a percentage of its weight (−100 to 100).
                                 country_weight:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Configured country weight (`aml_country_weight`).
                                 country_weight_normalized:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: Country weight after re-normalization (0–100).
                                 country_contribution:
-                                  type: number
-                                  nullable: true
+                                  type:
+                                  - number
+                                  - 'null'
                                   description: Points the country contributed to `total_score`.
                                 document_number_match_type:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   enum:
                                   - MATCH
                                   - NEUTRAL
                                   - HARD_MISMATCH
                                   description: Golden-key result for the document number comparison.
                                 document_number_effect:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   description: Human-readable description of the document-number effect.
                                 total_score:
-                                  type: integer
-                                  nullable: true
+                                  type:
+                                  - integer
+                                  - 'null'
                                   description: Final weighted match score (0–100) — mirrors `match_score`.
                       score:
-                        type: number
-                        nullable: true
+                        type:
+                        - number
+                        - 'null'
                         description: 'Overall AML risk score (0–100): the highest `risk_score` among hits that are not False Positives. Drives `status` via the two thresholds.'
                       screened_data:
                         type: object
@@ -2582,14 +2718,17 @@ paths:
                           full_name:
                             type: string
                           date_of_birth:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           nationality:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                           document_number:
-                            type: string
-                            nullable: true
+                            type:
+                            - string
+                            - 'null'
                       warnings:
                         type: array
                         items:
@@ -2602,8 +2741,9 @@ paths:
                               type: string
                               description: Machine-readable risk identifier.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Extra context for the warning, when available.
                             log_type:
                               type: string
@@ -2616,12 +2756,14 @@ paths:
                               description: Full human-readable explanation.
                         description: Contains a `POSSIBLE_MATCH_FOUND` warning whenever `score` is non-zero and ≥ `aml_score_approve_threshold` (a score of exactly 0 never warns); empty otherwise.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Echo of the `metadata` you sent.
                   created_at:
                     type: string
@@ -3044,14 +3186,16 @@ paths:
                           type: object
                           properties:
                             session_id:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: uuid
-                              nullable: true
                               description: Id of the verification session the matched face belongs to. `null` when `source` is `imported` or `list_entry`.
                               example: 882c42d5-8a4d-4d20-8080-a22f57822c86
                             session_number:
-                              type: integer
-                              nullable: true
+                              type:
+                              - integer
+                              - 'null'
                               description: Human-friendly session number shown in the Business Console. `null` for non-session matches.
                               example: 323442
                             similarity_percentage:
@@ -3069,41 +3213,49 @@ paths:
                               - list_entry
                               description: 'Where the matched face was enrolled from: `session` — a verification session or a saved standalone API call; `imported` — a face uploaded directly to a user profile via the vendor-user faces upload endpoint; `list_entry` — a face attached to one of your lists.'
                             vendor_data:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: '`vendor_data` of the matched session (or of the user profile for imported faces).'
                               example: user-1
                             verification_date:
-                              type: string
+                              type:
+                              - string
+                              - 'null'
                               format: date-time
-                              nullable: true
                               description: When the matched face was originally captured (`YYYY-MM-DDThh:mm:ssZ`). `null` for `list_entry` matches.
                               example: '2025-01-01T00:00:00Z'
                             user_details:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: 'Identity data extracted during the matched session''s document verification. `null` when the matched session has no document data (e.g. liveness-only sessions). For `source: imported` matches it is populated from the vendor-user profile instead: `full_name` set, `document_type`/`document_number` null.'
                               properties:
                                 full_name:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   example: Jane Marie Doe
                                 document_type:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   example: ID
                                 document_number:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   example: X1234567
                             match_image_url:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Time-limited URL (`https://<media-host>/...`) of the matched face's reference image when `save_api_request=true`. With `save_api_request=false` this is an internal storage path that is not directly downloadable.
                               example: https://<media-host>/face/3f6a1c2e/reference.jpg
                             status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Status of the matched session (`Approved`, `Declined`, `In Review`, …). `null` for `imported`/`list_entry` matches.
                               example: Approved
                             is_blocklisted:
@@ -3113,8 +3265,9 @@ paths:
                               type: boolean
                               description: '`true` when the matched face is on one of your allowlists. Allowlisted matches suppress duplicate warnings.'
                             api_service:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Set when the matched face was enrolled by a standalone API call (e.g. `PASSIVE_LIVENESS`); `null` for regular verification sessions and imported faces.
                               example: null
                       user_image:
@@ -3171,8 +3324,9 @@ paths:
                               - LIVENESS
                               description: Feature that raised the warning. Always `LIVENESS` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: '`null` for `MULTIPLE_FACES_DETECTED`. Blocklist hits carry `{blocklisted_session_id, blocklisted_session_number, api_service}`; duplicate hits carry `{duplicated_session_id, duplicated_session_number, api_service}` pointing at the first matching session.'
                             log_type:
@@ -3189,12 +3343,14 @@ paths:
                               type: string
                               description: Human-readable explanation of the risk.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -3328,8 +3484,9 @@ paths:
                   type: string
                   description: Your identifier for this lookup; echoed back and included in the webhook callback.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Free-form JSON; echoed back and included in the webhook callback.
                 webhook_url:
                   type: string
@@ -3367,37 +3524,44 @@ paths:
                           type: object
                           properties:
                             kyb_response_id:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: 'Handle for this candidate — pass it to `POST /v3/kyb/select/` to retrieve the full profile. Ephemeral and scoped to this search: do not store it long-term; re-search to get a fresh one.'
                               example: 69aeeb95febb0f1704042259
                             name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Registered company name.
                               example: Tesco PLC
                             registration_number:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Registry registration number.
                               example: 00445790
                             status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Normalized registry status of the company (e.g. `active`, `dissolved`, `inactive`, `struck off`).
                               example: active
                             type:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Legal form as reported by the registry.
                               example: Public Limited Company
                             risk_level:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Registry-reported risk level, when available. Usually `null` at search time.
                             fetch_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Always `pending` for search candidates — the full company profile is only fetched (and billed) when you select the candidate.
                               example: pending
                         description: Deduplicated candidate list. Empty while `search_resolved=false` (webhook mode) or when nothing matched.
@@ -3413,8 +3577,9 @@ paths:
                             type: integer
                             example: 25
                       search_status:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         enum:
                         - pending
                         - resolved
@@ -3423,12 +3588,14 @@ paths:
                         type: boolean
                         description: '`true` once the candidate list is final.'
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Echo of the `metadata` you sent.
                   created_at:
                     type: string
@@ -3573,8 +3740,9 @@ paths:
                   type: string
                   description: Your identifier for this company; echoed back and stored with the business session.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Free-form JSON stored with the business session and echoed back.
                 save_api_request:
                   type: boolean
@@ -3622,8 +3790,9 @@ paths:
                         - In Review
                         description: Didit's assessment of the registry check (e.g. `In Review` when the company is not active in the registry or ownership data could not be derived).
                       registry_status:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         enum:
                         - active
                         - dissolved
@@ -3644,41 +3813,49 @@ paths:
                         type: string
                         example: Tesco PLC
                       registration_number:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: 00445790
                       country_code:
                         type: string
                         description: ISO 3166-1 alpha-2.
                         example: GB
                       region:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Subdivision code when the registry is regional (e.g. `CA` for `US-CA`); empty otherwise.
                       company_type:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Public Limited Company
                       incorporation_date:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date
-                        nullable: true
                         example: '1947-11-27'
                       registered_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: Tesco House, Shire Park, Kestrel Way, Welwyn Garden City, United Kingdom, AL7 1GA
                       tax_number:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: GB412 8925 93
                       risk_level:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Registry-reported risk level, when available.
                       verification_status:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Registry verification status, when available.
                       is_from_registry:
                         type: boolean
@@ -3690,47 +3867,58 @@ paths:
                         - resolved
                         description: Registry fetch lifecycle. Mirrored by `data_resolved`.
                       alternative_names:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Previous/alternative registered names, when reported.
                       nature_of_business:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Activity description or classification code, when reported.
                       registered_capital:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                       registered_capital_amount:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Decimal amount as a string, when reported.
                       registered_capital_currency:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: ISO 4217 code, when reported.
                       website:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: https://www.tesco.com/
                       email:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: customer.service@tesco.co.uk
                       phone:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         example: 03301231688
                       legal_entity_identifier:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: LEI, when reported.
                       location_of_registration:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Registry/jurisdiction the company is registered with, when reported.
                       vat_number:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: EU VAT number, when collected during the hosted registry step or edited afterwards. At select time this is typically not yet set — VIES validation runs when the end user submits the registry step in the hosted flow.
                       vat_validation_status:
                         type: string
@@ -3741,21 +3929,25 @@ paths:
                         - not_applicable
                         description: Result of the EU VIES check run at registry submit. `not_applicable` when no VAT number was provided or the company is outside the EU VAT area (EU-27 plus Northern Ireland).
                       vat_validated_name:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Trader name registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                       vat_validated_address:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         description: Trader address registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
                       vat_checked_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
                         description: Timestamp of the VIES check. `null` when no check ran.
                       financial_summary:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Registry-reported share/capital details (currency, total shares, share classes), when available.
                       officers:
                         type: array
@@ -3769,8 +3961,9 @@ paths:
                               type: string
                               example: MELISSA BETHELL
                             designation:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Raw registry designation (e.g. `Director`, `Secretary`).
                             role:
                               type: string
@@ -3794,22 +3987,25 @@ paths:
                               - investor
                               - other
                             nationality:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             is_active:
                               type: boolean
                               description: '`false` when the registry marks the appointment as resigned.'
                             kyc_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               enum:
                               - Approved
                               - Declined
                               - Pending
                               description: Status of an associated KYC session, when one was started for this officer. `null` otherwise.
                             kyc_session_url:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Verification URL of the associated KYC session, when one exists.
                         description: Directors, secretaries, and other officers extracted from the registry.
                       beneficial_owners:
@@ -3823,11 +4019,13 @@ paths:
                             name:
                               type: string
                             first_name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             last_name:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             entity_type:
                               type: string
                               enum:
@@ -3840,33 +4038,39 @@ paths:
                                 type: string
                               description: Normalized roles (e.g. `ubo`, `shareholder`).
                             ownership_min_shares:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Lower bound of the ownership band reported by the registry (e.g. `25%`).
                             ownership_max_shares:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               description: Upper bound of the ownership band reported by the registry.
                             is_active:
                               type: boolean
                             kyc_status:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                               enum:
                               - Approved
                               - Declined
                               - Pending
                             kyc_session_url:
-                              type: string
-                              nullable: true
+                              type:
+                              - string
+                              - 'null'
                             effective_ownership_percent:
-                              type: number
-                              nullable: true
+                              type:
+                              - number
+                              - 'null'
                               description: Parsed ownership percentage (max bound, falling back to min bound).
                         description: Beneficial owners / persons with significant control extracted from the registry. Can be empty when the registry does not expose ownership.
                       addresses:
-                        type: array
-                        nullable: true
+                        type:
+                        - array
+                        - 'null'
                         items:
                           type: object
                           properties:
@@ -3878,43 +4082,51 @@ paths:
                               type: string
                         description: All addresses reported by the registry.
                       industries:
-                        type: array
-                        nullable: true
+                        type:
+                        - array
+                        - 'null'
                         items:
                           type: object
                         description: Industry classifications, when reported.
                       accounts:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Filing/accounts dates reported by the registry (e.g. `last_account`, `next_account`, `due_by_date`).
                       registry_data:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: The complete raw registry payload (people, filings, announcements, identifiers, …) for audit and custom parsing.
                       user_provided_data:
-                        type: object
-                        nullable: true
+                        type:
+                        - object
+                        - 'null'
                         description: Always `null` on this endpoint (used by the hosted KYB flow when end users edit registry data).
                       confirmed_by_user_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
                         description: Always `null` on this endpoint.
                       last_console_edit_at:
-                        type: string
+                        type:
+                        - string
+                        - 'null'
                         format: date-time
-                        nullable: true
                         description: Set when a console reviewer edits the record later.
                       is_editable:
                         type: boolean
                         description: Whether the registry-sourced data can still be edited in the hosted flow/console.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Echo of the `metadata` you sent.
                   created_at:
                     type: string
@@ -4309,9 +4521,10 @@ paths:
                         - PASSIVE
                         description: Always `PASSIVE` for this endpoint.
                       score:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         minimum: 0
                         maximum: 100
                         description: Liveness confidence (0–100, two decimals) that the image depicts a live person rather than a spoof. `null` when the model returned no confidence.
@@ -4354,14 +4567,16 @@ paths:
                                   description: Model-predicted gender of the detected face (`male` or `female`). Informational only.
                                   example: male
                                 race:
-                                  type: string
-                                  nullable: true
+                                  type:
+                                  - string
+                                  - 'null'
                                   description: Reserved field — always `null` in responses from this endpoint.
                                   example: null
                             description: One entry per detected face. The largest face is the one evaluated.
                           best_angle:
-                            type: integer
-                            nullable: true
+                            type:
+                            - integer
+                            - 'null'
                             description: Rotation (degrees) that produced the best face detection; non-zero only when `rotate_image=true` corrected the orientation.
                             example: 0
                       warnings:
@@ -4388,8 +4603,9 @@ paths:
                               - LIVENESS
                               description: Feature that raised the warning. Always `LIVENESS` on this endpoint.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               additionalProperties: true
                               description: '`null` for most warnings. Blocklist hits carry `{blocklisted_session_id, blocklisted_session_number, api_service}`; duplicate hits carry `{duplicated_session_id, duplicated_session_number, api_service}` pointing at the matching session.'
                             log_type:
@@ -4406,28 +4622,32 @@ paths:
                               type: string
                               description: Human-readable explanation of the risk.
                       face_quality:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         minimum: 0
                         maximum: 100
                         description: Capture-quality score of the detected face, normalized to 0–100. `null` when the model could not produce a reliable value.
                         example: 84.21
                       face_luminance:
-                        type: number
+                        type:
+                        - number
+                        - 'null'
                         format: float
-                        nullable: true
                         minimum: 0
                         maximum: 100
                         description: Brightness of the detected face, normalized to 0–100. `null` when unavailable.
                         example: 50.33
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent, or `null`.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     additionalProperties: true
                     description: Echo of the `metadata` object you sent, or `null`.
                   created_at:
@@ -4791,8 +5011,9 @@ paths:
                   type: string
                   description: Your identifier for the validated user; echoed back and stored with the session.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Free-form JSON stored with the request and echoed back.
           multipart/form-data:
             schema:
@@ -5051,8 +5272,9 @@ paths:
                   type: string
                   description: Your identifier for the validated user; echoed back and stored with the session.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Free-form JSON stored with the request and echoed back.
                 selfie:
                   type: string
@@ -5103,8 +5325,9 @@ paths:
                         type: object
                         description: 'Echo of the input fields that were sent to the selected services (dates normalized to `YYYY-MM-DD`; a `selfie`, when sent, is returned as a pre-signed URL; `consent_obtained: true` is added when consent was given).'
                       match_type:
-                        type: string
-                        nullable: true
+                        type:
+                        - string
+                        - 'null'
                         enum:
                         - full_match
                         - partial_match
@@ -5153,12 +5376,14 @@ paths:
                                 - REGISTRY_ERROR
                                 description: Vendor-neutral outcome of the registry lookup. `MATCH`/`PARTIAL_MATCH`/`NO_MATCH` describe the comparison; `DOCUMENT_NOT_FOUND` means the identifier is not in the registry; `INCONCLUSIVE` means the registry could not confirm either way (routed to review — NOT a no-match); `BIOMETRIC_NO_MATCH` is a definitive face mismatch while `BIOMETRIC_IMAGE_UNUSABLE` is a technical image problem (retake the selfie); `DECEASED`/`MINOR_BLOCKED` are registry-policy outcomes; `REGISTRY_UNAVAILABLE`/`REGISTRY_ERROR` indicate upstream failures.
                               outcome_detail:
-                                type: string
-                                nullable: true
+                                type:
+                                - string
+                                - 'null'
                                 description: Raw upstream status detail backing the outcome code (e.g. an HTTP or registry status code).
                               source_data:
-                                type: object
-                                nullable: true
+                                type:
+                                - object
+                                - 'null'
                                 description: Cleaned, normalized view of the registry record using canonical field names (`identification_number`, `first_name`, `last_name`, `date_of_birth`, plus registry-specific flags). Image fields, when present, are returned as pre-signed URLs.
                         - type: object
                           additionalProperties:
@@ -5180,8 +5405,9 @@ paths:
                               type: string
                               description: Machine-readable risk identifier.
                             additional_data:
-                              type: object
-                              nullable: true
+                              type:
+                              - object
+                              - 'null'
                               description: Extra context for the warning, when available.
                             log_type:
                               type: string
@@ -5215,12 +5441,14 @@ paths:
                         type: number
                         description: Fraction (0.0–1.0) of attempted services that produced a full match (on the identification number, on full name + date of birth together, or on the address without contradictions). **Only present when the request explicitly sent `services`.**
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: Echo of the `vendor_data` you sent.
                   metadata:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Echo of the `metadata` you sent.
                   created_at:
                     type: string
@@ -5476,7 +5704,7 @@ paths:
   /v3/phone/send/:
     post:
       summary: Send Phone Code
-      description: 'Send a one-time passcode (OTP) to a phone number over WhatsApp, SMS, or another supported channel, then verify it with [`POST /v3/phone/check/`](/standalone-apis/phone-check).
+      description: 'Send a one-time passcode (OTP) to a phone number over WhatsApp, SMS, or another supported channel, then verify it with `POST /v3/phone/check/`.
 
 
         **How send and check pair up.** Verification state is keyed by your application plus the E.164 `phone_number` — the check call does not take `request_id`. Each new send creates a pending verification that lives for **5 minutes**: call the check with the same number and the code the user received before the window closes. Calling send again for the same number while a verification is pending re-sends a code for that same verification (`status: "Retry"`, same `request_id`). At most one retry is attached this way (two sends total); a further send starts a fresh verification with a new `request_id`. The 5-minute window is measured from the first send and is not extended by retries.
@@ -5488,7 +5716,7 @@ paths:
         **Send statuses.** `Success` — OTP sent for a new verification; `Retry` — OTP re-sent for the pending verification; `Blocked` — the anti-fraud layer refused to send (see `reason`, e.g. `repeated_attempts`, `suspicious`, `spam`). A `Blocked` send immediately finalizes the verification as `Declined` with a high-risk warning, so a follow-up check returns `Expired or Not Found`.
 
 
-        **Billing.** The price depends on the destination country and the channel that actually delivers the message — see [Phone Verification Pricing](/getting-started/phone-verification-pricing). Only `Blocked` sends are guaranteed free: any other unbilled send attempt is charged at verification finalization or expiration, even if delivery was never confirmed or the delivery provider reported the message undeliverable. Checks are always free. As an anti-abuse measure, phone verification is disabled until your organization''s first top-up (`403`).
+        **Billing.** The price depends on the destination country and the channel that actually delivers the message — see Phone Verification Pricing. Only `Blocked` sends are guaranteed free: any other unbilled send attempt is charged at verification finalization or expiration, even if delivery was never confirmed or the delivery provider reported the message undeliverable. Checks are always free. As an anti-abuse measure, phone verification is disabled until your organization''s first top-up (`403`).
 
 
         **Session persistence.** Every new verification is persisted as an API-type session: `request_id` is a real session id you can pass to `GET /v3/session/{sessionId}/decision/`, the verification appears in the Business Console, and `status.updated` webhooks fire as it progresses.
@@ -5600,8 +5828,9 @@ paths:
                   type: string
                   description: Optional caller-controlled identifier (your internal user id, an email, a UUID, etc.) persisted on the session and echoed back in the send response, the matching check response, webhooks, and the Business Console. Use it to correlate Didit's `request_id` with your user record.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Optional free-form JSON object persisted on the session and echoed back in the send response, the matching check response, webhooks, and the Business Console.
               required:
               - phone_number
@@ -5753,7 +5982,7 @@ paths:
   /v3/phone/check/:
     post:
       summary: Check Phone Code
-      description: 'Verify the OTP delivered by [`POST /v3/phone/send/`](/standalone-apis/phone-send) and get the final verification result plus phone intelligence: carrier name and line type, virtual (VoIP) and disposable flags, and duplicate usage of the number across your sessions.
+      description: 'Verify the OTP delivered by `POST /v3/phone/send/` and get the final verification result plus phone intelligence: carrier name and line type, virtual (VoIP) and disposable flags, and duplicate usage of the number across your sessions.
 
 
         **How the check finds the verification.** Matching is by your application plus the E.164 `phone_number` — `request_id` is not an input. The most recent pending verification created within the last **5 minutes** is checked. If there is none (never sent, already finalized, or older than 5 minutes) the endpoint returns `200` with `status: "Expired or Not Found"`.
@@ -5768,7 +5997,7 @@ paths:
         **Risk actions.** `duplicated_phone_number_action`, `disposable_number_action`, and `voip_number_action` decide what happens when the corresponding risk is detected on a correct code: `DECLINE` flips the final status to `Declined`; `NO_ACTION` (default) records the risk in `phone.warnings` without affecting the status.
 
 
-        **Billing.** Checks are free — delivery is billed on the send side (see [Phone Verification Pricing](/getting-started/phone-verification-pricing)).
+        **Billing.** Checks are free — delivery is billed on the send side (see Phone Verification Pricing).
 
 
         **Session persistence.** A finalized check updates the session created by the send (visible in the Business Console, queryable via `GET /v3/session/{sessionId}/decision/`) and fires a `status.updated` webhook.
@@ -6110,7 +6339,7 @@ paths:
   /v3/email/send/:
     post:
       summary: Send Email Code
-      description: 'Send a one-time passcode (OTP) to an email address, then verify it with [`POST /v3/email/check/`](/standalone-apis/email-check).
+      description: 'Send a one-time passcode (OTP) to an email address, then verify it with `POST /v3/email/check/`.
 
 
         **How send and check pair up.** Verification state is keyed by your application plus the `email` address — the check call does not take `request_id`. Each new send creates a pending verification that lives for **5 minutes**: call the check with the same address and the code the user received before the window closes. Calling send again for the same address while a verification is pending generates a fresh code for that same verification (`status: "Retry"`, same `request_id`); the previous code stops working. At most one retry is attached this way (two sends total); a further send starts a fresh verification with a new `request_id`. The 5-minute window is measured from the first send and is not extended by retries.
@@ -6284,8 +6513,9 @@ paths:
                   type: string
                   description: Optional caller-controlled identifier (your internal user id, an email, a UUID, etc.) persisted on the session and echoed back in the send response, the matching check response, webhooks, and the Business Console. Use it to correlate Didit's `request_id` with your user record.
                 metadata:
-                  type: object
-                  nullable: true
+                  type:
+                  - object
+                  - 'null'
                   description: Optional free-form JSON object persisted on the session and echoed back in the send response, the matching check response, webhooks, and the Business Console.
               required:
               - email
@@ -6399,7 +6629,7 @@ paths:
   /v3/email/check/:
     post:
       summary: Check Email Code
-      description: 'Verify the OTP delivered by [`POST /v3/email/send/`](/standalone-apis/email-send) and get the final verification result plus email intelligence: deliverability, breach exposure (`is_breached` and the `breaches` list from a breach-intelligence database), disposable-provider detection, and duplicate usage of the address across your sessions.
+      description: 'Verify the OTP delivered by `POST /v3/email/send/` and get the final verification result plus email intelligence: deliverability, breach exposure (`is_breached` and the `breaches` list from a breach-intelligence database), disposable-provider detection, and duplicate usage of the address across your sessions.
 
 
         **How the check finds the verification.** Matching is by your application plus the `email` address — `request_id` is not an input. The most recent pending verification created within the last **5 minutes** is checked. If there is none (never sent, already finalized, undeliverable at send time, or older than 5 minutes) the endpoint returns `200` with `status: "Expired or Not Found"`.
@@ -6697,6 +6927,192 @@ paths:
       - ApiKeyAuth: []
 components:
   schemas:
+    PhoneVerificationCheckResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: 'On `Approved`/`Declined`: the session id of the matched verification — identical to the `request_id` returned by `POST /v3/phone/send/`. On `Failed` and `Expired or Not Found`: a random one-off UUID that cannot be looked up later.'
+        status:
+          type: string
+          enum:
+          - Approved
+          - Declined
+          - Failed
+          - Expired or Not Found
+          description: '`Approved` — correct code, no declining risk. `Declined` — terminal: a declining risk matched or the attempt budget (3) was exhausted. `Failed` — wrong code, attempts remaining. `Expired or Not Found` — no pending verification for this number in the last 5 minutes.'
+        message:
+          type: string
+          description: Human-readable explanation of the outcome, including the number of attempts remaining after a wrong code.
+        phone:
+          type:
+          - object
+          - 'null'
+          description: Full phone report. Present (non-null) only on finalized outcomes (`Approved`/`Declined`); `null` on `Failed` and absent on `Expired or Not Found`.
+          properties:
+            status:
+              type: string
+              enum:
+              - Approved
+              - Declined
+              - In Review
+              - Not Finished
+              - Expired
+              description: Final status of the phone verification. Matches the top-level `status` for finalized checks.
+            phone_number_prefix:
+              type: string
+              description: Country calling code with leading `+` (e.g., `+1`).
+              example: '+1'
+            phone_number:
+              type: string
+              description: National number without the country calling code.
+              example: '4155552671'
+            full_number:
+              type: string
+              description: Complete number in E.164 format.
+              example: '+14155552671'
+            country_code:
+              type:
+              - string
+              - 'null'
+              description: ISO 3166-1 alpha-2 country of the number.
+              example: US
+            country_name:
+              type: string
+              description: Full country name derived from `country_code`.
+              example: United States
+            carrier:
+              type: object
+              description: Current network serving the number, from the carrier lookup run at finalization.
+              properties:
+                name:
+                  type: string
+                  description: Carrier name. Empty string when the lookup could not identify it.
+                type:
+                  type: string
+                  description: 'Line type reported by the lookup: `mobile`, `fixed_line`, `voip`, `isp`, `vpn`, `toll_free`, `premium_rate`, `pager`, `payphone`, `satellite`, `service`, `shared_cost`, `short_codes_commercial`, `calling_cards`, `local_rate`, `universal_access`, `voice_mail`, `other`, or `unknown`.'
+            is_disposable:
+              type: boolean
+              description: '`true` when the number belongs to a temporary/burner number service.'
+            is_virtual:
+              type: boolean
+              description: '`true` when the line type is virtual (`voip`, `isp`, or `vpn`).'
+            verification_method:
+              type: string
+              description: Channel that actually delivered the OTP once delivery is confirmed (e.g., `whatsapp`, `sms`); until then, the requested channel.
+            verification_attempts:
+              type: integer
+              description: Number of OTP sends for this verification (1, or 2 after a retry).
+            verified_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: When the correct code was entered. `null` if the verification was never approved.
+            warnings:
+              type: array
+              description: Risk warnings recorded during the verification (duplicate, disposable, VoIP, attempts exceeded, blocklist, etc.). Empty array when there are none.
+              items:
+                type: object
+                properties:
+                  feature:
+                    type: string
+                    description: Feature that produced the warning. Always `PHONE` here.
+                  risk:
+                    type: string
+                    description: Machine-readable risk code.
+                  additional_data:
+                    type:
+                    - object
+                    - 'null'
+                    description: Risk-specific context (e.g., the duplicated session id for duplicate risks). `null` when the risk carries no extra data.
+                  log_type:
+                    type: string
+                    enum:
+                    - error
+                    - warning
+                    - information
+                    description: Severity. `error` risks decline the verification, `warning` flags it for review, `information` is recorded without affecting the status.
+                  short_description:
+                    type: string
+                    description: Human-readable one-line summary of the risk.
+                  long_description:
+                    type: string
+                    description: Human-readable explanation of the risk.
+            lifecycle:
+              type: array
+              description: Chronological audit trail of the verification. Event `type` is one of `PHONE_VERIFICATION_MESSAGE_SENT`, `PHONE_VERIFICATION_RETRY_MESSAGE_SENT`, `PHONE_VERIFICATION_BLOCKED`, `PHONE_DELIVERY_DELIVERED`, `PHONE_DELIVERY_UNDELIVERABLE`, `VALID_CODE_ENTERED`, `INVALID_CODE_ENTERED`, `PHONE_VERIFICATION_APPROVED`, `PHONE_VERIFICATION_DECLINED`, `PHONE_VERIFICATION_IN_REVIEW`, `PHONE_VERIFICATION_EXPIRED`.
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: Event type.
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: When the event happened.
+                  details:
+                    type:
+                    - object
+                    - 'null'
+                    description: 'Event-specific payload. Send events: `{status, reason, channel, actual_channel}` (`actual_channel` is filled once delivery is confirmed). Delivery events: `{channel, status}`. Code-entry events: `{code_tried, status}`. Final-status events: `null`, or `{reason}` when declined or in review.'
+                  fee:
+                    type: number
+                    description: USD amount billed for this event. Non-zero only on send events (the delivery price); 0 for code entries, delivery confirmations, and status events.
+            matches:
+              type: array
+              description: Other sessions of your application (KYC, KYB, or API) where the same phone number was used by a different user (different `vendor_data`). Up to 5 entries, a synthetic list-entry blocklist match first when present (session-derived matches keep query order). Empty array when there are no matches.
+              items:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: Session id of the other verification that used this phone number.
+                  session_number:
+                    type: integer
+                    description: Human-friendly sequential number of that session.
+                  vendor_data:
+                    type:
+                    - string
+                    - 'null'
+                    description: '`vendor_data` of that session.'
+                  verification_date:
+                    type: string
+                    description: When that session was created (`YYYY-MM-DDTHH:MM:SSZ`).
+                  phone_number:
+                    type: string
+                    description: The matched phone number.
+                  status:
+                    type: string
+                    description: Status of that session (e.g., `Approved`, `Declined`, `In Progress`).
+                  is_blocklisted:
+                    type: boolean
+                    description: Whether the phone number is on your application's blocklist.
+                  api_service:
+                    type:
+                    - string
+                    - 'null'
+                    description: For API-type sessions, the standalone API that created it (e.g., `PHONE_VERIFICATION`); `null` for regular verification sessions.
+                  source:
+                    type: string
+                    description: 'Where the match was found. Usually `session`; a blocklist hit via an organization list entry prepends a synthetic match with `source: "list_entry"` and null `session_id`/`session_number`.'
+        vendor_data:
+          type:
+          - string
+          - 'null'
+          description: '`vendor_data` of the matched verification''s session. `null` on `Expired or Not Found`.'
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: '`metadata` of the matched verification''s session. `null` on `Expired or Not Found`.'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of this check response.
     PhoneVerificationSendResponse:
       type: object
       properties:
@@ -6712,16 +7128,19 @@ components:
           - Blocked
           description: '`Success` — OTP sent to a new verification. `Retry` — OTP re-sent for the pending verification created by a previous send. `Blocked` — the anti-fraud layer refused to send; the verification is immediately finalized as `Declined` and nothing is billed.'
         reason:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Why a send was `Blocked` (e.g., `repeated_attempts`, `suspicious`, `spam`). `null` on `Success` and `Retry`.
         vendor_data:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Echo of the `vendor_data` stored on the session (from the first send).
         metadata:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Echo of the `metadata` stored on the session (from the first send).
     EmailVerificationSendResponse:
       type: object
@@ -6738,19 +7157,22 @@ components:
           - Undeliverable
           description: '`Success` — OTP emailed to a new verification (billed). `Retry` — fresh OTP emailed for the pending verification created by a previous send (free). `Undeliverable` — the address failed deliverability validation or the message could not be sent; the verification is immediately finalized as `Declined` and nothing is billed.'
         reason:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           enum:
           - email_can_not_be_delivered
           - null
           description: '`email_can_not_be_delivered` when `status` is `Undeliverable`; `null` otherwise.'
         vendor_data:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Echo of the `vendor_data` stored on the session (from the first send).
         metadata:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Echo of the `metadata` stored on the session (from the first send).
     EmailVerificationCheckResponse:
       type: object
@@ -6771,8 +7193,9 @@ components:
           type: string
           description: Human-readable explanation of the outcome, including the number of attempts remaining after a wrong code.
         email:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: Full email report. Present (non-null) only on finalized outcomes (`Approved`/`Declined`); `null` on `Failed` and absent on `Expired or Not Found`.
           properties:
             status:
@@ -6835,9 +7258,10 @@ components:
               type: integer
               description: Number of OTP sends for this verification (1, or 2 after a retry).
             verified_at:
-              type: string
+              type:
+              - string
+              - 'null'
               format: date-time
-              nullable: true
               description: When the correct code was entered. `null` if the verification was never approved.
             warnings:
               type: array
@@ -6852,8 +7276,9 @@ components:
                     type: string
                     description: Machine-readable risk code.
                   additional_data:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: Risk-specific context (e.g., the duplicated session id for duplicate risks). `null` when the risk carries no extra data.
                   log_type:
                     type: string
@@ -6882,8 +7307,9 @@ components:
                     format: date-time
                     description: When the event happened.
                   details:
-                    type: object
-                    nullable: true
+                    type:
+                    - object
+                    - 'null'
                     description: 'Event-specific payload. Send events: `{status, reason}`. Code-entry events: `{code_tried, status}`. Final-status events: `null`, or `{reason}` when declined or in review.'
                   fee:
                     type: number
@@ -6902,8 +7328,9 @@ components:
                     type: integer
                     description: Human-friendly sequential number of that session.
                   vendor_data:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: '`vendor_data` of that session.'
                   verification_date:
                     type: string
@@ -6918,196 +7345,22 @@ components:
                     type: boolean
                     description: Whether the email address is on your application's blocklist.
                   api_service:
-                    type: string
-                    nullable: true
+                    type:
+                    - string
+                    - 'null'
                     description: For API-type sessions, the standalone API that created it (e.g., `PHONE_VERIFICATION`); `null` for regular verification sessions.
                   source:
                     type: string
                     description: 'Where the match was found. Usually `session`; a blocklist hit via an organization list entry prepends a synthetic match with `source: "list_entry"` and null `session_id`/`session_number`.'
         vendor_data:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: '`vendor_data` of the matched verification''s session. `null` on `Expired or Not Found`.'
         metadata:
-          type: object
-          nullable: true
-          description: '`metadata` of the matched verification''s session. `null` on `Expired or Not Found`.'
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp of this check response.
-    PhoneVerificationCheckResponse:
-      type: object
-      properties:
-        request_id:
-          type: string
-          format: uuid
-          description: 'On `Approved`/`Declined`: the session id of the matched verification — identical to the `request_id` returned by `POST /v3/phone/send/`. On `Failed` and `Expired or Not Found`: a random one-off UUID that cannot be looked up later.'
-        status:
-          type: string
-          enum:
-          - Approved
-          - Declined
-          - Failed
-          - Expired or Not Found
-          description: '`Approved` — correct code, no declining risk. `Declined` — terminal: a declining risk matched or the attempt budget (3) was exhausted. `Failed` — wrong code, attempts remaining. `Expired or Not Found` — no pending verification for this number in the last 5 minutes.'
-        message:
-          type: string
-          description: Human-readable explanation of the outcome, including the number of attempts remaining after a wrong code.
-        phone:
-          type: object
-          nullable: true
-          description: Full phone report. Present (non-null) only on finalized outcomes (`Approved`/`Declined`); `null` on `Failed` and absent on `Expired or Not Found`.
-          properties:
-            status:
-              type: string
-              enum:
-              - Approved
-              - Declined
-              - In Review
-              - Not Finished
-              - Expired
-              description: Final status of the phone verification. Matches the top-level `status` for finalized checks.
-            phone_number_prefix:
-              type: string
-              description: Country calling code with leading `+` (e.g., `+1`).
-              example: '+1'
-            phone_number:
-              type: string
-              description: National number without the country calling code.
-              example: '4155552671'
-            full_number:
-              type: string
-              description: Complete number in E.164 format.
-              example: '+14155552671'
-            country_code:
-              type: string
-              nullable: true
-              description: ISO 3166-1 alpha-2 country of the number.
-              example: US
-            country_name:
-              type: string
-              description: Full country name derived from `country_code`.
-              example: United States
-            carrier:
-              type: object
-              description: Current network serving the number, from the carrier lookup run at finalization.
-              properties:
-                name:
-                  type: string
-                  description: Carrier name. Empty string when the lookup could not identify it.
-                type:
-                  type: string
-                  description: 'Line type reported by the lookup: `mobile`, `fixed_line`, `voip`, `isp`, `vpn`, `toll_free`, `premium_rate`, `pager`, `payphone`, `satellite`, `service`, `shared_cost`, `short_codes_commercial`, `calling_cards`, `local_rate`, `universal_access`, `voice_mail`, `other`, or `unknown`.'
-            is_disposable:
-              type: boolean
-              description: '`true` when the number belongs to a temporary/burner number service.'
-            is_virtual:
-              type: boolean
-              description: '`true` when the line type is virtual (`voip`, `isp`, or `vpn`).'
-            verification_method:
-              type: string
-              description: Channel that actually delivered the OTP once delivery is confirmed (e.g., `whatsapp`, `sms`); until then, the requested channel.
-            verification_attempts:
-              type: integer
-              description: Number of OTP sends for this verification (1, or 2 after a retry).
-            verified_at:
-              type: string
-              format: date-time
-              nullable: true
-              description: When the correct code was entered. `null` if the verification was never approved.
-            warnings:
-              type: array
-              description: Risk warnings recorded during the verification (duplicate, disposable, VoIP, attempts exceeded, blocklist, etc.). Empty array when there are none.
-              items:
-                type: object
-                properties:
-                  feature:
-                    type: string
-                    description: Feature that produced the warning. Always `PHONE` here.
-                  risk:
-                    type: string
-                    description: Machine-readable risk code.
-                  additional_data:
-                    type: object
-                    nullable: true
-                    description: Risk-specific context (e.g., the duplicated session id for duplicate risks). `null` when the risk carries no extra data.
-                  log_type:
-                    type: string
-                    enum:
-                    - error
-                    - warning
-                    - information
-                    description: Severity. `error` risks decline the verification, `warning` flags it for review, `information` is recorded without affecting the status.
-                  short_description:
-                    type: string
-                    description: Human-readable one-line summary of the risk.
-                  long_description:
-                    type: string
-                    description: Human-readable explanation of the risk.
-            lifecycle:
-              type: array
-              description: Chronological audit trail of the verification. Event `type` is one of `PHONE_VERIFICATION_MESSAGE_SENT`, `PHONE_VERIFICATION_RETRY_MESSAGE_SENT`, `PHONE_VERIFICATION_BLOCKED`, `PHONE_DELIVERY_DELIVERED`, `PHONE_DELIVERY_UNDELIVERABLE`, `VALID_CODE_ENTERED`, `INVALID_CODE_ENTERED`, `PHONE_VERIFICATION_APPROVED`, `PHONE_VERIFICATION_DECLINED`, `PHONE_VERIFICATION_IN_REVIEW`, `PHONE_VERIFICATION_EXPIRED`.
-              items:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    description: Event type.
-                  timestamp:
-                    type: string
-                    format: date-time
-                    description: When the event happened.
-                  details:
-                    type: object
-                    nullable: true
-                    description: 'Event-specific payload. Send events: `{status, reason, channel, actual_channel}` (`actual_channel` is filled once delivery is confirmed). Delivery events: `{channel, status}`. Code-entry events: `{code_tried, status}`. Final-status events: `null`, or `{reason}` when declined or in review.'
-                  fee:
-                    type: number
-                    description: USD amount billed for this event. Non-zero only on send events (the delivery price); 0 for code entries, delivery confirmations, and status events.
-            matches:
-              type: array
-              description: Other sessions of your application (KYC, KYB, or API) where the same phone number was used by a different user (different `vendor_data`). Up to 5 entries, a synthetic list-entry blocklist match first when present (session-derived matches keep query order). Empty array when there are no matches.
-              items:
-                type: object
-                properties:
-                  session_id:
-                    type: string
-                    format: uuid
-                    description: Session id of the other verification that used this phone number.
-                  session_number:
-                    type: integer
-                    description: Human-friendly sequential number of that session.
-                  vendor_data:
-                    type: string
-                    nullable: true
-                    description: '`vendor_data` of that session.'
-                  verification_date:
-                    type: string
-                    description: When that session was created (`YYYY-MM-DDTHH:MM:SSZ`).
-                  phone_number:
-                    type: string
-                    description: The matched phone number.
-                  status:
-                    type: string
-                    description: Status of that session (e.g., `Approved`, `Declined`, `In Progress`).
-                  is_blocklisted:
-                    type: boolean
-                    description: Whether the phone number is on your application's blocklist.
-                  api_service:
-                    type: string
-                    nullable: true
-                    description: For API-type sessions, the standalone API that created it (e.g., `PHONE_VERIFICATION`); `null` for regular verification sessions.
-                  source:
-                    type: string
-                    description: 'Where the match was found. Usually `session`; a blocklist hit via an organization list entry prepends a synthetic match with `source: "list_entry"` and null `session_id`/`session_number`.'
-        vendor_data:
-          type: string
-          nullable: true
-          description: '`vendor_data` of the matched verification''s session. `null` on `Expired or Not Found`.'
-        metadata:
-          type: object
-          nullable: true
+          type:
+          - object
+          - 'null'
           description: '`metadata` of the matched verification''s session. `null` on `Expired or Not Found`.'
         created_at:
           type: string
