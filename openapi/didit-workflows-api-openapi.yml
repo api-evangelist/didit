@@ -512,155 +512,6 @@ paths:
         source: "const res = await fetch(`https://verification.didit.me/v3/workflows/${settingsUuid}/`, {\n  method: \"DELETE\",\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (res.status !== 204) throw new Error(`Didit ${res.status}`);"
 components:
   schemas:
-    SimpleWorkflowUpdateRequest:
-      type: object
-      description: 'Update workflow metadata or replace the full linear feature list. STRICT field whitelist: any key not listed here is rejected with a 400.'
-      properties:
-        workflow_label:
-          type: string
-          maxLength: 50
-          description: Display name for the workflow (max 50 characters).
-        is_default:
-          type: boolean
-          description: Set this workflow as the default for new sessions.
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-          description: Controls versioning. Omit to update the current version in place (drafts auto-publish). `published` on an already-published version creates and returns a NEW version. `draft` is only valid while the version is still a draft.
-        features:
-          type: array
-          minItems: 1
-          description: If provided, this replaces the full feature order and configuration.
-          items:
-            $ref: '#/components/schemas/SimpleWorkflowFeature'
-        is_white_label_enabled:
-          type: boolean
-          description: Enable white-label customization for sessions created with this workflow.
-        is_desktop_allowed:
-          type: boolean
-          description: Allow the verification flow to run on desktop browsers.
-        max_retry_attempts:
-          type: integer
-          minimum: 0
-          maximum: 10
-          description: Maximum retry attempts allowed after a declined verification. `0` blocks the user after the first decline.
-        retry_window_days:
-          type:
-          - integer
-          - 'null'
-          minimum: 1
-          maximum: 365
-          description: Rolling window in days used to count retries. `null` enforces an all-time limit.
-        face_liveness_max_attempts:
-          type: integer
-          minimum: 1
-          maximum: 3
-          description: Maximum liveness submissions per session. This value is also copied into generated liveness and age-estimation workflow nodes unless the feature-level config overrides it.
-        face_match_max_attempts:
-          type: integer
-          minimum: 1
-          maximum: 3
-          description: Maximum face-match submissions per session. This value is also copied into generated face-match workflow nodes unless the feature-level config overrides it.
-        session_expiration_time:
-          type: integer
-          minimum: 3600
-          maximum: 2419200
-          description: Seconds before an unfinished session expires. Minimum 1 hour (3600), maximum 4 weeks (2419200).
-    WorkflowListItem:
-      type: object
-      description: One workflow version in the list view.
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          description: Per-version UUID. Use as `{settings_uuid}` for get/update/delete, and as `workflow_id` when creating sessions.
-        workflow_id:
-          type: string
-          format: uuid
-          description: Stable group ID shared by every version of the same workflow. Equals `uuid` for version 1.
-        workflow_label:
-          type: string
-          description: Display name for the workflow.
-        workflow_type:
-          type:
-          - string
-          - 'null'
-          description: 'Base type for simple workflows: `kyc`, `kyb`, `adaptive_age_verification`, `biometric_authentication`, etc. `null` for graph-based workflows without a KYB feature.'
-        is_default:
-          type: boolean
-          description: Whether this is the default workflow for new sessions.
-        is_archived:
-          type: boolean
-        is_white_label_enabled:
-          type: boolean
-          description: Whether white-label customization applies to sessions created with this workflow.
-        total_price:
-          type: number
-          description: Fixed price per verification in USD (JSON number, excludes variable-priced features such as DATABASE_VALIDATION and PHONE_VERIFICATION).
-        min_price:
-          type: number
-          description: Cheapest fixed price across workflow-graph paths, in USD.
-        max_price:
-          type: number
-          description: Most expensive fixed price across workflow-graph paths, in USD.
-        features:
-          type: string
-          description: Enabled features as a single `" + "`-joined string, e.g. `"OCR + LIVENESS + FACE_MATCH"`. Split on `" + "` to get a list.
-        is_simple_workflow:
-          type: boolean
-          description: True when the workflow has no custom workflow graph.
-        is_editable:
-          type: boolean
-          description: True when this version is a `draft` (drafts are editable in place; published versions are immutable in the Console).
-        workflow_url:
-          type: string
-          format: uri
-          description: Public shareable verification URL for this workflow (`https://verify.didit.me/u/<token>`).
-        max_retry_attempts:
-          type: integer
-          description: Maximum retry attempts allowed after a declined verification (0-10).
-        retry_window_days:
-          type:
-          - integer
-          - 'null'
-          description: Rolling window in days used to count retries (1-365). `null` = all-time limit.
-        session_expiration_time:
-          type: integer
-          description: Seconds before an unfinished session expires (3600-2419200).
-        version:
-          type: integer
-          description: Version number within the `workflow_id` group, starting at 1.
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-          description: Version status. New sessions use the latest `published` version of a group.
-        has_draft:
-          type: boolean
-          description: True when any version in this `workflow_id` group is currently a draft.
-        created_by:
-          type:
-          - object
-          - 'null'
-          description: 'Who created this version: `{name, email, type}` where `type` is `user` (Console user, `email` set) or `api_key` (`name` is the client id, `email` is null). `null` when no creator was recorded.'
-          properties:
-            name:
-              type: string
-            email:
-              type:
-              - string
-              - 'null'
-            type:
-              type: string
-              enum:
-              - user
-              - api_key
-        updated_at:
-          type: string
-          format: date-time
     SimpleWorkflowFeature:
       type: object
       required:
@@ -759,6 +610,155 @@ components:
           minimum: 3600
           maximum: 2419200
           default: 604800
+          description: Seconds before an unfinished session expires. Minimum 1 hour (3600), maximum 4 weeks (2419200).
+    WorkflowListItem:
+      type: object
+      description: One workflow version in the list view.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Per-version UUID. Use as `{settings_uuid}` for get/update/delete, and as `workflow_id` when creating sessions.
+        workflow_id:
+          type: string
+          format: uuid
+          description: Stable group ID shared by every version of the same workflow. Equals `uuid` for version 1.
+        workflow_label:
+          type: string
+          description: Display name for the workflow.
+        workflow_type:
+          type:
+          - string
+          - 'null'
+          description: 'Base type for simple workflows: `kyc`, `kyb`, `adaptive_age_verification`, `biometric_authentication`, etc. `null` for graph-based workflows without a KYB feature.'
+        is_default:
+          type: boolean
+          description: Whether this is the default workflow for new sessions.
+        is_archived:
+          type: boolean
+        is_white_label_enabled:
+          type: boolean
+          description: Whether white-label customization applies to sessions created with this workflow.
+        total_price:
+          type: number
+          description: Fixed price per verification in USD (JSON number, excludes variable-priced features such as DATABASE_VALIDATION and PHONE_VERIFICATION).
+        min_price:
+          type: number
+          description: Cheapest fixed price across workflow-graph paths, in USD.
+        max_price:
+          type: number
+          description: Most expensive fixed price across workflow-graph paths, in USD.
+        features:
+          type: string
+          description: Enabled features as a single `" + "`-joined string, e.g. `"OCR + LIVENESS + FACE_MATCH"`. Split on `" + "` to get a list.
+        is_simple_workflow:
+          type: boolean
+          description: True when the workflow has no custom workflow graph.
+        is_editable:
+          type: boolean
+          description: True when this version is a `draft` (drafts are editable in place; published versions are immutable in the Console).
+        workflow_url:
+          type: string
+          format: uri
+          description: Public shareable verification URL for this workflow (`https://verify.didit.me/u/<token>`).
+        max_retry_attempts:
+          type: integer
+          description: Maximum retry attempts allowed after a declined verification (0-10).
+        retry_window_days:
+          type:
+          - integer
+          - 'null'
+          description: Rolling window in days used to count retries (1-365). `null` = all-time limit.
+        session_expiration_time:
+          type: integer
+          description: Seconds before an unfinished session expires (3600-2419200).
+        version:
+          type: integer
+          description: Version number within the `workflow_id` group, starting at 1.
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          description: Version status. New sessions use the latest `published` version of a group.
+        has_draft:
+          type: boolean
+          description: True when any version in this `workflow_id` group is currently a draft.
+        created_by:
+          type:
+          - object
+          - 'null'
+          description: 'Who created this version: `{name, email, type}` where `type` is `user` (Console user, `email` set) or `api_key` (`name` is the client id, `email` is null). `null` when no creator was recorded.'
+          properties:
+            name:
+              type: string
+            email:
+              type:
+              - string
+              - 'null'
+            type:
+              type: string
+              enum:
+              - user
+              - api_key
+        updated_at:
+          type: string
+          format: date-time
+    SimpleWorkflowUpdateRequest:
+      type: object
+      description: 'Update workflow metadata or replace the full linear feature list. STRICT field whitelist: any key not listed here is rejected with a 400.'
+      properties:
+        workflow_label:
+          type: string
+          maxLength: 50
+          description: Display name for the workflow (max 50 characters).
+        is_default:
+          type: boolean
+          description: Set this workflow as the default for new sessions.
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          description: Controls versioning. Omit to update the current version in place (drafts auto-publish). `published` on an already-published version creates and returns a NEW version. `draft` is only valid while the version is still a draft.
+        features:
+          type: array
+          minItems: 1
+          description: If provided, this replaces the full feature order and configuration.
+          items:
+            $ref: '#/components/schemas/SimpleWorkflowFeature'
+        is_white_label_enabled:
+          type: boolean
+          description: Enable white-label customization for sessions created with this workflow.
+        is_desktop_allowed:
+          type: boolean
+          description: Allow the verification flow to run on desktop browsers.
+        max_retry_attempts:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Maximum retry attempts allowed after a declined verification. `0` blocks the user after the first decline.
+        retry_window_days:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          maximum: 365
+          description: Rolling window in days used to count retries. `null` enforces an all-time limit.
+        face_liveness_max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Maximum liveness submissions per session. This value is also copied into generated liveness and age-estimation workflow nodes unless the feature-level config overrides it.
+        face_match_max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Maximum face-match submissions per session. This value is also copied into generated face-match workflow nodes unless the feature-level config overrides it.
+        session_expiration_time:
+          type: integer
+          minimum: 3600
+          maximum: 2419200
           description: Seconds before an unfinished session expires. Minimum 1 hour (3600), maximum 4 weeks (2419200).
   securitySchemes:
     ApiKeyAuth:

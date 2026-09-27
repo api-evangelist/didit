@@ -2088,6 +2088,67 @@ paths:
                           type: string
 components:
   schemas:
+    CaseAssignee:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+    CaseSubject:
+      type:
+      - object
+      - 'null'
+      description: The single user or business the case is anchored to.
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+          - business
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: The subject's vendor_data.
+    CaseLink:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        linked_entity_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - session
+          - business_session
+          - transaction
+        linked_entity_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        linked_entity_summary:
+          type:
+          - object
+          - 'null'
+          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        created_at:
+          type: string
+          format: date-time
     CaseDetail:
       type: object
       properties:
@@ -2217,72 +2278,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseNote:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        comment:
-          type: string
-        actor_email:
-          type:
-          - string
-          - 'null'
-          format: email
-        actor_name:
-          type:
-          - string
-          - 'null'
-        mentioned_emails:
-          type: array
-          items:
-            type: string
-            format: email
-        is_internal:
-          type: boolean
-        attachments:
-          type: array
-          items:
-            type: object
-            properties:
-              s3_key:
-                type: string
-              filename:
-                type: string
-              file_size:
-                type: integer
-              url:
-                type: string
-                format: uri
-        tags:
-          type: array
-          items:
-            type: string
-        created_at:
-          type: string
-          format: date-time
-    CaseSubject:
-      type:
-      - object
-      - 'null'
-      description: The single user or business the case is anchored to.
-      properties:
-        type:
-          type: string
-          enum:
-          - user
-          - business
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-        external_id:
-          type:
-          - string
-          - 'null'
-          description: The subject's vendor_data.
     CaseListItem:
       type: object
       properties:
@@ -2375,6 +2370,62 @@ components:
           format: uuid
         organization_name:
           type: string
+    CaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        comment:
+          type: string
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+        actor_name:
+          type:
+          - string
+          - 'null'
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+        is_internal:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              s3_key:
+                type: string
+              filename:
+                type: string
+              file_size:
+                type: integer
+              url:
+                type: string
+                format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+    CaseBlueprintSummary:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
     CaseEvent:
       type: object
       properties:
@@ -2436,33 +2487,6 @@ components:
         created_at:
           type: string
           format: date-time
-    CaseLink:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        linked_entity_type:
-          type:
-          - string
-          - 'null'
-          enum:
-          - session
-          - business_session
-          - transaction
-        linked_entity_uuid:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        linked_entity_summary:
-          type:
-          - object
-          - 'null'
-          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
-        created_at:
-          type: string
-          format: date-time
     CaseChecklistItem:
       type: object
       properties:
@@ -2486,30 +2510,6 @@ components:
           format: date-time
         order:
           type: integer
-    CaseBlueprintSummary:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-    CaseAssignee:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
     CaseBlueprintDetail:
       type: object
       properties:

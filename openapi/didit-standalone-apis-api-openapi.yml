@@ -7113,67 +7113,6 @@ components:
           type: string
           format: date-time
           description: Timestamp of this check response.
-    PhoneVerificationSendResponse:
-      type: object
-      properties:
-        request_id:
-          type: string
-          format: uuid
-          description: Session id of the verification. A `Retry` send returns the same `request_id` as the original send. This id appears in the Business Console, is returned again by a finalized `POST /v3/phone/check/`, and can be passed to `GET /v3/session/{sessionId}/decision/`.
-        status:
-          type: string
-          enum:
-          - Success
-          - Retry
-          - Blocked
-          description: '`Success` — OTP sent to a new verification. `Retry` — OTP re-sent for the pending verification created by a previous send. `Blocked` — the anti-fraud layer refused to send; the verification is immediately finalized as `Declined` and nothing is billed.'
-        reason:
-          type:
-          - string
-          - 'null'
-          description: Why a send was `Blocked` (e.g., `repeated_attempts`, `suspicious`, `spam`). `null` on `Success` and `Retry`.
-        vendor_data:
-          type:
-          - string
-          - 'null'
-          description: Echo of the `vendor_data` stored on the session (from the first send).
-        metadata:
-          type:
-          - object
-          - 'null'
-          description: Echo of the `metadata` stored on the session (from the first send).
-    EmailVerificationSendResponse:
-      type: object
-      properties:
-        request_id:
-          type: string
-          format: uuid
-          description: Session id of the verification. A `Retry` send returns the same `request_id` as the original send. This id appears in the Business Console, is returned again by a finalized `POST /v3/email/check/`, and can be passed to `GET /v3/session/{sessionId}/decision/`.
-        status:
-          type: string
-          enum:
-          - Success
-          - Retry
-          - Undeliverable
-          description: '`Success` — OTP emailed to a new verification (billed). `Retry` — fresh OTP emailed for the pending verification created by a previous send (free). `Undeliverable` — the address failed deliverability validation or the message could not be sent; the verification is immediately finalized as `Declined` and nothing is billed.'
-        reason:
-          type:
-          - string
-          - 'null'
-          enum:
-          - email_can_not_be_delivered
-          - null
-          description: '`email_can_not_be_delivered` when `status` is `Undeliverable`; `null` otherwise.'
-        vendor_data:
-          type:
-          - string
-          - 'null'
-          description: Echo of the `vendor_data` stored on the session (from the first send).
-        metadata:
-          type:
-          - object
-          - 'null'
-          description: Echo of the `metadata` stored on the session (from the first send).
     EmailVerificationCheckResponse:
       type: object
       properties:
@@ -7366,6 +7305,67 @@ components:
           type: string
           format: date-time
           description: Timestamp of this check response.
+    PhoneVerificationSendResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Session id of the verification. A `Retry` send returns the same `request_id` as the original send. This id appears in the Business Console, is returned again by a finalized `POST /v3/phone/check/`, and can be passed to `GET /v3/session/{sessionId}/decision/`.
+        status:
+          type: string
+          enum:
+          - Success
+          - Retry
+          - Blocked
+          description: '`Success` — OTP sent to a new verification. `Retry` — OTP re-sent for the pending verification created by a previous send. `Blocked` — the anti-fraud layer refused to send; the verification is immediately finalized as `Declined` and nothing is billed.'
+        reason:
+          type:
+          - string
+          - 'null'
+          description: Why a send was `Blocked` (e.g., `repeated_attempts`, `suspicious`, `spam`). `null` on `Success` and `Retry`.
+        vendor_data:
+          type:
+          - string
+          - 'null'
+          description: Echo of the `vendor_data` stored on the session (from the first send).
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: Echo of the `metadata` stored on the session (from the first send).
+    EmailVerificationSendResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Session id of the verification. A `Retry` send returns the same `request_id` as the original send. This id appears in the Business Console, is returned again by a finalized `POST /v3/email/check/`, and can be passed to `GET /v3/session/{sessionId}/decision/`.
+        status:
+          type: string
+          enum:
+          - Success
+          - Retry
+          - Undeliverable
+          description: '`Success` — OTP emailed to a new verification (billed). `Retry` — fresh OTP emailed for the pending verification created by a previous send (free). `Undeliverable` — the address failed deliverability validation or the message could not be sent; the verification is immediately finalized as `Declined` and nothing is billed.'
+        reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - email_can_not_be_delivered
+          - null
+          description: '`email_can_not_be_delivered` when `status` is `Undeliverable`; `null` otherwise.'
+        vendor_data:
+          type:
+          - string
+          - 'null'
+          description: Echo of the `vendor_data` stored on the session (from the first send).
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: Echo of the `metadata` stored on the session (from the first send).
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
