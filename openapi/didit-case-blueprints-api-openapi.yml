@@ -623,48 +623,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseBlueprintListItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-        description:
-          type:
-          - string
-          - 'null'
-        assignment_method:
-          type: string
-          enum:
-          - MANUAL
-          - AUTOMATIC
-        assignee_pool:
-          type: array
-          items:
-            type: string
-            format: uuid
-        max_active_cases:
-          type:
-          - integer
-          - 'null'
-        escalation_enabled:
-          type: boolean
-        transfer_enabled:
-          type: boolean
-        require_resolution_note:
-          type: boolean
-        is_active:
-          type: boolean
-        preset_key:
-          type:
-          - string
-          - 'null'
-        created_at:
-          type: string
-          format: date-time
     CaseContentConfig:
       type: object
       description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
@@ -736,6 +694,48 @@ components:
               type: boolean
             transactions:
               type: boolean
+    CaseBlueprintListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type:
+          - string
+          - 'null'
+        assignment_method:
+          type: string
+          enum:
+          - MANUAL
+          - AUTOMATIC
+        assignee_pool:
+          type: array
+          items:
+            type: string
+            format: uuid
+        max_active_cases:
+          type:
+          - integer
+          - 'null'
+        escalation_enabled:
+          type: boolean
+        transfer_enabled:
+          type: boolean
+        require_resolution_note:
+          type: boolean
+        is_active:
+          type: boolean
+        preset_key:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
