@@ -478,47 +478,6 @@ paths:
         source: "const res = await fetch(`https://verification.didit.me/v3/questionnaires/${questionnaireUuid}/`, {\n  method: \"DELETE\",\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (res.status !== 204) throw new Error(`Didit ${res.status}`);"
 components:
   schemas:
-    SimpleQuestionnaireRequest:
-      type: object
-      description: Create a simple linear questionnaire. The API converts `form_elements` into the internal questionnaire graph.
-      required:
-      - title
-      - languages
-      - form_elements
-      properties:
-        title:
-          type: string
-          description: Internal name for the questionnaire.
-        description:
-          type:
-          - string
-          - 'null'
-        languages:
-          type: array
-          description: Languages included in every label. Must include `en`.
-          items:
-            type: string
-          example:
-          - en
-        default_language:
-          type: string
-          description: Default language. Must be included in `languages`.
-          example: en
-        is_active:
-          type: boolean
-          default: true
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-          description: Omit this field to create a published questionnaire ready for workflows.
-        form_elements:
-          type: array
-          minItems: 1
-          description: Questions in the exact order users should see them. Branching and conditional fields are not supported.
-          items:
-            $ref: '#/components/schemas/SimpleQuestionnaireElement'
     QuestionnaireListItem:
       type: object
       description: One questionnaire version in the list view.
@@ -581,86 +540,6 @@ components:
         is_editable:
           type: boolean
           description: True when this version is a `draft`.
-    QuestionnaireDetail:
-      type: object
-      description: Full questionnaire detail returned from GET, POST (create) and PATCH (update) endpoints.
-      properties:
-        questionnaire_id:
-          type: string
-          format: uuid
-          description: Unique identifier of the questionnaire. Use this id when referencing the questionnaire from a workflow or in subsequent update/delete requests.
-        title:
-          type: string
-        description:
-          type:
-          - string
-          - 'null'
-        languages:
-          type: array
-          items:
-            type: string
-        default_language:
-          type: string
-        is_active:
-          type: boolean
-        is_simple_questionnaire:
-          type: boolean
-        graph:
-          type: object
-          description: Graph structure with start_node and nodes map.
-        sections:
-          type: array
-          description: Questionnaire content grouped into sections (derived from the graph).
-          items:
-            type: object
-        questionnaire_group_id:
-          type: string
-          format: uuid
-          description: Stable identifier that groups all versions of the same questionnaire.
-        version:
-          type: integer
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-        published_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        is_editable:
-          type: boolean
-          description: True when the questionnaire can still be edited in place (draft versions).
-    SimpleQuestionnaireUpdateRequest:
-      type: object
-      description: Update questionnaire metadata or replace the full linear `form_elements` list.
-      properties:
-        title:
-          type: string
-        description:
-          type:
-          - string
-          - 'null'
-        languages:
-          type: array
-          items:
-            type: string
-        default_language:
-          type: string
-        is_active:
-          type: boolean
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-        form_elements:
-          type: array
-          minItems: 1
-          description: If provided, this replaces the full linear question list.
-          items:
-            $ref: '#/components/schemas/SimpleQuestionnaireElement'
     SimpleQuestionnaireElement:
       type: object
       required:
@@ -761,6 +640,127 @@ components:
               description: Translated message shown when validation fails, keyed by language code.
               additionalProperties:
                 type: string
+    QuestionnaireDetail:
+      type: object
+      description: Full questionnaire detail returned from GET, POST (create) and PATCH (update) endpoints.
+      properties:
+        questionnaire_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the questionnaire. Use this id when referencing the questionnaire from a workflow or in subsequent update/delete requests.
+        title:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        languages:
+          type: array
+          items:
+            type: string
+        default_language:
+          type: string
+        is_active:
+          type: boolean
+        is_simple_questionnaire:
+          type: boolean
+        graph:
+          type: object
+          description: Graph structure with start_node and nodes map.
+        sections:
+          type: array
+          description: Questionnaire content grouped into sections (derived from the graph).
+          items:
+            type: object
+        questionnaire_group_id:
+          type: string
+          format: uuid
+          description: Stable identifier that groups all versions of the same questionnaire.
+        version:
+          type: integer
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+        published_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        is_editable:
+          type: boolean
+          description: True when the questionnaire can still be edited in place (draft versions).
+    SimpleQuestionnaireRequest:
+      type: object
+      description: Create a simple linear questionnaire. The API converts `form_elements` into the internal questionnaire graph.
+      required:
+      - title
+      - languages
+      - form_elements
+      properties:
+        title:
+          type: string
+          description: Internal name for the questionnaire.
+        description:
+          type:
+          - string
+          - 'null'
+        languages:
+          type: array
+          description: Languages included in every label. Must include `en`.
+          items:
+            type: string
+          example:
+          - en
+        default_language:
+          type: string
+          description: Default language. Must be included in `languages`.
+          example: en
+        is_active:
+          type: boolean
+          default: true
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          description: Omit this field to create a published questionnaire ready for workflows.
+        form_elements:
+          type: array
+          minItems: 1
+          description: Questions in the exact order users should see them. Branching and conditional fields are not supported.
+          items:
+            $ref: '#/components/schemas/SimpleQuestionnaireElement'
+    SimpleQuestionnaireUpdateRequest:
+      type: object
+      description: Update questionnaire metadata or replace the full linear `form_elements` list.
+      properties:
+        title:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        languages:
+          type: array
+          items:
+            type: string
+        default_language:
+          type: string
+        is_active:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+        form_elements:
+          type: array
+          minItems: 1
+          description: If provided, this replaces the full linear question list.
+          items:
+            $ref: '#/components/schemas/SimpleQuestionnaireElement'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

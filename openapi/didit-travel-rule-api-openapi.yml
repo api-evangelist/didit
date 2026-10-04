@@ -551,13 +551,242 @@ paths:
           description: The session expired without completing.
 components:
   schemas:
-    TravelRuleOwnershipConfirmRequest:
+    TravelRuleWidgetContext:
+      type: object
+      properties:
+        vasp_name:
+          type: string
+          description: Legal name from your VASP profile, shown to the customer in the widget. Empty when no profile exists.
+        wallet_address:
+          type: string
+        chain:
+          type: string
+        holder_name:
+          type: string
+        allowed_methods:
+          type: array
+          items:
+            type: string
+            enum:
+            - MESSAGE_SIGNING
+            - SCREENSHOT
+            - SATOSHI_TEST
+            - SELF_DECLARATION
+          description: Proof methods available for this session. MESSAGE_SIGNING requires a supported chain family, SATOSHI_TEST requires a satoshi_deposit_address on the session, SCREENSHOT requires the allow_screenshot_proof setting, and SELF_DECLARATION requires the allow_self_declaration setting.
+        transfer_status:
+          type:
+          - string
+          - 'null'
+          description: Status of the linked Travel Rule transfer. Null when the session was minted without a transaction_id.
+        callback_url:
+          type: string
+          description: Where the widget returns the customer after completion. Empty when not set.
+        expires_at:
+          type: string
+          format: date-time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Non-null once a proof has been verified.
+        proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelRuleWidgetProofSummary'
+        customization:
+          type:
+          - object
+          - 'null'
+          description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
+    TravelRuleSettingsDetail:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: Whether the managed Travel Rule negotiation flow is active for outbound `travelRule` transactions on this application.
+        jurisdiction:
+          type: string
+          maxLength: 8
+          description: Your VASP's operating jurisdiction code. Default `"EU"`.
+        name_matching_strictness:
+          type: string
+          enum:
+          - NONE
+          - STRICT
+          - DEFAULT
+          - FUZZY
+          description: How strictly beneficiary names must match before a transfer can reach COMPLETED.
+        confirmation_timeout_hours:
+          type: integer
+          minimum: 1
+          description: Hours an AWAITING_COUNTERPARTY transfer may remain unconfirmed before the periodic sweeper expires it. Default 48.
+        timeout_outcome:
+          type: string
+          enum:
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: What happens to the underlying transaction when a transfer expires. Default HOLD.
+        threshold_amount:
+          type: string
+          description: Decimal string. Minimum transfer amount that triggers a managed exchange; transfers below it resolve straight to NOT_APPLICABLE. Defaults to "0.00" (EU TFR applies no minimum amount).
+        legal_name:
+          type: string
+          description: Your VASP's legal name. Required (non-blank) to set is_enabled to true.
+        lei:
+          type: string
+          description: Your Legal Entity Identifier, surfaced in the VASP directory.
+        compliance_email:
+          type: string
+          format: email
+          description: Compliance contact email for your VASP profile.
+        is_discoverable:
+          type: boolean
+          description: Whether your VASP profile appears in GET /v3/travel-rule/vasps/ search results and can be reached on the INTERNAL rail. Default true.
+        inbound_auto_accept:
+          type: boolean
+          description: When true, inbound transfers whose beneficiary wallet is a verified address-book entry with a matching name are accepted automatically, without a manual review step. Default false.
+        allow_self_declaration:
+          type: boolean
+          description: When true, the wallet-ownership widget offers self-declaration as a fallback proof method. Default false.
+        allow_screenshot_proof:
+          type: boolean
+          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
+        auto_wallet_verification:
+          type: boolean
+          description: When true, submitting an outbound Travel Rule transfer that needs end-user proof of wallet control auto-mints a wallet-ownership widget session bound to the transaction and exposes it in the transaction's action_required block. Default true.
+        vasp_attribution_enabled:
+          type: boolean
+          description: 'When true, an outbound Travel Rule transfer that no rail can route is attributed through blockchain analytics: the destination wallet is resolved to its owning VASP, the entity is recorded on the transfer and in the VASP directory, and the rails are re-run once with the attributed name. Default true.'
+        travel_address:
+          type: string
+          description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Populated once your VASP profile is complete.
+    TravelRuleTransferDetail:
+      type: object
+      description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. originator_data/beneficiary_data are omitted while PII is masked (see description).
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - AWAITING_COUNTERPARTY
+          - ON_HOLD
+          - COMPLETED
+          - FINISHED
+          - CANCELLED
+          - EXPIRED
+          - COUNTERPARTY_MISMATCHED_DATA
+          - COUNTERPARTY_VASP_NOT_FOUND
+          - COUNTERPARTY_VASP_NOT_REACHABLE
+          - UNCONFIRMED_OWNERSHIP
+          - COUNTERPARTY_VASP_GENERAL_DECLINE
+          - NOT_ENOUGH_COUNTERPARTY_DATA
+          - NOT_APPLICABLE
+        direction:
+          type: string
+          enum:
+          - INBOUND
+          - OUTBOUND
+        rail:
+          type:
+          - string
+          - 'null'
+          enum:
+          - INTERNAL
+          - TRP
+          - GTR
+          - EMAIL
+          - null
+        protocol:
+          type:
+          - string
+          - 'null'
+        ivms_version:
+          type: string
+          example: ivms101.2023
+        required:
+          type: boolean
+        ownership_confirmed:
+          type:
+          - boolean
+          - 'null'
+        deadline_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              at:
+                type: string
+                format: date-time
+              detail:
+                type: string
+        counterparty_vasp:
+          type:
+          - object
+          - 'null'
+          properties:
+            name:
+              type: string
+            lei:
+              type: string
+            dd_score:
+              type: integer
+        originator_data:
+          type: object
+        beneficiary_data:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    TravelRulePickupRespondRequest:
       type: object
       required:
-      - confirmed
+      - decision
       properties:
-        confirmed:
-          type: boolean
+        decision:
+          type: string
+          enum:
+          - accept
+          - decline
+        beneficiary_name:
+          type: string
+          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
+    TravelRulePickupInfo:
+      type: object
+      properties:
+        originator_vasp_name:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        beneficiary_wallet:
+          type: string
+        status:
+          type: string
+    TravelRuleTransferPatchRequest:
+      type: object
+      description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
+      properties:
+        payment_txn_id:
+          type: string
+          description: The on-chain transaction hash. Requires the transfer to be an outbound transfer in COMPLETED status.
+        action:
+          type: string
+          enum:
+          - cancel
+          - resend
+          description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
     TravelRuleWidgetProofSummary:
       type: object
       properties:
@@ -648,6 +877,92 @@ components:
           - string
           - 'null'
           description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's transfers over the TRP rail.
+    TravelRuleOwnershipConfirmRequest:
+      type: object
+      required:
+      - confirmed
+      properties:
+        confirmed:
+          type: boolean
+    VaspDirectoryEntry:
+      type: object
+      properties:
+        name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+        dd_status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETED
+          - REJECTED
+        dd_score:
+          type: integer
+        reachable_rails:
+          type: array
+          items:
+            type: string
+            enum:
+            - INTERNAL
+            - TRP
+            - GTR
+            - EMAIL
+        is_didit_customer:
+          type: boolean
+          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
+        dd_score_breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
+        dd_assessed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
+    TravelRuleWidgetSessionResponse:
+      type: object
+      properties:
+        widget_session_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          description: Opaque session token embedded in the widget URL.
+        url:
+          type: string
+          description: The hosted wallet-ownership widget URL. Open it verbatim in the system browser (never inside a mobile SDK webview).
+        expires_at:
+          type: string
+          format: date-time
+    WalletAddressEntryCreate:
+      type: object
+      required:
+      - address
+      properties:
+        address:
+          type: string
+        chain:
+          type: string
+        holder_vendor_data:
+          type: string
+        holder_name:
+          type: string
+        entity_type:
+          type: string
+          default: individual
+        self_declared:
+          type: boolean
+          default: false
+          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
+        travel_address:
+          type: string
+          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
     TravelRuleWidgetSessionCreate:
       type: object
       required:
@@ -722,18 +1037,6 @@ components:
             travel_address:
               type: string
               description: Travel address that lets Didit reach the sender on the TRP rail.
-    WalletAddressEntryUpdate:
-      type: object
-      properties:
-        holder_name:
-          type: string
-        holder_vendor_data:
-          type: string
-        entity_type:
-          type: string
-        travel_address:
-          type: string
-      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
     TravelRuleSettingsUpdate:
       type: object
       properties:
@@ -782,219 +1085,18 @@ components:
         vasp_attribution_enabled:
           type: boolean
       description: All fields optional; PUT applies a partial update.
-    TravelRuleWidgetSessionResponse:
+    WalletAddressEntryUpdate:
       type: object
       properties:
-        widget_session_id:
-          type: string
-          format: uuid
-        token:
-          type: string
-          description: Opaque session token embedded in the widget URL.
-        url:
-          type: string
-          description: The hosted wallet-ownership widget URL. Open it verbatim in the system browser (never inside a mobile SDK webview).
-        expires_at:
-          type: string
-          format: date-time
-    WalletAddressEntryCreate:
-      type: object
-      required:
-      - address
-      properties:
-        address:
-          type: string
-        chain:
+        holder_name:
           type: string
         holder_vendor_data:
           type: string
-        holder_name:
-          type: string
         entity_type:
           type: string
-          default: individual
-        self_declared:
-          type: boolean
-          default: false
-          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
         travel_address:
           type: string
-          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
-    TravelRuleTransferDetail:
-      type: object
-      description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. originator_data/beneficiary_data are omitted while PII is masked (see description).
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        status:
-          type: string
-          enum:
-          - AWAITING_COUNTERPARTY
-          - ON_HOLD
-          - COMPLETED
-          - FINISHED
-          - CANCELLED
-          - EXPIRED
-          - COUNTERPARTY_MISMATCHED_DATA
-          - COUNTERPARTY_VASP_NOT_FOUND
-          - COUNTERPARTY_VASP_NOT_REACHABLE
-          - UNCONFIRMED_OWNERSHIP
-          - COUNTERPARTY_VASP_GENERAL_DECLINE
-          - NOT_ENOUGH_COUNTERPARTY_DATA
-          - NOT_APPLICABLE
-        direction:
-          type: string
-          enum:
-          - INBOUND
-          - OUTBOUND
-        rail:
-          type:
-          - string
-          - 'null'
-          enum:
-          - INTERNAL
-          - TRP
-          - GTR
-          - EMAIL
-          - null
-        protocol:
-          type:
-          - string
-          - 'null'
-        ivms_version:
-          type: string
-          example: ivms101.2023
-        required:
-          type: boolean
-        ownership_confirmed:
-          type:
-          - boolean
-          - 'null'
-        deadline_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        timeline:
-          type: array
-          items:
-            type: object
-            properties:
-              status:
-                type: string
-              at:
-                type: string
-                format: date-time
-              detail:
-                type: string
-        counterparty_vasp:
-          type:
-          - object
-          - 'null'
-          properties:
-            name:
-              type: string
-            lei:
-              type: string
-            dd_score:
-              type: integer
-        originator_data:
-          type: object
-        beneficiary_data:
-          type: object
-        created_at:
-          type: string
-          format: date-time
-    VaspDirectoryEntry:
-      type: object
-      properties:
-        name:
-          type: string
-        lei:
-          type: string
-        jurisdiction:
-          type: string
-        dd_status:
-          type: string
-          enum:
-          - NOT_STARTED
-          - IN_PROGRESS
-          - COMPLETED
-          - REJECTED
-        dd_score:
-          type: integer
-        reachable_rails:
-          type: array
-          items:
-            type: string
-            enum:
-            - INTERNAL
-            - TRP
-            - GTR
-            - EMAIL
-        is_didit_customer:
-          type: boolean
-          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
-        dd_score_breakdown:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
-        dd_assessed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
-    TravelRuleWidgetContext:
-      type: object
-      properties:
-        vasp_name:
-          type: string
-          description: Legal name from your VASP profile, shown to the customer in the widget. Empty when no profile exists.
-        wallet_address:
-          type: string
-        chain:
-          type: string
-        holder_name:
-          type: string
-        allowed_methods:
-          type: array
-          items:
-            type: string
-            enum:
-            - MESSAGE_SIGNING
-            - SCREENSHOT
-            - SATOSHI_TEST
-            - SELF_DECLARATION
-          description: Proof methods available for this session. MESSAGE_SIGNING requires a supported chain family, SATOSHI_TEST requires a satoshi_deposit_address on the session, SCREENSHOT requires the allow_screenshot_proof setting, and SELF_DECLARATION requires the allow_self_declaration setting.
-        transfer_status:
-          type:
-          - string
-          - 'null'
-          description: Status of the linked Travel Rule transfer. Null when the session was minted without a transaction_id.
-        callback_url:
-          type: string
-          description: Where the widget returns the customer after completion. Empty when not set.
-        expires_at:
-          type: string
-          format: date-time
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Non-null once a proof has been verified.
-        proofs:
-          type: array
-          items:
-            $ref: '#/components/schemas/TravelRuleWidgetProofSummary'
-        customization:
-          type:
-          - object
-          - 'null'
-          description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
+      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
     TravelRuleInboundResponse:
       type: object
       properties:
@@ -1010,108 +1112,6 @@ components:
           description: true when a new transaction was minted (HTTP 201); false when an existing unclaimed deposit was reused (HTTP 200).
         travel_rule:
           $ref: '#/components/schemas/TravelRuleTransferDetail'
-    TravelRulePickupInfo:
-      type: object
-      properties:
-        originator_vasp_name:
-          type: string
-        amount:
-          type: string
-        currency:
-          type: string
-        beneficiary_wallet:
-          type: string
-        status:
-          type: string
-    TravelRuleTransferPatchRequest:
-      type: object
-      description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
-      properties:
-        payment_txn_id:
-          type: string
-          description: The on-chain transaction hash. Requires the transfer to be an outbound transfer in COMPLETED status.
-        action:
-          type: string
-          enum:
-          - cancel
-          - resend
-          description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
-    TravelRuleSettingsDetail:
-      type: object
-      properties:
-        is_enabled:
-          type: boolean
-          description: Whether the managed Travel Rule negotiation flow is active for outbound `travelRule` transactions on this application.
-        jurisdiction:
-          type: string
-          maxLength: 8
-          description: Your VASP's operating jurisdiction code. Default `"EU"`.
-        name_matching_strictness:
-          type: string
-          enum:
-          - NONE
-          - STRICT
-          - DEFAULT
-          - FUZZY
-          description: How strictly beneficiary names must match before a transfer can reach COMPLETED.
-        confirmation_timeout_hours:
-          type: integer
-          minimum: 1
-          description: Hours an AWAITING_COUNTERPARTY transfer may remain unconfirmed before the periodic sweeper expires it. Default 48.
-        timeout_outcome:
-          type: string
-          enum:
-          - HOLD
-          - REJECT
-          - PROCEED
-          description: What happens to the underlying transaction when a transfer expires. Default HOLD.
-        threshold_amount:
-          type: string
-          description: Decimal string. Minimum transfer amount that triggers a managed exchange; transfers below it resolve straight to NOT_APPLICABLE. Defaults to "0.00" (EU TFR applies no minimum amount).
-        legal_name:
-          type: string
-          description: Your VASP's legal name. Required (non-blank) to set is_enabled to true.
-        lei:
-          type: string
-          description: Your Legal Entity Identifier, surfaced in the VASP directory.
-        compliance_email:
-          type: string
-          format: email
-          description: Compliance contact email for your VASP profile.
-        is_discoverable:
-          type: boolean
-          description: Whether your VASP profile appears in GET /v3/travel-rule/vasps/ search results and can be reached on the INTERNAL rail. Default true.
-        inbound_auto_accept:
-          type: boolean
-          description: When true, inbound transfers whose beneficiary wallet is a verified address-book entry with a matching name are accepted automatically, without a manual review step. Default false.
-        allow_self_declaration:
-          type: boolean
-          description: When true, the wallet-ownership widget offers self-declaration as a fallback proof method. Default false.
-        allow_screenshot_proof:
-          type: boolean
-          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
-        auto_wallet_verification:
-          type: boolean
-          description: When true, submitting an outbound Travel Rule transfer that needs end-user proof of wallet control auto-mints a wallet-ownership widget session bound to the transaction and exposes it in the transaction's action_required block. Default true.
-        vasp_attribution_enabled:
-          type: boolean
-          description: 'When true, an outbound Travel Rule transfer that no rail can route is attributed through blockchain analytics: the destination wallet is resolved to its owning VASP, the entity is recorded on the transfer and in the VASP directory, and the rails are re-run once with the attributed name. Default true.'
-        travel_address:
-          type: string
-          description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Populated once your VASP profile is complete.
-    TravelRulePickupRespondRequest:
-      type: object
-      required:
-      - decision
-      properties:
-        decision:
-          type: string
-          enum:
-          - accept
-          - decline
-        beneficiary_name:
-          type: string
-          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -5070,6 +5070,118 @@ paths:
         source: "const response = await fetch(\n  'https://verification.didit.me/v3/session/33333333-4444-5555-6666-777777777777/kyb/' +\n    '88888888-9999-aaaa-bbbb-cccccccccccc/update-data/',\n  {\n    method: 'PATCH',\n    headers: {\n      'x-api-key': process.env.DIDIT_API_KEY,\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({\n      company_name: 'Docs Probe Corp',\n      registration_number: 'DPC-001',\n      country_code: 'US',\n      incorporation_date: '2015-04-12',\n      legal_address: '1 Example Plaza, Wilmington, DE 19801',\n      registry_status: 'active',\n    }),\n  },\n);\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst company = await response.json(); // full company record"
 components:
   schemas:
+    SessionImportJob:
+      type: object
+      required:
+      - uuid
+      - status
+      - import_type
+      - source_format
+      - source_filename
+      - total_rows
+      - processed_rows
+      - created_count
+      - updated_count
+      - skipped_count
+      - failed_count
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Import job id. Use this value to poll progress and fetch row errors.
+        status:
+          type: string
+          enum:
+          - PENDING
+          - PROCESSING
+          - COMPLETED
+          - FAILED
+          - PAUSED
+          - CANCELLED
+        import_type:
+          type: string
+          enum:
+          - user_verification
+          - business_verification
+          - status_rules
+          - transactions
+        source_format:
+          type: string
+          enum:
+          - csv
+          - ndjson
+        source_filename:
+          type: string
+        total_rows:
+          type: integer
+          format: int64
+        processed_rows:
+          type: integer
+          format: int64
+        checkpoint_row:
+          type: integer
+          format: int64
+        created_count:
+          type: integer
+          format: int64
+        updated_count:
+          type: integer
+          format: int64
+        skipped_count:
+          type: integer
+          format: int64
+        failed_count:
+          type: integer
+          format: int64
+        total_media_bytes:
+          type: integer
+          format: int64
+        last_error:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        started_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    SessionImportError:
+      type: object
+      required:
+      - uuid
+      - row_number
+      - error
+      - raw_row
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        row_number:
+          type: integer
+          format: int64
+        external_id:
+          type:
+          - string
+          - 'null'
+        error:
+          type: string
+        raw_row:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
     ReviewItem:
       type: object
       description: One entry in a session's review / activity feed. Status changes carry `previous_status`, `new_status`, `previous_value`, `new_value`, and `changed_fields`; comments carry `comment` and (for Console comments) `mentioned_emails`; the remaining fields are `null` or empty when they do not apply to the activity type.
@@ -5194,118 +5306,6 @@ components:
           format: date-time
           description: When the entry was written, ISO 8601 UTC.
           example: '2026-06-12T00:19:31.918735Z'
-    SessionImportJob:
-      type: object
-      required:
-      - uuid
-      - status
-      - import_type
-      - source_format
-      - source_filename
-      - total_rows
-      - processed_rows
-      - created_count
-      - updated_count
-      - skipped_count
-      - failed_count
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          description: Import job id. Use this value to poll progress and fetch row errors.
-        status:
-          type: string
-          enum:
-          - PENDING
-          - PROCESSING
-          - COMPLETED
-          - FAILED
-          - PAUSED
-          - CANCELLED
-        import_type:
-          type: string
-          enum:
-          - user_verification
-          - business_verification
-          - status_rules
-          - transactions
-        source_format:
-          type: string
-          enum:
-          - csv
-          - ndjson
-        source_filename:
-          type: string
-        total_rows:
-          type: integer
-          format: int64
-        processed_rows:
-          type: integer
-          format: int64
-        checkpoint_row:
-          type: integer
-          format: int64
-        created_count:
-          type: integer
-          format: int64
-        updated_count:
-          type: integer
-          format: int64
-        skipped_count:
-          type: integer
-          format: int64
-        failed_count:
-          type: integer
-          format: int64
-        total_media_bytes:
-          type: integer
-          format: int64
-        last_error:
-          type:
-          - string
-          - 'null'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        started_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-    SessionImportError:
-      type: object
-      required:
-      - uuid
-      - row_number
-      - error
-      - raw_row
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        row_number:
-          type: integer
-          format: int64
-        external_id:
-          type:
-          - string
-          - 'null'
-        error:
-          type: string
-        raw_row:
-          type: object
-          additionalProperties: true
-        created_at:
-          type: string
-          format: date-time
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

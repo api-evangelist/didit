@@ -6927,6 +6927,198 @@ paths:
       - ApiKeyAuth: []
 components:
   schemas:
+    EmailVerificationCheckResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: 'On `Approved`/`Declined`: the session id of the matched verification — identical to the `request_id` returned by `POST /v3/email/send/`. On `Failed` and `Expired or Not Found`: a random one-off UUID that cannot be looked up later.'
+        status:
+          type: string
+          enum:
+          - Approved
+          - Declined
+          - Failed
+          - Expired or Not Found
+          description: '`Approved` — correct code, no declining risk. `Declined` — terminal: a declining risk matched or the attempt budget (3) was exhausted. `Failed` — wrong code, attempts remaining. `Expired or Not Found` — no pending verification for this address in the last 5 minutes.'
+        message:
+          type: string
+          description: Human-readable explanation of the outcome, including the number of attempts remaining after a wrong code.
+        email:
+          type:
+          - object
+          - 'null'
+          description: Full email report. Present (non-null) only on finalized outcomes (`Approved`/`Declined`); `null` on `Failed` and absent on `Expired or Not Found`.
+          properties:
+            status:
+              type: string
+              enum:
+              - Approved
+              - Declined
+              - In Review
+              - Not Finished
+              - Expired
+              description: Final status of the email verification. Matches the top-level `status` for finalized checks.
+            email:
+              type: string
+              format: email
+              description: The verified email address.
+              example: alice@example.com
+            is_breached:
+              type: boolean
+              description: '`true` when the address appears in known data breaches (breach intelligence lookup run at finalization).'
+            breaches:
+              type: array
+              description: Up to 5 most recent known breaches containing this address. Empty array (or omitted) when `is_breached` is `false`.
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Breach identifier.
+                  domain:
+                    type: string
+                    description: Domain of the breached service.
+                  breach_date:
+                    type: string
+                    format: date
+                    description: Date the breach occurred.
+                  breach_emails_count:
+                    type: integer
+                    description: Total number of accounts exposed in the breach.
+                  description:
+                    type: string
+                    description: Human-readable description of the breach (may contain HTML markup).
+                  logo_path:
+                    type: string
+                    description: URL of the breached service's logo.
+                  data_classes:
+                    type: array
+                    items:
+                      type: string
+                    description: Categories of data exposed, in snake_case (e.g., `email_addresses`, `passwords`).
+                  is_verified:
+                    type: boolean
+                    description: Whether the breach has been verified as legitimate.
+            is_disposable:
+              type: boolean
+              description: '`true` when the domain belongs to a known disposable/temporary-mail provider.'
+            is_undeliverable:
+              type: boolean
+              description: '`true` when the address cannot receive mail (failed syntax or DNS/MX validation, or the message bounced).'
+            verification_attempts:
+              type: integer
+              description: Number of OTP sends for this verification (1, or 2 after a retry).
+            verified_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: When the correct code was entered. `null` if the verification was never approved.
+            warnings:
+              type: array
+              description: Risk warnings recorded during the verification (duplicate, breached, disposable, undeliverable, attempts exceeded, blocklist, etc.). Empty array when there are none.
+              items:
+                type: object
+                properties:
+                  feature:
+                    type: string
+                    description: Feature that produced the warning. Always `EMAIL` here.
+                  risk:
+                    type: string
+                    description: Machine-readable risk code.
+                  additional_data:
+                    type:
+                    - object
+                    - 'null'
+                    description: Risk-specific context (e.g., the duplicated session id for duplicate risks). `null` when the risk carries no extra data.
+                  log_type:
+                    type: string
+                    enum:
+                    - error
+                    - warning
+                    - information
+                    description: Severity. `error` risks decline the verification, `warning` flags it for review, `information` is recorded without affecting the status.
+                  short_description:
+                    type: string
+                    description: Human-readable one-line summary of the risk.
+                  long_description:
+                    type: string
+                    description: Human-readable explanation of the risk.
+            lifecycle:
+              type: array
+              description: Chronological audit trail of the verification. Event `type` is one of `EMAIL_VERIFICATION_MESSAGE_SENT`, `EMAIL_VERIFICATION_RETRY_MESSAGE_SENT`, `VALID_CODE_ENTERED`, `INVALID_CODE_ENTERED`, `EMAIL_VERIFICATION_APPROVED`, `EMAIL_VERIFICATION_DECLINED`, `EMAIL_VERIFICATION_IN_REVIEW`, `EMAIL_VERIFICATION_EXPIRED`.
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: Event type.
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: When the event happened.
+                  details:
+                    type:
+                    - object
+                    - 'null'
+                    description: 'Event-specific payload. Send events: `{status, reason}`. Code-entry events: `{code_tried, status}`. Final-status events: `null`, or `{reason}` when declined or in review.'
+                  fee:
+                    type: number
+                    description: USD amount billed for this event. Non-zero only on the first successful send; 0 for retries, code entries, and status events.
+            matches:
+              type: array
+              description: Other sessions of your application (KYC, KYB, or API) where the same email address was used by a different user (different `vendor_data`). Up to 5 entries; a synthetic list-entry blocklist match is prepended when present (and only when no session-derived blocklisted email exists) — session-derived matches keep created_at order. Empty array when there are no matches.
+              items:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: Session id of the other verification that used this email address.
+                  session_number:
+                    type: integer
+                    description: Human-friendly sequential number of that session.
+                  vendor_data:
+                    type:
+                    - string
+                    - 'null'
+                    description: '`vendor_data` of that session.'
+                  verification_date:
+                    type: string
+                    description: When that session was created (`YYYY-MM-DDTHH:MM:SSZ`).
+                  email:
+                    type: string
+                    description: The matched email address.
+                  status:
+                    type: string
+                    description: Status of that session (e.g., `Approved`, `Declined`, `In Progress`).
+                  is_blocklisted:
+                    type: boolean
+                    description: Whether the email address is on your application's blocklist.
+                  api_service:
+                    type:
+                    - string
+                    - 'null'
+                    description: For API-type sessions, the standalone API that created it (e.g., `PHONE_VERIFICATION`); `null` for regular verification sessions.
+                  source:
+                    type: string
+                    description: 'Where the match was found. Usually `session`; a blocklist hit via an organization list entry prepends a synthetic match with `source: "list_entry"` and null `session_id`/`session_number`.'
+        vendor_data:
+          type:
+          - string
+          - 'null'
+          description: '`vendor_data` of the matched verification''s session. `null` on `Expired or Not Found`.'
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: '`metadata` of the matched verification''s session. `null` on `Expired or Not Found`.'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of this check response.
     EmailVerificationSendResponse:
       type: object
       properties:
@@ -7123,198 +7315,6 @@ components:
                   is_blocklisted:
                     type: boolean
                     description: Whether the phone number is on your application's blocklist.
-                  api_service:
-                    type:
-                    - string
-                    - 'null'
-                    description: For API-type sessions, the standalone API that created it (e.g., `PHONE_VERIFICATION`); `null` for regular verification sessions.
-                  source:
-                    type: string
-                    description: 'Where the match was found. Usually `session`; a blocklist hit via an organization list entry prepends a synthetic match with `source: "list_entry"` and null `session_id`/`session_number`.'
-        vendor_data:
-          type:
-          - string
-          - 'null'
-          description: '`vendor_data` of the matched verification''s session. `null` on `Expired or Not Found`.'
-        metadata:
-          type:
-          - object
-          - 'null'
-          description: '`metadata` of the matched verification''s session. `null` on `Expired or Not Found`.'
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp of this check response.
-    EmailVerificationCheckResponse:
-      type: object
-      properties:
-        request_id:
-          type: string
-          format: uuid
-          description: 'On `Approved`/`Declined`: the session id of the matched verification — identical to the `request_id` returned by `POST /v3/email/send/`. On `Failed` and `Expired or Not Found`: a random one-off UUID that cannot be looked up later.'
-        status:
-          type: string
-          enum:
-          - Approved
-          - Declined
-          - Failed
-          - Expired or Not Found
-          description: '`Approved` — correct code, no declining risk. `Declined` — terminal: a declining risk matched or the attempt budget (3) was exhausted. `Failed` — wrong code, attempts remaining. `Expired or Not Found` — no pending verification for this address in the last 5 minutes.'
-        message:
-          type: string
-          description: Human-readable explanation of the outcome, including the number of attempts remaining after a wrong code.
-        email:
-          type:
-          - object
-          - 'null'
-          description: Full email report. Present (non-null) only on finalized outcomes (`Approved`/`Declined`); `null` on `Failed` and absent on `Expired or Not Found`.
-          properties:
-            status:
-              type: string
-              enum:
-              - Approved
-              - Declined
-              - In Review
-              - Not Finished
-              - Expired
-              description: Final status of the email verification. Matches the top-level `status` for finalized checks.
-            email:
-              type: string
-              format: email
-              description: The verified email address.
-              example: alice@example.com
-            is_breached:
-              type: boolean
-              description: '`true` when the address appears in known data breaches (breach intelligence lookup run at finalization).'
-            breaches:
-              type: array
-              description: Up to 5 most recent known breaches containing this address. Empty array (or omitted) when `is_breached` is `false`.
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    description: Breach identifier.
-                  domain:
-                    type: string
-                    description: Domain of the breached service.
-                  breach_date:
-                    type: string
-                    format: date
-                    description: Date the breach occurred.
-                  breach_emails_count:
-                    type: integer
-                    description: Total number of accounts exposed in the breach.
-                  description:
-                    type: string
-                    description: Human-readable description of the breach (may contain HTML markup).
-                  logo_path:
-                    type: string
-                    description: URL of the breached service's logo.
-                  data_classes:
-                    type: array
-                    items:
-                      type: string
-                    description: Categories of data exposed, in snake_case (e.g., `email_addresses`, `passwords`).
-                  is_verified:
-                    type: boolean
-                    description: Whether the breach has been verified as legitimate.
-            is_disposable:
-              type: boolean
-              description: '`true` when the domain belongs to a known disposable/temporary-mail provider.'
-            is_undeliverable:
-              type: boolean
-              description: '`true` when the address cannot receive mail (failed syntax or DNS/MX validation, or the message bounced).'
-            verification_attempts:
-              type: integer
-              description: Number of OTP sends for this verification (1, or 2 after a retry).
-            verified_at:
-              type:
-              - string
-              - 'null'
-              format: date-time
-              description: When the correct code was entered. `null` if the verification was never approved.
-            warnings:
-              type: array
-              description: Risk warnings recorded during the verification (duplicate, breached, disposable, undeliverable, attempts exceeded, blocklist, etc.). Empty array when there are none.
-              items:
-                type: object
-                properties:
-                  feature:
-                    type: string
-                    description: Feature that produced the warning. Always `EMAIL` here.
-                  risk:
-                    type: string
-                    description: Machine-readable risk code.
-                  additional_data:
-                    type:
-                    - object
-                    - 'null'
-                    description: Risk-specific context (e.g., the duplicated session id for duplicate risks). `null` when the risk carries no extra data.
-                  log_type:
-                    type: string
-                    enum:
-                    - error
-                    - warning
-                    - information
-                    description: Severity. `error` risks decline the verification, `warning` flags it for review, `information` is recorded without affecting the status.
-                  short_description:
-                    type: string
-                    description: Human-readable one-line summary of the risk.
-                  long_description:
-                    type: string
-                    description: Human-readable explanation of the risk.
-            lifecycle:
-              type: array
-              description: Chronological audit trail of the verification. Event `type` is one of `EMAIL_VERIFICATION_MESSAGE_SENT`, `EMAIL_VERIFICATION_RETRY_MESSAGE_SENT`, `VALID_CODE_ENTERED`, `INVALID_CODE_ENTERED`, `EMAIL_VERIFICATION_APPROVED`, `EMAIL_VERIFICATION_DECLINED`, `EMAIL_VERIFICATION_IN_REVIEW`, `EMAIL_VERIFICATION_EXPIRED`.
-              items:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    description: Event type.
-                  timestamp:
-                    type: string
-                    format: date-time
-                    description: When the event happened.
-                  details:
-                    type:
-                    - object
-                    - 'null'
-                    description: 'Event-specific payload. Send events: `{status, reason}`. Code-entry events: `{code_tried, status}`. Final-status events: `null`, or `{reason}` when declined or in review.'
-                  fee:
-                    type: number
-                    description: USD amount billed for this event. Non-zero only on the first successful send; 0 for retries, code entries, and status events.
-            matches:
-              type: array
-              description: Other sessions of your application (KYC, KYB, or API) where the same email address was used by a different user (different `vendor_data`). Up to 5 entries; a synthetic list-entry blocklist match is prepended when present (and only when no session-derived blocklisted email exists) — session-derived matches keep created_at order. Empty array when there are no matches.
-              items:
-                type: object
-                properties:
-                  session_id:
-                    type: string
-                    format: uuid
-                    description: Session id of the other verification that used this email address.
-                  session_number:
-                    type: integer
-                    description: Human-friendly sequential number of that session.
-                  vendor_data:
-                    type:
-                    - string
-                    - 'null'
-                    description: '`vendor_data` of that session.'
-                  verification_date:
-                    type: string
-                    description: When that session was created (`YYYY-MM-DDTHH:MM:SSZ`).
-                  email:
-                    type: string
-                    description: The matched email address.
-                  status:
-                    type: string
-                    description: Status of that session (e.g., `Approved`, `Declined`, `In Progress`).
-                  is_blocklisted:
-                    type: boolean
-                    description: Whether the email address is on your application's blocklist.
                   api_service:
                     type:
                     - string

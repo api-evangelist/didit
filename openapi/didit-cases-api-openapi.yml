@@ -2088,6 +2088,299 @@ paths:
                           type: string
 components:
   schemas:
+    CaseAssignee:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+    CaseLink:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        linked_entity_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - session
+          - business_session
+          - transaction
+        linked_entity_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        linked_entity_summary:
+          type:
+          - object
+          - 'null'
+          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        created_at:
+          type: string
+          format: date-time
+    CaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        comment:
+          type: string
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+        actor_name:
+          type:
+          - string
+          - 'null'
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+        is_internal:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              s3_key:
+                type: string
+              filename:
+                type: string
+              file_size:
+                type: integer
+              url:
+                type: string
+                format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+    CaseBlueprintSummary:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+    CaseEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          enum:
+          - CREATED
+          - STATUS_CHANGED
+          - ASSIGNED
+          - UNASSIGNED
+          - RESOLVED
+          - REOPENED
+          - LINK_ADDED
+          - LINK_REMOVED
+          - NOTE_ADDED
+          - PRIORITY_CHANGED
+          - DUE_DATE_CHANGED
+          - TAG_ADDED
+          - TAG_REMOVED
+          - ESCALATED
+          - TRANSFERRED
+          - CHECKLIST_COMPLETED
+          - REPORT_CREATED
+          - REPORT_FINALIZED
+          - SUBMITTED_FOR_APPROVAL
+          - APPROVAL_GRANTED
+          - APPROVAL_REJECTED
+          - ENTITY_ACTION
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+        actor_name:
+          type:
+          - string
+          - 'null'
+        previous_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        new_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    CaseListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        case_number:
+          type:
+          - string
+          - 'null'
+          description: Auto-assigned, e.g. CS-0001.
+        title:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type:
+          - string
+          - 'null'
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        due_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        created_by_email:
+          type:
+          - string
+          - 'null'
+        created_by_name:
+          type:
+          - string
+          - 'null'
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintSummary'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        application_id:
+          type: string
+          format: uuid
+        application_name:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+        organization_name:
+          type: string
+    CaseChecklistItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        label:
+          type: string
+          maxLength: 255
+        is_completed:
+          type: boolean
+        completed_by:
+          type:
+          - string
+          - 'null'
+          format: email
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        order:
+          type: integer
+    CaseSubject:
+      type:
+      - object
+      - 'null'
+      description: The single user or business the case is anchored to.
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+          - business
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: The subject's vendor_data.
     CaseBlueprintDetail:
       type: object
       properties:
@@ -2377,299 +2670,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseChecklistItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        label:
-          type: string
-          maxLength: 255
-        is_completed:
-          type: boolean
-        completed_by:
-          type:
-          - string
-          - 'null'
-          format: email
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        order:
-          type: integer
-    CaseLink:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        linked_entity_type:
-          type:
-          - string
-          - 'null'
-          enum:
-          - session
-          - business_session
-          - transaction
-        linked_entity_uuid:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        linked_entity_summary:
-          type:
-          - object
-          - 'null'
-          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
-        created_at:
-          type: string
-          format: date-time
-    CaseEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        event_type:
-          type: string
-          enum:
-          - CREATED
-          - STATUS_CHANGED
-          - ASSIGNED
-          - UNASSIGNED
-          - RESOLVED
-          - REOPENED
-          - LINK_ADDED
-          - LINK_REMOVED
-          - NOTE_ADDED
-          - PRIORITY_CHANGED
-          - DUE_DATE_CHANGED
-          - TAG_ADDED
-          - TAG_REMOVED
-          - ESCALATED
-          - TRANSFERRED
-          - CHECKLIST_COMPLETED
-          - REPORT_CREATED
-          - REPORT_FINALIZED
-          - SUBMITTED_FOR_APPROVAL
-          - APPROVAL_GRANTED
-          - APPROVAL_REJECTED
-          - ENTITY_ACTION
-        actor_email:
-          type:
-          - string
-          - 'null'
-          format: email
-        actor_name:
-          type:
-          - string
-          - 'null'
-        previous_status:
-          type:
-          - string
-          - 'null'
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        new_status:
-          type:
-          - string
-          - 'null'
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        metadata:
-          type: object
-        created_at:
-          type: string
-          format: date-time
-    CaseBlueprintSummary:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-    CaseNote:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        comment:
-          type: string
-        actor_email:
-          type:
-          - string
-          - 'null'
-          format: email
-        actor_name:
-          type:
-          - string
-          - 'null'
-        mentioned_emails:
-          type: array
-          items:
-            type: string
-            format: email
-        is_internal:
-          type: boolean
-        attachments:
-          type: array
-          items:
-            type: object
-            properties:
-              s3_key:
-                type: string
-              filename:
-                type: string
-              file_size:
-                type: integer
-              url:
-                type: string
-                format: uri
-        tags:
-          type: array
-          items:
-            type: string
-        created_at:
-          type: string
-          format: date-time
-    CaseAssignee:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-    CaseListItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        case_number:
-          type:
-          - string
-          - 'null'
-          description: Auto-assigned, e.g. CS-0001.
-        title:
-          type: string
-        status:
-          type: string
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        resolution:
-          type:
-          - string
-          - 'null'
-          enum:
-          - FALSE_POSITIVE
-          - VALID_THREAT
-        priority:
-          type: string
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-        source:
-          type: string
-          enum:
-          - MANUAL
-          - AML_SCREENING
-          - TRANSACTION_RULE
-          - WORKFLOW_BUILDER
-        tags:
-          type: array
-          items:
-            type: string
-        subject:
-          $ref: '#/components/schemas/CaseSubject'
-        assigned_to:
-          $ref: '#/components/schemas/CaseAssignee'
-        assigned_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        due_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        resolved_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        created_by_email:
-          type:
-          - string
-          - 'null'
-        created_by_name:
-          type:
-          - string
-          - 'null'
-        blueprint:
-          $ref: '#/components/schemas/CaseBlueprintSummary'
-        links_count:
-          type: integer
-        notes_count:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        application_id:
-          type: string
-          format: uuid
-        application_name:
-          type: string
-        organization_id:
-          type: string
-          format: uuid
-        organization_name:
-          type: string
-    CaseSubject:
-      type:
-      - object
-      - 'null'
-      description: The single user or business the case is anchored to.
-      properties:
-        type:
-          type: string
-          enum:
-          - user
-          - business
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-        external_id:
-          type:
-          - string
-          - 'null'
-          description: The subject's vendor_data.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

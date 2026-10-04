@@ -463,6 +463,119 @@ paths:
                       type: string
 components:
   schemas:
+    CaseBlueprintListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type:
+          - string
+          - 'null'
+        assignment_method:
+          type: string
+          enum:
+          - MANUAL
+          - AUTOMATIC
+        assignee_pool:
+          type: array
+          items:
+            type: string
+            format: uuid
+        max_active_cases:
+          type:
+          - integer
+          - 'null'
+        escalation_enabled:
+          type: boolean
+        transfer_enabled:
+          type: boolean
+        require_resolution_note:
+          type: boolean
+        is_active:
+          type: boolean
+        preset_key:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+    CaseContentConfig:
+      type: object
+      description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
+      properties:
+        checklist:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            optional:
+              type: boolean
+              description: When true, a case can be resolved with incomplete checklist items.
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    maxLength: 255
+                  order:
+                    type: integer
+        aml_control:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            financial:
+              type: boolean
+            identity:
+              type: boolean
+        identity:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            personal_information:
+              type: boolean
+            applicant_tags:
+              type: boolean
+            contact_information:
+              type: boolean
+            risk_overview:
+              type: boolean
+            poi_documents:
+              type: boolean
+            poa_documents:
+              type: boolean
+        verifications:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            summary:
+              type: boolean
+        reporting:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            fiu_reports:
+              type: boolean
+        financial:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            payment_methods:
+              type: boolean
+            transactions:
+              type: boolean
     CaseBlueprintDetail:
       type: object
       properties:
@@ -621,119 +734,6 @@ components:
               name:
                 type: string
         updated_at:
-          type: string
-          format: date-time
-    CaseContentConfig:
-      type: object
-      description: The six togglable sections that drive which tabs and fields appear on the case page. Unknown sections or keys are rejected.
-      properties:
-        checklist:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            optional:
-              type: boolean
-              description: When true, a case can be resolved with incomplete checklist items.
-            items:
-              type: array
-              items:
-                type: object
-                properties:
-                  label:
-                    type: string
-                    maxLength: 255
-                  order:
-                    type: integer
-        aml_control:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            financial:
-              type: boolean
-            identity:
-              type: boolean
-        identity:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            personal_information:
-              type: boolean
-            applicant_tags:
-              type: boolean
-            contact_information:
-              type: boolean
-            risk_overview:
-              type: boolean
-            poi_documents:
-              type: boolean
-            poa_documents:
-              type: boolean
-        verifications:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            summary:
-              type: boolean
-        reporting:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            fiu_reports:
-              type: boolean
-        financial:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            payment_methods:
-              type: boolean
-            transactions:
-              type: boolean
-    CaseBlueprintListItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-        description:
-          type:
-          - string
-          - 'null'
-        assignment_method:
-          type: string
-          enum:
-          - MANUAL
-          - AUTOMATIC
-        assignee_pool:
-          type: array
-          items:
-            type: string
-            format: uuid
-        max_active_cases:
-          type:
-          - integer
-          - 'null'
-        escalation_enabled:
-          type: boolean
-        transfer_enabled:
-          type: boolean
-        require_resolution_note:
-          type: boolean
-        is_active:
-          type: boolean
-        preset_key:
-          type:
-          - string
-          - 'null'
-        created_at:
           type: string
           format: date-time
   securitySchemes:
