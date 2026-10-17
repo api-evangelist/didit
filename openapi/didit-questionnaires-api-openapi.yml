@@ -478,14 +478,14 @@ paths:
         source: "const res = await fetch(`https://verification.didit.me/v3/questionnaires/${questionnaireUuid}/`, {\n  method: \"DELETE\",\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (res.status !== 204) throw new Error(`Didit ${res.status}`);"
 components:
   schemas:
-    QuestionnaireListItem:
+    QuestionnaireDetail:
       type: object
-      description: One questionnaire version in the list view.
+      description: Full questionnaire detail returned from GET, POST (create) and PATCH (update) endpoints.
       properties:
-        uuid:
+        questionnaire_id:
           type: string
           format: uuid
-          description: Per-version UUID. Use as `{questionnaire_uuid}` for get/update/delete and as `questionnaire_uuid` in a workflow's QUESTIONNAIRE feature config.
+          description: Unique identifier of the questionnaire. Use this id when referencing the questionnaire from a workflow or in subsequent update/delete requests.
         title:
           type: string
         description:
@@ -502,30 +502,20 @@ components:
           type: boolean
         is_simple_questionnaire:
           type: boolean
-          description: True for linear questionnaires created through this API; false for graph-based questionnaires built in the Console.
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        question_types:
+        graph:
+          type: object
+          description: Graph structure with start_node and nodes map.
+        sections:
           type: array
+          description: Questionnaire content grouped into sections (derived from the graph).
           items:
-            type: string
-          description: Uppercase element types of the answerable questions, in creation order (e.g. `SHORT_TEXT`, `MULTIPLE_CHOICE`, `FILE_UPLOAD`). Structural `SECTION_HEADER` and `SEPARATOR` elements are excluded. One entry per question, so values can repeat.
-        workflow_names:
-          type: array
-          items:
-            type: string
-          description: Names of workflows using this questionnaire. Currently always `[]` on this endpoint (populated only in the Console listing).
+            type: object
         questionnaire_group_id:
           type: string
           format: uuid
           description: Stable identifier that groups all versions of the same questionnaire.
         version:
           type: integer
-          description: Version number within the group, starting at 1.
         status:
           type: string
           enum:
@@ -536,10 +526,9 @@ components:
           - string
           - 'null'
           format: date-time
-          description: When this version was published. `null` for drafts.
         is_editable:
           type: boolean
-          description: True when this version is a `draft`.
+          description: True when the questionnaire can still be edited in place (draft versions).
     SimpleQuestionnaireElement:
       type: object
       required:
@@ -640,14 +629,14 @@ components:
               description: Translated message shown when validation fails, keyed by language code.
               additionalProperties:
                 type: string
-    QuestionnaireDetail:
+    QuestionnaireListItem:
       type: object
-      description: Full questionnaire detail returned from GET, POST (create) and PATCH (update) endpoints.
+      description: One questionnaire version in the list view.
       properties:
-        questionnaire_id:
+        uuid:
           type: string
           format: uuid
-          description: Unique identifier of the questionnaire. Use this id when referencing the questionnaire from a workflow or in subsequent update/delete requests.
+          description: Per-version UUID. Use as `{questionnaire_uuid}` for get/update/delete and as `questionnaire_uuid` in a workflow's QUESTIONNAIRE feature config.
         title:
           type: string
         description:
@@ -664,20 +653,30 @@ components:
           type: boolean
         is_simple_questionnaire:
           type: boolean
-        graph:
-          type: object
-          description: Graph structure with start_node and nodes map.
-        sections:
+          description: True for linear questionnaires created through this API; false for graph-based questionnaires built in the Console.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        question_types:
           type: array
-          description: Questionnaire content grouped into sections (derived from the graph).
           items:
-            type: object
+            type: string
+          description: Uppercase element types of the answerable questions, in creation order (e.g. `SHORT_TEXT`, `MULTIPLE_CHOICE`, `FILE_UPLOAD`). Structural `SECTION_HEADER` and `SEPARATOR` elements are excluded. One entry per question, so values can repeat.
+        workflow_names:
+          type: array
+          items:
+            type: string
+          description: Names of workflows using this questionnaire. Currently always `[]` on this endpoint (populated only in the Console listing).
         questionnaire_group_id:
           type: string
           format: uuid
           description: Stable identifier that groups all versions of the same questionnaire.
         version:
           type: integer
+          description: Version number within the group, starting at 1.
         status:
           type: string
           enum:
@@ -688,9 +687,10 @@ components:
           - string
           - 'null'
           format: date-time
+          description: When this version was published. `null` for drafts.
         is_editable:
           type: boolean
-          description: True when the questionnaire can still be edited in place (draft versions).
+          description: True when this version is a `draft`.
     SimpleQuestionnaireRequest:
       type: object
       description: Create a simple linear questionnaire. The API converts `form_elements` into the internal questionnaire graph.

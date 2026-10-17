@@ -599,6 +599,317 @@ components:
           - object
           - 'null'
           description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
+    TravelRulePickupRespondRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - accept
+          - decline
+        beneficiary_name:
+          type: string
+          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
+    WalletAddressEntryUpdate:
+      type: object
+      properties:
+        holder_name:
+          type: string
+        holder_vendor_data:
+          type: string
+        entity_type:
+          type: string
+        travel_address:
+          type: string
+      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
+    WalletAddressEntry:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        address:
+          type: string
+          description: The wallet address. Unique per application and chain among non-deleted entries.
+        chain:
+          type:
+          - string
+          - 'null'
+          description: Free-text chain identifier, e.g. "ethereum", "bitcoin".
+        holder_vendor_data:
+          type:
+          - string
+          - 'null'
+          description: Your internal identifier for the holder.
+        holder_name:
+          type:
+          - string
+          - 'null'
+          description: Name of the wallet holder, used for the beneficiary name match.
+        entity_type:
+          type: string
+          description: Free text, defaults to "individual".
+        is_ownership_verified:
+          type: boolean
+          description: Read-only. Whether ownership of this address has been proven.
+        created_at:
+          type: string
+          format: date-time
+        self_declared:
+          type: boolean
+          description: Whether the entry was created as a self-declared ownership proof.
+        travel_address:
+          type:
+          - string
+          - 'null'
+          description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's transfers over the TRP rail.
+    TravelRuleInboundResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+          description: Didit transaction UUID for the inbound deposit.
+        txn_id:
+          type: string
+          description: Didit-generated txn_id for the sunrise transaction.
+        created:
+          type: boolean
+          description: true when a new transaction was minted (HTTP 201); false when an existing unclaimed deposit was reused (HTTP 200).
+        travel_rule:
+          $ref: '#/components/schemas/TravelRuleTransferDetail'
+    VaspDirectoryEntry:
+      type: object
+      properties:
+        name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+        dd_status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETED
+          - REJECTED
+        dd_score:
+          type: integer
+        reachable_rails:
+          type: array
+          items:
+            type: string
+            enum:
+            - INTERNAL
+            - TRP
+            - GTR
+            - EMAIL
+        is_didit_customer:
+          type: boolean
+          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
+        dd_score_breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
+        dd_assessed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
+    WalletAddressEntryCreate:
+      type: object
+      required:
+      - address
+      properties:
+        address:
+          type: string
+        chain:
+          type: string
+        holder_vendor_data:
+          type: string
+        holder_name:
+          type: string
+        entity_type:
+          type: string
+          default: individual
+        self_declared:
+          type: boolean
+          default: false
+          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
+        travel_address:
+          type: string
+          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
+    TravelRulePickupInfo:
+      type: object
+      properties:
+        originator_vasp_name:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        beneficiary_wallet:
+          type: string
+        status:
+          type: string
+    TravelRuleTransferPatchRequest:
+      type: object
+      description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
+      properties:
+        payment_txn_id:
+          type: string
+          description: The on-chain transaction hash. Requires the transfer to be an outbound transfer in COMPLETED status.
+        action:
+          type: string
+          enum:
+          - cancel
+          - resend
+          description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
+    TravelRuleSettingsUpdate:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+        legal_name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+          maxLength: 8
+        name_matching_strictness:
+          type: string
+          enum:
+          - NONE
+          - STRICT
+          - DEFAULT
+          - FUZZY
+        confirmation_timeout_hours:
+          type: integer
+          minimum: 1
+        timeout_outcome:
+          type: string
+          enum:
+          - HOLD
+          - REJECT
+          - PROCEED
+        compliance_email:
+          type: string
+          format: email
+        is_discoverable:
+          type: boolean
+        threshold_amount:
+          type: string
+          description: Decimal string. Minimum transfer amount that triggers a managed exchange.
+        inbound_auto_accept:
+          type: boolean
+        allow_self_declaration:
+          type: boolean
+        allow_screenshot_proof:
+          type: boolean
+          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
+        auto_wallet_verification:
+          type: boolean
+        vasp_attribution_enabled:
+          type: boolean
+      description: All fields optional; PUT applies a partial update.
+    TravelRuleInboundRequest:
+      type: object
+      required:
+      - chain
+      - txid
+      - wallet_address
+      - amount
+      - currency
+      properties:
+        chain:
+          type: string
+          description: Chain the deposit settled on, e.g. "ethereum".
+        txid:
+          type: string
+          description: On-chain transaction hash. Deduped together with wallet_address.
+        wallet_address:
+          type: string
+          description: The destination wallet you received the deposit on.
+        amount:
+          type: string
+          description: Deposit amount as a decimal string.
+        currency:
+          type: string
+          description: Deposit asset, e.g. "USDC".
+        originator_data:
+          type: object
+          description: IVMS-101 originator payload from the sending VASP, if known.
+          additionalProperties: true
+        beneficiary_data:
+          type: object
+          description: IVMS-101 beneficiary payload (your customer).
+          additionalProperties: true
+        originating_vasp:
+          type: object
+          description: Optional description of the sending VASP.
+          properties:
+            name:
+              type: string
+            lei:
+              type: string
+            travel_address:
+              type: string
+              description: Travel address that lets Didit reach the sender on the TRP rail.
+    TravelRuleWidgetProofSummary:
+      type: object
+      properties:
+        proof_id:
+          type: string
+          format: uuid
+        method:
+          type: string
+          enum:
+          - MESSAGE_SIGNING
+          - SATOSHI_TEST
+          - SCREENSHOT
+          - SELF_DECLARATION
+        status:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - REJECTED
+          - EXPIRED
+          description: PENDING on a SATOSHI_TEST proof means the deposit has been seen on-chain but has not yet reached enough confirmations; a background job automatically rechecks it and moves it to VERIFIED once it confirms, with no resubmission needed. REJECTED means a genuinely wrong deposit was submitted (absent, wrong sender, or wrong amount). EXPIRED means the proof's own test window closed before a valid deposit was seen.
+        wallet_address:
+          type: string
+        chain:
+          type: string
+        deposit_address:
+          type:
+          - string
+          - 'null'
+          description: Deposit address the customer must send the Satoshi test amount to. Present only on a SATOSHI_TEST proof.
+        expected_amount:
+          type:
+          - string
+          - 'null'
+          description: Exact on-chain amount, in the deposit's native currency, the Satoshi test deposit must match. Present only on a SATOSHI_TEST proof.
+        expires_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Deadline for this proof's own Satoshi test window. Present only on a SATOSHI_TEST proof; the widget session's own expires_at is extended to cover it when SATOSHI_TEST is offered.
+        challenge:
+          type:
+          - string
+          - 'null'
+          description: Didit-issued message the customer signs with their wallet. Present only on a MESSAGE_SIGNING proof.
+        created_at:
+          type: string
+          format: date-time
     TravelRuleSettingsDetail:
       type: object
       properties:
@@ -662,6 +973,44 @@ components:
         travel_address:
           type: string
           description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Populated once your VASP profile is complete.
+    TravelRuleWidgetSessionCreate:
+      type: object
+      required:
+      - wallet_address
+      - chain
+      properties:
+        wallet_address:
+          type: string
+          description: The wallet address to verify.
+        chain:
+          type: string
+          description: Chain identifier for the address, e.g. "ethereum", "bitcoin", "solana".
+        holder_name:
+          type: string
+          description: Name of the wallet holder, used for the beneficiary name match.
+        vendor_data:
+          type: string
+          description: Your internal identifier for the holder, carried onto the created address-book entry.
+        transaction_id:
+          type: string
+          format: uuid
+          description: Optional. Didit transaction UUID of a Travel Rule transfer to advance when the proof verifies.
+        satoshi_deposit_address:
+          type: string
+          description: Optional. A deposit address you control; supplying it enables the SATOSHI_TEST proof method.
+        callback_url:
+          type: string
+          description: Optional. Where the widget returns the customer after completion.
+        expires_in_minutes:
+          type: integer
+          description: Optional. Lifetime of the minted link, in minutes. Automatically extended to cover the Satoshi test window when SATOSHI_TEST is offered.
+    TravelRuleOwnershipConfirmRequest:
+      type: object
+      required:
+      - confirmed
+      properties:
+        confirmed:
+          type: boolean
     TravelRuleTransferDetail:
       type: object
       description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. originator_data/beneficiary_data are omitted while PII is masked (see description).
@@ -748,183 +1097,6 @@ components:
         created_at:
           type: string
           format: date-time
-    TravelRulePickupRespondRequest:
-      type: object
-      required:
-      - decision
-      properties:
-        decision:
-          type: string
-          enum:
-          - accept
-          - decline
-        beneficiary_name:
-          type: string
-          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
-    TravelRulePickupInfo:
-      type: object
-      properties:
-        originator_vasp_name:
-          type: string
-        amount:
-          type: string
-        currency:
-          type: string
-        beneficiary_wallet:
-          type: string
-        status:
-          type: string
-    TravelRuleTransferPatchRequest:
-      type: object
-      description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
-      properties:
-        payment_txn_id:
-          type: string
-          description: The on-chain transaction hash. Requires the transfer to be an outbound transfer in COMPLETED status.
-        action:
-          type: string
-          enum:
-          - cancel
-          - resend
-          description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
-    TravelRuleWidgetProofSummary:
-      type: object
-      properties:
-        proof_id:
-          type: string
-          format: uuid
-        method:
-          type: string
-          enum:
-          - MESSAGE_SIGNING
-          - SATOSHI_TEST
-          - SCREENSHOT
-          - SELF_DECLARATION
-        status:
-          type: string
-          enum:
-          - PENDING
-          - VERIFIED
-          - REJECTED
-          - EXPIRED
-          description: PENDING on a SATOSHI_TEST proof means the deposit has been seen on-chain but has not yet reached enough confirmations; a background job automatically rechecks it and moves it to VERIFIED once it confirms, with no resubmission needed. REJECTED means a genuinely wrong deposit was submitted (absent, wrong sender, or wrong amount). EXPIRED means the proof's own test window closed before a valid deposit was seen.
-        wallet_address:
-          type: string
-        chain:
-          type: string
-        deposit_address:
-          type:
-          - string
-          - 'null'
-          description: Deposit address the customer must send the Satoshi test amount to. Present only on a SATOSHI_TEST proof.
-        expected_amount:
-          type:
-          - string
-          - 'null'
-          description: Exact on-chain amount, in the deposit's native currency, the Satoshi test deposit must match. Present only on a SATOSHI_TEST proof.
-        expires_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Deadline for this proof's own Satoshi test window. Present only on a SATOSHI_TEST proof; the widget session's own expires_at is extended to cover it when SATOSHI_TEST is offered.
-        challenge:
-          type:
-          - string
-          - 'null'
-          description: Didit-issued message the customer signs with their wallet. Present only on a MESSAGE_SIGNING proof.
-        created_at:
-          type: string
-          format: date-time
-    WalletAddressEntry:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        address:
-          type: string
-          description: The wallet address. Unique per application and chain among non-deleted entries.
-        chain:
-          type:
-          - string
-          - 'null'
-          description: Free-text chain identifier, e.g. "ethereum", "bitcoin".
-        holder_vendor_data:
-          type:
-          - string
-          - 'null'
-          description: Your internal identifier for the holder.
-        holder_name:
-          type:
-          - string
-          - 'null'
-          description: Name of the wallet holder, used for the beneficiary name match.
-        entity_type:
-          type: string
-          description: Free text, defaults to "individual".
-        is_ownership_verified:
-          type: boolean
-          description: Read-only. Whether ownership of this address has been proven.
-        created_at:
-          type: string
-          format: date-time
-        self_declared:
-          type: boolean
-          description: Whether the entry was created as a self-declared ownership proof.
-        travel_address:
-          type:
-          - string
-          - 'null'
-          description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's transfers over the TRP rail.
-    TravelRuleOwnershipConfirmRequest:
-      type: object
-      required:
-      - confirmed
-      properties:
-        confirmed:
-          type: boolean
-    VaspDirectoryEntry:
-      type: object
-      properties:
-        name:
-          type: string
-        lei:
-          type: string
-        jurisdiction:
-          type: string
-        dd_status:
-          type: string
-          enum:
-          - NOT_STARTED
-          - IN_PROGRESS
-          - COMPLETED
-          - REJECTED
-        dd_score:
-          type: integer
-        reachable_rails:
-          type: array
-          items:
-            type: string
-            enum:
-            - INTERNAL
-            - TRP
-            - GTR
-            - EMAIL
-        is_didit_customer:
-          type: boolean
-          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
-        dd_score_breakdown:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
-        dd_assessed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
     TravelRuleWidgetSessionResponse:
       type: object
       properties:
@@ -940,178 +1112,6 @@ components:
         expires_at:
           type: string
           format: date-time
-    WalletAddressEntryCreate:
-      type: object
-      required:
-      - address
-      properties:
-        address:
-          type: string
-        chain:
-          type: string
-        holder_vendor_data:
-          type: string
-        holder_name:
-          type: string
-        entity_type:
-          type: string
-          default: individual
-        self_declared:
-          type: boolean
-          default: false
-          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
-        travel_address:
-          type: string
-          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
-    TravelRuleWidgetSessionCreate:
-      type: object
-      required:
-      - wallet_address
-      - chain
-      properties:
-        wallet_address:
-          type: string
-          description: The wallet address to verify.
-        chain:
-          type: string
-          description: Chain identifier for the address, e.g. "ethereum", "bitcoin", "solana".
-        holder_name:
-          type: string
-          description: Name of the wallet holder, used for the beneficiary name match.
-        vendor_data:
-          type: string
-          description: Your internal identifier for the holder, carried onto the created address-book entry.
-        transaction_id:
-          type: string
-          format: uuid
-          description: Optional. Didit transaction UUID of a Travel Rule transfer to advance when the proof verifies.
-        satoshi_deposit_address:
-          type: string
-          description: Optional. A deposit address you control; supplying it enables the SATOSHI_TEST proof method.
-        callback_url:
-          type: string
-          description: Optional. Where the widget returns the customer after completion.
-        expires_in_minutes:
-          type: integer
-          description: Optional. Lifetime of the minted link, in minutes. Automatically extended to cover the Satoshi test window when SATOSHI_TEST is offered.
-    TravelRuleInboundRequest:
-      type: object
-      required:
-      - chain
-      - txid
-      - wallet_address
-      - amount
-      - currency
-      properties:
-        chain:
-          type: string
-          description: Chain the deposit settled on, e.g. "ethereum".
-        txid:
-          type: string
-          description: On-chain transaction hash. Deduped together with wallet_address.
-        wallet_address:
-          type: string
-          description: The destination wallet you received the deposit on.
-        amount:
-          type: string
-          description: Deposit amount as a decimal string.
-        currency:
-          type: string
-          description: Deposit asset, e.g. "USDC".
-        originator_data:
-          type: object
-          description: IVMS-101 originator payload from the sending VASP, if known.
-          additionalProperties: true
-        beneficiary_data:
-          type: object
-          description: IVMS-101 beneficiary payload (your customer).
-          additionalProperties: true
-        originating_vasp:
-          type: object
-          description: Optional description of the sending VASP.
-          properties:
-            name:
-              type: string
-            lei:
-              type: string
-            travel_address:
-              type: string
-              description: Travel address that lets Didit reach the sender on the TRP rail.
-    TravelRuleSettingsUpdate:
-      type: object
-      properties:
-        is_enabled:
-          type: boolean
-        legal_name:
-          type: string
-        lei:
-          type: string
-        jurisdiction:
-          type: string
-          maxLength: 8
-        name_matching_strictness:
-          type: string
-          enum:
-          - NONE
-          - STRICT
-          - DEFAULT
-          - FUZZY
-        confirmation_timeout_hours:
-          type: integer
-          minimum: 1
-        timeout_outcome:
-          type: string
-          enum:
-          - HOLD
-          - REJECT
-          - PROCEED
-        compliance_email:
-          type: string
-          format: email
-        is_discoverable:
-          type: boolean
-        threshold_amount:
-          type: string
-          description: Decimal string. Minimum transfer amount that triggers a managed exchange.
-        inbound_auto_accept:
-          type: boolean
-        allow_self_declaration:
-          type: boolean
-        allow_screenshot_proof:
-          type: boolean
-          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
-        auto_wallet_verification:
-          type: boolean
-        vasp_attribution_enabled:
-          type: boolean
-      description: All fields optional; PUT applies a partial update.
-    WalletAddressEntryUpdate:
-      type: object
-      properties:
-        holder_name:
-          type: string
-        holder_vendor_data:
-          type: string
-        entity_type:
-          type: string
-        travel_address:
-          type: string
-      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
-    TravelRuleInboundResponse:
-      type: object
-      properties:
-        transaction_id:
-          type: string
-          format: uuid
-          description: Didit transaction UUID for the inbound deposit.
-        txn_id:
-          type: string
-          description: Didit-generated txn_id for the sunrise transaction.
-        created:
-          type: boolean
-          description: true when a new transaction was minted (HTTP 201); false when an existing unclaimed deposit was reused (HTTP 200).
-        travel_rule:
-          $ref: '#/components/schemas/TravelRuleTransferDetail'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
