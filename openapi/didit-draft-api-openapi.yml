@@ -1,0 +1,228 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Draft API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Draft
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/routing-rules/{record_uuid}/draft/:
+    get:
+      operationId: get_case_routing_rule_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: record_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Draft
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPublicationPolicyDraftResponse'
+          description: ''
+        '403':
+          description: Case access is required.
+      security:
+      - ApiKeyAuth: []
+      summary: Get case routing rule draft
+      x-summary-source: derived
+    put:
+      operationId: save_case_routing_rule_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: record_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Draft
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftWriteRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftWriteRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPublicationPolicyDraft'
+          description: ''
+        '403':
+          description: Case access is required.
+        '409':
+          description: The published version or draft revision has changed. Reload before retrying.
+      security:
+      - ApiKeyAuth: []
+      summary: Save case routing rule draft
+      x-summary-source: derived
+    delete:
+      operationId: discard_case_routing_rule_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: record_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Draft
+      responses:
+        '204':
+          description: No response body
+        '403':
+          description: Case access is required.
+        '409':
+          description: The published version or draft revision has changed. Reload before retrying.
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftPreconditionRequest'
+      summary: Discard case routing rule draft
+      x-summary-source: derived
+components:
+  schemas:
+    RoutingPublicationPolicyDraftPreconditionRequest:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 0
+        expected_revision:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - expected_revision
+      - expected_version
+    RoutingPublicationPolicyDraftWriteRequest:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 0
+        expected_revision:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        changes:
+          type: object
+          additionalProperties: {}
+      required:
+      - changes
+      - expected_revision
+      - expected_version
+    RoutingPublicationPolicyDraft:
+      type: object
+      properties:
+        revision:
+          type: string
+          format: uuid
+        base_version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        changes: {}
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          maxLength: 254
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - base_version
+      - updated_at
+    RoutingPublicationPolicyDraftResponse:
+      type: object
+      properties:
+        draft:
+          allOf:
+          - $ref: '#/components/schemas/RoutingPublicationPolicyDraft'
+      required:
+      - draft
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

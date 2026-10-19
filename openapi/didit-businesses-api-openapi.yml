@@ -118,7 +118,7 @@ paths:
   /v3/businesses/{vendor_data}/:
     get:
       summary: Get business
-      description: Fetch one business by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Soft-deleted businesses return 404.
+      description: Fetch one business by `vendor_data` (exact match). Adds `metadata` and `updated_at` to the list view. Deleted businesses return 404.
       operationId: get_business
       tags:
       - Businesses
@@ -501,7 +501,7 @@ paths:
   /v3/businesses/delete/:
     post:
       summary: Batch delete businesses
-      description: '**Hard delete** businesses via `qs.delete()` — permanent. For blocking prefer Update Business Status with `BLOCKED`.'
+      description: '**Permanently delete** businesses — this cannot be undone. For blocking prefer Update Business Status with `BLOCKED`.'
       operationId: batch_delete_businesses
       tags:
       - Businesses
@@ -750,6 +750,769 @@ paths:
                     detail: Request was throttled. Expected available in 30 seconds.
       security:
       - ApiKeyAuth: []
+  /v3/organization/{organization_id}/application/{application_id}/vendor-businesses/toggle-ongoing-monitoring/:
+    patch:
+      summary: Toggle AML ongoing monitoring for businesses
+      description: 'Business-level equivalent of the user toggle: one monitored AML screening per business, with businesses lacking any AML screening screened first (company entity). Same estimate_only, inline fast-path and async job contract.'
+      operationId: toggle_vendor_businesses_ongoing_monitoring
+      tags:
+      - Businesses
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_enabled
+              properties:
+                is_enabled:
+                  type: boolean
+                  description: true to enable monitoring, false to disable it.
+                estimate_only:
+                  type: boolean
+                  default: false
+                  description: When true, returns the cost estimate and performs no writes.
+                update_all:
+                  type: boolean
+                  default: false
+                  description: Apply to every entity of the application (scoped by the filter_* params when present).
+                filter_search:
+                  type: string
+                filter_status:
+                  type: array
+                  items:
+                    type: string
+                filter_country:
+                  type: string
+                filter_date_from:
+                  type: string
+                  format: date
+                filter_date_to:
+                  type: string
+                  format: date
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Entities to toggle. Required unless update_all is true.
+      responses:
+        '200':
+          description: Estimate (when estimate_only) or the completed job for small batches processed inline.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                  properties:
+                    users_total:
+                      type: integer
+                      description: Entities in the selection.
+                    already_enabled:
+                      type: integer
+                    with_existing_aml:
+                      type: integer
+                      description: Entities whose existing AML screening will be switched to monitored.
+                    needing_screening:
+                      type: integer
+                      description: Entities without any AML screening that will be screened first (billed).
+                    skipped_no_identity_data:
+                      type: integer
+                    skipped_blocked:
+                      type: integer
+                    estimated_screening_cost_usd:
+                      type: number
+                      example: 0.2
+                    estimated_annual_monitoring_cost_usd:
+                      type: number
+                      example: 0.07
+                    balance_sufficient:
+                      type: boolean
+                - type: object
+                  properties:
+                    job_id:
+                      type: string
+                      format: uuid
+                    status:
+                      type: string
+                      enum:
+                      - PENDING
+                      - PROCESSING
+                      - COMPLETED
+                      - FAILED
+                    is_enabled:
+                      type: boolean
+                    total:
+                      type: integer
+                    processed:
+                      type: integer
+                    outcomes:
+                      type: object
+                      description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                      properties:
+                        enabled:
+                          type: integer
+                          description: Monitoring enabled on an existing AML screening.
+                        screened_and_enabled:
+                          type: integer
+                          description: A new AML screening was created (billed) and monitoring enabled.
+                        already_enabled:
+                          type: integer
+                          description: Monitoring was already active (legacy duplicate rows are consolidated).
+                        disabled:
+                          type: integer
+                          description: Monitoring disabled on every AML row of the entity.
+                        skipped_no_identity_data:
+                          type: integer
+                          description: 'Skipped: no full name + date of birth + country available to screen.'
+                        skipped_blocked:
+                          type: integer
+                          description: 'Skipped: the user is blocked.'
+                        skipped_sandbox:
+                          type: integer
+                          description: 'Skipped: sandbox application.'
+                        failed_provider:
+                          type: integer
+                          description: The screening provider call failed.
+                        failed_insufficient_balance:
+                          type: integer
+                          description: Balance ran out mid-job.
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                    estimate:
+                      type: object
+                      description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                      properties:
+                        users_total:
+                          type: integer
+                          description: Entities in the selection.
+                        already_enabled:
+                          type: integer
+                        with_existing_aml:
+                          type: integer
+                          description: Entities whose existing AML screening will be switched to monitored.
+                        needing_screening:
+                          type: integer
+                          description: Entities without any AML screening that will be screened first (billed).
+                        skipped_no_identity_data:
+                          type: integer
+                        skipped_blocked:
+                          type: integer
+                        estimated_screening_cost_usd:
+                          type: number
+                          example: 0.2
+                        estimated_annual_monitoring_cost_usd:
+                          type: number
+                          example: 0.07
+                        balance_sufficient:
+                          type: boolean
+        '202':
+          description: Larger batches are processed asynchronously; poll the job endpoint with the returned job_id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '403':
+          description: Missing write:sessions privilege, or insufficient balance to enable (the estimate is included in the error body).
+  /v3/organization/{organization_id}/application/{application_id}/vendor-businesses/toggle-ongoing-monitoring/{job_id}/:
+    get:
+      summary: Get AML ongoing monitoring job
+      description: Progress and per-outcome counters of a monitoring toggle job. Poll every couple of seconds while status is PENDING or PROCESSING.
+      operationId: get_vendor_businesses_ongoing_monitoring_job
+      tags:
+      - Businesses
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Monitoring job UUID returned by the toggle endpoint.
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '404':
+          description: Unknown job for this application.
+  /v3/organization/{organization_id}/application/{application_id}/businesses/toggle-ongoing-monitoring/:
+    patch:
+      summary: Toggle AML ongoing monitoring for business sessions
+      description: Session-level toggle for KYB verifications, addressed by session number. Sessions without an AML screening get one created and attached to the session itself. Same estimate_only, inline fast-path and async job contract as the user-level endpoints. Replaces the legacy synchronous behavior that skipped sessions without an AML screening.
+      operationId: toggle_business_sessions_ongoing_monitoring
+      tags:
+      - Businesses
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_enabled
+              properties:
+                is_enabled:
+                  type: boolean
+                  description: true to enable monitoring, false to disable it.
+                estimate_only:
+                  type: boolean
+                  default: false
+                  description: When true, returns the cost estimate and performs no writes.
+                update_all:
+                  type: boolean
+                  default: false
+                  description: Apply to every entity of the application (scoped by the filter_* params when present).
+                filter_search:
+                  type: string
+                filter_status:
+                  type: array
+                  items:
+                    type: string
+                filter_country:
+                  type: string
+                filter_date_from:
+                  type: string
+                  format: date
+                filter_date_to:
+                  type: string
+                  format: date
+                session_numbers:
+                  type: array
+                  items:
+                    type: string
+                  description: Business session numbers to toggle. Required unless update_all (or the legacy toggle_all alias) is true.
+                toggle_all:
+                  type: boolean
+                  default: false
+                  description: Legacy alias of update_all.
+                filter_workflow_id:
+                  type: string
+      responses:
+        '200':
+          description: Estimate (when estimate_only) or the completed job for small batches processed inline.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                  properties:
+                    users_total:
+                      type: integer
+                      description: Entities in the selection.
+                    already_enabled:
+                      type: integer
+                    with_existing_aml:
+                      type: integer
+                      description: Entities whose existing AML screening will be switched to monitored.
+                    needing_screening:
+                      type: integer
+                      description: Entities without any AML screening that will be screened first (billed).
+                    skipped_no_identity_data:
+                      type: integer
+                    skipped_blocked:
+                      type: integer
+                    estimated_screening_cost_usd:
+                      type: number
+                      example: 0.2
+                    estimated_annual_monitoring_cost_usd:
+                      type: number
+                      example: 0.07
+                    balance_sufficient:
+                      type: boolean
+                - type: object
+                  properties:
+                    job_id:
+                      type: string
+                      format: uuid
+                    status:
+                      type: string
+                      enum:
+                      - PENDING
+                      - PROCESSING
+                      - COMPLETED
+                      - FAILED
+                    is_enabled:
+                      type: boolean
+                    total:
+                      type: integer
+                    processed:
+                      type: integer
+                    outcomes:
+                      type: object
+                      description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                      properties:
+                        enabled:
+                          type: integer
+                          description: Monitoring enabled on an existing AML screening.
+                        screened_and_enabled:
+                          type: integer
+                          description: A new AML screening was created (billed) and monitoring enabled.
+                        already_enabled:
+                          type: integer
+                          description: Monitoring was already active (legacy duplicate rows are consolidated).
+                        disabled:
+                          type: integer
+                          description: Monitoring disabled on every AML row of the entity.
+                        skipped_no_identity_data:
+                          type: integer
+                          description: 'Skipped: no full name + date of birth + country available to screen.'
+                        skipped_blocked:
+                          type: integer
+                          description: 'Skipped: the user is blocked.'
+                        skipped_sandbox:
+                          type: integer
+                          description: 'Skipped: sandbox application.'
+                        failed_provider:
+                          type: integer
+                          description: The screening provider call failed.
+                        failed_insufficient_balance:
+                          type: integer
+                          description: Balance ran out mid-job.
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                    estimate:
+                      type: object
+                      description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                      properties:
+                        users_total:
+                          type: integer
+                          description: Entities in the selection.
+                        already_enabled:
+                          type: integer
+                        with_existing_aml:
+                          type: integer
+                          description: Entities whose existing AML screening will be switched to monitored.
+                        needing_screening:
+                          type: integer
+                          description: Entities without any AML screening that will be screened first (billed).
+                        skipped_no_identity_data:
+                          type: integer
+                        skipped_blocked:
+                          type: integer
+                        estimated_screening_cost_usd:
+                          type: number
+                          example: 0.2
+                        estimated_annual_monitoring_cost_usd:
+                          type: number
+                          example: 0.07
+                        balance_sufficient:
+                          type: boolean
+        '202':
+          description: Larger batches are processed asynchronously; poll the job endpoint with the returned job_id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '403':
+          description: Missing write:sessions privilege, or insufficient balance to enable (the estimate is included in the error body).
+  /v3/organization/{organization_id}/application/{application_id}/businesses/toggle-ongoing-monitoring/{job_id}/:
+    get:
+      summary: Get AML ongoing monitoring job
+      description: Progress and per-outcome counters of a monitoring toggle job. Poll every couple of seconds while status is PENDING or PROCESSING.
+      operationId: get_business_sessions_ongoing_monitoring_job
+      tags:
+      - Businesses
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Monitoring job UUID returned by the toggle endpoint.
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '404':
+          description: Unknown job for this application.
 components:
   schemas:
     BusinessDetailItem:
@@ -874,6 +1637,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -884,3 +1648,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

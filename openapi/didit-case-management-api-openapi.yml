@@ -1,0 +1,1958 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Case Management API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Case Management
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/entity-actions/:
+    post:
+      operationId: apply_case_entity_action
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaseActionCaseEntityActionRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseActionCaseEntityActionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaseActionCaseEntityActionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseActionCaseEntityActionResult'
+          description: ''
+        '409':
+          description: The reference belongs to a different action payload.
+      security:
+      - ApiKeyAuth: []
+      description: 'Apply one explicit action to the case subject. Supply a unique client_reference to obtain an action receipt and make retries idempotent. Reusing that reference with a different payload returns 409. With a reference, inspect receipt.status even when HTTP status is 200: FAILED means no action was applied. Repeating a failed request does not execute it again unless retry is true. Omitting client_reference preserves the legacy response.'
+      summary: Apply case entity action
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/:
+    get:
+      operationId: list_case_notes
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCollaborationPaginatedCaseNoteList'
+          description: ''
+        '403':
+          description: The caller lacks the required cases permission.
+        '404':
+          description: The case or note is unavailable for this caller.
+      tags:
+      - Case Management
+      security:
+      - ApiKeyAuth: []
+      summary: List case notes
+      x-summary-source: derived
+    post:
+      operationId: create_case_note
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationCaseNoteCreateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationCaseNoteCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationCaseNoteCreateRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCollaborationCaseNote'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCollaborationCaseNote'
+          description: ''
+        '403':
+          description: The caller lacks the required cases permission.
+        '404':
+          description: The case or note is unavailable for this caller.
+        '409':
+          description: This client reference was already used for another note or for a note that has been deleted.
+      tags:
+      - Case Management
+      security:
+      - ApiKeyAuth: []
+      description: Add a case-scoped note. An optional client_reference makes an unchanged retry return the same note without duplicate activity or notifications. reply_to must identify a live note in this case. The response includes a bounded parent excerpt without copying that excerpt into the saved reply.
+      summary: Create case note
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/{note_uuid}/:
+    patch:
+      operationId: root_partial_update
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: note_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationPatchedCaseNoteUpdateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationPatchedCaseNoteUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaseCollaborationPatchedCaseNoteUpdateRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCollaborationCaseNote'
+          description: ''
+        '403':
+          description: The caller lacks the required cases permission.
+        '404':
+          description: The case or note is unavailable for this caller.
+      tags:
+      - Case Management
+      security:
+      - ApiKeyAuth: []
+      description: Pin or unpin an existing note. Pinned notes appear first. Pin changes are recorded in case activity and do not change evidence or source decisions.
+      summary: Root partial update
+      x-summary-source: derived
+    delete:
+      operationId: delete_case_note
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: note_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      responses:
+        '204':
+          description: The note is permanently deleted. Replies remain, without the deleted parent excerpt. Attachments are deleted unless another note still uses them.
+        '403':
+          description: The caller lacks the required cases permission.
+        '404':
+          description: The case or note is unavailable for this caller.
+      tags:
+      - Case Management
+      security:
+      - ApiKeyAuth: []
+      summary: Delete case note
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/requests/:
+    get:
+      operationId: organization_application_cases_requests_list
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingPaginatedCaseRequestList'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+      security:
+      - ApiKeyAuth: []
+      summary: Organization application cases requests list
+      x-summary-source: derived
+    post:
+      operationId: organization_application_cases_requests_create
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestConfirmRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestConfirmRequest'
+        required: true
+      responses:
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+        '400':
+          description: Invalid inputs, unsupported purpose, unavailable verified contact or an existing immutable response.
+        '409':
+          description: The preview changed or expired. Preview again before confirming.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseRequest'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      description: Confirm the exact signed preview within 15 minutes. Only fixed templates and an OTP-verified contact belonging to the case subject are accepted. The request ID makes retries idempotent. Delivery is queued; SENT, SIMULATED and UNKNOWN are distinct outcomes. An actionable request sets the case to Awaiting user. A review update leaves its status unchanged.
+      summary: Organization application cases requests create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/requests/{request_uuid}/cancel/:
+    post:
+      operationId: organization_application_cases_requests_cancel_create
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseRequest'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+        '400':
+          description: Invalid inputs, unsupported purpose, unavailable verified contact or an existing immutable response.
+        '409':
+          description: The preview changed or expired. Preview again before confirming.
+      security:
+      - ApiKeyAuth: []
+      summary: Organization application cases requests cancel create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/requests/options/:
+    get:
+      operationId: organization_application_cases_requests_options_retrieve
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseRequestOptions'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+      security:
+      - ApiKeyAuth: []
+      summary: Organization application cases requests options retrieve
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/requests/{request_uuid}/attachment/:
+    get:
+      operationId: organization_application_cases_requests_attachment_retrieve
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+      security:
+      - ApiKeyAuth: []
+      summary: Organization application cases requests attachment retrieve
+      x-summary-source: derived
+  /v3/case-requests/{request_uuid}/:
+    get:
+      operationId: case_requests_retrieve
+      parameters:
+      - in: path
+        name: request_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseRequestPublic'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+      security:
+      - CaseRequestToken: []
+      description: Access one customer request using its request-specific token. No private case findings, original identity data or recipient address are returned. Actionable requests expire after seven days. Cancellation or case resolution invalidates the link. Responses are immutable and remain evidence for reviewer assessment; they never approve or update a source verification.
+      summary: Case requests retrieve
+      x-summary-source: derived
+    post:
+      operationId: case_requests_create
+      parameters:
+      - in: path
+        name: request_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseCustomerResponseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseCustomerResponseRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseCustomerResponseResult'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '400':
+          description: Invalid inputs, unsupported purpose, unavailable verified contact or an existing immutable response.
+        '409':
+          description: The preview changed or expired. Preview again before confirming.
+      security:
+      - CaseRequestToken: []
+      description: Access one customer request using its request-specific token. No private case findings, original identity data or recipient address are returned. Actionable requests expire after seven days. Cancellation or case resolution invalidates the link. Responses are immutable and remain evidence for reviewer assessment; they never approve or update a source verification.
+      summary: Case requests create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/{blueprint_uuid}/publish/:
+    post:
+      operationId: publish_case_blueprint
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: blueprint_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftPreconditionRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftPreconditionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftPreconditionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePublicationCaseBlueprint'
+          description: ''
+        '409':
+          description: Published version or saved draft revision changed. Reload before retrying.
+        '403':
+          description: Required case permission is missing.
+      security:
+      - ApiKeyAuth: []
+      summary: Publish case blueprint
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/requests/preview/:
+    post:
+      operationId: organization_application_cases_requests_preview_create
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestPreviewRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestPreviewRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerMessagingCaseRequestPreviewRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMessagingCaseRequestPreviewResponse'
+          description: ''
+        '404':
+          description: The request or case is unavailable for this caller.
+        '403':
+          description: The caller lacks the required cases permission.
+        '400':
+          description: Invalid inputs, unsupported purpose, unavailable verified contact or an existing immutable response.
+        '409':
+          description: The preview changed or expired. Preview again before confirming.
+      security:
+      - ApiKeyAuth: []
+      description: Render the production email without sending or changing the case. Returns the exact recipient, sender, subject, body and a signed preview_token. Send the same contact_id, purpose, language, request_id, expires_at and preview_token to confirm within 15 minutes.
+      summary: Organization application cases requests preview create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/action-receipts/:
+    get:
+      operationId: action_receipts_retrieve
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: offset
+        schema:
+          type: integer
+          maximum: 1000000
+          minimum: 0
+          default: 0
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseActionCaseActionReceiptPage'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      description: List subject-action receipts, newest first, with at most 20 results per page. Use next_offset for the next page. Input note text is not exposed in the history.
+      summary: Action receipts retrieve
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/action-receipts/{receipt_uuid}/retry/:
+    post:
+      operationId: action_receipts_retry_create
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: case_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: receipt_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseActionCaseActionReceipt'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      description: Retry only this failed subject action using its saved inputs. Current write permission is checked. Applied actions return their receipt without executing again. Case closure is independent.
+      summary: Action receipts retry create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/{blueprint_uuid}/draft/:
+    get:
+      operationId: get_case_blueprint_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: blueprint_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePublicationPolicyDraftResponse'
+          description: ''
+        '403':
+          description: Required case permission is missing.
+      security:
+      - ApiKeyAuth: []
+      summary: Get case blueprint draft
+      x-summary-source: derived
+    put:
+      operationId: save_case_blueprint_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: blueprint_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftWriteRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftWriteRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePublicationPolicyDraft'
+          description: ''
+        '409':
+          description: Published version or saved draft revision changed. Reload before retrying.
+        '403':
+          description: Required case permission is missing.
+      security:
+      - ApiKeyAuth: []
+      summary: Save case blueprint draft
+      x-summary-source: derived
+    delete:
+      operationId: discard_case_blueprint_draft
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: blueprint_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      responses:
+        '204':
+          description: No response body
+        '409':
+          description: Published version or saved draft revision changed. Reload before retrying.
+        '403':
+          description: Required case permission is missing.
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CasePublicationPolicyDraftPreconditionRequest'
+      summary: Discard case blueprint draft
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/duplicates/:
+    post:
+      operationId: duplicates_create
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Case Management
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaseDuplicateCaseDuplicateQueryRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseDuplicateCaseDuplicateQueryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaseDuplicateCaseDuplicateQueryRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDuplicateCaseDuplicatePage'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      description: Review existing cases for a subject or owned source record before manual case creation. Both open and resolved investigations are returned. Each page contains at most 20 cases; use next_offset to request another page.
+      summary: Duplicates create
+      x-summary-source: derived
+  /v3/organization/{organization_id}/application/{application_id}/cases/blueprints/{blueprint_uuid}/history/:
+    get:
+      operationId: list_case_blueprint_history
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: blueprint_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - Case Management
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePublicationPaginatedPolicyRevisionList'
+          description: ''
+        '403':
+          description: Required case permission is missing.
+      security:
+      - ApiKeyAuth: []
+      summary: List case blueprint history
+      x-summary-source: derived
+components:
+  schemas:
+    CustomerMessagingCaseRequestContact:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        verified_at:
+          type: string
+          format: date-time
+      required:
+      - email
+      - uuid
+      - verified_at
+    CustomerMessagingLanguageEnum:
+      enum:
+      - en
+      - es
+      - pt
+      type: string
+      description: '* `en` - en
+
+        * `es` - es
+
+        * `pt` - pt'
+    CaseDuplicateTypeEnum:
+      enum:
+      - user
+      - business
+      type: string
+      description: '* `user` - user
+
+        * `business` - business'
+    CustomerMessagingLanguagesEnum:
+      enum:
+      - en
+      - es
+      - pt
+      type: string
+      description: '* `en` - en
+
+        * `es` - es
+
+        * `pt` - pt'
+    CaseDuplicateCaseDuplicatePage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next_offset:
+          type:
+          - integer
+          - 'null'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseDuplicateCaseDuplicate'
+      required:
+      - count
+      - next_offset
+      - results
+    CaseDuplicateCaseDuplicateQueryRequest:
+      type: object
+      properties:
+        subject:
+          $ref: '#/components/schemas/CaseDuplicateCaseSubjectInputRequest'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseDuplicateCaseLinkCreateRequest'
+        offset:
+          type: integer
+          maximum: 1000000
+          minimum: 0
+          default: 0
+    CustomerMessagingCaseCustomerResponseResult:
+      type: object
+      properties:
+        responded_at:
+          type: string
+          format: date-time
+      required:
+      - responded_at
+    CaseDuplicateCaseDuplicate:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        case_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 32
+        title:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/CaseDuplicateStatusEnum'
+        priority:
+          $ref: '#/components/schemas/CaseDuplicatePriorityEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - title
+      - uuid
+    CustomerMessagingCaseRequestOptions:
+      type: object
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerMessagingCaseRequestContact'
+        purposes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerMessagingPurposesEnum'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerMessagingLanguagesEnum'
+      required:
+      - contacts
+      - languages
+      - purposes
+    CustomerMessagingPurposeEnum:
+      enum:
+      - identity_document
+      - proof_of_address
+      - business_document
+      - confirm_details
+      - review_in_progress
+      type: string
+      description: '* `identity_document` - identity_document
+
+        * `proof_of_address` - proof_of_address
+
+        * `business_document` - business_document
+
+        * `confirm_details` - confirm_details
+
+        * `review_in_progress` - review_in_progress'
+    CaseCollaborationCaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        comment:
+          type: string
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          maxLength: 255
+        actor_name:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+        mentioned_emails: {}
+        is_internal:
+          type: boolean
+        attachments: {}
+        tags: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        reply_to:
+          allOf:
+          - $ref: '#/components/schemas/CaseCollaborationCaseNoteReply'
+          readOnly: true
+        is_pinned:
+          type: boolean
+        client_reference:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - comment
+      - created_at
+      - reply_to
+      - uuid
+    CasePublicationPaginatedPolicyRevisionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CasePublicationPolicyRevision'
+    CaseDuplicateCaseLinkCreateRequest:
+      type: object
+      properties:
+        entity_type:
+          $ref: '#/components/schemas/CaseDuplicateEntityTypeEnum'
+        entity_uuid:
+          type: string
+          format: uuid
+      required:
+      - entity_type
+      - entity_uuid
+    CaseActionEntityTypeEnum:
+      enum:
+      - user
+      - business
+      type: string
+      description: '* `user` - user
+
+        * `business` - business'
+    CasePublicationPolicyDraftResponse:
+      type: object
+      properties:
+        draft:
+          allOf:
+          - $ref: '#/components/schemas/CasePublicationPolicyDraft'
+      required:
+      - draft
+    CaseActionCaseActionReceiptPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next_offset:
+          type:
+          - integer
+          - 'null'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseActionCaseActionReceipt'
+      required:
+      - count
+      - next_offset
+      - results
+    CaseCollaborationCaseNoteReply:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        actor_name:
+          type:
+          - string
+          - 'null'
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+        comment:
+          type: string
+          maxLength: 300
+      required:
+      - actor_email
+      - actor_name
+      - comment
+      - uuid
+    CaseActionCaseEntityActionResult:
+      type: object
+      properties:
+        receipt:
+          $ref: '#/components/schemas/CaseActionCaseActionReceipt'
+        entity_type:
+          $ref: '#/components/schemas/CaseActionEntityTypeEnum'
+        entity_uuid:
+          type: string
+          format: uuid
+        action:
+          type: string
+        previous_status:
+          type: string
+        new_status:
+          type: string
+        tags_added:
+          type: array
+          items:
+            type: string
+        comment_uuid:
+          type: string
+          format: uuid
+        blocklisted:
+          type: array
+          items:
+            type: string
+    CaseCollaborationPaginatedCaseNoteList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseCollaborationCaseNote'
+    CustomerMessagingCaseRequestConfirmRequest:
+      type: object
+      properties:
+        contact_id:
+          type: string
+          format: uuid
+        purpose:
+          $ref: '#/components/schemas/CustomerMessagingPurposeEnum'
+        language:
+          allOf:
+          - $ref: '#/components/schemas/CustomerMessagingLanguageEnum'
+          default: en
+        request_id:
+          type: string
+          format: uuid
+        expires_at:
+          type: string
+          format: date-time
+        preview_token:
+          type: string
+          minLength: 1
+          maxLength: 512
+      required:
+      - contact_id
+      - expires_at
+      - preview_token
+      - purpose
+      - request_id
+    CasePublicationPolicyDraft:
+      type: object
+      properties:
+        revision:
+          type: string
+          format: uuid
+        base_version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        changes: {}
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          maxLength: 254
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - base_version
+      - updated_at
+    CustomerMessagingCaseCustomerResponseRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 512
+        date_of_birth:
+          type: string
+          format: date
+        file:
+          type: string
+          format: binary
+          writeOnly: true
+    CustomerMessagingPurposesEnum:
+      enum:
+      - identity_document
+      - proof_of_address
+      - business_document
+      - confirm_details
+      - review_in_progress
+      type: string
+      description: '* `identity_document` - identity_document
+
+        * `proof_of_address` - proof_of_address
+
+        * `business_document` - business_document
+
+        * `confirm_details` - confirm_details
+
+        * `review_in_progress` - review_in_progress'
+    CaseDuplicateStatusEnum:
+      enum:
+      - OPEN
+      - AWAITING_USER
+      - RESOLVED
+      type: string
+      description: '* `OPEN` - Open
+
+        * `AWAITING_USER` - Awaiting user
+
+        * `RESOLVED` - Resolved'
+    CustomerMessagingPaginatedCaseRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerMessagingCaseRequest'
+    CaseActionCaseEntityActionRequest:
+      type: object
+      properties:
+        client_reference:
+          type: string
+          format: uuid
+        retry:
+          type: boolean
+          default: false
+        action:
+          $ref: '#/components/schemas/CaseActionActionEnum'
+        status:
+          type:
+          - string
+          - 'null'
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        note:
+          type:
+          - string
+          - 'null'
+      required:
+      - action
+    CustomerMessagingCaseRequestPublic:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        purpose:
+          $ref: '#/components/schemas/CustomerMessagingPurposeEnum'
+        language:
+          $ref: '#/components/schemas/CustomerMessagingLanguageEnum'
+        expires_at:
+          type: string
+          format: date-time
+        responded_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        copy:
+          type: object
+          additionalProperties: {}
+        organization_name:
+          type: string
+        is_white_label:
+          type: boolean
+        customization:
+          type:
+          - object
+          - 'null'
+          additionalProperties: {}
+      required:
+      - copy
+      - customization
+      - expires_at
+      - is_white_label
+      - language
+      - organization_name
+      - purpose
+      - request_id
+      - responded_at
+    CaseDuplicateCaseSubjectInputRequest:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/CaseDuplicateTypeEnum'
+        uuid:
+          type: string
+          format: uuid
+      required:
+      - type
+      - uuid
+    CasePublicationPolicyRevision:
+      type: object
+      properties:
+        version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        snapshot: {}
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          maxLength: 254
+        published_at:
+          type: string
+          format: date-time
+      required:
+      - published_at
+      - snapshot
+      - version
+    CasePublicationPolicyDraftPreconditionRequest:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 0
+        expected_revision:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - expected_revision
+      - expected_version
+    CasePublicationPolicyDraftWriteRequest:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 0
+        expected_revision:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        changes:
+          type: object
+          additionalProperties: {}
+      required:
+      - changes
+      - expected_revision
+      - expected_version
+    CustomerMessagingCaseRequest:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        purpose:
+          type: string
+          readOnly: true
+        language:
+          type: string
+          readOnly: true
+        recipient:
+          type: string
+          format: email
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          readOnly: true
+        delivery_status:
+          type: string
+          readOnly: true
+        delivered_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        cancelled_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        responded_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        response:
+          readOnly: true
+        has_attachment:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor_email
+      - cancelled_at
+      - created_at
+      - delivered_at
+      - delivery_status
+      - expires_at
+      - has_attachment
+      - language
+      - purpose
+      - recipient
+      - responded_at
+      - response
+      - uuid
+    CustomerMessagingCaseRequestPreviewRequest:
+      type: object
+      properties:
+        contact_id:
+          type: string
+          format: uuid
+        purpose:
+          $ref: '#/components/schemas/CustomerMessagingPurposeEnum'
+        language:
+          allOf:
+          - $ref: '#/components/schemas/CustomerMessagingLanguageEnum'
+          default: en
+      required:
+      - contact_id
+      - purpose
+    CaseCollaborationCaseNoteCreateRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        reply_to:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        client_reference:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+            minLength: 1
+        is_internal:
+          type: boolean
+          default: false
+        attachments:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+      required:
+      - comment
+    CaseDuplicatePriorityEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      type: string
+      description: '* `LOW` - Low
+
+        * `MEDIUM` - Medium
+
+        * `HIGH` - High'
+    CasePublicationCaseBlueprint:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 24
+        description:
+          type:
+          - string
+          - 'null'
+        assignment_method:
+          $ref: '#/components/schemas/CasePublicationAssignmentMethodEnum'
+        assignee_pool: {}
+        max_active_cases:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: 0
+        escalation_enabled:
+          type: boolean
+        escalation_blueprint:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        escalation_blueprint_name:
+          type: string
+          readOnly: true
+        transfer_enabled:
+          type: boolean
+        four_eyes_checker_blueprint:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        four_eyes_checker_blueprint_name:
+          type: string
+          readOnly: true
+        require_resolution_note:
+          type: boolean
+        content_config: {}
+        version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        default_deadline_hours:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+        preset_key:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        creation_sources:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        receives_escalation_from:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - creation_sources
+      - escalation_blueprint_name
+      - four_eyes_checker_blueprint_name
+      - name
+      - receives_escalation_from
+      - updated_at
+      - uuid
+    CaseActionActionEnum:
+      enum:
+      - set_status
+      - add_tags
+      - add_note
+      - add_to_blocklist
+      type: string
+      description: '* `set_status` - set_status
+
+        * `add_tags` - add_tags
+
+        * `add_note` - add_note
+
+        * `add_to_blocklist` - add_to_blocklist'
+    CaseActionStatusEnum:
+      enum:
+      - APPLIED
+      - FAILED
+      type: string
+      description: '* `APPLIED` - Applied
+
+        * `FAILED` - Failed'
+    CasePublicationAssignmentMethodEnum:
+      enum:
+      - MANUAL
+      - AUTOMATIC
+      type: string
+      description: '* `MANUAL` - Manual
+
+        * `AUTOMATIC` - Automatic'
+    CaseDuplicateEntityTypeEnum:
+      enum:
+      - session
+      - business_session
+      - transaction
+      type: string
+      description: '* `session` - Session
+
+        * `business_session` - Business Session
+
+        * `transaction` - Transaction'
+    CustomerMessagingCaseRequestPreviewResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        expires_at:
+          type: string
+          format: date-time
+        recipient:
+          type: string
+          format: email
+        sender:
+          type: string
+        subject:
+          type: string
+        html:
+          type: string
+        requires_user_action:
+          type: boolean
+        preview_token:
+          type: string
+      required:
+      - expires_at
+      - html
+      - preview_token
+      - recipient
+      - request_id
+      - requires_user_action
+      - sender
+      - subject
+    CaseCollaborationPatchedCaseNoteUpdateRequest:
+      type: object
+      properties:
+        is_pinned:
+          type: boolean
+    CaseActionCaseActionReceipt:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        client_reference:
+          type: string
+          format: uuid
+        action:
+          type: string
+          maxLength: 32
+        status:
+          $ref: '#/components/schemas/CaseActionStatusEnum'
+        result: {}
+        error:
+          type: string
+          maxLength: 255
+        actor_email:
+          type:
+          - string
+          - 'null'
+          format: email
+          maxLength: 254
+        attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - client_reference
+      - created_at
+      - status
+      - updated_at
+      - uuid
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

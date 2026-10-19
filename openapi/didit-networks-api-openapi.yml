@@ -1,0 +1,1553 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Networks API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Networks
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/networks/:
+    get:
+      summary: List networks
+      description: List fraud networks detected within this application's organization, newest activity first by default. By default dismissed networks are excluded; pass status to include them. Sandbox applications never have networks - clustering excludes sandbox data entirely.
+      operationId: list_networks
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: status
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated statuses to include: active,in_review,resolved,dismissed. Omit to exclude dismissed.'
+      - name: signal_type
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated signal types: ip_address,device,face,document_number,phone,email,address.'
+      - name: pattern_type
+        in: query
+        schema:
+          type: string
+        description: Comma-separated pattern types, e.g. exact_same_device,same_email.
+      - name: risk_band
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated bands: low,medium,high.'
+      - name: min_size
+        in: query
+        schema:
+          type: integer
+        description: Minimum member count.
+      - name: max_size
+        in: query
+        schema:
+          type: integer
+        description: Maximum member count.
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Lower bound on last_activity_at (ISO 8601 date or datetime).
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date
+        description: Upper bound on first_activity_at (ISO 8601 date or datetime).
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Free-text search across network name, member names, the network_id (N-0001), and exact pattern_type tokens.
+      - name: ordering
+        in: query
+        schema:
+          type: string
+        description: One of risk_score, -risk_score, last_activity_at, -last_activity_at, first_activity_at, -first_activity_at, network_number, -network_number. Defaults to -risk_score,-last_activity_at.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 500
+        description: Page size, 1-500. Defaults to 100.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+        description: Zero-based offset of the first record.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/?status=active,in_review&ordering=-risk_score' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Paginated network list with console KPIs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type:
+                    - integer
+                    - 'null'
+                    description: Offset of the next page, or null on the last page.
+                  previous:
+                    type:
+                    - integer
+                    - 'null'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkListItem'
+                  kpis:
+                    type: object
+                    description: Each key is {value, delta} over the results matching the current filters.
+                    properties:
+                      active:
+                        type: object
+                      in_review:
+                        type: object
+                      applicants_involved:
+                        type: object
+                      detected_this_period:
+                        type: object
+                      false_positive_rate:
+                        type: object
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/:
+    get:
+      summary: Get network
+      description: Retrieve a single network's full detail, including stats, fraud tags, and risk signals.
+      operationId: get_network
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Network detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkDetail'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/graph/:
+    get:
+      summary: Get network graph
+      description: Retrieve the network as a graph of subject nodes (vendor users, vendor businesses, transaction parties) and signal nodes (the shared device/IP/face/document/phone/email/address values linking them), with edges representing memberships.
+      operationId: get_network_graph
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      - name: depth
+        in: query
+        schema:
+          type: string
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          - all
+        description: Hops from the focus subject to include. Defaults to all (unbounded).
+      - name: focus_kind
+        in: query
+        schema:
+          type: string
+          enum:
+          - vendor_user
+          - vendor_business
+          - transaction_party
+        description: Subject type to center the graph on. Must be supplied together with focus_id; defaults to an arbitrary member when depth is bounded and neither is supplied.
+      - name: focus_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Subject UUID to center the graph on.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/graph/?depth=2' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Network graph.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkGraph'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/members/:
+    get:
+      summary: List network members
+      description: List the subjects (vendor users, vendor businesses, or transaction parties) that belong to this network.
+      operationId: list_network_members
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/members/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Network members. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkMember'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/signals/:
+    get:
+      summary: List network signals
+      description: List the signals (shared device, IP, face, document number, phone, email, or address values) that link this network's members.
+      operationId: list_network_signals
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/signals/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Network signals. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkSignal'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/timeline/:
+    get:
+      summary: Get network timeline
+      description: 'Chronological events for this network: detection, each signal''s observation, and lifecycle status changes.'
+      operationId: get_network_timeline
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/timeline/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Timeline events, oldest first. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkTimelineEvent'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/map/:
+    get:
+      summary: Get network map
+      description: Geographic points where this network's members' addresses/locations converge, sourced from the sessions, business sessions, and transactions backing its memberships.
+      operationId: get_network_map
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: n3a5e000-0000-4000-8000-000000000001
+        description: Network UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/networks/n3a5e000-0000-4000-8000-000000000001/map/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Network map.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkMap'
+        '404':
+          description: Network not found (or not visible to this application).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/sessions/{session_id}/networks/:
+    get:
+      summary: List networks for a session
+      description: List the networks the session's vendor user belongs to. Resolves through the session's vendor_data-linked user.
+      operationId: list_session_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Session UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/sessions/aaaaaaaa-0000-4000-8000-000000000001/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/business-sessions/{business_session_id}/networks/:
+    get:
+      summary: List networks for a business session
+      description: List the networks the business session's vendor business belongs to.
+      operationId: list_business_session_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: business_session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Business session UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/business-sessions/aaaaaaaa-0000-4000-8000-000000000002/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/users/{vendor_user_uuid}/networks/:
+    get:
+      summary: List networks for a user
+      description: List the networks a vendor user belongs to.
+      operationId: list_user_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: vendor_user_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Vendor user UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/users/aaaaaaaa-0000-4000-8000-000000000003/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/businesses/{vendor_business_uuid}/networks/:
+    get:
+      summary: List networks for a business
+      description: List the networks a vendor business belongs to.
+      operationId: list_business_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: vendor_business_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Vendor business UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/businesses/aaaaaaaa-0000-4000-8000-000000000004/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/transactions/{transaction_uuid}/networks/:
+    get:
+      summary: List networks for a transaction
+      description: List the networks the transaction's backing KYC/KYB subject belongs to (resolved through the transaction's session or business session).
+      operationId: list_transaction_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: transaction_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Transaction UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/transactions/aaaaaaaa-0000-4000-8000-000000000005/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  ? /v3/organization/{organization_id}/application/{application_id}/transactions/{transaction_uuid}/parties/{transaction_party_uuid}/networks/
+  : get:
+      summary: List networks for a transaction party
+      description: List the networks a transaction party (remitter, beneficiary, or counterparty) belongs to, resolved through the party itself rather than through the transaction's backing session.
+      operationId: list_transaction_party_network_memberships
+      tags:
+      - Networks
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: transaction_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Transaction UUID.
+      - name: transaction_party_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Transaction party UUID.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/transactions/aaaaaaaa-0000-4000-8000-000000000005/parties/bbbbbbbb-0000-4000-8000-000000000006/networks/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Networks this entity belongs to. Not paginated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityNetworkMembership'
+        '404':
+          description: Entity not found in this application, or has no linked subject to look up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/notes/{note_uuid}/:
+    delete:
+      operationId: delete_network_note
+      tags:
+      - Networks
+      summary: Delete your network note
+      description: Requires write:networks and the authenticated author of the note. Deletion is irreversible. Connected account and verification data are unaffected.
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Network UUID.
+      - name: note_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Console user access token in the form Bearer <token>.
+      responses:
+        '204':
+          description: Note deleted.
+        '401':
+          description: Authentication is required.
+        '403':
+          description: Missing permission or Networks access.
+        '404':
+          description: Network or note is not visible to this application.
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/report/:
+    get:
+      operationId: download_network_report
+      tags:
+      - Networks
+      summary: Download a network evidence report
+      description: Download a PDF of the current organization network, its observed account connections, signal references and review status. Requires read:networks. Global intelligence and private analyst notes are not included. Each account and signal list is capped at 500 entries and the report states when it is incomplete. The request does not change network status. Errors are returned as JSON.
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Network UUID.
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Console user access token in the form Bearer <token>.
+      responses:
+        '200':
+          description: 'Network evidence report. Cache-Control: no-store.'
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Authentication is required.
+        '403':
+          description: Missing permission or Networks access.
+        '404':
+          description: Network or note is not visible to this application.
+  /v3/organization/{organization_id}/application/{application_id}/networks/{network_uuid}/notes/:
+    get:
+      operationId: list_network_notes
+      tags:
+      - Networks
+      summary: List private network notes
+      description: Console users with read:networks can read notes on a network visible to the application. Notes stay within the organization and are not contributed to shared intelligence. Newest notes appear first.
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Network UUID.
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Console user access token in the form Bearer <token>.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 30
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+          default: 0
+      responses:
+        '200':
+          description: A page of notes. Count is capped at 100; use next to continue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NetworkNote'
+        '401':
+          description: Authentication is required.
+        '403':
+          description: Missing permission or Networks access.
+        '404':
+          description: Network or note is not visible to this application.
+    post:
+      operationId: create_network_note
+      tags:
+      - Networks
+      summary: Add a private network note
+      description: Requires a console user with write:networks. The author is assigned from the authenticated user. Supply a new random UUID client_reference for each note; retry the same body and reference after an uncertain response to avoid duplicates. Reusing a reference for another body, author or network returns 409. Notes follow the surviving investigation when networks merge.
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: network_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Network UUID.
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Console user access token in the form Bearer <token>.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - comment
+              - client_reference
+              properties:
+                comment:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                client_reference:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Saved private note.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkNote'
+        '200':
+          description: Saved private note.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkNote'
+        '400':
+          description: Invalid or blank note.
+        '409':
+          description: The reference was already used for another note.
+        '401':
+          description: Authentication is required.
+        '403':
+          description: Missing permission or Networks access.
+        '404':
+          description: Network or note is not visible to this application.
+components:
+  schemas:
+    NetworkNodeTag:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type:
+          - string
+          - 'null'
+          description: Null for guard tags, whose color token the renderer owns.
+        source:
+          type: string
+          enum:
+          - subject_tag
+          - session_tag
+          - transaction_tag
+          - signal_guard
+          description: 'Where the tag came from: a tag on the user/business, a tag on a session in this network, a tag on a transaction a party belongs to, or a signal guard condition (e.g. hub, datacenter IP).'
+        category:
+          type:
+          - string
+          - 'null'
+          enum:
+          - customer
+          - quality
+          description: customer for customer-defined tags, quality for signal-quality guard tags. Null when not applicable.
+    NetworkRiskDisplay:
+      type: object
+      properties:
+        score:
+          type: integer
+          description: Risk score, 0-100.
+        band:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          description: Band the score renders as. high >= 70, medium >= 40, otherwise low.
+        bar:
+          type: number
+          format: float
+          description: Normalized 0-1 value for rendering a risk bar.
+    NetworkGraphNode:
+      type: object
+      description: 'A subject node or a signal node, distinguished by kind. Subject nodes (kind: vendor_user | vendor_business | transaction_party) carry id, kind, subject, node_status (approved | in_review | declined | not_completed), and tags. Signal nodes (kind: signal) carry id, kind, uuid, signal_type, subject_count, coverage, is_hub, is_datacenter_ip, is_high_collision_device, node_status (signal_active | signal_guarded), tags, risk_evidence, first_seen_at, and last_seen_at.'
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum:
+          - vendor_user
+          - vendor_business
+          - transaction_party
+          - signal
+    NetworkMember:
+      type: object
+      properties:
+        subject:
+          type: object
+          description: The vendor_user, vendor_business, or transaction_party this member represents.
+        outcome_status:
+          type: string
+          description: The subject's verification/decision outcome.
+        node_status:
+          type: string
+          enum:
+          - approved
+          - in_review
+          - declined
+          - not_completed
+          - signal_active
+          - signal_guarded
+          description: 'For a member row this is always one of the subject-outcome values: approved, in_review, declined, or not_completed.'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkNodeTag'
+        risk:
+          $ref: '#/components/schemas/NetworkRiskDisplay'
+        signal_coverage:
+          type: object
+        shared_infrastructure:
+          type: object
+        joined_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        provenance:
+          type: object
+          properties:
+            session_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+            business_session_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+            transaction_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+    NetworkSignal:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        signal_type:
+          type: string
+          enum:
+          - ip_address
+          - device
+          - face
+          - document_number
+          - phone
+          - email
+          - address
+        subject_count:
+          type: integer
+        coverage:
+          type: number
+          format: float
+        is_hub:
+          type: boolean
+          description: True when this signal links an unusually large number of subjects.
+        is_datacenter_ip:
+          type: boolean
+        is_high_collision_device:
+          type: boolean
+        node_status:
+          type: string
+          enum:
+          - signal_active
+          - signal_guarded
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkNodeTag'
+        risk_evidence:
+          type: object
+        first_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    NetworkMap:
+      type: object
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkDetail'
+        convergence_count:
+          type: integer
+          description: Number of distinct address/location points members converge on.
+        countries:
+          type: array
+          items:
+            type: string
+        points:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              country:
+                type:
+                - string
+                - 'null'
+              country_code:
+                type:
+                - string
+                - 'null'
+              city:
+                type:
+                - string
+                - 'null'
+              latitude:
+                type:
+                - number
+                - 'null'
+                format: float
+              longitude:
+                type:
+                - number
+                - 'null'
+                format: float
+              observed_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+    EntityNetworkMembership:
+      type: object
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkListItem'
+        subject:
+          type: object
+        signal_types:
+          type: array
+          items:
+            type: string
+            enum:
+            - ip_address
+            - device
+            - face
+            - document_number
+            - phone
+            - email
+            - address
+        signal_count:
+          type: integer
+        joined_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    NetworkListItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        network_id:
+          type: string
+          description: Human-readable per-organization sequential id, e.g. N-0001.
+        name:
+          type:
+          - string
+          - 'null'
+        status:
+          type: string
+          enum:
+          - active
+          - in_review
+          - resolved
+          - dismissed
+          description: Network lifecycle status. Distinct from the per-applicant outcome_status inside a network (approved/in_review/declined/not_completed).
+        risk:
+          $ref: '#/components/schemas/NetworkRiskDisplay'
+        pattern_types:
+          type: array
+          items:
+            type: string
+            enum:
+            - exact_same_device
+            - similar_device
+            - same_ip_address
+            - same_address
+            - similar_selfie_backgrounds
+            - similar_poa_documents
+            - same_document_number
+            - same_phone_number
+            - same_email
+          description: The clustering patterns detected in this network.
+        signal_types:
+          type: array
+          items:
+            type: string
+            enum:
+            - ip_address
+            - device
+            - face
+            - document_number
+            - phone
+            - email
+            - address
+          description: The distinct signal types present in this network.
+        member_counts:
+          type: object
+          description: Counts of members by category (e.g. total, per outcome_status).
+        member_status:
+          type: object
+          description: Breakdown of members by outcome_status.
+        signal_coverage:
+          type: object
+          description: Per signal_type coverage of this network's members.
+        first_activity_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_activity_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    NetworkDetail:
+      allOf:
+      - $ref: '#/components/schemas/NetworkListItem'
+      - type: object
+        properties:
+          stats:
+            type: object
+            description: Aggregate stats for the network (e.g. member totals).
+          fraud_tags:
+            type: array
+            items:
+              type: object
+            description: Fraud-pattern tags surfaced on the network.
+          risk_signals:
+            type: object
+            description: 'Risk-signal summaries: residential_proxy_reuse, email_intelligence, phone_intelligence.'
+          reviewed_at:
+            type:
+            - string
+            - 'null'
+            format: date-time
+          reviewed_by:
+            type:
+            - string
+            - 'null'
+          review_reason:
+            type:
+            - string
+            - 'null'
+      properties:
+        notes_count:
+          type: integer
+          minimum: 0
+          readOnly: true
+          description: Number of private analyst notes in this investigation.
+    NetworkGraph:
+      type: object
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkDetail'
+        depth:
+          type:
+          - integer
+          - 'null'
+          description: Effective depth applied, or null when unbounded (depth=all).
+        truncated:
+          type: boolean
+          description: True if the neighborhood was cut off by depth.
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkGraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkGraphEdge'
+        metrics:
+          type: object
+          properties:
+            node_count:
+              type: integer
+            edge_count:
+              type: integer
+            hub_signal_count:
+              type: integer
+    NetworkTimelineEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+          description: e.g. network_detected, signal_observed, network_in_review, network_resolved, network_dismissed.
+        occurred_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        label:
+          type: string
+        metadata:
+          type: object
+    NetworkNote:
+      type: object
+      required:
+      - uuid
+      - actor_email
+      - comment
+      - client_reference
+      - created_at
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        actor_email:
+          type: string
+          format: email
+          readOnly: true
+          description: Authenticated author, assigned by the server.
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        client_reference:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    NetworkGraphEdge:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        source:
+          type: string
+          description: Subject node id.
+        target:
+          type: string
+          description: Signal node id.
+        subject_kind:
+          type: string
+          enum:
+          - vendor_user
+          - vendor_business
+          - transaction_party
+        signal_type:
+          type: string
+          enum:
+          - ip_address
+          - device
+          - face
+          - document_number
+          - phone
+          - email
+          - address
+        confidence:
+          type: number
+          format: float
+          description: 1.0 for an exact match.
+        observation_count:
+          type: integer
+        first_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_seen_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

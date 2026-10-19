@@ -106,11 +106,11 @@ paths:
                 success_url:
                   type: string
                   format: uri
-                  description: URL Stripe redirects the customer to after a successful payment. Defaults to `https://console.didit.me`. Append the literal placeholder `{CHECKOUT_SESSION_ID}` if you want Stripe to substitute the session ID.
+                  description: URL Stripe redirects the customer to after a successful payment. Currently defaults to `https://console.didit.me`. Pass a working URL explicitly; the default host is unavailable. Append the literal placeholder `{CHECKOUT_SESSION_ID}` if you want Stripe to substitute the session ID.
                 cancel_url:
                   type: string
                   format: uri
-                  description: URL Stripe redirects the customer to when they abort or close the Checkout window. Defaults to `https://console.didit.me`.
+                  description: URL Stripe redirects the customer to when they abort or close the Checkout window. Currently defaults to `https://console.didit.me`. Pass a working URL explicitly; the default host is unavailable.
             examples:
               Minimum top-up:
                 value:
@@ -194,6 +194,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -204,3 +205,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

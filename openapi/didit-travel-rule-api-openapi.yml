@@ -37,10 +37,52 @@ paths:
                     confirmation_timeout_hours: 48
                     timeout_outcome: HOLD
                     threshold_amount: '0.00'
+                    inbound_auto_accept: true
+                    allow_self_declaration: true
+                    allow_screenshot_proof: true
+                    auto_wallet_verification: true
+                    vasp_attribution_enabled: true
                     legal_name: ''
                     lei: ''
                     compliance_email: ''
                     is_discoverable: true
+                    counterparty_screening_enabled: false
+                    sunrise_policy: ''
+                    sunrise_jurisdictions:
+                    - CO
+                    - KH
+                    - VN
+                    non_responsive_policy: ''
+                    travel_address: ''
+                    disabled_networks: []
+                    networks:
+                      gtr:
+                        rail: GTR
+                        mode: unavailable
+                        platform_available: false
+                        connected: false
+                      trust:
+                        rail: TRUST
+                        mode: unavailable
+                        platform_available: false
+                        connected: false
+                      verifyvasp:
+                        rail: VERIFYVASP
+                        mode: unavailable
+                        platform_available: false
+                        connected: false
+                      sygna:
+                        rail: SYGNA
+                        mode: unavailable
+                        platform_available: false
+                        connected: false
+                    didit_network:
+                      listed: false
+                      missing:
+                      - travel_rule_off
+                      - legal_name_missing
+                      - compliance_email_missing
+                      compliance_email_confirmed: false
     put:
       summary: Update Travel Rule settings
       description: 'Upsert the application''s Travel Rule settings and VASP profile. Partial update — only send the fields you want to change. Setting `is_enabled: true` requires a non-blank `legal_name` (already stored or included in the same request), otherwise returns 400.'
@@ -75,7 +117,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TravelRuleSettingsDetail'
         '400':
-          description: Validation error, e.g. enabling without a legal_name.
+          description: Validation error, e.g. enabling without a legal_name, a sunrise_policy or non_responsive_policy other than HOLD, REJECT, PROCEED or empty, an unknown field in `matching_rules`, or a `data_sharing_fields` choice that cannot meet the originator obligations of your jurisdiction's regime (the errors are keyed by entity type under `data_sharing_fields`).
           content:
             application/json:
               schema:
@@ -83,6 +125,60 @@ paths:
               example:
                 legal_name:
                 - legal_name is required to enable travel rule.
+  /v3/travel-rule/settings/compliance-email/confirmation/:
+    post:
+      summary: Send the compliance email confirmation
+      description: Emails a single-use confirmation link to your VASP profile's compliance_email. Opening the link and pressing its confirm button confirms the address, which the Didit network needs before it lists your profile. A new request replaces the previous link; the link stops working when the compliance email changes. One email per minute per address.
+      operationId: sendTravelRuleComplianceEmailConfirmation
+      x-didit-sdk:
+        resource: travel_rule
+        method: send_compliance_email_confirmation
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/settings/compliance-email/confirmation/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '202':
+          description: The confirmation email was sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sent_to:
+                    type: string
+                    format: email
+              example:
+                sent_to: compliance@your-vasp.example
+        '400':
+          description: No compliance email is set, or it is already confirmed.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              examples:
+                No compliance email:
+                  value:
+                    compliance_email:
+                    - Set a compliance email before confirming it.
+                Already confirmed:
+                  value:
+                    compliance_email:
+                    - This compliance email is already confirmed.
+        '429':
+          description: A confirmation went to this address less than a minute ago.
+        '503':
+          description: The email could not be sent. Nothing changed; try again in a moment.
   /v3/travel-rule/wallet-addresses/:
     get:
       summary: List wallet address book entries
@@ -147,14 +243,14 @@ paths:
               $ref: '#/components/schemas/WalletAddressEntryCreate'
             example:
               address: 0xBeneficiaryWallet01
-              chain: ethereum
+              chain: ETH
               holder_name: Ana Diaz
               holder_vendor_data: user-042
               self_declared: true
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X POST https://verification.didit.me/v3/travel-rule/wallet-addresses/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"address\": \"0xBeneficiaryWallet01\", \"chain\": \"ethereum\", \"holder_name\": \"Ana Diaz\", \"self_declared\": true}'"
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/wallet-addresses/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"address\": \"0xBeneficiaryWallet01\", \"chain\": \"ETH\", \"holder_name\": \"Ana Diaz\", \"self_declared\": true}'"
       responses:
         '201':
           description: The created entry.
@@ -163,14 +259,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/WalletAddressEntry'
         '400':
-          description: Duplicate address for this application and chain.
+          description: 'Duplicate address for this application and chain, a missing `address`, an invalid `travel_address`, `self_declared: true` while `allow_self_declaration` is off, or `self_declared: true` while `ownership_validation_mode` is `FULL`.'
           content:
             application/json:
               schema:
                 type: object
-              example:
-                address:
-                - A wallet address entry with this address and chain already exists.
+              examples:
+                Duplicate entry:
+                  value:
+                    address:
+                    - A wallet address entry with this address and chain already exists.
+                Invalid travel address:
+                  value:
+                    travel_address:
+                    - Invalid travel address.
+                Self-declaration disabled:
+                  value:
+                    self_declared:
+                    - Self-declared ownership is disabled for this application.
   /v3/travel-rule/wallet-addresses/{entry_uuid}/:
     patch:
       summary: Update wallet address holder metadata
@@ -195,11 +301,11 @@ paths:
               $ref: '#/components/schemas/WalletAddressEntryUpdate'
             example:
               holder_name: Ana Updated
-              travel_address: ta...
+              travel_address: ta2ih1MicegQ3JqiKz9xT89KsSuwaDJYw8DgzmeSEp1h9tduJcNDZ5SgKLEHeyGMcS1s2HgbM6undFrMQknhM5aTXw3G9KBzi16hx
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X PATCH https://verification.didit.me/v3/travel-rule/wallet-addresses/{entry_uuid}/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"holder_name\": \"Ana Updated\", \"travel_address\": \"ta...\"}'"
+        source: "curl -X PATCH https://verification.didit.me/v3/travel-rule/wallet-addresses/{entry_uuid}/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"holder_name\": \"Ana Updated\", \"travel_address\": \"ta2ih1MicegQ3JqiKz9xT89KsSuwaDJYw8DgzmeSEp1h9tduJcNDZ5SgKLEHeyGMcS1s2HgbM6undFrMQknhM5aTXw3G9KBzi16hx\"}'"
       responses:
         '200':
           description: The updated fields.
@@ -207,9 +313,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletAddressEntryUpdate'
+        '400':
+          description: '`travel_address` is not a valid travel address.'
+          content:
+            application/json:
+              examples:
+                Invalid travel address:
+                  value:
+                    travel_address:
+                    - Invalid travel address.
+        '404':
+          description: Unknown or deleted entry.
     delete:
-      summary: Soft-delete a wallet address
-      description: Soft-deletes the entry (deleted_at is set). The address is freed up for re-registration; ownership proofs are retained for audit.
+      summary: Delete a wallet address
+      description: Deletes the entry. It stops matching new transfers immediately and the address is freed up for re-registration.
       operationId: deleteTravelRuleWalletAddress
       tags:
       - Travel Rule
@@ -229,10 +346,12 @@ paths:
       responses:
         '204':
           description: Deleted.
+        '404':
+          description: Unknown or already deleted entry.
   /v3/travel-rule/vasps/:
     get:
       summary: Search the VASP directory
-      description: Paginated search across discoverable Didit customers with Travel Rule enabled, plus VASPs catalogued in the internal counterparty registry. Excludes your own application's profile.
+      description: 'Paginated, name-sorted search of the VASP directory: the shared directory entries, which Didit builds from the ESMA interim MiCA register, the public TRISA directory, the global LEI register and its own curation, plus the members of the Didit network. Each row carries the routes your application has to it today. Your own application''s profile is never listed. Rows also carry the shared due-diligence assessment and your application''s own decision, entity screening and questionnaires.'
       operationId: listTravelRuleVasps
       tags:
       - Travel Rule
@@ -243,7 +362,55 @@ paths:
         in: query
         schema:
           type: string
-        description: Case-insensitive substring match on VASP name.
+          maxLength: 255
+        description: A name or alias fragment (case-insensitive), an exact LEI, or a domain (example.com or a URL on it). Didit network members match on their legal name, LEI or the domain of their compliance email.
+      - name: network
+        in: query
+        schema:
+          type: string
+          enum:
+          - GTR
+          - TRUST
+          - VERIFYVASP
+          - SYGNA
+          - TRISA
+        description: Only directory entries a network's member directory currently lists.
+      - name: jurisdiction
+        in: query
+        schema:
+          type: string
+        description: ISO 3166 alpha-2 or alpha-3 country code. 400 for anything else.
+      - name: reachable
+        in: query
+        schema:
+          type: boolean
+        description: 'true: only VASPs your application has an available route to (Didit network members included). false: only directory entries it cannot reach today.'
+      - name: kind
+        in: query
+        schema:
+          type: string
+          enum:
+          - directory
+          - didit
+        description: Only directory entries, or only Didit network members.
+      - name: risk
+        in: query
+        schema:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        description: Only directory entries whose risk_level is this band. Didit network members, which are not scored, never match.
+      - name: responsiveness
+        in: query
+        schema:
+          type: string
+          enum:
+          - RESPONSIVE
+          - UNRESPONSIVE
+          - UNKNOWN
+        description: Only directory entries whose responsiveness.status is this value. Didit network members never match.
       - name: limit
         in: query
         schema:
@@ -259,7 +426,7 @@ paths:
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X GET 'https://verification.didit.me/v3/travel-rule/vasps/?search=Bene' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+        source: "curl -X GET 'https://verification.didit.me/v3/travel-rule/vasps/?search=counterparty&reachable=true' \\\n  -H 'x-api-key: YOUR_API_KEY'"
       responses:
         '200':
           description: Paginated, name-sorted VASP directory results.
@@ -282,10 +449,626 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/VaspDirectoryEntry'
+        '400':
+          description: 'A filter is not valid: the body names each field, for example an unknown network, country code, risk band or responsiveness status.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                jurisdiction:
+                - Use an ISO 3166 alpha-2 or alpha-3 country code.
+                network:
+                - '"SWIFT" is not a valid choice.'
+      x-didit-sdk:
+        resource: travel_rule
+        method: list_vasps
+        auth: api_key
+        server: true
+  /v3/travel-rule/vasps/{vasp_id}/:
+    get:
+      summary: Get a VASP directory entry
+      description: One directory entry or Didit network member by the id the search returned, with the same fields and the routes your application has to it.
+      operationId: getTravelRuleVasp
+      x-didit-sdk:
+        resource: travel_rule
+        method: retrieve_vasp
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The id of a row of GET /v3/travel-rule/vasps/.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: The entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaspDirectoryEntry'
+        '404':
+          description: No entry or listed Didit network member has this id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry has this id.
+  /v3/travel-rule/vasps/{vasp_id}/decision/:
+    get:
+      summary: Get your decision on a VASP
+      description: 'Your application''s decision on a counterparty (a directory entry or a Didit network member): approved, restricted or blocked. An entity of a brand with no decision of its own follows the brand''s decision, named in inherited_from. Private to your application.'
+      operationId: getTravelRuleVaspDecision
+      x-didit-sdk:
+        resource: travel_rule
+        method: retrieve_vasp_decision
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/decision/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: The decision that applies, or null.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyDecisionResponse'
+              examples:
+                Own decision:
+                  value:
+                    decision:
+                      decision: APPROVED
+                      reason: Licensed in DE, questionnaire reviewed
+                      decided_by: ''
+                      updated_at: '2026-10-14T10:05:00Z'
+                      inherited_from: null
+                Inherited from the brand:
+                  value:
+                    decision:
+                      decision: BLOCKED
+                      reason: Group refused after review
+                      decided_by: ''
+                      updated_at: '2026-10-14T10:05:00Z'
+                      inherited_from:
+                        id: 5e4d3c2b-1a0f-4e9d-8c7b-6a5f4e3d2c1b
+                        name: Example Group
+                No decision:
+                  value:
+                    decision: null
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+    put:
+      summary: Set your decision on a VASP
+      description: 'Make or change your application''s decision on a counterparty: APPROVED, RESTRICTED or BLOCKED, with an optional reason. It never changes the shared directory entry and acts only through your transaction rules (counterparty_dd_status). A decision on a brand also covers each of its entities that has no decision of its own.'
+      operationId: updateTravelRuleVaspDecision
+      x-didit-sdk:
+        resource: travel_rule
+        method: update_vasp_decision
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleCounterpartyDecisionRequest'
+            example:
+              decision: BLOCKED
+              reason: Unlicensed in its home jurisdiction
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PUT https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/decision/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"decision\": \"BLOCKED\", \"reason\": \"Unlicensed in its home jurisdiction\"}'"
+      responses:
+        '200':
+          description: The decision as it now applies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyDecisionResponse'
+              example:
+                decision:
+                  decision: BLOCKED
+                  reason: Unlicensed in its home jurisdiction
+                  decided_by: ''
+                  updated_at: '2026-10-14T10:05:00Z'
+                  inherited_from: null
+        '400':
+          description: The decision is missing or not one of APPROVED, RESTRICTED or BLOCKED, or the reason is longer than 255 characters.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                decision:
+                - '"MAYBE" is not a valid choice.'
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+    delete:
+      summary: Clear your decision on a VASP
+      description: 'Clear your application''s own decision on a counterparty. The response shows the decision that applies afterwards: null, or for an entity of a brand the brand''s decision, which the entity follows again.'
+      operationId: clearTravelRuleVaspDecision
+      x-didit-sdk:
+        resource: travel_rule
+        method: clear_vasp_decision
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/decision/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: The decision cleared; the body shows the decision that applies now.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyDecisionResponse'
+              example:
+                decision: null
+        '404':
+          description: 'No counterparty has this id, or your application has no decision of its own on it (a decision it only inherits from its brand cannot be cleared here: clear the brand''s).'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Unknown id:
+                  value:
+                    detail: No directory entry or Didit network member has this id.
+                No decision of its own:
+                  value:
+                    detail: This application has no decision of its own on this counterparty.
+  /v3/travel-rule/vasps/{vasp_id}/screening/:
+    get:
+      summary: Get a VASP's entity screening
+      description: Whether counterparty screening is on for your application, what one screening costs your organization, how long a result stays fresh, and your latest sanctions and adverse-media screening of the counterparty. Reading it is free.
+      operationId: getTravelRuleVaspScreening
+      x-didit-sdk:
+        resource: travel_rule
+        method: retrieve_vasp_screening
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/screening/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Your screening setting, its price and your latest screening.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyScreeningStatus'
+              example:
+                enabled: true
+                price: '0.20'
+                fresh_days: 30
+                screening:
+                  id: 7a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+                  status: Approved
+                  total_hits: 0
+                  score: null
+                  screened_at: '2026-10-14T09:58:00Z'
+                  fresh: true
+                  flagged: false
+        '403':
+          description: Your organization's contract has no rate configured for counterparty screening.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No contract rate is configured for this usage type.
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+    post:
+      summary: Screen a VASP
+      description: 'Screen the counterparty entity against sanctions and adverse media for your application. Opt-in: counterparty_screening_enabled must be on in your Travel Rule settings. Each new screening is billed at your organization''s Company AML Screening price; a screening younger than 30 days is returned instead (200, not billed) unless you send refresh: true. One screening of a counterparty runs at a time per application. The result is private to your application. Sandbox applications are never screened.'
+      operationId: screenTravelRuleVasp
+      x-didit-sdk:
+        resource: travel_rule
+        method: screen_vasp
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleCounterpartyScreeningRequest'
+            example:
+              refresh: false
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/screening/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"refresh\": false}'"
+      responses:
+        '200':
+          description: A fresh screening already existed and was returned. Nothing was billed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyScreeningResult'
+              example:
+                outcome: reused
+                screening:
+                  id: 7a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+                  status: Approved
+                  total_hits: 0
+                  score: null
+                  screened_at: '2026-10-14T09:58:00Z'
+                  fresh: true
+                  flagged: false
+        '201':
+          description: A new screening ran and was billed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyScreeningResult'
+              example:
+                outcome: screened
+                screening:
+                  id: 7a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+                  status: In Review
+                  total_hits: 2
+                  score: 85.0
+                  screened_at: '2026-10-14T09:58:00Z'
+                  fresh: true
+                  flagged: true
+        '400':
+          description: The body is not valid, or the counterparty has no name to screen.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                detail:
+                - This counterparty has no name to screen.
+        '403':
+          description: Your organization's balance cannot cover the screening (code insufficient_credits; nothing ran and nothing was billed), or your contract has no rate configured for it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                  code:
+                    type: string
+              example:
+                detail: You don't have enough credits to perform this request. Please top up at https://business.didit.me
+                code: insufficient_credits
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+        '409':
+          description: 'Nothing ran and nothing was billed: counterparty screening is off for your application, the application is a sandbox one, or a screening of this counterparty is already running.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Screening off:
+                  value:
+                    detail: Counterparty screening is turned off. Enable it in the Travel Rule settings first.
+                Sandbox application:
+                  value:
+                    detail: Counterparty screening does not run for sandbox applications.
+                Already running:
+                  value:
+                    detail: A screening of this counterparty is already running. Try again in a moment.
+        '502':
+          description: The screening could not be completed. Nothing was billed; try again in a moment.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: The screening provider did not answer. Try again in a moment.
+  /v3/travel-rule/vasps/{vasp_id}/questionnaires/:
+    get:
+      summary: List due-diligence questionnaires with a VASP
+      description: Every due-diligence questionnaire your application sent the counterparty, newest first, with its status and, once answered, the answers. Private to your application.
+      operationId: listTravelRuleVaspQuestionnaires
+      x-didit-sdk:
+        resource: travel_rule
+        method: list_vasp_questionnaires
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/questionnaires/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: Your questionnaires with this counterparty.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyQuestionnaireList'
+              example:
+                questionnaires:
+                - id: 3f9e8d7c-6b5a-4c3d-9e2f-1a0b9c8d7e6f
+                  status: SENT
+                  form_version: '1'
+                  sent_to: travelrule@counterparty.example
+                  sent_at: '2026-10-14T10:00:00Z'
+                  expires_at: '2026-11-13T10:00:00Z'
+                  answered_at: null
+                  valid_until: null
+                  current: false
+                  answers: {}
+                - id: 8b7a6c5d-4e3f-4a2b-9c1d-0e9f8a7b6c5d
+                  status: ANSWERED
+                  form_version: '1'
+                  sent_to: travelrule@counterparty.example
+                  sent_at: '2026-09-02T08:00:00Z'
+                  expires_at: '2026-10-02T08:00:00Z'
+                  answered_at: '2026-09-04T15:20:00Z'
+                  valid_until: '2027-09-04T15:20:00Z'
+                  current: true
+                  answers:
+                    legal_name: Example Counterparty VASP, incorporated in the example jurisdiction.
+                    licensing: Crypto-asset service provider authorised under MiCA by its national regulator, licence active.
+                    jurisdictions: EU and EEA. We do not serve the United States.
+                    aml_program: Written AML/CFT policy, annual independent review, last completed in March 2026.
+                    compliance_officer: Head of Compliance, reachable at compliance@counterparty.example.
+                    sanctions_screening: Customers at onboarding and daily; counterparties on every transfer.
+                    transaction_monitoring: Rule-based monitoring with analyst review; suspicious activity reports filed with the FIU.
+                    travel_rule: TRP and email; we answer requests within one business day.
+                    custody: Segregated customer wallets held with a qualified custodian, insured.
+                    ownership: No shareholder holds 25 percent or more; parent company Example Holding Group.
+                    record_keeping: Five-year record-keeping for Travel Rule and transaction data, as our regulator requires.
+                    data_protection: Encrypted at rest and in transit, stored in the EU.
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+    post:
+      summary: Send a due-diligence questionnaire to a VASP
+      description: Email Didit's standard due-diligence questionnaire to a compliance address on record for the counterparty, with a single-use answer link. The counterparty has 30 days to answer every question; the answers stay current for 365 days. A new send replaces your earlier unanswered questionnaire to the same counterparty, whose link stops working. One email per minute per address.
+      operationId: sendTravelRuleVaspQuestionnaire
+      x-didit-sdk:
+        resource: travel_rule
+        method: send_vasp_questionnaire
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: vasp_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 'The id of a row of GET /v3/travel-rule/vasps/: a directory entry or a Didit network member.'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleCounterpartyQuestionnaireRequest'
+            example:
+              sent_to: travelrule@counterparty.example
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/vasps/{vasp_id}/questionnaires/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"sent_to\": \"travelrule@counterparty.example\"}'"
+      responses:
+        '202':
+          description: The questionnaire was emailed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleCounterpartyQuestionnaire'
+              example:
+                id: 3f9e8d7c-6b5a-4c3d-9e2f-1a0b9c8d7e6f
+                status: SENT
+                form_version: '1'
+                sent_to: travelrule@counterparty.example
+                sent_at: '2026-10-14T10:00:00Z'
+                expires_at: '2026-11-13T10:00:00Z'
+                answered_at: null
+                valid_until: null
+                current: false
+                answers: {}
+        '400':
+          description: sent_to is not a valid email address or not a compliance address on record for the counterparty, or the counterparty has no compliance address on record.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              examples:
+                Not on record:
+                  value:
+                    sent_to:
+                    - Send the questionnaire to a compliance address on record for this counterparty.
+                No address:
+                  value:
+                    sent_to:
+                    - No compliance address is on record for this counterparty. Add a contact for it first.
+        '404':
+          description: No directory entry or listed Didit network member has this id. Your own VASP profile is never a counterparty of yours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: No directory entry or Didit network member has this id.
+        '429':
+          description: A questionnaire went to this address less than a minute ago.
+        '503':
+          description: The email could not be sent and no questionnaire was created. Try again in a moment.
   /v3/transactions/{transaction_id}/travel-rule/:
     patch:
       summary: Finish, cancel, or resend a Travel Rule transfer
-      description: 'Provide `payment_txn_id` to report the on-chain hash and move an outbound COMPLETED transfer to FINISHED (its INTERNAL-rail counterpart also moves to FINISHED), `{"action": "cancel"}` to cancel a non-terminal transfer, or `{"action": "resend"}` to re-run routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA (improve the counterparty data first, e.g. add a travel_address to the destination wallet entry).'
+      description: 'Provide `payment_txn_id` to report the on-chain hash and move an outbound COMPLETED transfer to FINISHED (its INTERNAL-rail counterpart also moves to FINISHED), `{"action": "cancel"}` to cancel a non-terminal transfer, or `{"action": "resend"}` to re-run routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA (improve the counterparty data first, e.g. add a travel_address to the destination wallet entry). resend applies to outbound transfers only.'
       operationId: patchTravelRuleTransfer
       tags:
       - Travel Rule
@@ -328,12 +1111,33 @@ paths:
                 $ref: '#/components/schemas/TravelRuleTransferDetail'
         '400':
           description: Neither payment_txn_id nor a supported action (cancel, resend) was provided.
+          content:
+            application/json:
+              examples:
+                No action:
+                  value:
+                    detail:
+                    - Provide payment_txn_id, action=cancel or action=resend.
+        '404':
+          description: Unknown transaction, or the transaction has no Travel Rule transfer.
         '409':
           description: The transfer is not in a state that allows this operation (e.g. not COMPLETED/outbound for finish, already terminal for cancel, or not an outbound transfer in a resendable status for resend).
+          content:
+            application/json:
+              examples:
+                Cancel from a terminal status:
+                  value:
+                    detail: Transfer is already in a terminal state.
+                Resend not allowed:
+                  value:
+                    detail: Transfer cannot be resent from its current state.
+                Finish not allowed:
+                  value:
+                    detail: Transfer must be an outbound transfer in COMPLETED status to finish.
   /v3/transactions/{transaction_id}/travel-rule/ownership/:
     post:
       summary: Confirm or deny wallet ownership
-      description: Called by the beneficiary's application when its INTERNAL-rail transfer is UNCONFIRMED_OWNERSHIP. Confirming marks the matching wallet address book entry as ownership-verified and runs the beneficiary name match on both sides of the transfer; denying declines both sides.
+      description: 'Resolve a transfer that waits on wallet ownership: call it on your own side of the transfer when it is UNCONFIRMED_OWNERSHIP, or when it is an inbound transfer in ON_HOLD. Confirming marks the matching wallet address book entry as ownership-verified (for an inbound ON_HOLD transfer with no entry, Didit creates one from beneficiary_data.wallet_address) and runs the beneficiary name match on both sides of the transfer; denying declines both sides. An inbound transfer whose deposit already settled moves on to FINISHED when the match succeeds. For an inbound TRP transfer in UNCONFIRMED_OWNERSHIP, ON_HOLD or COUNTERPARTY_MISMATCHED_DATA, Didit sends your decision to the originating VASP instead: approving returns the payment address (wallet_address, or the matched entry''s address) and moves the transfer to COMPLETED, and denying declines it.'
       operationId: confirmTravelRuleOwnership
       tags:
       - Travel Rule
@@ -361,13 +1165,144 @@ paths:
         source: "curl -X POST https://verification.didit.me/v3/transactions/{transaction_id}/travel-rule/ownership/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"confirmed\": true}'"
       responses:
         '200':
-          description: The updated transfer. originator_data/beneficiary_data are omitted until ownership_confirmed is true on an inbound transfer.
+          description: 'The updated transfer. For an inbound transfer the counterparty''s originator_data/beneficiary_data stay masked (`data_masked: true`) until ownership is confirmed, then `data_unmasked` records when, why and by whom.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TravelRuleTransferDetail'
+        '400':
+          description: 'Validation error: confirmed is missing, or an inbound TRP approval has no wallet_address and no address to fall back on.'
+          content:
+            application/json:
+              examples:
+                No payment address:
+                  value:
+                    wallet_address:
+                    - wallet_address is required to approve.
+        '404':
+          description: Unknown transaction, or the transaction has no Travel Rule transfer.
         '409':
-          description: The transfer is not currently UNCONFIRMED_OWNERSHIP, or its matching wallet address book entry was deleted.
+          description: The transfer is not waiting on ownership confirmation, no wallet address book entry matches its counterparty wallet, or an INTERNAL transfer from another Didit customer needs a control proof (a signed message or a test deposit) before it can be confirmed.
+          content:
+            application/json:
+              examples:
+                Not awaiting confirmation:
+                  value:
+                    detail: Transfer is not awaiting ownership confirmation.
+                No matching address book entry:
+                  value:
+                    detail: wallet address entry no longer available
+        '502':
+          description: 'Inbound TRP transfer only: Didit could not deliver your decision to the originating VASP, so the transfer status does not change.'
+          content:
+            application/json:
+              examples:
+                Callback not delivered:
+                  value:
+                    detail: Counterparty inquiry-resolution callback could not be delivered.
+  /v3/transactions/{transaction_id}/travel-rule/messages/:
+    get:
+      summary: List Travel Rule messages
+      description: Messages and document requests exchanged with the counterparty VASP about this transfer.
+      operationId: listTravelRuleMessages
+      x-didit-sdk:
+        resource: transactions.travel_rule
+        method: list_messages
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID that owns the transfer.
+        schema:
+          type: string
+          format: uuid
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET https://verification.didit.me/v3/transactions/{transaction_id}/travel-rule/messages/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      responses:
+        '200':
+          description: The messages, oldest first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelRuleMessage'
+        '404':
+          description: Unknown transaction or token, or no Travel Rule transfer on the transaction.
+    post:
+      summary: Send a Travel Rule message or document request
+      description: 'Sends a message or a document request to the counterparty VASP. Works on INTERNAL transfers (the other Didit customer sees it on its side of the pair) and EMAIL transfers (the counterparty is emailed and answers in the pickup portal). A transfer over TRP, GTR, TRUST, VerifyVASP or Sygna carries no messages, because those protocols have none. Limits: 100 messages per transfer, 5000 characters per body, 10 requested documents, 5 files of 10 MB each.'
+      operationId: createTravelRuleMessage
+      x-didit-sdk:
+        resource: transactions.travel_rule
+        method: create_message
+        auth: api_key
+        server: true
+      tags:
+      - Travel Rule
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        description: Didit-stable transaction UUID that owns the transfer.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleMessageCreateRequest'
+            example:
+              kind: DOCUMENT_REQUEST
+              body: Please confirm the date of birth of the beneficiary.
+              requested_documents:
+              - Proof of address
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TravelRuleMessageCreateRequest'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/transactions/{transaction_id}/travel-rule/messages/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"kind\": \"DOCUMENT_REQUEST\", \"body\": \"Please confirm the date of birth of the beneficiary.\", \"requested_documents\": [\"Proof of address\"]}'"
+      responses:
+        '201':
+          description: The stored message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleMessage'
+        '400':
+          description: Invalid body, a file type or size that is not accepted, more than 100 messages on the transfer, or a `reply_to` that is not a message of this transfer.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                requested_documents:
+                - Name at least one document the counterparty should send.
+        '404':
+          description: Unknown transaction or token, or no Travel Rule transfer on the transaction.
+        '409':
+          description: 'No message can reach the counterparty. `detail` gives the reason: the transfer runs over a network rail (TRP, GTR, TRUST, VerifyVASP or Sygna), it has no counterparty yet, an INTERNAL transfer''s data did not match the wallet holder so nothing reached the recipient, or an EMAIL transfer''s pickup link has expired or the transfer is closed.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
   /v3/travel-rule/pickup/{token}/:
     get:
       summary: Get email-rail pickup info
@@ -436,14 +1371,115 @@ paths:
                     type: string
               example:
                 status: COMPLETED
+        '400':
+          description: '`decision` is missing or is not `accept` or `decline`.'
+          content:
+            application/json:
+              examples:
+                Invalid decision:
+                  value:
+                    decision:
+                    - '"maybe" is not a valid choice.'
         '404':
           description: Unknown token.
         '410':
           description: The pickup window has closed.
+  /v3/travel-rule/pickup/{token}/messages/:
+    get:
+      summary: List pickup messages
+      description: 'Public, unauthenticated. The messages of an EMAIL-rail transfer as the counterparty VASP reads them: what the customer sent is `INBOUND` and is signed with the customer''s VASP name. The token is the authentication.'
+      operationId: listTravelRulePickupMessages
+      x-didit-sdk:
+        resource: travel_rule
+        method: list_pickup_messages
+        auth: public
+        server: false
+      tags:
+      - Travel Rule
+      security:
+      - {}
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: curl https://verification.didit.me/v3/travel-rule/pickup/{token}/messages/
+      responses:
+        '200':
+          description: The messages, oldest first, from the counterparty's side.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelRuleMessage'
+        '404':
+          description: Unknown token.
+        '410':
+          description: The pickup link has expired or the transfer is closed.
+    post:
+      summary: Reply in the pickup portal
+      description: Public, unauthenticated. The counterparty VASP writes back on an EMAIL-rail transfer. Same body as the transaction's messages; attachments must be PDF, PNG, JPEG or WebP. The token is the authentication.
+      operationId: createTravelRulePickupMessage
+      x-didit-sdk:
+        resource: travel_rule
+        method: create_pickup_message
+        auth: public
+        server: false
+      tags:
+      - Travel Rule
+      security:
+      - {}
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRuleMessageCreateRequest'
+            example:
+              kind: MESSAGE
+              body: Attached is the proof of address of the wallet holder.
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TravelRuleMessageCreateRequest'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/pickup/{token}/messages/ \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"kind\": \"MESSAGE\", \"body\": \"Attached is the proof of address of the wallet holder.\"}'"
+      responses:
+        '201':
+          description: The stored message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelRuleMessage'
+        '400':
+          description: Invalid body, a file type or size that is not accepted, more than 100 messages on the transfer, or a `reply_to` that is not a message of this transfer.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                requested_documents:
+                - Name at least one document the counterparty should send.
+        '404':
+          description: Unknown token.
+        '410':
+          description: The pickup link has expired or the transfer is closed.
   /v3/travel-rule/inbound/:
     post:
       summary: Register an after-deposit (sunrise) inbound transfer
-      description: Register Travel Rule data for a crypto deposit that already settled on-chain before any exchange took place. Creates an inbound travelRule transaction (or reuses an unclaimed deposit) and resolves the transfer against your wallet address book. A transaction.created webhook fires for newly-created transactions.
+      description: Register Travel Rule data for a crypto deposit that already settled on-chain before any exchange took place. Creates an inbound travelRule transaction (or reuses an unclaimed deposit) and resolves the transfer against your wallet address book. For newly-created transactions the travel_rule.status.updated webhook fires before transaction.created.
       operationId: registerTravelRuleInbound
       tags:
       - Travel Rule
@@ -456,7 +1492,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TravelRuleInboundRequest'
             example:
-              chain: ethereum
+              chain: ETH
               txid: 0xdeposit-hash
               wallet_address: 0xYourDepositWallet
               amount: '500.00'
@@ -468,24 +1504,38 @@ paths:
               originating_vasp:
                 name: Origin CASP SL
                 lei: ''
-                travel_address: ta...
+                travel_address: ta9JbXbsBSuS5ozArJRFVgvBHMVnDGUnrPPChSZYQsuZTn3kPrJXUQ7RSLUEJ5KjyPvr8C9sAxmPtZfGsQVKCi4n8ShxP9BkbDdbtjtA9aumNybAZ1BxC
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X POST https://verification.didit.me/v3/travel-rule/inbound/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"chain\":\"ethereum\",\"txid\":\"0xdeposit-hash\",\"wallet_address\":\"0xYourDepositWallet\",\"amount\":\"500.00\",\"currency\":\"USDC\"}'"
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/inbound/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"chain\":\"ETH\",\"txid\":\"0xdeposit-hash\",\"wallet_address\":\"0xYourDepositWallet\",\"amount\":\"500.00\",\"currency\":\"USDC\"}'"
       responses:
         '200':
-          description: An existing unclaimed deposit was reused (created is false).
+          description: A transfer for this txid and wallet_address was already registered; the existing one is returned unchanged (created is false).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TravelRuleInboundResponse'
         '201':
-          description: A new inbound transaction and transfer were created.
+          description: A new Travel Rule transfer was registered, on a new inbound transaction or on an existing unclaimed deposit (created is true).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TravelRuleInboundResponse'
+        '400':
+          description: A required field (`chain`, `txid`, `wallet_address`, `amount`, `currency`) is missing, `originating_vasp.lei` is not a valid LEI, or `originating_vasp.travel_address` is not a valid travel address.
+          content:
+            application/json:
+              examples:
+                Missing field:
+                  value:
+                    txid:
+                    - This field is required.
+                Invalid LEI:
+                  value:
+                    originating_vasp:
+                      lei:
+                      - 'Invalid LEI: expected 20 alphanumeric characters (ISO 17442).'
   /v3/travel-rule/widget-session/:
     post:
       summary: Mint a wallet-ownership widget session
@@ -502,16 +1552,16 @@ paths:
             schema:
               $ref: '#/components/schemas/TravelRuleWidgetSessionCreate'
             example:
-              wallet_address: 0xBeneficiaryWallet01
-              chain: ethereum
-              holder_name: Ana Diaz
+              wallet_address: '0xd3b62acb76fb27a7f8961ec40fa11746b113aca9'
+              chain: ETH
+              holder_name: Jane Doe
               vendor_data: user-042
-              transaction_id: 22222222-3333-4444-5555-666666666666
+              transaction_id: 99999999-aaaa-bbbb-cccc-dddddddddddd
               expires_in_minutes: 60
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X POST https://verification.didit.me/v3/travel-rule/widget-session/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"wallet_address\":\"0xBeneficiaryWallet01\",\"chain\":\"ethereum\",\"holder_name\":\"Ana Diaz\"}'"
+        source: "curl -X POST https://verification.didit.me/v3/travel-rule/widget-session/ \\\n  -H 'x-api-key: YOUR_API_KEY' -H 'Content-Type: application/json' \\\n  -d '{\"wallet_address\":\"0xd3b62acb76fb27a7f8961ec40fa11746b113aca9\",\"chain\":\"ETH\",\"holder_name\":\"Jane Doe\",\"transaction_id\":\"99999999-aaaa-bbbb-cccc-dddddddddddd\"}'"
       responses:
         '201':
           description: The minted widget session.
@@ -519,6 +1569,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TravelRuleWidgetSessionResponse'
+        '400':
+          description: 'Invalid body: `callback_url` is not an absolute http(s) URL, `expires_in_minutes` is outside 5 to 10080, `transaction_id` is not a UUID, or a field is longer than its limit.'
+          content:
+            application/json:
+              examples:
+                Invalid callback_url:
+                  value:
+                    callback_url:
+                    - callback_url must be an absolute http(s) URL.
+        '404':
+          description: '`transaction_id` does not name a Travel Rule transfer in this application.'
   /v3/travel-rule/widget/{token}/:
     get:
       summary: Get wallet-ownership widget context
@@ -549,214 +1610,148 @@ paths:
           description: Unknown token.
         '410':
           description: The session expired without completing.
+  /v3/travel-rule/widget/{token}/vasps/:
+    get:
+      summary: Search VASPs from the wallet widget
+      description: 'Public read endpoint keyed by the widget session token, no API key required: the VASP picker of the end user''s widget. Same search and filters as GET /v3/travel-rule/vasps/ for the widget''s application, answering only who each VASP is and whether it can be reached.'
+      operationId: listTravelRuleWidgetVasps
+      x-didit-sdk:
+        resource: travel_rule
+        method: list_widget_vasps
+        auth: public
+        server: false
+      tags:
+      - Travel Rule
+      security: []
+      parameters:
+      - name: token
+        in: path
+        required: true
+        description: Opaque session token returned when the widget session was minted.
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+          maxLength: 255
+        description: A name or alias fragment (case-insensitive), an exact LEI, or a domain (example.com or a URL on it). Didit network members match on their legal name, LEI or the domain of their compliance email.
+      - name: network
+        in: query
+        schema:
+          type: string
+          enum:
+          - GTR
+          - TRUST
+          - VERIFYVASP
+          - SYGNA
+          - TRISA
+        description: Only directory entries a network's member directory currently lists.
+      - name: jurisdiction
+        in: query
+        schema:
+          type: string
+        description: ISO 3166 alpha-2 or alpha-3 country code. 400 for anything else.
+      - name: reachable
+        in: query
+        schema:
+          type: boolean
+        description: 'true: only VASPs your application has an available route to (Didit network members included). false: only directory entries it cannot reach today.'
+      - name: kind
+        in: query
+        schema:
+          type: string
+          enum:
+          - directory
+          - didit
+        description: Only directory entries, or only Didit network members.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: curl 'https://verification.didit.me/v3/travel-rule/widget/{token}/vasps/?search=counterparty'
+      responses:
+        '200':
+          description: Paginated, name-sorted results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VaspDirectoryWidgetEntry'
+        '400':
+          description: 'A filter is not valid: the body names each field, for example an unknown network or country code.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+              example:
+                jurisdiction:
+                - Use an ISO 3166 alpha-2 or alpha-3 country code.
+                network:
+                - '"SWIFT" is not a valid choice.'
+        '404':
+          description: Unknown token.
+        '410':
+          description: The session expired.
 components:
   schemas:
-    TravelRuleWidgetContext:
-      type: object
+    TravelRuleDataUnmasked:
+      type:
+      - object
+      - 'null'
+      description: Audit record of the moment the counterparty's data was unmasked. Null while the data is still masked, and for outbound transfers.
       properties:
-        vasp_name:
-          type: string
-          description: Legal name from your VASP profile, shown to the customer in the widget. Empty when no profile exists.
-        wallet_address:
-          type: string
-        chain:
-          type: string
-        holder_name:
-          type: string
-        allowed_methods:
-          type: array
-          items:
-            type: string
-            enum:
-            - MESSAGE_SIGNING
-            - SCREENSHOT
-            - SATOSHI_TEST
-            - SELF_DECLARATION
-          description: Proof methods available for this session. MESSAGE_SIGNING requires a supported chain family, SATOSHI_TEST requires a satoshi_deposit_address on the session, SCREENSHOT requires the allow_screenshot_proof setting, and SELF_DECLARATION requires the allow_self_declaration setting.
-        transfer_status:
-          type:
-          - string
-          - 'null'
-          description: Status of the linked Travel Rule transfer. Null when the session was minted without a transaction_id.
-        callback_url:
-          type: string
-          description: Where the widget returns the customer after completion. Empty when not set.
-        expires_at:
+        at:
           type: string
           format: date-time
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Non-null once a proof has been verified.
-        proofs:
-          type: array
-          items:
-            $ref: '#/components/schemas/TravelRuleWidgetProofSummary'
-        customization:
-          type:
-          - object
-          - 'null'
-          description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
-    TravelRulePickupRespondRequest:
+        reason:
+          type: string
+          enum:
+          - ownership_confirmed
+          - wallet_proof
+          - address_book_match
+          - own_verified_wallet
+          - inquiry_approved
+          description: 'What confirmed ownership: your confirmation through the console or the API, a wallet proof in the widget, a verified address-book wallet, your own verified wallet, or your approval of an inbound TRP inquiry.'
+        actor:
+          type: string
+          description: 'Who confirmed it: the console user''s email or the API key''s label. Blank for an automatic decision.'
+    TravelRuleCounterpartyDecisionResponse:
       type: object
-      required:
-      - decision
       properties:
         decision:
-          type: string
-          enum:
-          - accept
-          - decline
-        beneficiary_name:
-          type: string
-          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
-    WalletAddressEntryUpdate:
-      type: object
-      properties:
-        holder_name:
-          type: string
-        holder_vendor_data:
-          type: string
-        entity_type:
-          type: string
-        travel_address:
-          type: string
-      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
-    WalletAddressEntry:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        address:
-          type: string
-          description: The wallet address. Unique per application and chain among non-deleted entries.
-        chain:
-          type:
-          - string
-          - 'null'
-          description: Free-text chain identifier, e.g. "ethereum", "bitcoin".
-        holder_vendor_data:
-          type:
-          - string
-          - 'null'
-          description: Your internal identifier for the holder.
-        holder_name:
-          type:
-          - string
-          - 'null'
-          description: Name of the wallet holder, used for the beneficiary name match.
-        entity_type:
-          type: string
-          description: Free text, defaults to "individual".
-        is_ownership_verified:
-          type: boolean
-          description: Read-only. Whether ownership of this address has been proven.
-        created_at:
-          type: string
-          format: date-time
-        self_declared:
-          type: boolean
-          description: Whether the entry was created as a self-declared ownership proof.
-        travel_address:
-          type:
-          - string
-          - 'null'
-          description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's transfers over the TRP rail.
-    TravelRuleInboundResponse:
-      type: object
-      properties:
-        transaction_id:
-          type: string
-          format: uuid
-          description: Didit transaction UUID for the inbound deposit.
-        txn_id:
-          type: string
-          description: Didit-generated txn_id for the sunrise transaction.
-        created:
-          type: boolean
-          description: true when a new transaction was minted (HTTP 201); false when an existing unclaimed deposit was reused (HTTP 200).
-        travel_rule:
-          $ref: '#/components/schemas/TravelRuleTransferDetail'
-    VaspDirectoryEntry:
-      type: object
-      properties:
-        name:
-          type: string
-        lei:
-          type: string
-        jurisdiction:
-          type: string
-        dd_status:
-          type: string
-          enum:
-          - NOT_STARTED
-          - IN_PROGRESS
-          - COMPLETED
-          - REJECTED
-        dd_score:
-          type: integer
-        reachable_rails:
-          type: array
-          items:
-            type: string
-            enum:
-            - INTERNAL
-            - TRP
-            - GTR
-            - EMAIL
-        is_didit_customer:
-          type: boolean
-          description: true for discoverable Didit applications (dd_status is always COMPLETED, dd_score always 0 for these); false for internal counterparty-registry rows, which carry a real due-diligence status and score.
-        dd_score_breakdown:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Per-component contributions to dd_score (licensing/registry, sanctions/PEP, jurisdiction risk, on-chain analytics risk), all derived from checks Didit runs in-house. Empty for Didit-customer rows.
-        dd_assessed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: When the due-diligence assessment last ran. Null for Didit-customer rows.
-    WalletAddressEntryCreate:
-      type: object
-      required:
-      - address
-      properties:
-        address:
-          type: string
-        chain:
-          type: string
-        holder_vendor_data:
-          type: string
-        holder_name:
-          type: string
-        entity_type:
-          type: string
-          default: individual
-        self_declared:
-          type: boolean
-          default: false
-          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof.
-        travel_address:
-          type: string
-          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing.
-    TravelRulePickupInfo:
-      type: object
-      properties:
-        originator_vasp_name:
-          type: string
-        amount:
-          type: string
-        currency:
-          type: string
-        beneficiary_wallet:
-          type: string
-        status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleCounterpartyDecision'
+          description: 'The decision that applies to the counterparty for your application: its own, else (for an entity of a brand) the brand''s. Null when there is none.'
     TravelRuleTransferPatchRequest:
       type: object
       description: 'Provide exactly one of: payment_txn_id (finish), action=cancel, or action=resend.'
@@ -770,6 +1765,540 @@ components:
           - cancel
           - resend
           description: '"cancel" cancels a non-terminal transfer. "resend" re-runs routing for an outbound transfer stuck in COUNTERPARTY_VASP_NOT_FOUND, COUNTERPARTY_VASP_NOT_REACHABLE, or NOT_ENOUGH_COUNTERPARTY_DATA.'
+    TravelRuleMessageCreateRequest:
+      type: object
+      description: Send as JSON, or as multipart/form-data with the attachments in `files`.
+      properties:
+        kind:
+          type: string
+          enum:
+          - MESSAGE
+          - DOCUMENT_REQUEST
+          default: MESSAGE
+        body:
+          type: string
+          maxLength: 5000
+          description: Required for a MESSAGE unless a file is attached.
+        requested_documents:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          maxItems: 10
+          description: Required (at least one) for a DOCUMENT_REQUEST, and only allowed there.
+        reply_to:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: A message of the same transfer. A reply that carries a document fulfils the document request it answers.
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+          maxItems: 5
+          description: Multipart only. Up to 5 files of 10 MB each.
+    TravelRulePickupInfo:
+      type: object
+      properties:
+        originator_vasp_name:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        beneficiary_wallet:
+          type: string
+        status:
+          type: string
+    TravelRuleWidgetSessionResponse:
+      type: object
+      properties:
+        widget_session_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          description: Opaque session token embedded in the widget URL.
+        url:
+          type: string
+          description: The hosted wallet-ownership widget URL. Open it verbatim in the system browser (never inside a mobile SDK webview).
+        expires_at:
+          type: string
+          format: date-time
+    TravelRuleCounterpartyQuestionnaireList:
+      type: object
+      properties:
+        questionnaires:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelRuleCounterpartyQuestionnaire'
+          description: Newest first.
+    WalletAddressEntry:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        address:
+          type: string
+          description: The wallet address. Unique per application and chain, comparing the address without regard to case. After you delete an entry, you can register the same address again.
+        chain:
+          type: string
+          description: Chain token for the address, for example `ETH` or `BTC`. When Didit routes or registers a transfer, it matches address book entries on the wallet address and, when the transfer carries a chain, on this value too, ignoring case. A transfer's chain is `beneficiary_data.chain`, filled from the transaction's crypto chain or currency symbol (for example `ETH`) when you do not send it, or the `chain` of an after-deposit registration, so use the same token everywhere. An entry with an empty chain matches any chain.
+        holder_vendor_data:
+          type: string
+          description: Your internal identifier for the holder.
+        holder_name:
+          type: string
+          description: Name of the wallet holder, used for the beneficiary name match.
+        entity_type:
+          type: string
+          description: Free text, defaults to "individual".
+        is_ownership_verified:
+          type: boolean
+          description: Read-only. Whether ownership of this address has been proven.
+        created_at:
+          type: string
+          format: date-time
+        travel_address:
+          type: string
+          description: The counterparty VASP's travel address for this wallet, if known. Lets Didit route this beneficiary's BTC and ETH transfers over the TRP rail.
+    TravelRuleDataSharingFields:
+      type: object
+      description: 'The fields Didit sends to the counterparty VASP about your own users, per entity type. The `name` and the `wallet_address` are always sent, whatever the list says. An entity type you never chose shares every field. An empty list is a choice too: it shares the name and the wallet only.'
+      properties:
+        individual:
+          type: array
+          items:
+            type: string
+            enum:
+            - name
+            - wallet_address
+            - address
+            - national_id
+            - customer_identification
+            - date_of_birth
+            - place_of_birth
+          description: Fields shared about a natural person.
+        company:
+          type: array
+          items:
+            type: string
+            enum:
+            - name
+            - wallet_address
+            - address
+            - national_id
+            - customer_identification
+          description: Fields shared about a legal person.
+    TravelRulePickupRespondRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - accept
+          - decline
+        beneficiary_name:
+          type: string
+          description: Required in practice for decision=accept; run through the originator's name_matching_strictness policy.
+    TravelRuleTransferDetail:
+      type: object
+      description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. While an inbound transfer's wallet ownership is unconfirmed, the counterparty's `originator_data` and `beneficiary_data` come back masked (the first letter of each word is kept; the wallet, chain and VASP routing stay readable) and `data_masked` is true.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - AWAITING_COUNTERPARTY
+          - ON_HOLD
+          - COMPLETED
+          - FINISHED
+          - CANCELLED
+          - EXPIRED
+          - COUNTERPARTY_MISMATCHED_DATA
+          - COUNTERPARTY_VASP_NOT_FOUND
+          - COUNTERPARTY_VASP_NOT_REACHABLE
+          - UNCONFIRMED_OWNERSHIP
+          - COUNTERPARTY_VASP_GENERAL_DECLINE
+          - NOT_ENOUGH_COUNTERPARTY_DATA
+          - NOT_APPLICABLE
+        direction:
+          type: string
+          enum:
+          - INBOUND
+          - OUTBOUND
+        rail:
+          type:
+          - string
+          - 'null'
+          enum:
+          - INTERNAL
+          - TRP
+          - GTR
+          - TRUST
+          - VERIFYVASP
+          - SYGNA
+          - EMAIL
+          - null
+          description: 'The rail the transfer was routed over, or null when no rail was selected (for example below the threshold, a self-hosted counterparty wallet, an after-deposit registration, a sandbox application, or no reachable counterparty). INTERNAL means both sides are Didit applications; EMAIL means the counterparty was reached by an emailed pickup link. GTR, TRUST and VERIFYVASP are send-only: Didit sends the message but does not process the counterparty''s reply, so those transfers stay AWAITING_COUNTERPARTY until they expire. SYGNA receives the counterparty''s answer through Didit''s Sygna callback. A network rail is used only when you have connected your own membership for that network.'
+        protocol:
+          type:
+          - string
+          - 'null'
+        ivms_version:
+          type: string
+          example: ivms101.2023
+        required:
+          type: boolean
+        ownership_confirmed:
+          type:
+          - boolean
+          - 'null'
+        deadline_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              at:
+                type: string
+                format: date-time
+              detail:
+                type: string
+        counterparty_vasp:
+          type:
+          - object
+          - 'null'
+          properties:
+            name:
+              type: string
+            lei:
+              type: string
+            dd_score:
+              type: integer
+              description: Due-diligence score from 0 to 100, where higher is better. Same scale as in the VASP directory.
+            dd_score_breakdown:
+              type: object
+              description: Per-component contributions to dd_score, one object per component as in the VASP directory (jurisdiction, verification, protocol, lei, history, essentials, responsiveness), each {points, max, reason, detail}. {} until the counterparty has been assessed.
+              additionalProperties:
+                type: object
+                properties:
+                  points:
+                    type: number
+                    description: Points awarded for this component.
+                  max:
+                    type: integer
+                    description: Maximum points this component can award.
+                  reason:
+                    type: string
+                    description: Machine-readable code of the component's verdict.
+                  detail:
+                    type: string
+                    description: Human-readable reason for the awarded points.
+            dd_assessed_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: When the due-diligence assessment last ran. Null until the counterparty has been assessed.
+        originator_data:
+          type: object
+          description: Originator party. For an inbound transfer the counterparty's values are masked until ownership is confirmed.
+        beneficiary_data:
+          type: object
+          description: Beneficiary party. For an inbound transfer the counterparty's values are masked until ownership is confirmed.
+        name_match:
+          type:
+          - object
+          - 'null'
+          description: The name comparison that decided the transfer (score and strictness). Null until one ran. The compared names are masked together with the parties.
+        data_match:
+          $ref: '#/components/schemas/TravelRuleDataMatch'
+        mismatched_fields:
+          type: array
+          items:
+            type: string
+          description: Shortcut for `data_match.mismatched_fields`. Empty when nothing differs.
+        data_unmasked:
+          $ref: '#/components/schemas/TravelRuleDataUnmasked'
+        data_masked:
+          type: boolean
+          description: True while the counterparty's personal data is masked in this response.
+        created_at:
+          type: string
+          format: date-time
+    TravelRuleCounterpartyDecision:
+      type: object
+      description: 'Your application''s decision on a counterparty VASP. Private to your application: it never changes the shared directory entry and another customer never sees it. It acts only through your transaction rules (the counterparty_dd_status rule field and the travel-rule-counterparty-blocked and travel-rule-counterparty-restricted presets); it never changes how a transfer is routed.'
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVED
+          - RESTRICTED
+          - BLOCKED
+          description: 'APPROVED: your team cleared the counterparty. RESTRICTED: transfers to it may go ahead after review. BLOCKED: your team refused it.'
+        reason:
+          type: string
+          maxLength: 255
+          description: Free-text reason you gave, empty when none.
+        decided_by:
+          type: string
+          description: The console user who made or last changed the decision. Empty when an API key made it.
+        updated_at:
+          type: string
+          format: date-time
+        inherited_from:
+          type:
+          - object
+          - 'null'
+          description: The brand whose decision this entity follows because you made none on the entity itself. Null when the decision is the counterparty's own.
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+    TravelRuleSettingsDetail:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: Whether the managed Travel Rule negotiation flow is active for outbound `travelRule` transactions on this application.
+        jurisdiction:
+          type: string
+          maxLength: 8
+          description: Your VASP's operating jurisdiction code. Default `"EU"`. Didit maps it to the regime it stamps on your Travel Rule transactions as `travel_rule_regime` (for example `EU` or an EU member code becomes `eu`), which transaction rules can key on. Other Didit customers see it as your jurisdiction in the VASP directory once the Didit network lists your profile.
+        name_matching_strictness:
+          type: string
+          enum:
+          - NONE
+          - STRICT
+          - CONTAINS
+          - DEFAULT
+          - FUZZY
+          description: How strictly beneficiary names must match before a transfer can reach COMPLETED. `CONTAINS` accepts one name whose words all appear in the other.
+        confirmation_timeout_hours:
+          type: integer
+          minimum: 1
+          description: Hours an AWAITING_COUNTERPARTY transfer may remain unconfirmed before the periodic sweeper expires it. Default 48.
+        timeout_outcome:
+          type: string
+          enum:
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: What happens to the underlying transaction when a transfer expires. Default HOLD. sunrise_policy and non_responsive_policy take precedence when they apply and are set.
+        threshold_amount:
+          type: string
+          description: Decimal string, in your application's default currency. Minimum transfer amount that triggers a managed exchange; transfers below it resolve straight to NOT_APPLICABLE. Didit compares the transaction amount converted to your default currency, or the `amount_in_default_currency` you send; when no converted amount is available, the threshold does not apply. Defaults to "0.00" (EU TFR applies no minimum amount).
+        ownership_validation_mode:
+          type: string
+          enum:
+          - FULL
+          - SIMPLIFIED
+          - AUTOMATED
+          description: How much proof a wallet's ownership takes. `FULL` always needs a proof (signed message, test deposit or reviewed screenshot), never the end user's word. `SIMPLIFIED` accepts a self-declaration below `simplified_validation_threshold` and a proof above it. `AUTOMATED` lets the address book and earlier proofs answer on their own, self-declarations included while `allow_self_declaration` is true. Default `AUTOMATED`.
+        simplified_validation_threshold:
+          type: string
+          description: Decimal string, default "0.00". In `SIMPLIFIED` mode a transfer below this amount (in the threshold currency) accepts a self-declaration. A transfer with no amount in that currency counts as above it.
+        data_sharing_fields:
+          $ref: '#/components/schemas/TravelRuleDataSharingFields'
+        matching_rules:
+          $ref: '#/components/schemas/TravelRuleMatchingRules'
+        legal_name:
+          type: string
+          description: Your VASP's legal name. Required (non-blank) to set is_enabled to true.
+        lei:
+          type: string
+          description: Your Legal Entity Identifier, surfaced in the VASP directory.
+        compliance_email:
+          type: string
+          format: email
+          description: Compliance contact email for your VASP profile. The Didit network lists your profile only once this address is confirmed through an emailed link (POST /v3/travel-rule/settings/compliance-email/confirmation/); changing it needs a new confirmation.
+        is_discoverable:
+          type: boolean
+          description: 'Whether your VASP profile can be listed in the Didit network: found in GET /v3/travel-rule/vasps/ by other Didit customers and reached on the INTERNAL rail. Listing also needs a live application, Travel Rule on, a legal name and a confirmed compliance email; didit_network says which are missing. Default true.'
+        inbound_auto_accept:
+          type: boolean
+          description: When true, an inbound TRP inquiry whose beneficiary wallet is a verified address-book entry with a matching name is approved automatically. When false, that inquiry waits in ON_HOLD for you to approve or deny it with the ownership endpoint. INTERNAL-rail and after-deposit transfers are not affected. Default true.
+        allow_self_declaration:
+          type: boolean
+          description: When true, the wallet-ownership widget offers self-declaration as a fallback proof method. Default true.
+        allow_screenshot_proof:
+          type: boolean
+          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
+        auto_wallet_verification:
+          type: boolean
+          description: When true, submitting an outbound Travel Rule transfer that needs end-user proof of wallet control auto-mints a wallet-ownership widget session bound to the transaction and exposes it in the transaction's action_required block. Default true.
+        vasp_attribution_enabled:
+          type: boolean
+          description: 'When true, an outbound Travel Rule transfer that no rail can route is attributed through blockchain analytics: the destination wallet is resolved to its owning VASP, the entity is recorded on the transfer and in the VASP directory, and the rails are re-run once with the attributed name. Default true.'
+        counterparty_screening_enabled:
+          type: boolean
+          description: 'Opt-in sanctions and adverse-media screening of counterparty VASPs, billed per screening at the Company AML Screening price. When on, Didit screens the counterparty an outbound exchange reaches (reusing a screening younger than 30 days) and you can screen one with POST /v3/travel-rule/vasps/{vasp_id}/screening/. Default false: nothing is screened or billed.'
+        sunrise_policy:
+          type: string
+          enum:
+          - ''
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: 'What an expired transfer does to its transaction when the counterparty is a directory entry in a jurisdiction on sunrise_jurisdictions, which does not enforce the Travel Rule yet: HOLD moves it to review, REJECT declines it, PROCEED leaves its status untouched. Empty (the default) follows timeout_outcome. Applies before non_responsive_policy.'
+        sunrise_jurisdictions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Read-only. The countries (ISO 3166 alpha-2) Didit treats as in a Travel Rule sunrise period, where sunrise_policy applies. Currently CO, KH and VN. Any other jurisdiction, and an empty or unknown one, follows timeout_outcome.
+        non_responsive_policy:
+          type: string
+          enum:
+          - ''
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: 'What an expired transfer does to its transaction when the counterparty is a directory entry whose responsiveness is UNRESPONSIVE: HOLD, REJECT or PROCEED, as for timeout_outcome. Empty (the default) follows timeout_outcome. sunrise_policy applies first when both fit.'
+        travel_address:
+          type: string
+          description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Empty while `is_enabled` is false.
+        disabled_networks:
+          type: array
+          items:
+            type: string
+            enum:
+            - GTR
+            - TRUST
+            - VERIFYVASP
+            - SYGNA
+          description: Networks opted out of platform membership. Does not disable your connected own memberships or provision unavailable networks.
+          default: []
+        networks:
+          type: object
+          readOnly: true
+          description: Effective membership configuration for each network. No network, including GTR, is included by default. This is not a live health or delivery check.
+          properties:
+            gtr:
+              type: object
+              properties:
+                rail:
+                  type: string
+                  enum:
+                  - GTR
+                mode:
+                  type: string
+                  enum:
+                  - own
+                  - didit
+                  - 'off'
+                  - unavailable
+                  description: 'own: connected customer membership takes precedence; didit: configured platform membership allowed; off: platform routing disabled with no own membership; unavailable: neither membership available.'
+                platform_available:
+                  type: boolean
+                  description: Whether platform membership is configured; not a live health check.
+                connected:
+                  type: boolean
+                  description: Whether a connected customer membership exists. Credentials are validated locally; network validation occurs on a live exchange.
+            trust:
+              type: object
+              properties:
+                rail:
+                  type: string
+                  enum:
+                  - TRUST
+                mode:
+                  type: string
+                  enum:
+                  - own
+                  - didit
+                  - 'off'
+                  - unavailable
+                  description: 'own: connected customer membership takes precedence; didit: configured platform membership allowed; off: platform routing disabled with no own membership; unavailable: neither membership available.'
+                platform_available:
+                  type: boolean
+                  description: Whether platform membership is configured; not a live health check.
+                connected:
+                  type: boolean
+                  description: Whether a connected customer membership exists. Credentials are validated locally; network validation occurs on a live exchange.
+            verifyvasp:
+              type: object
+              properties:
+                rail:
+                  type: string
+                  enum:
+                  - VERIFYVASP
+                mode:
+                  type: string
+                  enum:
+                  - own
+                  - didit
+                  - 'off'
+                  - unavailable
+                  description: 'own: connected customer membership takes precedence; didit: configured platform membership allowed; off: platform routing disabled with no own membership; unavailable: neither membership available.'
+                platform_available:
+                  type: boolean
+                  description: Whether platform membership is configured; not a live health check.
+                connected:
+                  type: boolean
+                  description: Whether a connected customer membership exists. Credentials are validated locally; network validation occurs on a live exchange.
+            sygna:
+              type: object
+              properties:
+                rail:
+                  type: string
+                  enum:
+                  - SYGNA
+                mode:
+                  type: string
+                  enum:
+                  - own
+                  - didit
+                  - 'off'
+                  - unavailable
+                  description: 'own: connected customer membership takes precedence; didit: configured platform membership allowed; off: platform routing disabled with no own membership; unavailable: neither membership available.'
+                platform_available:
+                  type: boolean
+                  description: Whether platform membership is configured; not a live health check.
+                connected:
+                  type: boolean
+                  description: Whether a connected customer membership exists. Credentials are validated locally; network validation occurs on a live exchange.
+        didit_network:
+          type: object
+          readOnly: true
+          description: Whether the Didit network lists your VASP profile, so other Didit customers find it in the directory and reach it on the INTERNAL rail, and each condition it still misses.
+          properties:
+            listed:
+              type: boolean
+            missing:
+              type: array
+              items:
+                type: string
+                enum:
+                - travel_rule_off
+                - sandbox_application
+                - not_discoverable
+                - legal_name_missing
+                - compliance_email_missing
+                - compliance_email_unconfirmed
+                - excluded_by_staff
+                - internal_organization
+              description: 'Empty when listed. compliance_email_unconfirmed: send the confirmation with POST /v3/travel-rule/settings/compliance-email/confirmation/ and open the emailed link. excluded_by_staff: Didit marked the application as a test, demo or internal one.'
+            compliance_email_confirmed:
+              type: boolean
+              description: Whether the current compliance_email was confirmed through the emailed link.
     TravelRuleSettingsUpdate:
       type: object
       properties:
@@ -777,8 +2306,10 @@ components:
           type: boolean
         legal_name:
           type: string
+          maxLength: 255
         lei:
           type: string
+          maxLength: 20
         jurisdiction:
           type: string
           maxLength: 8
@@ -787,8 +2318,10 @@ components:
           enum:
           - NONE
           - STRICT
+          - CONTAINS
           - DEFAULT
           - FUZZY
+          description: '`CONTAINS` accepts one name whose words all appear in the other.'
         confirmation_timeout_hours:
           type: integer
           minimum: 1
@@ -801,11 +2334,31 @@ components:
         compliance_email:
           type: string
           format: email
+          description: Compliance contact email for your VASP profile. The Didit network lists your profile only once this address is confirmed through an emailed link (POST /v3/travel-rule/settings/compliance-email/confirmation/); changing it needs a new confirmation.
         is_discoverable:
           type: boolean
+          description: 'Whether your VASP profile can be listed in the Didit network: found in GET /v3/travel-rule/vasps/ by other Didit customers and reached on the INTERNAL rail. Listing also needs a live application, Travel Rule on, a legal name and a confirmed compliance email; didit_network says which are missing. Default true.'
         threshold_amount:
           type: string
-          description: Decimal string. Minimum transfer amount that triggers a managed exchange.
+          description: Decimal string, zero or greater, in your application's default currency. Minimum transfer amount that triggers a managed exchange.
+        ownership_validation_mode:
+          type: string
+          enum:
+          - FULL
+          - SIMPLIFIED
+          - AUTOMATED
+          description: See the response field of the same name.
+        simplified_validation_threshold:
+          type: string
+          description: Decimal string, 0 or more.
+        data_sharing_fields:
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleDataSharingFields'
+          description: 'Merged per entity type: an entity type you leave out keeps its current choice. A choice that cannot meet the originator obligations of your `jurisdiction` regime (EU TFR or FATF Recommendation 16), an empty list included, is refused with `400`.'
+        matching_rules:
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleMatchingRules'
+          description: Merged per entity type, and per field inside it. A field that entity type does not compare (for example `date_of_birth` for `company`) is refused with `400`.
         inbound_auto_accept:
           type: boolean
         allow_self_declaration:
@@ -817,50 +2370,215 @@ components:
           type: boolean
         vasp_attribution_enabled:
           type: boolean
+        counterparty_screening_enabled:
+          type: boolean
+          description: 'Opt-in sanctions and adverse-media screening of counterparty VASPs, billed per screening at the Company AML Screening price. When on, Didit screens the counterparty an outbound exchange reaches (reusing a screening younger than 30 days) and you can screen one with POST /v3/travel-rule/vasps/{vasp_id}/screening/. Default false: nothing is screened or billed.'
+        sunrise_policy:
+          type: string
+          enum:
+          - ''
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: HOLD, REJECT, PROCEED, or empty to follow timeout_outcome. See the response field of the same name.
+        non_responsive_policy:
+          type: string
+          enum:
+          - ''
+          - HOLD
+          - REJECT
+          - PROCEED
+          description: HOLD, REJECT, PROCEED, or empty to follow timeout_outcome. See the response field of the same name.
+        disabled_networks:
+          type: array
+          items:
+            type: string
+            enum:
+            - GTR
+            - TRUST
+            - VERIFYVASP
+            - SYGNA
+          description: Networks opted out of platform membership. Does not disable your connected own memberships or provision unavailable networks.
+          default: []
       description: All fields optional; PUT applies a partial update.
-    TravelRuleInboundRequest:
+    TravelRuleCounterpartyQuestionnaire:
       type: object
-      required:
-      - chain
-      - txid
-      - wallet_address
-      - amount
-      - currency
+      description: 'One due-diligence questionnaire your application sent the counterparty: Didit''s standard questionnaire, emailed to a compliance address on record with a single-use answer link. Private to your application.'
       properties:
-        chain:
+        id:
           type: string
-          description: Chain the deposit settled on, e.g. "ethereum".
-        txid:
+          format: uuid
+        status:
           type: string
-          description: On-chain transaction hash. Deduped together with wallet_address.
-        wallet_address:
+          enum:
+          - SENT
+          - ANSWERED
+          - EXPIRED
+          description: 'SENT: waiting for answers. ANSWERED: the counterparty answered every question. EXPIRED: the answer link closed unanswered (its deadline passed, or a newer questionnaire replaced it), or answers passed valid_until.'
+        form_version:
           type: string
-          description: The destination wallet you received the deposit on.
-        amount:
+          description: Version of Didit's standard questionnaire the answers belong to. Currently 1.
+        sent_to:
           type: string
-          description: Deposit amount as a decimal string.
-        currency:
-          type: string
-          description: Deposit asset, e.g. "USDC".
-        originator_data:
+          format: email
+        sent_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        expires_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The answer-by deadline, 30 days after sending. The link stops working after it.
+        answered_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        valid_until:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: 'How long the answers stay current: 365 days after answering. Null until answered.'
+        current:
+          type: boolean
+          description: true while the questionnaire is ANSWERED and valid_until has not passed.
+        answers:
           type: object
-          description: IVMS-101 originator payload from the sending VASP, if known.
-          additionalProperties: true
-        beneficiary_data:
+          additionalProperties:
+            type: string
+          description: 'The answers keyed by question id: legal_name, licensing, jurisdictions, aml_program, compliance_officer, sanctions_screening, transaction_monitoring, travel_rule, custody, ownership, record_keeping, data_protection. Each answer is up to 2,000 characters. Empty until answered.'
+    TravelRuleInboundResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+          description: Didit transaction UUID for the inbound deposit.
+        txn_id:
+          type: string
+          description: 'txn_id of the inbound transaction: Didit-generated when Didit created the transaction, or your own when an unclaimed deposit was reused.'
+        created:
+          type: boolean
+          description: true when this call registered the transfer (HTTP 201); false when a transfer for the same txid and wallet_address already existed (HTTP 200).
+        travel_rule:
+          $ref: '#/components/schemas/TravelRuleTransferDetail'
+    TravelRuleCounterpartyScreeningRequest:
+      type: object
+      properties:
+        refresh:
+          type: boolean
+          default: false
+          description: true screens again (and bills again) even when a fresh screening exists.
+    TravelRuleMatchingRules:
+      type: object
+      description: How strictly each field of the counterparty's data is compared with what you hold, per entity type. A field you leave out keeps its default. `NONE` skips the comparison, `STRICT` needs exactly the same words, `CONTAINS` accepts one value whose words all appear in the other, `DEFAULT` is the standard subset match, and `FUZZY` accepts close spellings (and, for dates of birth, a swapped day and month).
+      properties:
+        individual:
           type: object
-          description: IVMS-101 beneficiary payload (your customer).
-          additionalProperties: true
-        originating_vasp:
-          type: object
-          description: Optional description of the sending VASP.
+          description: Rules for a natural person.
           properties:
             name:
               type: string
-            lei:
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: 'Default: follows `name_matching_strictness`.'
+            date_of_birth:
               type: string
-            travel_address:
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: Default `NONE`.
+            address:
               type: string
-              description: Travel address that lets Didit reach the sender on the TRP rail.
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: Default `NONE`.
+            account:
+              type: string
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: The wallet the exchange was routed by. Default `STRICT`.
+        company:
+          type: object
+          description: Rules for a legal person.
+          properties:
+            name:
+              type: string
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: 'Default: follows `name_matching_strictness`.'
+            address:
+              type: string
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: Default `NONE`.
+            account:
+              type: string
+              enum:
+              - NONE
+              - STRICT
+              - CONTAINS
+              - DEFAULT
+              - FUZZY
+              description: The wallet the exchange was routed by. Default `STRICT`.
+    TravelRuleCounterpartyScreening:
+      type: object
+      description: 'One sanctions and adverse-media screening of the counterparty entity, run for and billed to your application. Private to your application: another customer never sees it.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - Approved
+          - In Review
+          - Declined
+          description: 'Approved: no possible match needs attention. In Review or Declined: a possible sanctions or adverse-media match.'
+        total_hits:
+          type: integer
+          description: How many possible matches the screening returned.
+        score:
+          type:
+          - number
+          - 'null'
+          description: The highest risk score among the possible matches. Null when nothing matched.
+        screened_at:
+          type: string
+          format: date-time
+        fresh:
+          type: boolean
+          description: Whether the screening is younger than fresh_days (30 days). A fresh screening is reused instead of billed again.
+        flagged:
+          type: boolean
+          description: true while the screening is fresh and its status is In Review or Declined. While your latest screening is flagged and counterparty screening stays on, counterparty_risk_level is HIGH in your rules.
     TravelRuleWidgetProofSummary:
       type: object
       properties:
@@ -907,103 +2625,12 @@ components:
           - string
           - 'null'
           description: Didit-issued message the customer signs with their wallet. Present only on a MESSAGE_SIGNING proof.
+        rejection_reason:
+          type: string
+          description: Why the proof was rejected. Present only when `status` is REJECTED.
         created_at:
           type: string
           format: date-time
-    TravelRuleSettingsDetail:
-      type: object
-      properties:
-        is_enabled:
-          type: boolean
-          description: Whether the managed Travel Rule negotiation flow is active for outbound `travelRule` transactions on this application.
-        jurisdiction:
-          type: string
-          maxLength: 8
-          description: Your VASP's operating jurisdiction code. Default `"EU"`.
-        name_matching_strictness:
-          type: string
-          enum:
-          - NONE
-          - STRICT
-          - DEFAULT
-          - FUZZY
-          description: How strictly beneficiary names must match before a transfer can reach COMPLETED.
-        confirmation_timeout_hours:
-          type: integer
-          minimum: 1
-          description: Hours an AWAITING_COUNTERPARTY transfer may remain unconfirmed before the periodic sweeper expires it. Default 48.
-        timeout_outcome:
-          type: string
-          enum:
-          - HOLD
-          - REJECT
-          - PROCEED
-          description: What happens to the underlying transaction when a transfer expires. Default HOLD.
-        threshold_amount:
-          type: string
-          description: Decimal string. Minimum transfer amount that triggers a managed exchange; transfers below it resolve straight to NOT_APPLICABLE. Defaults to "0.00" (EU TFR applies no minimum amount).
-        legal_name:
-          type: string
-          description: Your VASP's legal name. Required (non-blank) to set is_enabled to true.
-        lei:
-          type: string
-          description: Your Legal Entity Identifier, surfaced in the VASP directory.
-        compliance_email:
-          type: string
-          format: email
-          description: Compliance contact email for your VASP profile.
-        is_discoverable:
-          type: boolean
-          description: Whether your VASP profile appears in GET /v3/travel-rule/vasps/ search results and can be reached on the INTERNAL rail. Default true.
-        inbound_auto_accept:
-          type: boolean
-          description: When true, inbound transfers whose beneficiary wallet is a verified address-book entry with a matching name are accepted automatically, without a manual review step. Default false.
-        allow_self_declaration:
-          type: boolean
-          description: When true, the wallet-ownership widget offers self-declaration as a fallback proof method. Default false.
-        allow_screenshot_proof:
-          type: boolean
-          description: When true, the wallet-ownership widget offers screenshot upload as an ownership evidence method. Default true.
-        auto_wallet_verification:
-          type: boolean
-          description: When true, submitting an outbound Travel Rule transfer that needs end-user proof of wallet control auto-mints a wallet-ownership widget session bound to the transaction and exposes it in the transaction's action_required block. Default true.
-        vasp_attribution_enabled:
-          type: boolean
-          description: 'When true, an outbound Travel Rule transfer that no rail can route is attributed through blockchain analytics: the destination wallet is resolved to its owning VASP, the entity is recorded on the transfer and in the VASP directory, and the rails are re-run once with the attributed name. Default true.'
-        travel_address:
-          type: string
-          description: Read-only. Your VASP's own travel address - the encoded inbound TRP inquiry endpoint other VASPs use to reach you. Populated once your VASP profile is complete.
-    TravelRuleWidgetSessionCreate:
-      type: object
-      required:
-      - wallet_address
-      - chain
-      properties:
-        wallet_address:
-          type: string
-          description: The wallet address to verify.
-        chain:
-          type: string
-          description: Chain identifier for the address, e.g. "ethereum", "bitcoin", "solana".
-        holder_name:
-          type: string
-          description: Name of the wallet holder, used for the beneficiary name match.
-        vendor_data:
-          type: string
-          description: Your internal identifier for the holder, carried onto the created address-book entry.
-        transaction_id:
-          type: string
-          format: uuid
-          description: Optional. Didit transaction UUID of a Travel Rule transfer to advance when the proof verifies.
-        satoshi_deposit_address:
-          type: string
-          description: Optional. A deposit address you control; supplying it enables the SATOSHI_TEST proof method.
-        callback_url:
-          type: string
-          description: Optional. Where the widget returns the customer after completion.
-        expires_in_minutes:
-          type: integer
-          description: Optional. Lifetime of the minted link, in minutes. Automatically extended to cover the Satoshi test window when SATOSHI_TEST is offered.
     TravelRuleOwnershipConfirmRequest:
       type: object
       required:
@@ -1011,112 +2638,876 @@ components:
       properties:
         confirmed:
           type: boolean
-    TravelRuleTransferDetail:
+          description: true to confirm ownership, false to deny it.
+        wallet_address:
+          type: string
+          default: ''
+          description: 'Inbound TRP transfers only: the payment address Didit returns to the originating VASP when you approve. Defaults to the matched address book entry''s address, then beneficiary_data.wallet_address. Ignored for other transfers.'
+    VaspDirectoryWidgetEntry:
       type: object
-      description: Full transfer object returned by the ownership-confirmation and finish/cancel endpoints. originator_data/beneficiary_data are omitted while PII is masked (see description).
+      description: 'What the end user''s VASP picker shows: who the VASP is and whether it can be reached.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The entry's id, for GET /v3/travel-rule/vasps/{vasp_id}/.
+        kind:
+          type: string
+          enum:
+          - directory
+          - didit
+          description: directory for an entry of the shared directory; didit for a member of the Didit network.
+        name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+          description: ISO 3166 country code, as the source gives it.
+        domains:
+          type: array
+          items:
+            type: string
+          description: The VASP's web domains. Always empty for Didit network members.
+        reachable:
+          type: boolean
+          description: Whether your application has an available route to this VASP, or to one of its entities for a brand. Always true for a Didit network member.
+    TravelRuleInboundRequest:
+      type: object
+      required:
+      - chain
+      - txid
+      - wallet_address
+      - amount
+      - currency
+      properties:
+        chain:
+          type: string
+          description: Chain the deposit settled on, for example `ETH`. Stored lowercase and compared case-insensitively with your wallet address book entries, so use the same chain token there.
+          maxLength: 32
+        txid:
+          type: string
+          description: On-chain transaction hash. Deduped together with wallet_address.
+          maxLength: 128
+        wallet_address:
+          type: string
+          description: The destination wallet you received the deposit on.
+          maxLength: 128
+        amount:
+          type: string
+          description: Deposit amount as a decimal string, zero or greater, with up to 18 decimal places.
+        currency:
+          type: string
+          description: Deposit asset, e.g. "USDC".
+          maxLength: 16
+        originator_data:
+          type: object
+          description: 'Originator details from the sending VASP, if known, as a flat object such as `{"name": "..."}`. Didit reads name (or full_name), first_name, last_name and vendor_data from it.'
+          additionalProperties: true
+        beneficiary_data:
+          type: object
+          description: 'Beneficiary details (your customer), as a flat object such as `{"name": "..."}`. Didit matches name against the holder_name of the matched address book entry, and sets wallet_address and chain from the request.'
+          additionalProperties: true
+        originating_vasp:
+          type: object
+          description: Optional description of the sending VASP.
+          properties:
+            name:
+              type: string
+              maxLength: 255
+            lei:
+              type: string
+              maxLength: 20
+              description: Optional. A valid 20-character ISO 17442 LEI, or empty.
+            travel_address:
+              type: string
+              description: Travel address that lets Didit reach the sender on the TRP rail.
+              maxLength: 512
+    TravelRuleMessageAttachment:
+      type:
+      - object
+      - 'null'
+      description: The document attached to a message, stored like any other transaction document.
       properties:
         uuid:
           type: string
           format: uuid
-        status:
+        label:
+          type:
+          - string
+          - 'null'
+        note:
+          type:
+          - string
+          - 'null'
+        uploaded_by:
+          type:
+          - string
+          - 'null'
+          description: Who attached it. In the pickup portal, a file you sent shows your VASP name, never the person or API key behind it.
+        created_at:
+          type: string
+          format: date-time
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              file_url:
+                type:
+                - string
+                - 'null'
+                description: Time-limited download URL.
+              original_filename:
+                type: string
+              file_size:
+                type: integer
+    TravelRuleWidgetSessionCreate:
+      type: object
+      properties:
+        wallet_address:
+          type: string
+          description: The wallet address to verify. Optional; when empty, the address must be supplied when a proof is started.
+          maxLength: 128
+        chain:
+          type: string
+          description: Chain token for the address, for example `ETH`, `BTC` or `SOL`. Use the same token as in your wallet address book. Message signing and the Satoshi test are offered only for a supported chain.
+          maxLength: 32
+        holder_name:
+          type: string
+          description: Name of the wallet holder, used for the beneficiary name match.
+          maxLength: 255
+        vendor_data:
+          type: string
+          description: Your internal identifier for the holder, carried onto the created address-book entry.
+          maxLength: 255
+        transaction_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Optional. Didit transaction UUID of a Travel Rule transfer to advance when the proof verifies.
+        satoshi_deposit_address:
+          type: string
+          description: Optional. A deposit address you control; supplying it enables the SATOSHI_TEST proof method.
+          maxLength: 128
+        callback_url:
+          type: string
+          description: Optional. Absolute http(s) URL where the widget returns the customer after completion.
+          maxLength: 512
+        expires_in_minutes:
+          type: integer
+          description: Optional. Lifetime of the minted link, in minutes. Automatically extended to cover the Satoshi test window when SATOSHI_TEST is offered.
+          default: 60
+          minimum: 5
+          maximum: 10080
+    TravelRuleWidgetContext:
+      type: object
+      properties:
+        vasp_name:
+          type: string
+          description: Legal name from your VASP profile, shown to the customer in the widget. Empty when no profile exists.
+        wallet_address:
+          type: string
+        chain:
+          type: string
+        holder_name:
+          type: string
+        allowed_methods:
+          type: array
+          items:
+            type: string
+            enum:
+            - MESSAGE_SIGNING
+            - SCREENSHOT
+            - SATOSHI_TEST
+            - SELF_DECLARATION
+          description: Proof methods available for this session. MESSAGE_SIGNING requires a supported chain family, SATOSHI_TEST requires a satoshi_deposit_address on the session, SCREENSHOT requires the allow_screenshot_proof setting, and SELF_DECLARATION requires the allow_self_declaration setting and an `ownership_validation_mode` that accepts a declaration for the linked transfer (never in `FULL`; in `SIMPLIFIED` only below `simplified_validation_threshold`). Initiating a SELF_DECLARATION the mode does not accept answers 403.
+        transfer_status:
+          type:
+          - string
+          - 'null'
+          description: Status of the linked Travel Rule transfer. Null when the session was minted without a transaction_id.
+        callback_url:
+          type: string
+          description: Where the widget returns the customer after completion. Empty when not set.
+        expires_at:
+          type: string
+          format: date-time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Non-null once a proof has been verified.
+        proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelRuleWidgetProofSummary'
+        max_attempts:
+          type: integer
+          description: Rejected wallet proofs this session allows.
+        attempts_used:
+          type: integer
+          description: Rejected proofs so far.
+        attempts_remaining:
+          type: integer
+          description: When 0, starting another proof answers 409 and you mint a new widget session.
+        customization:
+          type:
+          - object
+          - 'null'
+          description: The application's whitelabel customization (colors, logo, font family) when white label is enabled - the widget renders with the same branding as the verification flow. Null otherwise.
+    VaspDirectoryEntry:
+      type: object
+      description: A VASP of the directory or a member of the Didit network, with the routes your application has to it. A customer is a member of the Didit network only while its application is live, its Travel Rule is on, its profile is discoverable, has a legal name and a confirmed compliance email, and Didit has not marked the application as a test, demo or internal one. Each row also carries the shared due-diligence assessment (dd_score, risk_level, responsiveness, essential_checks) and your application's own decision, entity screening and questionnaires, which no other customer sees.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The entry's id, for GET /v3/travel-rule/vasps/{vasp_id}/.
+        kind:
           type: string
           enum:
-          - AWAITING_COUNTERPARTY
-          - ON_HOLD
+          - directory
+          - didit
+          description: directory for an entry of the shared directory; didit for a member of the Didit network.
+        name:
+          type: string
+        lei:
+          type: string
+        jurisdiction:
+          type: string
+          description: ISO 3166 country code, as the source gives it.
+        domains:
+          type: array
+          items:
+            type: string
+          description: The VASP's web domains. Always empty for Didit network members.
+        reachable:
+          type: boolean
+          description: Whether your application has an available route to this VASP, or to one of its entities for a brand. Always true for a Didit network member.
+        aliases:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              kind:
+                type: string
+                enum:
+                - trading_name
+                - other_legal_name
+                - network_name
+                - attribution
+                - merged
+                - staff
+                description: trading_name, other_legal_name (from the global LEI register), network_name (the name on a Travel Rule network), attribution (the entity name blockchain analytics gives the VASP's wallets), merged (the name of a duplicate entry merged into this one) or staff.
+          description: Other names the VASP is found by.
+        networks:
+          type: array
+          items:
+            type: object
+            description: A current listing of this VASP in a Travel Rule network's member directory. A TRISA listing says who the VASP is on TRISA; Didit has no TRISA rail, so it is never a route.
+            properties:
+              network:
+                type: string
+                enum:
+                - GTR
+                - TRUST
+                - VERIFYVASP
+                - SYGNA
+                - TRISA
+              code:
+                type: string
+                description: The VASP's identifier on that network.
+              listed_name:
+                type: string
+                description: The name the network lists the VASP under.
+              country:
+                type: string
+                description: The country the network lists, when it gives one.
+              verified_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When Didit staff verified the listing. Null for listings read from a public directory.
+              last_seen_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When the source last showed the listing. A listing the source has not shown for three weeks is removed.
+              source:
+                type: string
+                enum:
+                - trisa_directory
+                - staff
+                description: 'Where the listing comes from: the public TRISA directory, or Didit staff.'
+        routes:
+          type: array
+          items:
+            type: object
+            description: 'One way your application can deliver Travel Rule data to this VASP, in the order dispatch tries them. A network route needs a membership on that network: your own (connected in the Marketplace) or Didit''s once Didit holds one. Without it the route is listed as unavailable with the reason, never as a way to reach the VASP.'
+            properties:
+              rail:
+                type: string
+                enum:
+                - INTERNAL
+                - TRP
+                - GTR
+                - TRUST
+                - VERIFYVASP
+                - SYGNA
+                - EMAIL
+              status:
+                type: string
+                enum:
+                - available
+                - unavailable
+              reason:
+                type: string
+                enum:
+                - ''
+                - no_membership
+                - network_switched_off
+                description: 'Why an unavailable route cannot be used: no_membership (neither you nor Didit holds a membership on that network) or network_switched_off (you turned that network off in your settings). Empty when the route is available.'
+              via:
+                type: string
+                enum:
+                - ''
+                - own_membership
+                - didit_membership
+                - directory
+                - contact
+                - didit_network
+                description: 'How an available route is reached: own_membership or didit_membership for a network rail, directory for a TRP endpoint the directory verified, contact for the EMAIL rail, didit_network for a Didit network member. Empty when the route is unavailable.'
+        umbrella:
+          type:
+          - object
+          - 'null'
+          description: The brand this entry is a regulated entity of. Null when it is not part of one.
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+        entities:
+          type: array
+          items:
+            type: object
+            description: 'A regulated entity of a brand: the legal entity that receives a transfer.'
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              lei:
+                type: string
+              jurisdiction:
+                type: string
+              reachable:
+                type: boolean
+                description: Whether your application has an available route to it.
+          description: For a brand, the regulated entities that receive its transfers. A transfer naming the brand goes to the reachable entity in the jurisdiction it states (beneficiary_data.counterparty_vasp_jurisdiction), else to the entity blockchain analytics attribution linked to the destination wallet, else to the only reachable entity when no jurisdiction is stated. Two entities that fit equally are never guessed between.
+        contacts:
+          type: array
+          items:
+            type: object
+            description: A compliance contact the EMAIL rail can write to.
+            properties:
+              id:
+                type: string
+                format: uuid
+              email:
+                type: string
+                format: email
+              name:
+                type: string
+              source:
+                type: string
+                enum:
+                - staff
+                - application
+                - learned
+                description: 'staff: curated by Didit; application: added by your application; learned: an address that answered a Travel Rule request through its response link.'
+              scope:
+                type: string
+                enum:
+                - platform
+                - application
+                description: platform contacts are used for every Didit customer's transfers; application contacts are private to your application, which sees only its own.
+              verified_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When someone at this address answered a request. Null when it has not yet.
+          description: The platform's contacts for this VASP and your application's own.
+        dd_status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
           - COMPLETED
-          - FINISHED
-          - CANCELLED
-          - EXPIRED
-          - COUNTERPARTY_MISMATCHED_DATA
-          - COUNTERPARTY_VASP_NOT_FOUND
-          - COUNTERPARTY_VASP_NOT_REACHABLE
-          - UNCONFIRMED_OWNERSHIP
-          - COUNTERPARTY_VASP_GENERAL_DECLINE
-          - NOT_ENOUGH_COUNTERPARTY_DATA
-          - NOT_APPLICABLE
+          - REJECTED
+          description: Didit's verification status of the entry, scored by the verification component of dd_score. Always COMPLETED for a Didit network member.
+        dd_score:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 100
+          description: 'The shared due-diligence score of a directory entry, 0 to 100, where higher is safer (see dd_score_semantic): the sum of the points in dd_score_breakdown. Null for a Didit network member, which is not scored. An entry not assessed yet (dd_assessed_at null) shows 0 with an empty risk_level, so read risk_level rather than the raw score.'
+        reachable_rails:
+          type: array
+          items:
+            type: string
+            enum:
+            - INTERNAL
+            - TRP
+            - GTR
+            - TRUST
+            - VERIFYVASP
+            - SYGNA
+            - EMAIL
+          description: Rails recorded on the entry. Read routes for what your application can use today.
+        is_didit_customer:
+          type: boolean
+          description: true for a member of the Didit network (dd_status is always COMPLETED, dd_score null and risk_level empty for these) and for a directory entry linked to a Didit customer.
+        dd_score_breakdown:
+          type: object
+          description: 'One object per component of dd_score. Components, their weight (max) and their reason codes: jurisdiction, 25 (jurisdiction_not_high_risk, jurisdiction_high_risk, jurisdiction_unknown); verification, 15 (dd_status_completed, dd_status_in_progress, dd_status_not_started, dd_status_rejected); protocol, 15 (native_rail, email_only, no_rail); lei, 10 (lei_valid, lei_missing); history, 10 (history, no_history); essentials, 15 (essential_checks, no_essential_checks); responsiveness, 10 (responsive, unresponsive, responsiveness_unknown). Empty for a Didit network member.'
+          additionalProperties:
+            type: object
+            properties:
+              points:
+                type: number
+                description: Points the component contributes, rounded to one decimal.
+              max:
+                type: integer
+                description: 'The component''s weight: the points it contributes at best.'
+              reason:
+                type: string
+                description: Machine-readable code of the component's verdict.
+              detail:
+                type: string
+                description: One-line English explanation.
+        dd_assessed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: 'When dd_score, risk_level and responsiveness were last computed: after an exchange with the entry completes, finishes, expires, mismatches or is declined, when Didit refreshes or curates the entry, and in the weekly directory refresh. Null for a Didit network member.'
+        dd_score_semantic:
+          type: string
+          enum:
+          - higher_is_safer
+          description: 'Which way dd_score points: always higher_is_safer.'
+        risk_level:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - ''
+          description: 'The band dd_score falls in: LOW (70 or more), MEDIUM (40 to 69) or HIGH (below 40). Empty for a Didit network member and for an entry not assessed yet. Filter on it with risk. Your own flagged screening never changes this shared value: it makes counterparty_risk_level HIGH in your rules instead.'
+        responsiveness:
+          type: object
+          description: 'Whether the VASP answers Travel Rule requests: the share of the requests Didit customers started towards it in the last 90 days that it answered. Only requests sent over a network or protocol rail, or by email to a shared address (the entry''s compliance address or a platform contact), count; a request sent to an address a customer typed, or to a customer''s private contact, never does. An expired request is unanswered; a completed exchange, a decline or a data mismatch is an answer; a cancelled request or an unreachable rail is neither. Always UNKNOWN with zero counts for a Didit network member.'
+          properties:
+            status:
+              type: string
+              enum:
+              - RESPONSIVE
+              - UNRESPONSIVE
+              - UNKNOWN
+              description: UNKNOWN with fewer than 5 decided requests in the window; UNRESPONSIVE when less than 10 percent of them were answered; RESPONSIVE otherwise.
+            answered:
+              type: integer
+              description: Decided requests in the window that the VASP answered.
+            total:
+              type: integer
+              description: 'Decided requests in the window: answered plus expired.'
+            computed_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+        essential_checks:
+          type: object
+          description: 'The essential-checks report of a directory entry, built only from the platform''s verified sources: registration (an official register lists the VASP: the EU''s interim MiCA register, the public TRISA directory or the global LEI register), licence (a MiCA authorisation is on record and current), domain (the entry''s domain matches its TRP endpoint or the website its register gives) and lei (its LEI record is active, issued and consistent with the entry''s names and country). The essentials component of dd_score is the share of decided checks that pass. Empty until the weekly directory refresh first checks the entry, and always empty for a Didit network member.'
+          properties:
+            level:
+              type: string
+              enum:
+              - essential
+            checked_at:
+              type: string
+              format: date-time
+            checks:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    enum:
+                    - registration
+                    - licence
+                    - domain
+                    - lei
+                  status:
+                    type: string
+                    enum:
+                    - pass
+                    - fail
+                    - unknown
+                    description: unknown when no source on record can decide the check.
+                  reason:
+                    type: string
+                    description: Machine-readable code of the verdict.
+                  detail:
+                    type: string
+                    description: One-line English explanation.
+            passed:
+              type: integer
+            failed:
+              type: integer
+            unknown:
+              type: integer
+            total:
+              type: integer
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleCounterpartyDecision'
+          description: Your application's decision on this VASP, or for an entity with no decision of its own its brand's (inherited_from names the brand). Null when there is none. Private to your application.
+        entity_screening:
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleCounterpartyScreening'
+          description: Your application's latest sanctions and adverse-media screening of this VASP. Null when you never screened it. Private to your application.
+        questionnaires:
+          type: array
+          items:
+            $ref: '#/components/schemas/TravelRuleCounterpartyQuestionnaire'
+          description: Your application's due-diligence questionnaires with this VASP, newest first. Private to your application.
+      example:
+        id: 0d6f3c2a-6a1e-4c55-9a39-1f2b0c7d8e91
+        kind: directory
+        name: Example Counterparty VASP
+        lei: 529900EXAMPLECPTY001
+        jurisdiction: DE
+        domains:
+        - counterparty.example
+        reachable: true
+        aliases:
+        - name: Example Counterparty
+          kind: trading_name
+        networks:
+        - network: GTR
+          code: EXAMPLE01
+          listed_name: Example Counterparty VASP
+          country: DE
+          verified_at: '2026-10-12T09:30:00Z'
+          last_seen_at: '2026-10-12T09:30:00Z'
+          source: staff
+        routes:
+        - rail: GTR
+          status: unavailable
+          reason: no_membership
+          via: ''
+        - rail: EMAIL
+          status: available
+          reason: ''
+          via: contact
+        umbrella: null
+        entities: []
+        contacts:
+        - id: 6c1f9b8e-2d4a-4f7e-8b3c-5a9d0e1f2a3b
+          email: travelrule@counterparty.example
+          name: Travel Rule desk
+          source: staff
+          scope: platform
+          verified_at: null
+        dd_status: NOT_STARTED
+        dd_score: 62
+        dd_score_breakdown:
+          jurisdiction:
+            points: 25.0
+            max: 25
+            reason: jurisdiction_not_high_risk
+            detail: DEU is not on the high-risk jurisdiction list
+          verification:
+            points: 3.8
+            max: 15
+            reason: dd_status_not_started
+            detail: due diligence status NOT_STARTED
+          protocol:
+            points: 6.0
+            max: 15
+            reason: email_only
+            detail: reachable over the email fallback only
+          lei:
+            points: 10.0
+            max: 10
+            reason: lei_valid
+            detail: valid LEI on record
+          history:
+            points: 5.0
+            max: 10
+            reason: no_history
+            detail: no exchange history
+          essentials:
+            points: 7.5
+            max: 15
+            reason: no_essential_checks
+            detail: no decided essential check yet
+          responsiveness:
+            points: 5.0
+            max: 10
+            reason: responsiveness_unknown
+            detail: 0 decided recent requests, too few to judge
+        dd_assessed_at: '2026-10-12T09:30:00Z'
+        dd_score_semantic: higher_is_safer
+        risk_level: MEDIUM
+        responsiveness:
+          status: UNKNOWN
+          answered: 0
+          total: 0
+          computed_at: '2026-10-12T09:30:00Z'
+        essential_checks: {}
+        reachable_rails:
+        - GTR
+        - EMAIL
+        is_didit_customer: false
+        decision:
+          decision: APPROVED
+          reason: Licensed in DE, questionnaire reviewed
+          decided_by: ''
+          updated_at: '2026-10-14T10:05:00Z'
+          inherited_from: null
+        entity_screening:
+          id: 7a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+          status: Approved
+          total_hits: 0
+          score: null
+          screened_at: '2026-10-14T09:58:00Z'
+          fresh: true
+          flagged: false
+        questionnaires:
+        - id: 8b7a6c5d-4e3f-4a2b-9c1d-0e9f8a7b6c5d
+          status: ANSWERED
+          form_version: '1'
+          sent_to: travelrule@counterparty.example
+          sent_at: '2026-09-02T08:00:00Z'
+          expires_at: '2026-10-02T08:00:00Z'
+          answered_at: '2026-09-04T15:20:00Z'
+          valid_until: '2027-09-04T15:20:00Z'
+          current: true
+          answers:
+            legal_name: Example Counterparty VASP, incorporated in the example jurisdiction.
+            licensing: Crypto-asset service provider authorised under MiCA by its national regulator, licence active.
+            jurisdictions: EU and EEA. We do not serve the United States.
+            aml_program: Written AML/CFT policy, annual independent review, last completed in March 2026.
+            compliance_officer: Head of Compliance, reachable at compliance@counterparty.example.
+            sanctions_screening: Customers at onboarding and daily; counterparties on every transfer.
+            transaction_monitoring: Rule-based monitoring with analyst review; suspicious activity reports filed with the FIU.
+            travel_rule: TRP and email; we answer requests within one business day.
+            custody: Segregated customer wallets held with a qualified custodian, insured.
+            ownership: No shareholder holds 25 percent or more; parent company Example Holding Group.
+            record_keeping: Five-year record-keeping for Travel Rule and transaction data, as our regulator requires.
+            data_protection: Encrypted at rest and in transit, stored in the EU.
+    TravelRuleMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - MESSAGE
+          - DOCUMENT_REQUEST
         direction:
           type: string
           enum:
           - INBOUND
           - OUTBOUND
-        rail:
-          type:
-          - string
-          - 'null'
-          enum:
-          - INTERNAL
-          - TRP
-          - GTR
-          - EMAIL
-          - null
-        protocol:
-          type:
-          - string
-          - 'null'
-        ivms_version:
+          description: '`OUTBOUND` is what the reader''s own side sent. In the pickup portal the direction is from the counterparty''s side.'
+        author:
           type: string
-          example: ivms101.2023
-        required:
-          type: boolean
-        ownership_confirmed:
+          description: 'Who wrote it on its own side: a console user''s email or an API key label, or the other VASP''s name.'
+        body:
+          type: string
+        requested_documents:
+          type: array
+          items:
+            type: string
+          description: What a DOCUMENT_REQUEST asks for, in the requester's words.
+        reply_to:
           type:
-          - boolean
+          - string
           - 'null'
-        deadline_at:
+          format: uuid
+        fulfilled_at:
           type:
           - string
           - 'null'
           format: date-time
-        timeline:
-          type: array
-          items:
-            type: object
-            properties:
-              status:
-                type: string
-              at:
-                type: string
-                format: date-time
-              detail:
-                type: string
-        counterparty_vasp:
-          type:
-          - object
-          - 'null'
-          properties:
-            name:
-              type: string
-            lei:
-              type: string
-            dd_score:
-              type: integer
-        originator_data:
-          type: object
-        beneficiary_data:
-          type: object
+          description: Set on a DOCUMENT_REQUEST once a reply to it carries a document.
+        attachment:
+          $ref: '#/components/schemas/TravelRuleMessageAttachment'
         created_at:
           type: string
           format: date-time
-    TravelRuleWidgetSessionResponse:
+    TravelRuleCounterpartyQuestionnaireRequest:
       type: object
       properties:
-        widget_session_id:
+        sent_to:
           type: string
-          format: uuid
-        token:
+          format: email
+          description: 'Optional. A compliance address on record for the counterparty: for a directory entry its compliance address or a contact your application sees, for a Didit network member its confirmed compliance email. Default: the address a Travel Rule email to the counterparty goes to (your own contact first, then a platform contact, then the entry''s compliance address).'
+    TravelRuleCounterpartyScreeningStatus:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Your counterparty_screening_enabled Travel Rule setting. Off by default; nothing is screened or billed while it is off.
+        price:
           type: string
-          description: Opaque session token embedded in the widget URL.
-        url:
+          description: 'Decimal string, in USD: what one screening costs your organization, the Company AML Screening price.'
+        fresh_days:
+          type: integer
+          description: How many days a screening stays fresh and is reused.
+        screening:
+          allOf:
+          - $ref: '#/components/schemas/TravelRuleCounterpartyScreening'
+          description: Your latest screening of the counterparty. Null when you never screened it.
+    WalletAddressEntryCreate:
+      type: object
+      required:
+      - address
+      properties:
+        address:
           type: string
-          description: The hosted wallet-ownership widget URL. Open it verbatim in the system browser (never inside a mobile SDK webview).
-        expires_at:
+          maxLength: 128
+        chain:
           type: string
-          format: date-time
+          maxLength: 32
+          description: Chain token for the address, for example `ETH` or `BTC`. When Didit routes or registers a transfer, it matches address book entries on the wallet address and, when the transfer carries a chain, on this value too, ignoring case. A transfer's chain is `beneficiary_data.chain`, filled from the transaction's crypto chain or currency symbol (for example `ETH`) when you do not send it, or the `chain` of an after-deposit registration, so use the same token everywhere. An entry with an empty chain matches any chain.
+        holder_vendor_data:
+          type: string
+          maxLength: 255
+        holder_name:
+          type: string
+          maxLength: 255
+        entity_type:
+          type: string
+          default: individual
+          maxLength: 16
+        self_declared:
+          type: boolean
+          default: false
+          description: Write-only. When true, the entry is created already ownership-verified via a SELF_DECLARATION proof. Returns 400 when `allow_self_declaration` is off in your Travel Rule settings.
+        travel_address:
+          type: string
+          description: Optional. The counterparty VASP's travel address for this wallet, enabling TRP routing for BTC and ETH transfers. An invalid travel address returns 400.
+          maxLength: 512
+    TravelRuleCounterpartyDecisionRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVED
+          - RESTRICTED
+          - BLOCKED
+        reason:
+          type: string
+          maxLength: 255
+          description: Optional. Replaces the previous reason; omit it to clear it.
+    TravelRuleCounterpartyScreeningResult:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+          - screened
+          - reused
+          description: 'screened: a new screening ran and was billed (201). reused: a fresh screening was returned and nothing was billed (200).'
+        screening:
+          $ref: '#/components/schemas/TravelRuleCounterpartyScreening'
+    WalletAddressEntryUpdate:
+      type: object
+      properties:
+        holder_name:
+          type: string
+          maxLength: 255
+        holder_vendor_data:
+          type: string
+          maxLength: 255
+        entity_type:
+          type: string
+          maxLength: 16
+        travel_address:
+          type: string
+          maxLength: 512
+      description: PATCH is a partial update; the response echoes only holder_name, holder_vendor_data, entity_type, and travel_address.
+    TravelRuleDataMatch:
+      type:
+      - object
+      - 'null'
+      description: Field-by-field comparison of the transfer's party data with what the other side knows about the wallet holder. It names fields and results, never values, so it stays readable while the counterparty's data is masked. Null until a comparison ran.
+      properties:
+        matched:
+          type: boolean
+          description: True when no compared field differs.
+        mismatched_fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - name
+            - date_of_birth
+            - address
+            - account
+          description: The fields that differ.
+        fields:
+          type: object
+          description: One entry per field compared for the party's entity type (`name`, `date_of_birth`, `address`, `account`; a company has no `date_of_birth`).
+          additionalProperties:
+            type: object
+            properties:
+              result:
+                type: string
+                enum:
+                - matched
+                - mismatched
+                - not_compared
+                description: '`not_compared` when the rule is `NONE` or either side has no value for the field.'
+              strictness:
+                type: string
+                enum:
+                - NONE
+                - STRICT
+                - CONTAINS
+                - DEFAULT
+                - FUZZY
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -1127,3 +3518,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

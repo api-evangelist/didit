@@ -230,6 +230,15 @@ paths:
                   - 'null'
                   format: uuid
                   description: User UUID to assign immediately.
+                review_duplicates:
+                  type: boolean
+                  default: false
+                  description: Recheck existing investigations before creating the case. When true, a subject with existing cases requires a nonblank separate_incident_reason. The console always enables this protection. Omitting it preserves existing API behavior.
+                separate_incident_reason:
+                  type: string
+                  maxLength: 1000
+                source_context:
+                  $ref: '#/components/schemas/CaseDuplicateCaseFraudSourceContextRequest'
       x-codeSamples:
       - lang: curl
         label: curl
@@ -250,6 +259,8 @@ paths:
             application/json:
               schema:
                 type: object
+        '409':
+          description: Duplicate review is enabled and an existing case was found without a separate-incident reason. No case was created.
   /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/:
     get:
       summary: Get case
@@ -367,7 +378,7 @@ paths:
                 $ref: '#/components/schemas/CaseDetail'
     delete:
       summary: Delete case
-      description: Soft-delete a case. There is no undelete endpoint; the row is retained internally for audit purposes only.
+      description: Delete a case. There is no undelete endpoint.
       operationId: delete_case
       tags:
       - Cases
@@ -755,8 +766,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CaseDetail'
-        '403':
-          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must approve it.
+        '409':
+          description: Case has no resolution pending approval.
           content:
             application/json:
               schema:
@@ -764,8 +775,8 @@ paths:
                 properties:
                   detail:
                     type: string
-        '409':
-          description: Case has no resolution pending approval.
+        '403':
+          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must approve it.
           content:
             application/json:
               schema:
@@ -825,15 +836,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CaseDetail'
-        '403':
-          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must reject it.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  detail:
-                    type: string
         '409':
           description: Case has no resolution pending approval.
           content:
@@ -843,97 +845,8 @@ paths:
                 properties:
                   detail:
                     type: string
-  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/entity-actions/:
-    post:
-      summary: Apply entity action
-      description: 'Act on the case''s subject without leaving the case: set_status changes the user/business status, add_tags applies applicant tags, add_note posts an internal case note, and add_to_blocklist adds the subject''s latest document and face to the blocklist. Logs an ENTITY_ACTION event.'
-      operationId: apply_case_entity_action
-      tags:
-      - Cases
-      parameters:
-      - name: organization_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Organization UUID.
-      - name: application_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Application UUID.
-      - name: case_uuid
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-          example: c1a5e000-0000-4000-8000-000000000001
-        description: Case UUID.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - action
-              properties:
-                action:
-                  type: string
-                  enum:
-                  - set_status
-                  - add_tags
-                  - add_note
-                  - add_to_blocklist
-                status:
-                  type:
-                  - string
-                  - 'null'
-                  description: Required for set_status; a valid VendorUser/VendorBusiness status.
-                tags:
-                  type: array
-                  items:
-                    type: string
-                  description: Required for add_tags.
-                note:
-                  type:
-                  - string
-                  - 'null'
-                  description: Required for add_note.
-      x-codeSamples:
-      - lang: curl
-        label: curl
-        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/entity-actions/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"action\": \"add_tags\", \"tags\": [\"high-risk\"]}'"
-      responses:
-        '200':
-          description: Action applied.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  entity_type:
-                    type: string
-                    enum:
-                    - user
-                    - business
-                  entity_uuid:
-                    type: string
-                    format: uuid
-                  action:
-                    type: string
-                    enum:
-                    - set_status
-                    - add_tags
-                    - add_note
-                    - add_to_blocklist
-                description: 'Plus action-specific keys: previous_status/new_status, tags_added, comment_uuid, or blocklisted_document_uuids/blocklisted_face_uuids.'
-        '400':
-          description: Unsupported action, missing required field, or the case has no subject.
+        '403':
+          description: The caller is the same user who submitted the resolution (or the case has no recorded maker); a different officer must reject it.
           content:
             application/json:
               schema:
@@ -986,199 +899,6 @@ paths:
                   url:
                     type: string
                     format: uri
-  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/:
-    get:
-      summary: List case notes
-      description: List notes on the case, newest first.
-      operationId: list_case_notes
-      tags:
-      - Cases
-      parameters:
-      - name: organization_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Organization UUID.
-      - name: application_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Application UUID.
-      - name: case_uuid
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-          example: c1a5e000-0000-4000-8000-000000000001
-        description: Case UUID.
-      - name: limit
-        in: query
-        schema:
-          type: integer
-          default: 50
-          minimum: 1
-        description: Page size.
-      - name: offset
-        in: query
-        schema:
-          type: integer
-          default: 0
-          minimum: 0
-        description: Zero-based offset.
-      x-codeSamples:
-      - lang: curl
-        label: curl
-        source: "curl -X GET 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
-      responses:
-        '200':
-          description: Paginated notes.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                    description: Number of matching rows. Exact up to 100, capped at 100 beyond that for performance. Rely on `next` being null to detect the last page.
-                  next:
-                    type:
-                    - string
-                    - 'null'
-                    description: Absolute URL of the next page, or null.
-                  previous:
-                    type:
-                    - string
-                    - 'null'
-                    description: Absolute URL of the previous page, or null.
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CaseNote'
-    post:
-      summary: Create case note
-      description: Post a plain-text note, optionally mentioning teammates, tagging it, or attaching files uploaded via notes/presign/.
-      operationId: create_case_note
-      tags:
-      - Cases
-      parameters:
-      - name: organization_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Organization UUID.
-      - name: application_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Application UUID.
-      - name: case_uuid
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-          example: c1a5e000-0000-4000-8000-000000000001
-        description: Case UUID.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - comment
-              properties:
-                comment:
-                  type: string
-                mentioned_emails:
-                  type: array
-                  items:
-                    type: string
-                    format: email
-                is_internal:
-                  type: boolean
-                  default: false
-                attachments:
-                  type: array
-                  description: s3_key values returned by POST notes/presign/; each must belong to this case.
-                  items:
-                    type: object
-                    properties:
-                      s3_key:
-                        type: string
-                      filename:
-                        type: string
-                      file_size:
-                        type: integer
-                tags:
-                  type: array
-                  items:
-                    type: string
-      x-codeSamples:
-      - lang: curl
-        label: curl
-        source: "curl -X POST 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"comment\": \"Called the customer, awaiting a reply with supporting documents.\", \"tags\": [\"follow-up\"]}'"
-      responses:
-        '201':
-          description: Note created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaseNote'
-  /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/{note_uuid}/:
-    delete:
-      summary: Delete case note
-      description: Soft-delete a note.
-      operationId: delete_case_note
-      tags:
-      - Cases
-      parameters:
-      - name: organization_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Organization UUID.
-      - name: application_id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: Application UUID.
-      - name: case_uuid
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-          example: c1a5e000-0000-4000-8000-000000000001
-        description: Case UUID.
-      - name: note_uuid
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-          example: d0000000-0000-4000-8000-000000000003
-        description: Note UUID.
-      x-codeSamples:
-      - lang: curl
-        label: curl
-        source: "curl -X DELETE 'https://verification.didit.me/v3/organization/11111111-2222-3333-4444-555555555555/application/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/cases/c1a5e000-0000-4000-8000-000000000001/notes/d0000000-0000-4000-8000-000000000003/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
-      responses:
-        '204':
-          description: Note deleted.
   /v3/organization/{organization_id}/application/{application_id}/cases/{case_uuid}/notes/presign/:
     post:
       summary: Upload note attachment
@@ -1686,7 +1406,7 @@ paths:
   /v3/organization/{organization_id}/application/{application_id}/cases/statistics/:
     get:
       summary: Case analytics
-      description: 'Aggregate case analytics for the date range (defaults to the last 30 days; max 731 days): a created-vs-reviewed time series, per-officer/blueprint/source/status tables, rollup totals, and the live open/overdue queue depth.'
+      description: Aggregate case analytics for the date range (defaults to the last 30 days; max 731 days). Charts, tables, totals, assignment events, and current queue counts use the same application-scoped filters. Filters use current case values. Dates apply to each metric event, so older cases assigned or resolved during the period remain included. Queue depth is independent of the date range. Invalid filters return 400; an unknown blueprint or assignee returns an empty result.
       operationId: get_case_analytics
       tags:
       - Cases
@@ -1717,6 +1437,51 @@ paths:
           type: string
           format: date
         description: Range end (inclusive). Defaults to today.
+      - name: blueprint
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Filter by the current blueprint UUID.
+      - name: assigned_to
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Filter by the current assigned reviewer user UUID.
+      - name: priority
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        description: Filter by current case priority.
+      - name: source
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        description: Filter by case creation source.
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        description: Filter by current case status.
       x-codeSamples:
       - lang: curl
         label: curl
@@ -2088,146 +1853,6 @@ paths:
                           type: string
 components:
   schemas:
-    CaseListItem:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        case_number:
-          type:
-          - string
-          - 'null'
-          description: Auto-assigned, e.g. CS-0001.
-        title:
-          type: string
-        status:
-          type: string
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        resolution:
-          type:
-          - string
-          - 'null'
-          enum:
-          - FALSE_POSITIVE
-          - VALID_THREAT
-        priority:
-          type: string
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-        source:
-          type: string
-          enum:
-          - MANUAL
-          - AML_SCREENING
-          - TRANSACTION_RULE
-          - WORKFLOW_BUILDER
-        tags:
-          type: array
-          items:
-            type: string
-        subject:
-          $ref: '#/components/schemas/CaseSubject'
-        assigned_to:
-          $ref: '#/components/schemas/CaseAssignee'
-        assigned_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        due_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        resolved_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        created_by_email:
-          type:
-          - string
-          - 'null'
-        created_by_name:
-          type:
-          - string
-          - 'null'
-        blueprint:
-          $ref: '#/components/schemas/CaseBlueprintSummary'
-        links_count:
-          type: integer
-        notes_count:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        application_id:
-          type: string
-          format: uuid
-        application_name:
-          type: string
-        organization_id:
-          type: string
-          format: uuid
-        organization_name:
-          type: string
-    CaseSubject:
-      type:
-      - object
-      - 'null'
-      description: The single user or business the case is anchored to.
-      properties:
-        type:
-          type: string
-          enum:
-          - user
-          - business
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-        external_id:
-          type:
-          - string
-          - 'null'
-          description: The subject's vendor_data.
-    CaseLink:
-      type: object
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        linked_entity_type:
-          type:
-          - string
-          - 'null'
-          enum:
-          - session
-          - business_session
-          - transaction
-        linked_entity_uuid:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        linked_entity_summary:
-          type:
-          - object
-          - 'null'
-          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
-        created_at:
-          type: string
-          format: date-time
     CaseBlueprintDetail:
       type: object
       properties:
@@ -2388,25 +2013,162 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseBlueprintSummary:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        name:
-          type: string
-          maxLength: 24
-    CaseNote:
+        version:
+          type: integer
+          readOnly: true
+        default_deadline_hours:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          maximum: 8760
+    CaseListItem:
       type: object
       properties:
         uuid:
           type: string
           format: uuid
-        comment:
+        case_number:
+          type:
+          - string
+          - 'null'
+          description: Auto-assigned, e.g. CS-0001.
+        title:
           type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        resolution:
+          type:
+          - string
+          - 'null'
+          enum:
+          - FALSE_POSITIVE
+          - VALID_THREAT
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        tags:
+          type: array
+          items:
+            type: string
+        subject:
+          $ref: '#/components/schemas/CaseSubject'
+        assigned_to:
+          $ref: '#/components/schemas/CaseAssignee'
+        assigned_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        due_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        created_by_email:
+          type:
+          - string
+          - 'null'
+        created_by_name:
+          type:
+          - string
+          - 'null'
+        blueprint:
+          $ref: '#/components/schemas/CaseBlueprintSummary'
+        links_count:
+          type: integer
+        notes_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        application_id:
+          type: string
+          format: uuid
+        application_name:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+        organization_name:
+          type: string
+    CaseChecklistItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        label:
+          type: string
+          maxLength: 255
+        is_completed:
+          type: boolean
+        completed_by:
+          type:
+          - string
+          - 'null'
+          format: email
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        order:
+          type: integer
+    CaseEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          enum:
+          - CREATED
+          - STATUS_CHANGED
+          - ASSIGNED
+          - UNASSIGNED
+          - RESOLVED
+          - REOPENED
+          - LINK_ADDED
+          - LINK_REMOVED
+          - NOTE_ADDED
+          - PRIORITY_CHANGED
+          - DUE_DATE_CHANGED
+          - TAG_ADDED
+          - TAG_REMOVED
+          - ESCALATED
+          - TRANSFERRED
+          - CHECKLIST_COMPLETED
+          - REPORT_CREATED
+          - REPORT_FINALIZED
+          - SUBMITTED_FOR_APPROVAL
+          - APPROVAL_GRANTED
+          - APPROVAL_REJECTED
+          - ENTITY_ACTION
+          - APPROVAL_INVALIDATED
         actor_email:
           type:
           - string
@@ -2416,47 +2178,27 @@ components:
           type:
           - string
           - 'null'
-        mentioned_emails:
-          type: array
-          items:
-            type: string
-            format: email
-        is_internal:
-          type: boolean
-        attachments:
-          type: array
-          items:
-            type: object
-            properties:
-              s3_key:
-                type: string
-              filename:
-                type: string
-              file_size:
-                type: integer
-              url:
-                type: string
-                format: uri
-        tags:
-          type: array
-          items:
-            type: string
+        previous_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        new_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - OPEN
+          - AWAITING_USER
+          - RESOLVED
+        metadata:
+          type: object
         created_at:
           type: string
           format: date-time
-    CaseAssignee:
-      type:
-      - object
-      - 'null'
-      properties:
-        uuid:
-          type: string
-          format: uuid
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
     CaseDetail:
       type: object
       properties:
@@ -2586,60 +2328,52 @@ components:
         updated_at:
           type: string
           format: date-time
-    CaseChecklistItem:
+    CaseDuplicateCaseFraudSourceContextRequest:
       type: object
       properties:
-        uuid:
+        check_id:
           type: string
           format: uuid
-        label:
+        request_id:
           type: string
-          maxLength: 255
-        is_completed:
-          type: boolean
-        completed_by:
-          type:
-          - string
-          - 'null'
-          format: email
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        order:
-          type: integer
-    CaseEvent:
-      type: object
+          format: uuid
+        source_section:
+          type: string
+          minLength: 1
+          pattern: ^[A-Z][A-Z0-9_:-]{0,63}$
+      required:
+      - check_id
+      - request_id
+      - source_section
+    CaseSubject:
+      type:
+      - object
+      - 'null'
+      description: The single user or business the case is anchored to.
       properties:
-        uuid:
-          type: string
-          format: uuid
-        event_type:
+        type:
           type: string
           enum:
-          - CREATED
-          - STATUS_CHANGED
-          - ASSIGNED
-          - UNASSIGNED
-          - RESOLVED
-          - REOPENED
-          - LINK_ADDED
-          - LINK_REMOVED
-          - NOTE_ADDED
-          - PRIORITY_CHANGED
-          - DUE_DATE_CHANGED
-          - TAG_ADDED
-          - TAG_REMOVED
-          - ESCALATED
-          - TRANSFERRED
-          - CHECKLIST_COMPLETED
-          - REPORT_CREATED
-          - REPORT_FINALIZED
-          - SUBMITTED_FOR_APPROVAL
-          - APPROVAL_GRANTED
-          - APPROVAL_REJECTED
-          - ENTITY_ACTION
+          - user
+          - business
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: The subject's vendor_data.
+    CaseNote:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        comment:
+          type: string
         actor_email:
           type:
           - string
@@ -2649,32 +2383,91 @@ components:
           type:
           - string
           - 'null'
-        previous_status:
-          type:
-          - string
-          - 'null'
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        new_status:
-          type:
-          - string
-          - 'null'
-          enum:
-          - OPEN
-          - AWAITING_USER
-          - RESOLVED
-        metadata:
-          type: object
+        mentioned_emails:
+          type: array
+          items:
+            type: string
+            format: email
+        is_internal:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              s3_key:
+                type: string
+              filename:
+                type: string
+              file_size:
+                type: integer
+              url:
+                type: string
+                format: uri
+        tags:
+          type: array
+          items:
+            type: string
         created_at:
           type: string
           format: date-time
+    CaseLink:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        linked_entity_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - session
+          - business_session
+          - transaction
+        linked_entity_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        linked_entity_summary:
+          type:
+          - object
+          - 'null'
+          description: session_id/session_number/status for session and business_session links; uuid/txn_id/status for transaction links.
+        created_at:
+          type: string
+          format: date-time
+    CaseAssignee:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+    CaseBlueprintSummary:
+      type:
+      - object
+      - 'null'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 24
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -2685,3 +2478,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

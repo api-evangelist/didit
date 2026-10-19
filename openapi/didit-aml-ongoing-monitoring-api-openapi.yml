@@ -1,0 +1,1099 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification AML Ongoing Monitoring API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: AML Ongoing Monitoring
+paths:
+  /v3/users/aml-monitoring/:
+    post:
+      summary: Enable or disable AML ongoing monitoring for users
+      description: 'Turns AML ongoing monitoring on or off for the selected users, with the same semantics as the Business Console. Exactly one monitored AML screening is kept per user, so a profile that verified several times is monitored and billed once; disabling turns monitoring off across all of the profile''s screenings. Users without any AML screening are screened first (billed as a regular AML screening) when they have the full name, date of birth and country needed; otherwise they are reported as `skipped_no_identity_data`.
+
+
+        Set `estimate_only: true` to preview counts and costs without writing anything. Selections of 20 profiles or fewer resolve inline and return `200` with the completed job; larger selections return `202` and run in the background - poll Get AML monitoring job with the returned `job_id`. Enabling is refused with `403` when the organization balance does not cover the estimate. Identifiers that match nothing are listed in `unmatched` and never fail the request: a selection that matches nothing completes as an empty job (`total` 0), the same convention as the batch delete endpoints.'
+      operationId: toggle_users_aml_monitoring
+      tags:
+      - AML Ongoing Monitoring
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_enabled
+              description: Select users with `vendor_data_list`, `didit_internal_id_list`, or both (the two lists are OR'd). At most 1000 identifiers per request across both lists.
+              properties:
+                is_enabled:
+                  type: boolean
+                  description: true to enable monitoring, false to disable it.
+                estimate_only:
+                  type: boolean
+                  default: false
+                  description: When true, returns the cost estimate and performs no writes - no screening, no billing, no job.
+                vendor_data_list:
+                  type: array
+                  items:
+                    type: string
+                  description: Your own identifiers of the users to toggle, matched exactly as sent.
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Didit internal ids of the users to toggle - the `didit_internal_id` returned by the create, get and list endpoints.
+            examples:
+              Estimate first:
+                summary: Preview the cost without writing
+                value:
+                  is_enabled: true
+                  estimate_only: true
+                  vendor_data_list:
+                  - user-123
+                  - user-456
+              Enable:
+                summary: Enable monitoring for two users
+                value:
+                  is_enabled: true
+                  vendor_data_list:
+                  - user-123
+                  - user-456
+              Disable:
+                summary: Disable monitoring by Didit internal id
+                value:
+                  is_enabled: false
+                  didit_internal_id_list:
+                  - 3f1c0d3e-8f0a-4c2e-9a3d-9b1f5f4a2c11
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/users/aml-monitoring/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"is_enabled\": true, \"vendor_data_list\": [\"user-123\", \"user-456\"]}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/users/aml-monitoring/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'is_enabled': True, 'vendor_data_list': ['user-123', 'user-456']},\n)\nresp.raise_for_status()\njob = resp.json()\nprint(job['status'], job['outcomes'])\nfor row in job['results']:\n    print(row['vendor_data'], row['outcome'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/users/aml-monitoring/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ is_enabled: true, vendor_data_list: ['user-123', 'user-456'] }),\n});\nconst job = await resp.json();\nconsole.log(job.status, job.outcomes);\nfor (const row of job.results) console.log(row.vendor_data, row.outcome);"
+      responses:
+        '200':
+          description: The estimate (when `estimate_only` is true) or the completed job for a selection processed inline.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  required:
+                  - users_total
+                  - already_enabled
+                  - with_existing_aml
+                  - needing_screening
+                  - skipped_no_identity_data
+                  - skipped_blocked
+                  - estimated_screening_cost_usd
+                  - estimated_annual_monitoring_cost_usd
+                  - balance_sufficient
+                  - unmatched
+                  description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                  properties:
+                    users_total:
+                      type: integer
+                      description: Profiles matched by the selection.
+                    already_enabled:
+                      type: integer
+                      description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                    with_existing_aml:
+                      type: integer
+                      description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                    needing_screening:
+                      type: integer
+                      description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                    skipped_no_identity_data:
+                      type: integer
+                      description: Profiles that cannot be screened because identity data is missing.
+                    skipped_blocked:
+                      type: integer
+                      description: Blocked users that will be skipped (always 0 for businesses).
+                    estimated_screening_cost_usd:
+                      type: number
+                      example: 0.2
+                      description: One-time cost of the new screenings.
+                    estimated_annual_monitoring_cost_usd:
+                      type: number
+                      example: 0.07
+                      description: Yearly monitoring cost of the profiles that will become monitored.
+                    balance_sufficient:
+                      type: boolean
+                      description: Whether the organization balance covers the screening plus the first year of monitoring.
+                    unmatched:
+                      type: array
+                      items:
+                        type: string
+                      description: Identifiers of the request that matched no profile in this application, exactly as sent.
+                - type: object
+                  required:
+                  - job_id
+                  - status
+                  - is_enabled
+                  - target_type
+                  - total
+                  - processed
+                  - outcomes
+                  - results
+                  - error
+                  - created_at
+                  - completed_at
+                  - estimate
+                  - unmatched
+                  properties:
+                    job_id:
+                      type: string
+                      format: uuid
+                    status:
+                      type: string
+                      enum:
+                      - PENDING
+                      - PROCESSING
+                      - COMPLETED
+                      - FAILED
+                    is_enabled:
+                      type: boolean
+                      description: true when the job enables monitoring, false when it disables it.
+                    target_type:
+                      type: string
+                      enum:
+                      - user
+                      - business
+                      description: Which profile family the job toggles.
+                    total:
+                      type: integer
+                      description: Profiles the job processes.
+                    processed:
+                      type: integer
+                      description: Profiles processed so far.
+                    outcomes:
+                      type: object
+                      description: Per-record outcome counters. Every selected profile resolves to exactly one counter; nothing is silently skipped.
+                      properties:
+                        enabled:
+                          type: integer
+                          description: Monitoring enabled on an existing AML screening.
+                        screened_and_enabled:
+                          type: integer
+                          description: A new AML screening was created (billed) and monitoring enabled on it.
+                        already_enabled:
+                          type: integer
+                          description: Monitoring was already active; nothing changed and nothing was billed.
+                        disabled:
+                          type: integer
+                          description: Monitoring turned off across every AML screening of the profile.
+                        skipped_no_identity_data:
+                          type: integer
+                          description: 'Skipped: the profile lacks the full name, date of birth and country (users) or a name (businesses) needed to screen.'
+                        skipped_blocked:
+                          type: integer
+                          description: 'Skipped: the user is blocked.'
+                        skipped_sandbox:
+                          type: integer
+                          description: 'Skipped: sandbox application, no screening is created.'
+                        failed_provider:
+                          type: integer
+                          description: The screening could not be completed; retry later.
+                        failed_insufficient_balance:
+                          type: integer
+                          description: Balance ran out while the job was running.
+                    results:
+                      type: array
+                      description: One entry per processed profile, in processing order. Grows while the job runs; complete once status is COMPLETED. Recorded for jobs started through the API.
+                      items:
+                        type: object
+                        properties:
+                          didit_internal_id:
+                            type: string
+                            format: uuid
+                            description: Didit internal id of the profile.
+                          vendor_data:
+                            type:
+                            - string
+                            - 'null'
+                            description: Your own identifier for the profile.
+                          outcome:
+                            type: string
+                            enum:
+                            - enabled
+                            - screened_and_enabled
+                            - already_enabled
+                            - disabled
+                            - skipped_no_identity_data
+                            - skipped_blocked
+                            - skipped_sandbox
+                            - failed_provider
+                            - failed_insufficient_balance
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                      description: Generic failure message when status is FAILED; the detailed cause is kept on the platform side.
+                    created_at:
+                      type: string
+                      format: date-time
+                    completed_at:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                    estimate:
+                      type: object
+                      description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                      properties:
+                        users_total:
+                          type: integer
+                          description: Profiles matched by the selection.
+                        already_enabled:
+                          type: integer
+                          description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                        with_existing_aml:
+                          type: integer
+                          description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                        needing_screening:
+                          type: integer
+                          description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                        skipped_no_identity_data:
+                          type: integer
+                          description: Profiles that cannot be screened because identity data is missing.
+                        skipped_blocked:
+                          type: integer
+                          description: Blocked users that will be skipped (always 0 for businesses).
+                        estimated_screening_cost_usd:
+                          type: number
+                          example: 0.2
+                          description: One-time cost of the new screenings.
+                        estimated_annual_monitoring_cost_usd:
+                          type: number
+                          example: 0.07
+                          description: Yearly monitoring cost of the profiles that will become monitored.
+                        balance_sufficient:
+                          type: boolean
+                          description: Whether the organization balance covers the screening plus the first year of monitoring.
+                    unmatched:
+                      type: array
+                      items:
+                        type: string
+                      description: Identifiers of the request that matched no profile in this application, exactly as sent. They are not part of the job.
+        '202':
+          description: Larger selections run in the background. Poll the job endpoint with `job_id`; `results` fills in as profiles are processed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                    description: true when the job enables monitoring, false when it disables it.
+                  target_type:
+                    type: string
+                    enum:
+                    - user
+                    - business
+                    description: Which profile family the job toggles.
+                  total:
+                    type: integer
+                    description: Profiles the job processes.
+                  processed:
+                    type: integer
+                    description: Profiles processed so far.
+                  outcomes:
+                    type: object
+                    description: Per-record outcome counters. Every selected profile resolves to exactly one counter; nothing is silently skipped.
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled on it.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active; nothing changed and nothing was billed.
+                      disabled:
+                        type: integer
+                        description: Monitoring turned off across every AML screening of the profile.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: the profile lacks the full name, date of birth and country (users) or a name (businesses) needed to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application, no screening is created.'
+                      failed_provider:
+                        type: integer
+                        description: The screening could not be completed; retry later.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out while the job was running.
+                  results:
+                    type: array
+                    description: One entry per processed profile, in processing order. Grows while the job runs; complete once status is COMPLETED. Recorded for jobs started through the API.
+                    items:
+                      type: object
+                      properties:
+                        didit_internal_id:
+                          type: string
+                          format: uuid
+                          description: Didit internal id of the profile.
+                        vendor_data:
+                          type:
+                          - string
+                          - 'null'
+                          description: Your own identifier for the profile.
+                        outcome:
+                          type: string
+                          enum:
+                          - enabled
+                          - screened_and_enabled
+                          - already_enabled
+                          - disabled
+                          - skipped_no_identity_data
+                          - skipped_blocked
+                          - skipped_sandbox
+                          - failed_provider
+                          - failed_insufficient_balance
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: Generic failure message when status is FAILED; the detailed cause is kept on the platform side.
+                  created_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Profiles matched by the selection.
+                      already_enabled:
+                        type: integer
+                        description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                      with_existing_aml:
+                        type: integer
+                        description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                      needing_screening:
+                        type: integer
+                        description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                      skipped_no_identity_data:
+                        type: integer
+                        description: Profiles that cannot be screened because identity data is missing.
+                      skipped_blocked:
+                        type: integer
+                        description: Blocked users that will be skipped (always 0 for businesses).
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                        description: One-time cost of the new screenings.
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                        description: Yearly monitoring cost of the profiles that will become monitored.
+                      balance_sufficient:
+                        type: boolean
+                        description: Whether the organization balance covers the screening plus the first year of monitoring.
+                  unmatched:
+                    type: array
+                    items:
+                      type: string
+                    description: Identifiers of the request that matched no profile in this application, exactly as sent. They are not part of the job.
+        '400':
+          description: 'Validation error: `is_enabled` missing, no selector, or more than 1000 identifiers across both lists.'
+        '401':
+          description: Missing or invalid API key.
+        '403':
+          description: Insufficient balance to enable monitoring for this selection. The response carries the `estimate` so you can top up the right amount.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Profiles matched by the selection.
+                      already_enabled:
+                        type: integer
+                        description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                      with_existing_aml:
+                        type: integer
+                        description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                      needing_screening:
+                        type: integer
+                        description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                      skipped_no_identity_data:
+                        type: integer
+                        description: Profiles that cannot be screened because identity data is missing.
+                      skipped_blocked:
+                        type: integer
+                        description: Blocked users that will be skipped (always 0 for businesses).
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                        description: One-time cost of the new screenings.
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                        description: Yearly monitoring cost of the profiles that will become monitored.
+                      balance_sufficient:
+                        type: boolean
+                        description: Whether the organization balance covers the screening plus the first year of monitoring.
+  /v3/businesses/aml-monitoring/:
+    post:
+      summary: Enable or disable AML ongoing monitoring for businesses
+      description: 'Turns AML ongoing monitoring on or off for the selected businesses, with the same semantics as the Business Console. Exactly one monitored AML screening is kept per business, so a profile that verified several times is monitored and billed once; disabling turns monitoring off across all of the profile''s screenings. Businesses without any AML screening are screened first (billed as a regular AML screening) when they have the legal or display name needed; otherwise they are reported as `skipped_no_identity_data`.
+
+
+        Set `estimate_only: true` to preview counts and costs without writing anything. Selections of 20 profiles or fewer resolve inline and return `200` with the completed job; larger selections return `202` and run in the background - poll Get AML monitoring job with the returned `job_id`. Enabling is refused with `403` when the organization balance does not cover the estimate. Identifiers that match nothing are listed in `unmatched` and never fail the request: a selection that matches nothing completes as an empty job (`total` 0), the same convention as the batch delete endpoints.'
+      operationId: toggle_businesses_aml_monitoring
+      tags:
+      - AML Ongoing Monitoring
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_enabled
+              description: Select businesses with `vendor_data_list`, `didit_internal_id_list`, or both (the two lists are OR'd). At most 1000 identifiers per request across both lists.
+              properties:
+                is_enabled:
+                  type: boolean
+                  description: true to enable monitoring, false to disable it.
+                estimate_only:
+                  type: boolean
+                  default: false
+                  description: When true, returns the cost estimate and performs no writes - no screening, no billing, no job.
+                vendor_data_list:
+                  type: array
+                  items:
+                    type: string
+                  description: Your own identifiers of the businesses to toggle, matched exactly as sent.
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Didit internal ids of the businesses to toggle - the `didit_internal_id` returned by the create, get and list endpoints.
+            examples:
+              Estimate first:
+                summary: Preview the cost without writing
+                value:
+                  is_enabled: true
+                  estimate_only: true
+                  vendor_data_list:
+                  - company-123
+                  - company-456
+              Enable:
+                summary: Enable monitoring for two businesses
+                value:
+                  is_enabled: true
+                  vendor_data_list:
+                  - company-123
+                  - company-456
+              Disable:
+                summary: Disable monitoring by Didit internal id
+                value:
+                  is_enabled: false
+                  didit_internal_id_list:
+                  - 3f1c0d3e-8f0a-4c2e-9a3d-9b1f5f4a2c11
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/businesses/aml-monitoring/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"is_enabled\": true, \"vendor_data_list\": [\"company-123\", \"company-456\"]}'"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/businesses/aml-monitoring/',\n    headers={'x-api-key': 'YOUR_API_KEY', 'Content-Type': 'application/json'},\n    json={'is_enabled': True, 'vendor_data_list': ['company-123', 'company-456']},\n)\nresp.raise_for_status()\njob = resp.json()\nprint(job['status'], job['outcomes'])\nfor row in job['results']:\n    print(row['vendor_data'], row['outcome'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const resp = await fetch('https://verification.didit.me/v3/businesses/aml-monitoring/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ is_enabled: true, vendor_data_list: ['company-123', 'company-456'] }),\n});\nconst job = await resp.json();\nconsole.log(job.status, job.outcomes);\nfor (const row of job.results) console.log(row.vendor_data, row.outcome);"
+      responses:
+        '200':
+          description: The estimate (when `estimate_only` is true) or the completed job for a selection processed inline.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  required:
+                  - users_total
+                  - already_enabled
+                  - with_existing_aml
+                  - needing_screening
+                  - skipped_no_identity_data
+                  - skipped_blocked
+                  - estimated_screening_cost_usd
+                  - estimated_annual_monitoring_cost_usd
+                  - balance_sufficient
+                  - unmatched
+                  description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                  properties:
+                    users_total:
+                      type: integer
+                      description: Profiles matched by the selection.
+                    already_enabled:
+                      type: integer
+                      description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                    with_existing_aml:
+                      type: integer
+                      description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                    needing_screening:
+                      type: integer
+                      description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                    skipped_no_identity_data:
+                      type: integer
+                      description: Profiles that cannot be screened because identity data is missing.
+                    skipped_blocked:
+                      type: integer
+                      description: Blocked users that will be skipped (always 0 for businesses).
+                    estimated_screening_cost_usd:
+                      type: number
+                      example: 0.2
+                      description: One-time cost of the new screenings.
+                    estimated_annual_monitoring_cost_usd:
+                      type: number
+                      example: 0.07
+                      description: Yearly monitoring cost of the profiles that will become monitored.
+                    balance_sufficient:
+                      type: boolean
+                      description: Whether the organization balance covers the screening plus the first year of monitoring.
+                    unmatched:
+                      type: array
+                      items:
+                        type: string
+                      description: Identifiers of the request that matched no profile in this application, exactly as sent.
+                - type: object
+                  required:
+                  - job_id
+                  - status
+                  - is_enabled
+                  - target_type
+                  - total
+                  - processed
+                  - outcomes
+                  - results
+                  - error
+                  - created_at
+                  - completed_at
+                  - estimate
+                  - unmatched
+                  properties:
+                    job_id:
+                      type: string
+                      format: uuid
+                    status:
+                      type: string
+                      enum:
+                      - PENDING
+                      - PROCESSING
+                      - COMPLETED
+                      - FAILED
+                    is_enabled:
+                      type: boolean
+                      description: true when the job enables monitoring, false when it disables it.
+                    target_type:
+                      type: string
+                      enum:
+                      - user
+                      - business
+                      description: Which profile family the job toggles.
+                    total:
+                      type: integer
+                      description: Profiles the job processes.
+                    processed:
+                      type: integer
+                      description: Profiles processed so far.
+                    outcomes:
+                      type: object
+                      description: Per-record outcome counters. Every selected profile resolves to exactly one counter; nothing is silently skipped.
+                      properties:
+                        enabled:
+                          type: integer
+                          description: Monitoring enabled on an existing AML screening.
+                        screened_and_enabled:
+                          type: integer
+                          description: A new AML screening was created (billed) and monitoring enabled on it.
+                        already_enabled:
+                          type: integer
+                          description: Monitoring was already active; nothing changed and nothing was billed.
+                        disabled:
+                          type: integer
+                          description: Monitoring turned off across every AML screening of the profile.
+                        skipped_no_identity_data:
+                          type: integer
+                          description: 'Skipped: the profile lacks the full name, date of birth and country (users) or a name (businesses) needed to screen.'
+                        skipped_blocked:
+                          type: integer
+                          description: 'Skipped: the user is blocked.'
+                        skipped_sandbox:
+                          type: integer
+                          description: 'Skipped: sandbox application, no screening is created.'
+                        failed_provider:
+                          type: integer
+                          description: The screening could not be completed; retry later.
+                        failed_insufficient_balance:
+                          type: integer
+                          description: Balance ran out while the job was running.
+                    results:
+                      type: array
+                      description: One entry per processed profile, in processing order. Grows while the job runs; complete once status is COMPLETED. Recorded for jobs started through the API.
+                      items:
+                        type: object
+                        properties:
+                          didit_internal_id:
+                            type: string
+                            format: uuid
+                            description: Didit internal id of the profile.
+                          vendor_data:
+                            type:
+                            - string
+                            - 'null'
+                            description: Your own identifier for the profile.
+                          outcome:
+                            type: string
+                            enum:
+                            - enabled
+                            - screened_and_enabled
+                            - already_enabled
+                            - disabled
+                            - skipped_no_identity_data
+                            - skipped_blocked
+                            - skipped_sandbox
+                            - failed_provider
+                            - failed_insufficient_balance
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                      description: Generic failure message when status is FAILED; the detailed cause is kept on the platform side.
+                    created_at:
+                      type: string
+                      format: date-time
+                    completed_at:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                    estimate:
+                      type: object
+                      description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                      properties:
+                        users_total:
+                          type: integer
+                          description: Profiles matched by the selection.
+                        already_enabled:
+                          type: integer
+                          description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                        with_existing_aml:
+                          type: integer
+                          description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                        needing_screening:
+                          type: integer
+                          description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                        skipped_no_identity_data:
+                          type: integer
+                          description: Profiles that cannot be screened because identity data is missing.
+                        skipped_blocked:
+                          type: integer
+                          description: Blocked users that will be skipped (always 0 for businesses).
+                        estimated_screening_cost_usd:
+                          type: number
+                          example: 0.2
+                          description: One-time cost of the new screenings.
+                        estimated_annual_monitoring_cost_usd:
+                          type: number
+                          example: 0.07
+                          description: Yearly monitoring cost of the profiles that will become monitored.
+                        balance_sufficient:
+                          type: boolean
+                          description: Whether the organization balance covers the screening plus the first year of monitoring.
+                    unmatched:
+                      type: array
+                      items:
+                        type: string
+                      description: Identifiers of the request that matched no profile in this application, exactly as sent. They are not part of the job.
+        '202':
+          description: Larger selections run in the background. Poll the job endpoint with `job_id`; `results` fills in as profiles are processed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                    description: true when the job enables monitoring, false when it disables it.
+                  target_type:
+                    type: string
+                    enum:
+                    - user
+                    - business
+                    description: Which profile family the job toggles.
+                  total:
+                    type: integer
+                    description: Profiles the job processes.
+                  processed:
+                    type: integer
+                    description: Profiles processed so far.
+                  outcomes:
+                    type: object
+                    description: Per-record outcome counters. Every selected profile resolves to exactly one counter; nothing is silently skipped.
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled on it.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active; nothing changed and nothing was billed.
+                      disabled:
+                        type: integer
+                        description: Monitoring turned off across every AML screening of the profile.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: the profile lacks the full name, date of birth and country (users) or a name (businesses) needed to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application, no screening is created.'
+                      failed_provider:
+                        type: integer
+                        description: The screening could not be completed; retry later.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out while the job was running.
+                  results:
+                    type: array
+                    description: One entry per processed profile, in processing order. Grows while the job runs; complete once status is COMPLETED. Recorded for jobs started through the API.
+                    items:
+                      type: object
+                      properties:
+                        didit_internal_id:
+                          type: string
+                          format: uuid
+                          description: Didit internal id of the profile.
+                        vendor_data:
+                          type:
+                          - string
+                          - 'null'
+                          description: Your own identifier for the profile.
+                        outcome:
+                          type: string
+                          enum:
+                          - enabled
+                          - screened_and_enabled
+                          - already_enabled
+                          - disabled
+                          - skipped_no_identity_data
+                          - skipped_blocked
+                          - skipped_sandbox
+                          - failed_provider
+                          - failed_insufficient_balance
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: Generic failure message when status is FAILED; the detailed cause is kept on the platform side.
+                  created_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Profiles matched by the selection.
+                      already_enabled:
+                        type: integer
+                        description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                      with_existing_aml:
+                        type: integer
+                        description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                      needing_screening:
+                        type: integer
+                        description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                      skipped_no_identity_data:
+                        type: integer
+                        description: Profiles that cannot be screened because identity data is missing.
+                      skipped_blocked:
+                        type: integer
+                        description: Blocked users that will be skipped (always 0 for businesses).
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                        description: One-time cost of the new screenings.
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                        description: Yearly monitoring cost of the profiles that will become monitored.
+                      balance_sufficient:
+                        type: boolean
+                        description: Whether the organization balance covers the screening plus the first year of monitoring.
+                  unmatched:
+                    type: array
+                    items:
+                      type: string
+                    description: Identifiers of the request that matched no profile in this application, exactly as sent. They are not part of the job.
+        '400':
+          description: 'Validation error: `is_enabled` missing, no selector, or more than 1000 identifiers across both lists.'
+        '401':
+          description: Missing or invalid API key.
+        '403':
+          description: Insufficient balance to enable monitoring for this selection. The response carries the `estimate` so you can top up the right amount.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (nothing is written).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Profiles matched by the selection.
+                      already_enabled:
+                        type: integer
+                        description: Profiles already monitored (nothing to do when enabling; these are what disabling turns off).
+                      with_existing_aml:
+                        type: integer
+                        description: Profiles whose existing AML screening will be switched to monitored (no new screening).
+                      needing_screening:
+                        type: integer
+                        description: Profiles without any AML screening that will be screened first (billed as a regular AML screening).
+                      skipped_no_identity_data:
+                        type: integer
+                        description: Profiles that cannot be screened because identity data is missing.
+                      skipped_blocked:
+                        type: integer
+                        description: Blocked users that will be skipped (always 0 for businesses).
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                        description: One-time cost of the new screenings.
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                        description: Yearly monitoring cost of the profiles that will become monitored.
+                      balance_sufficient:
+                        type: boolean
+                        description: Whether the organization balance covers the screening plus the first year of monitoring.
+  /v3/aml-monitoring/jobs/{job_id}/:
+    get:
+      summary: Get AML ongoing monitoring job
+      description: Status, outcome counters and per-record results of a monitoring toggle job started from `POST /v3/users/aml-monitoring/` or `POST /v3/businesses/aml-monitoring/`. Poll every couple of seconds while `status` is `PENDING` or `PROCESSING`; `results` is complete once it is `COMPLETED`.
+      operationId: get_aml_monitoring_job
+      tags:
+      - AML Ongoing Monitoring
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The `job_id` returned by the toggle endpoint.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl 'https://verification.didit.me/v3/aml-monitoring/jobs/JOB_ID/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import time\nimport requests\n\nurl = 'https://verification.didit.me/v3/aml-monitoring/jobs/JOB_ID/'\nwhile True:\n    job = requests.get(url, headers={'x-api-key': 'YOUR_API_KEY'}).json()\n    if job['status'] in ('COMPLETED', 'FAILED'):\n        break\n    time.sleep(2)\nprint(job['outcomes'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const url = 'https://verification.didit.me/v3/aml-monitoring/jobs/JOB_ID/';\nlet job;\ndo {\n  await new Promise((r) => setTimeout(r, 2000));\n  job = await (await fetch(url, { headers: { 'x-api-key': process.env.DIDIT_API_KEY } })).json();\n} while (job.status === 'PENDING' || job.status === 'PROCESSING');\nconsole.log(job.outcomes);"
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                    description: true when the job enables monitoring, false when it disables it.
+                  target_type:
+                    type: string
+                    enum:
+                    - user
+                    - business
+                    description: Which profile family the job toggles.
+                  total:
+                    type: integer
+                    description: Profiles the job processes.
+                  processed:
+                    type: integer
+                    description: Profiles processed so far.
+                  outcomes:
+                    type: object
+                    description: Per-record outcome counters. Every selected profile resolves to exactly one counter; nothing is silently skipped.
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled on it.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active; nothing changed and nothing was billed.
+                      disabled:
+                        type: integer
+                        description: Monitoring turned off across every AML screening of the profile.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: the profile lacks the full name, date of birth and country (users) or a name (businesses) needed to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application, no screening is created.'
+                      failed_provider:
+                        type: integer
+                        description: The screening could not be completed; retry later.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out while the job was running.
+                  results:
+                    type: array
+                    description: One entry per processed profile, in processing order. Grows while the job runs; complete once status is COMPLETED. Recorded for jobs started through the API; a job started from the Business Console reports counters only.
+                    items:
+                      type: object
+                      properties:
+                        didit_internal_id:
+                          type: string
+                          format: uuid
+                          description: Didit internal id of the profile.
+                        vendor_data:
+                          type:
+                          - string
+                          - 'null'
+                          description: Your own identifier for the profile.
+                        outcome:
+                          type: string
+                          enum:
+                          - enabled
+                          - screened_and_enabled
+                          - already_enabled
+                          - disabled
+                          - skipped_no_identity_data
+                          - skipped_blocked
+                          - skipped_sandbox
+                          - failed_provider
+                          - failed_insufficient_balance
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: Generic failure message when status is FAILED; the detailed cause is kept on the platform side.
+                  created_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+        '401':
+          description: Missing or invalid API key.
+        '404':
+          description: No such job for this application.
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

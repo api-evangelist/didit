@@ -11,7 +11,7 @@ paths:
   /v3/wallet-screening/:
     post:
       summary: Screen a wallet address
-      description: Run on-demand AML screening for a single crypto wallet/address without creating a transaction. Resolves your application's configured blockchain analytics provider (Merkle Science or Crystal), screens the address synchronously, and returns the normalised risk result. Nothing is written to the transactions table. One AML monitoring usage is billed per successful screening (sandbox applications are not billed).
+      description: Run on-demand AML screening for a single crypto wallet/address without creating a transaction. Resolves your application's configured blockchain analytics provider, screens the address synchronously, and returns the normalised risk result. LIGHTNING is available only with an Elliptic or Chainalysis BYOK connection added through Marketplace. Nothing is written to the transactions table. One AML monitoring usage is billed per successful screening (sandbox applications are not billed).
       operationId: screenWallet
       tags:
       - Transactions
@@ -29,13 +29,14 @@ paths:
               properties:
                 wallet_address:
                   type: string
-                  description: 'The crypto address to screen. Must match the format of the selected blockchain (e.g. a `0x`-prefixed 40-hex-char address for EVM chains). Alias: `address`.'
-                  example: '0x28c6c06298d514db089934071355e5743bf21d60'
+                  description: 'The crypto address or network identifier to screen. Must match the selected network (e.g. a `0x`-prefixed 40-hex-char address for EVM chains). Alias: `address`.'
+                  example: '0x94f1b9b64e2932f6a2db338f616844400cd58e8a'
                 blockchain:
                   type: string
-                  description: 'Asset / chain identifier. One of: BTC, ETH, LTC, XRP, BCH, DOGE, TRX, SOL, MATIC, BNB, USDT, USDC. Alias: `currency`.'
+                  description: 'Network identifier. Managed screening supports BTC, ETH, LTC, XRP, BCH, DOGE, TRX, SOL, MATIC, BNB, BASE (Base), OP (Optimism), and ARB (Arbitrum One). USDT and USDC are legacy Ethereum aliases, not multi-network searches. Connected-provider coverage varies. LIGHTNING requires a supported connected provider. Celo, Mode and Plume are not currently supported. Alias: `currency`.'
                   enum:
                   - BTC
+                  - LIGHTNING
                   - ETH
                   - LTC
                   - XRP
@@ -47,10 +48,13 @@ paths:
                   - BNB
                   - USDT
                   - USDC
+                  - BASE
+                  - OP
+                  - ARB
                   example: ETH
                 direction:
                   type: string
-                  description: Optional. Whether the address is being screened as an inbound (deposit) or outbound (withdrawal) counterparty. Accepts `inbound`, `outbound`, `deposit`, or `withdrawal`. Defaults to a neutral pre-transfer screen when omitted.
+                  description: Optional. Whether the address is being screened as an inbound (deposit) or outbound (withdrawal) counterparty. Accepts `inbound`, `outbound`, `deposit`, or `withdrawal`. Defaults to a neutral pre-transfer screen when omitted. This is passed to the provider as context only; it does not change the returned `risk_score`, `severity`, or the `source_of_funds`/`destination_of_funds` breakdowns, which are always both returned regardless of `direction`. Changing or omitting `direction` therefore does not require re-screening an address.
                   enum:
                   - inbound
                   - outbound
@@ -59,278 +63,238 @@ paths:
       x-codeSamples:
       - lang: curl
         label: curl
-        source: "curl -X POST 'https://verification.didit.me/v3/wallet-screening/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"wallet_address\": \"0x28c6c06298d514db089934071355e5743bf21d60\",\n    \"blockchain\": \"ETH\"\n  }'"
+        source: "curl -X POST 'https://verification.didit.me/v3/wallet-screening/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"wallet_address\": \"0x94f1b9b64e2932f6a2db338f616844400cd58e8a\",\n    \"blockchain\": \"ETH\"\n  }'"
       - lang: python
         label: Python
-        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/wallet-screening/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n        'wallet_address': '0x28c6c06298d514db089934071355e5743bf21d60',\n        'blockchain': 'ETH',\n    },\n    timeout=20,\n)\nresp.raise_for_status()\nresult = resp.json()\nprint(result['risk_score'], result['severity'], result['sanctions_hit'])"
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/wallet-screening/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n        'wallet_address': '0x94f1b9b64e2932f6a2db338f616844400cd58e8a',\n        'blockchain': 'ETH',\n    },\n    timeout=20,\n)\nresp.raise_for_status()\nresult = resp.json()\nprint(result['risk_score'], result['severity'], result['sanctions_hit'])"
       - lang: javascript
         label: JavaScript
-        source: "const result = await fetch('https://verification.didit.me/v3/wallet-screening/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    wallet_address: '0x28c6c06298d514db089934071355e5743bf21d60',\n    blockchain: 'ETH',\n  }),\n}).then((r) => r.json());\nconsole.log(result.risk_score, result.severity, result.sanctions_hit);"
+        source: "const result = await fetch('https://verification.didit.me/v3/wallet-screening/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({\n    wallet_address: '0x94f1b9b64e2932f6a2db338f616844400cd58e8a',\n    blockchain: 'ETH',\n  }),\n}).then((r) => r.json());\nconsole.log(result.risk_score, result.severity, result.sanctions_hit);"
       responses:
         '200':
           description: The normalised wallet screening result.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  provider:
-                    type: string
-                    description: Provider that performed the screening (e.g. `merklescience`, `crystal`).
-                  screening_type:
-                    type: string
-                    enum:
-                    - WALLET_SCREENING
-                    description: Always `WALLET_SCREENING` for this endpoint.
-                  risk_score:
-                    type: integer
-                    description: Normalised 0-100 risk score. Higher means greater exposure to risky entities.
-                  severity:
-                    type: string
-                    enum:
-                    - UNKNOWN
-                    - LOW
-                    - MEDIUM
-                    - HIGH
-                    - CRITICAL
-                    description: Severity bucket derived from `risk_score`.
-                  status:
-                    type: string
-                    enum:
-                    - SCREENED
-                    - PENDING
-                    - ERROR
-                    description: Screening outcome status.
-                  summary:
-                    type: string
-                    description: Human-readable summary of the screening result.
-                  wallet_address:
-                    type: string
-                    description: The screened address, echoed back.
-                  blockchain:
-                    type: string
-                    description: The blockchain that was screened.
-                  sanctions_hit:
-                    type: boolean
-                    description: True if the address has direct or indirect sanctions exposure.
-                  dominant_risk_category:
-                    type:
-                    - string
-                    - 'null'
-                    description: Highest-weighted high-risk category, or `null` when none is dominant (e.g. `sanctioned`, `mixer`, `stolen_funds`).
-                  source_of_funds:
-                    type: array
-                    description: Where the address received funds from, attributed by entity. Each entry is an exposure breakdown.
-                    items:
-                      type: object
-                      properties:
-                        category:
-                          type: string
-                          description: Normalised risk category, e.g. `exchange_licensed`, `dex`, `defi`, `payment_processor`, `mixer`, `darknet_market`, `sanctioned`, `stolen_funds`, `high_risk_exchange`.
-                        entity_name:
-                          type: string
-                          description: Name of the attributed entity (e.g. `Binance.com`, `Tornado Cash`).
-                        entity_type:
-                          type: string
-                          description: Provider entity type (e.g. `Exchange`, `Mixer`, `DeFi`, `Sanctions`, `Theft`).
-                        entity_subtype:
-                          type: string
-                          description: More granular subtype (e.g. `Mandatory KYC and AML`, `OFAC SDN`, `Yield Aggregator`).
-                        exposure_direction:
-                          type: string
-                          enum:
-                          - incoming
-                          - outgoing
-                          - connected
-                          description: Whether the funds came from (`incoming`) or went to (`outgoing`) this entity.
-                        exposure_type:
-                          type: string
-                          enum:
-                          - direct
-                          - indirect
-                          description: '`direct` (1 hop) or `indirect` (multi-hop) exposure.'
-                        is_direct:
-                          type: boolean
-                          description: True when the exposure is direct (0 hops).
-                        amount_usd:
-                          type: number
-                          description: USD value attributed to this entity.
-                        percentage:
-                          type: number
-                          description: Share of the direction's total exposure, 0-100.
-                        hops:
-                          type: integer
-                          description: Number of hops to the entity (0 for direct exposure).
-                        risk_level:
-                          type: string
-                          enum:
-                          - UNKNOWN
-                          - LOW
-                          - MEDIUM
-                          - HIGH
-                          - CRITICAL
-                          description: Risk level of the entity.
-                        country:
-                          type: string
-                          description: Primary ISO 3166-1 alpha-2 country of the entity, when known.
-                  destination_of_funds:
-                    type: array
-                    description: Where the address sent funds to, attributed by entity. Same item shape as `source_of_funds` with `exposure_direction` = `outgoing`.
-                    items:
-                      type: object
-                      properties:
-                        category:
-                          type: string
-                        entity_name:
-                          type: string
-                        entity_type:
-                          type: string
-                        entity_subtype:
-                          type: string
-                        exposure_direction:
-                          type: string
-                          enum:
-                          - incoming
-                          - outgoing
-                          - connected
-                        exposure_type:
-                          type: string
-                          enum:
-                          - direct
-                          - indirect
-                        is_direct:
-                          type: boolean
-                        amount_usd:
-                          type: number
-                        percentage:
-                          type: number
-                        hops:
-                          type: integer
-                        risk_level:
-                          type: string
-                          enum:
-                          - UNKNOWN
-                          - LOW
-                          - MEDIUM
-                          - HIGH
-                          - CRITICAL
-                        country:
-                          type: string
-                  counterparty_connections:
-                    type: array
-                    description: Direct and indirect counterparty entities with received/sent amounts and risk levels.
-                    items:
-                      type: object
-                      properties:
-                        entity_name:
-                          type: string
-                          description: Counterparty entity name.
-                        entity_type:
-                          type: string
-                          description: Counterparty entity type.
-                        entity_subtype:
-                          type: string
-                          description: Counterparty entity subtype.
-                        risk_level:
-                          type: string
-                          enum:
-                          - UNKNOWN
-                          - LOW
-                          - MEDIUM
-                          - HIGH
-                          - CRITICAL
-                        categories:
-                          type: array
-                          items:
-                            type: string
-                          description: Risk categories attributed to the counterparty.
-                        received_usd:
-                          type: number
-                          description: USD received from the counterparty.
-                        sent_usd:
-                          type: number
-                          description: USD sent to the counterparty.
-                        received_hops:
-                          type: integer
-                        sent_hops:
-                          type: integer
-                        percentage:
-                          type: number
-                        is_direct:
-                          type: boolean
-                        country:
-                          type: string
+                $ref: '#/components/schemas/WalletScreeningResult'
               example:
                 provider: merklescience
                 screening_type: WALLET_SCREENING
-                risk_score: 72
-                severity: HIGH
+                risk_score: 95
+                severity: CRITICAL
                 status: SCREENED
-                summary: 'Merkle Science risk: High (4/5). Dominant risk: mixer'
-                wallet_address: '0x28c6c06298d514db089934071355e5743bf21d60'
+                summary: 'Merkle Science risk: Critical (5/5). SANCTIONS HIT. Dominant risk: sanctioned. Driven by: the address is attributed to Sanctions / OFAC (Example Sanctions)'
+                wallet_address: '0x94f1b9b64e2932f6a2db338f616844400cd58e8a'
+                transaction_hash: null
                 blockchain: ETH
-                sanctions_hit: true
-                dominant_risk_category: mixer
+                block_timestamp: null
+                total_value_usd: null
+                fee_usd: null
+                sender_rows: []
+                receiver_rows: []
+                transaction_flows: []
+                transaction_flows_status: null
+                transaction_flows_error: null
                 source_of_funds:
-                - category: exchange_licensed
-                  entity_name: Binance.com
-                  entity_type: Exchange
-                  entity_subtype: Mandatory KYC and AML
+                - category: sanctioned
+                  percentage: 100.0
+                  amount_usd: 9813695.0
+                  entity_name: Example Sanctions
+                  entity_type: Sanctions
+                  entity_subtype: OFAC
+                  hops: null
+                  description: Sanctions / OFAC
+                  is_direct: true
                   exposure_direction: incoming
                   exposure_type: direct
-                  is_direct: true
-                  amount_usd: 18420.55
-                  percentage: 61.4
-                  hops: 0
-                  risk_level: LOW
-                  country: SC
-                - category: mixer
-                  entity_name: Tornado Cash
-                  entity_type: Mixer
-                  entity_subtype: OFAC SDN
-                  exposure_direction: incoming
-                  exposure_type: indirect
-                  is_direct: false
-                  amount_usd: 11580.2
-                  percentage: 38.6
-                  hops: 2
-                  risk_level: CRITICAL
-                  country: RU
+                  provider_entity_id: '118885'
+                  provider_entity_type_id: '30'
+                  provider_entity_subtype_id: '125'
+                  country: ''
+                  raw_amount: null
+                  raw_currency: null
                 destination_of_funds:
-                - category: exchange_licensed
-                  entity_name: Coinbase
-                  entity_type: Exchange
-                  entity_subtype: Mandatory KYC and AML
-                  exposure_direction: outgoing
-                  exposure_type: direct
-                  is_direct: true
-                  amount_usd: 30000.75
-                  percentage: 100
-                  hops: 0
-                  risk_level: LOW
-                  country: US
-                counterparty_connections:
-                - entity_name: Tornado Cash
-                  entity_type: Mixer
-                  entity_subtype: OFAC SDN
-                  risk_level: CRITICAL
-                  categories:
-                  - mixer
-                  received_usd: 11580.2
-                  sent_usd: 0
-                  received_hops: 2
-                  sent_hops: 0
-                  percentage: 38.6
+                - category: defi
+                  percentage: 84.824453
+                  amount_usd: 7783414.38
+                  entity_name: Example DeFi 7
+                  entity_type: DeFi
+                  entity_subtype: Bridges
+                  hops: null
+                  description: DeFi / Bridges
                   is_direct: false
-                  country: RU
+                  exposure_direction: outgoing
+                  exposure_type: indirect
+                  provider_entity_id: '118459'
+                  provider_entity_type_id: '33'
+                  provider_entity_subtype_id: '143'
+                  country: ''
+                  raw_amount: null
+                  raw_currency: null
+                - category: defi
+                  percentage: 15.175547
+                  amount_usd: 1392494.37
+                  entity_name: Example DeFi 2
+                  entity_type: DeFi
+                  entity_subtype: Yield Aggregator
+                  hops: null
+                  description: DeFi / Yield Aggregator
+                  is_direct: false
+                  exposure_direction: outgoing
+                  exposure_type: indirect
+                  provider_entity_id: '90192'
+                  provider_entity_type_id: '33'
+                  provider_entity_subtype_id: '142'
+                  country: ''
+                  raw_amount: null
+                  raw_currency: null
+                counterparty_connections:
+                - entity_name: Example Sanctions
+                  entity_type: Sanctions
+                  entity_subtype: OFAC
+                  risk_level: critical
+                  categories:
+                  - sanctioned
+                  received_usd: null
+                  sent_usd: null
+                  received_hops: null
+                  sent_hops: null
+                  percentage: 0.0
+                  is_direct: true
+                  country: null
+                  provider_entity_id: null
+                - entity_name: Example Sanctions
+                  entity_type: Sanctions
+                  entity_subtype: OFAC
+                  risk_level: critical
+                  categories:
+                  - sanctioned
+                  received_usd: null
+                  sent_usd: null
+                  received_hops: null
+                  sent_hops: null
+                  percentage: 0.0
+                  is_direct: true
+                  country: null
+                  provider_entity_id: null
+                network_nodes: []
+                network_edges: []
+                sanctions_hit: true
+                pep_counterparty: null
+                dominant_risk_category: sanctioned
+                risk_factors:
+                - source: attribution
+                  category: sanctioned
+                  label: Sanctions / OFAC
+                  entity_name: Example Sanctions
+                  direction: attribution
+                  exposure_type: attribution
+                  amount_usd: null
+                  percentage: 0.0
+                  is_high_risk: true
+                  description: the address is attributed to Sanctions / OFAC (Example Sanctions)
+                - source: exposure
+                  category: sanctioned
+                  label: Sanctions / OFAC
+                  entity_name: Example Sanctions
+                  direction: incoming
+                  exposure_type: direct
+                  amount_usd: 9813695.0
+                  percentage: 51.679304
+                  is_high_risk: true
+                  description: 51.6793% direct incoming exposure to Sanctions / OFAC (Example Sanctions)
+                - source: exposure
+                  category: defi
+                  label: DeFi / Bridges
+                  entity_name: Example DeFi 7
+                  direction: outgoing
+                  exposure_type: indirect
+                  amount_usd: 7783414.38
+                  percentage: 40.987766
+                  is_high_risk: false
+                  description: 40.9878% indirect outgoing exposure to DeFi / Bridges (Example DeFi 7)
+                - source: exposure
+                  category: defi
+                  label: DeFi / Yield Aggregator
+                  entity_name: Example DeFi 2
+                  direction: outgoing
+                  exposure_type: indirect
+                  amount_usd: 1392494.37
+                  percentage: 7.33293
+                  is_high_risk: false
+                  description: 7.33293% indirect outgoing exposure to DeFi / Yield Aggregator (Example DeFi 2)
+                raw_response:
+                  '...': provider-specific details
+                report_signature: <hmac-sha256 over the result, scoped to your application>
         '400':
-          description: Validation error — malformed wallet address, missing `wallet_address`, or unsupported `blockchain`.
+          description: Validation error — malformed wallet address, missing `wallet_address`, unsupported `blockchain`, or LIGHTNING without an Elliptic or Chainalysis BYOK Marketplace connection.
         '401':
           description: Missing or invalid `x-api-key`.
         '409':
           description: No AML provider is configured for the application, or the configured provider does not support wallet screening yet. Configure transaction monitoring first.
         '502':
           description: The AML provider could not complete the screening. Retry later.
+  /v3/wallet-screening/pdf/:
+    post:
+      summary: Render a wallet-screening result as a PDF
+      description: 'Stateless companion to `POST /v3/wallet-screening/`: repost the exact JSON body that endpoint returned — including the `report_signature` it added — and get back a Didit-branded PDF of the same result. No provider is called and nothing is billed or persisted; this only re-renders a result Didit already produced. The signature ties the PDF to an unmodified result: editing `risk_score`, `severity`, `sanctions_hit`, or any other signed field before reposting fails with `400`.'
+      operationId: screenWalletPdf
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        description: The unmodified JSON object returned by `POST /v3/wallet-screening/`, including `report_signature`.
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WalletScreeningResult'
+              required:
+              - report_signature
+              description: Same shape as the `POST /v3/wallet-screening/` response — pass that response body back verbatim, including `report_signature`.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "# $RESULT is the saved JSON body from POST /v3/wallet-screening/\ncurl -X POST 'https://verification.didit.me/v3/wallet-screening/pdf/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d \"$RESULT\" \\\n  -o wallet_screening_report.pdf"
+      - lang: python
+        label: Python
+        source: "import requests\n\n# `result` is the dict returned by POST /v3/wallet-screening/, unmodified\nresponse = requests.post(\n    'https://verification.didit.me/v3/wallet-screening/pdf/',\n    headers={'x-api-key': 'YOUR_API_KEY'},\n    json=result,\n    timeout=30,\n)\nresponse.raise_for_status()\nwith open('wallet_screening_report.pdf', 'wb') as fh:\n    fh.write(response.content)"
+      - lang: javascript
+        label: JavaScript
+        source: "// `result` is the object returned by POST /v3/wallet-screening/, unmodified\nconst response = await fetch('https://verification.didit.me/v3/wallet-screening/pdf/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify(result),\n});\nif (!response.ok) throw new Error(`PDF generation failed: HTTP ${response.status}`);\nconst pdfBuffer = Buffer.from(await response.arrayBuffer());"
+      responses:
+        '200':
+          description: The rendered PDF document, returned directly as binary `application/pdf` — there is no JSON wrapper.
+          headers:
+            Content-Disposition:
+              description: '`attachment; filename=wallet_screening_{address}.pdf`, derived from the `wallet_address` (or `transaction_hash`) in the reposted result.'
+              schema:
+                type: string
+                example: attachment; filename=wallet_screening_0x28c6c06298d514db0899.pdf
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: The body is not a JSON object matching the wallet-screening result shape, or `report_signature` is missing or does not match the reposted fields (edited or truncated before repost).
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Not an object:
+                  value:
+                    non_field_errors:
+                    - Expected a JSON object matching a wallet-screening result.
+                Missing or invalid signature:
+                  value:
+                    report_signature:
+                    - This wallet-screening result is missing or fails its report signature - repost the exact JSON returned by the wallet-screening endpoint, unmodified.
+        '401':
+          description: Missing or invalid `x-api-key`.
   /v3/transactions/:
     get:
       summary: List transactions
@@ -353,6 +317,12 @@ paths:
           default: 0
           minimum: 0
         description: Zero-based offset of the first record to return. Prefer following the `next` URL from the previous page.
+      - name: travel_rule_status
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Return only transactions whose Travel Rule transfer is in this exact status (for example `ON_HOLD` or `AWAITING_COUNTERPARTY`). `count` follows this filter; `total_transactions` still counts every transaction in the application.
       x-codeSamples:
       - lang: curl
         label: curl
@@ -427,7 +397,7 @@ paths:
                           description: Transaction amount as a decimal string with trailing zeros stripped (e.g. `"1500"`, `"0.5"`, `"0.123456789012345678"`). Up to 18 decimal places.
                         currency:
                           type: string
-                          description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
+                          description: 'Currency code of `amount`. Any ISO 4217 alphabetic code is accepted (e.g. `EUR`, `USD`, `NGN`), as is a crypto asset symbol (e.g. `BTC`). Prefer a currently-circulating code. Not every accepted code has an exchange rate: when none is available for the code (for example the ISO accounting unit `XSU`, or a crypto symbol Didit does not price), automatic conversion fails and `preferred_currency_amount` is returned null unless the request supplied a pre-converted `amount_in_default_currency`.'
                         preferred_currency_amount:
                           type:
                           - string
@@ -437,7 +407,7 @@ paths:
                           type:
                           - string
                           - 'null'
-                          description: Preferred currency code used for `preferred_currency_amount`.
+                          description: Preferred currency code used for `preferred_currency_amount` - the application's base currency, any currently-circulating ISO 4217 code. A code with no available exchange rate leaves `preferred_currency_amount` null unless the request supplied a pre-converted `amount_in_default_currency`.
                         payment_details:
                           type:
                           - string
@@ -533,6 +503,11 @@ paths:
                           - string
                           - 'null'
                           description: Display name of the Console reviewer assigned to this transaction.
+                        travel_rule_status:
+                          type:
+                          - string
+                          - 'null'
+                          description: Status of the transaction's Travel Rule transfer (for example `COMPLETED`), or `null` when it has none.
               examples:
                 Single transaction:
                   value:
@@ -657,11 +632,11 @@ paths:
                       - out
                     amount:
                       type: number
-                      description: Transaction amount (up to 18 decimal places).
+                      description: 'Transaction amount (up to 18 decimal places). Send it as a decimal string (e.g. `"0.123456789012345678"`) when exact precision matters: a JSON number is parsed as a binary float first, so digits beyond about 15 significant digits are rounded before the amount is stored.'
                       example: 1500
                     currency:
                       type: string
-                      description: Currency code, e.g. `EUR`, `USD`, `BTC`.
+                      description: 'Currency code. Any ISO 4217 alphabetic code is accepted (e.g. `EUR`, `USD`, `NGN`), as is a crypto asset symbol (e.g. `BTC`). Prefer a currently-circulating code. Not every accepted code has an exchange rate: when none is available for the code (for example the ISO accounting unit `XSU`, or a crypto symbol Didit does not price), automatic conversion fails and `preferred_currency_amount` is returned null unless the request supplied a pre-converted `amount_in_default_currency`.'
                       example: EUR
                     currency_kind:
                       type: string
@@ -673,7 +648,7 @@ paths:
                       description: Pre-converted amount in the default currency. If omitted, automatic FX conversion is attempted.
                     default_currency:
                       type: string
-                      description: The default currency code for the converted amount.
+                      description: The default currency code for the converted amount. Any currently-circulating ISO 4217 code.
                     payment_details:
                       type:
                       - string
@@ -689,6 +664,14 @@ paths:
                       - string
                       - 'null'
                       description: Sub-type of the transaction, e.g. `deposit`, `withdrawal`, `transfer`.
+                    crypto_params:
+                      type: object
+                      description: Crypto network selection, separate from currency (the asset symbol). Recording a custom token symbol does not guarantee transaction-hash coverage for its contract.
+                      properties:
+                        crypto_chain:
+                          type: string
+                          description: Actual network used for screening. Managed screening supports BTC, ETH, LTC, XRP, BCH, DOGE, TRX, SOL, MATIC, BNB, BASE (Base), OP (Optimism) and ARB (Arbitrum One). Always specify this for multi-network tokens. Connected-provider coverage varies; LIGHTNING requires a supported connected provider.
+                          example: BASE
                 subject:
                   type: object
                   description: The subject (applicant) of the transaction.
@@ -744,7 +727,57 @@ paths:
                           type: object
                     device_context:
                       type: object
-                      description: Device context captured at transaction time.
+                      description: Device context captured at transaction time. browser_family and platform must be sent as explicit top-level keys — they are not derived from user_agent. The camelCase alias device is also accepted on the request.
+                      properties:
+                        fingerprint:
+                          type: string
+                          description: Unique device fingerprint.
+                        persistent_device_id:
+                          type: string
+                          description: Stable cross-session device identifier (v2 fingerprint schema).
+                        user_agent:
+                          type: string
+                          description: 'Browser or app user agent string. CamelCase alias: userAgent.'
+                        browser_family:
+                          type: string
+                          description: 'Browser family (e.g. Chrome, Firefox, Safari). Must be sent explicitly — it is not derived from user_agent. CamelCase alias: browserFamily.'
+                        browser_version:
+                          type: string
+                          description: 'Browser version string. Must be sent explicitly. CamelCase alias: browserVersion.'
+                        platform:
+                          type: string
+                          description: Platform identifier (web, ios, android, macos, windows, linux). Must be sent explicitly — it is not derived from user_agent.
+                        os_family:
+                          type: string
+                          description: 'Operating system family (e.g. iOS, Android, Windows). CamelCase alias: osFamily.'
+                        os_version:
+                          type: string
+                          description: 'Operating system version string. CamelCase alias: osVersion.'
+                        accept_language:
+                          type: string
+                          description: 'Accept-Language header value. CamelCase alias: acceptLang.'
+                        session_id:
+                          type: string
+                          description: 'Session identifier of the user current session. Stored in metadata. CamelCase alias: sessionId.'
+                        session_age_ms:
+                          type: number
+                          description: 'Age of the user session in milliseconds at transaction time. CamelCase alias: sessionAgeMs.'
+                        network_context:
+                          type: object
+                          description: Network context with IP address and geo-location. A top-level ipInfo block is also folded into this object.
+                          properties:
+                            ip_address:
+                              type: string
+                              description: 'Client IP address. CamelCase alias: ip.'
+                            ip_country_code:
+                              type: string
+                              description: 'Geo-resolved country of the IP (ISO 3166-1 alpha-3). CamelCase alias: countryCode3.'
+                            latitude:
+                              type: number
+                              description: 'Geographic latitude of the IP. CamelCase alias: lat.'
+                            longitude:
+                              type: number
+                              description: 'Geographic longitude of the IP. CamelCase alias: lon.'
                     payment_method:
                       type: object
                       description: Payment method used by the subject.
@@ -785,6 +818,57 @@ paths:
                       type: object
                     device_context:
                       type: object
+                      description: Device context for the counterparty. browser_family and platform must be sent as explicit top-level keys — they are not derived from user_agent.
+                      properties:
+                        fingerprint:
+                          type: string
+                          description: Unique device fingerprint.
+                        persistent_device_id:
+                          type: string
+                          description: Stable cross-session device identifier (v2 fingerprint schema).
+                        user_agent:
+                          type: string
+                          description: 'Browser or app user agent string. CamelCase alias: userAgent.'
+                        browser_family:
+                          type: string
+                          description: 'Browser family (e.g. Chrome, Firefox, Safari). Must be sent explicitly — it is not derived from user_agent. CamelCase alias: browserFamily.'
+                        browser_version:
+                          type: string
+                          description: 'Browser version string. Must be sent explicitly. CamelCase alias: browserVersion.'
+                        platform:
+                          type: string
+                          description: Platform identifier (web, ios, android, macos, windows, linux). Must be sent explicitly — it is not derived from user_agent.
+                        os_family:
+                          type: string
+                          description: 'Operating system family (e.g. iOS, Android, Windows). CamelCase alias: osFamily.'
+                        os_version:
+                          type: string
+                          description: 'Operating system version string. CamelCase alias: osVersion.'
+                        accept_language:
+                          type: string
+                          description: 'Accept-Language header value. CamelCase alias: acceptLang.'
+                        session_id:
+                          type: string
+                          description: 'Session identifier for the counterparty session. Stored in metadata. CamelCase alias: sessionId.'
+                        session_age_ms:
+                          type: number
+                          description: 'Age of the user session in milliseconds at transaction time. CamelCase alias: sessionAgeMs.'
+                        network_context:
+                          type: object
+                          description: Network context with IP address and geo-location. A top-level ipInfo block is also folded into this object.
+                          properties:
+                            ip_address:
+                              type: string
+                              description: 'Client IP address. CamelCase alias: ip.'
+                            ip_country_code:
+                              type: string
+                              description: 'Geo-resolved country of the IP (ISO 3166-1 alpha-3). CamelCase alias: countryCode3.'
+                            latitude:
+                              type: number
+                              description: 'Geographic latitude of the IP. CamelCase alias: lat.'
+                            longitude:
+                              type: number
+                              description: 'Geographic longitude of the IP. CamelCase alias: lon.'
                     payment_method:
                       type: object
                       description: 'Payment method used by the counterparty. On travelRule transactions, `method_type: "unhosted_wallet"` declares the counterparty wallet as self-hosted: the transfer skips counterparty-VASP routing, is created directly in `UNCONFIRMED_OWNERSHIP`, and (when `auto_wallet_verification` is enabled) a wallet-ownership widget session is auto-minted and returned in the transaction''s `action_required` block.'
@@ -806,12 +890,13 @@ paths:
                     bank_name: test_2
                 travel_rule_details:
                   type: object
-                  description: Travel Rule compliance metadata.
+                  description: 'Travel Rule compliance metadata. When Travel Rule is enabled and transaction_category is travel_rule, Didit runs the exchange itself: it ignores status, protocol, required and obligations_count, and uses originator_data, beneficiary_data and metadata. Otherwise Didit stores these values as a passive Travel Rule record.'
                   required:
                   - status
                   properties:
                     status:
                       type: string
+                      description: Required whenever you send travel_rule_details. One of the Travel Rule transfer statuses (for example AWAITING_COUNTERPARTY, COMPLETED, NOT_APPLICABLE); lowercase and camelCase spellings and the legacy values UNKNOWN, COMPLIANT, PENDING_ACTION, PENDING_COUNTERPARTY, FAILED and EXEMPT are also accepted and mapped. Any other value returns 400.
                     protocol:
                       type: string
                     required:
@@ -820,8 +905,10 @@ paths:
                       type: integer
                     originator_data:
                       type: object
+                      description: Originator details, sent to the counterparty exactly as you provide them. Didit does not add the subject's verified identity.
                     beneficiary_data:
                       type: object
+                      description: Beneficiary details. For routing, Didit reads wallet_address (falling back to counterparty.payment_method.account_id), chain (filled from crypto_params.crypto_chain or the currency when that names a supported chain), name (falling back to counterparty.full_name), travel_address, counterparty_vasp_name, counterparty_vasp_lei and counterparty_vasp_email.
                     metadata:
                       type: object
                 network_snapshot:
@@ -900,7 +987,6 @@ paths:
                     amount: 25000
                     currency: USDT
                     currency_kind: crypto
-                    payment_reference_id: '0xabcdef1234567890'
                     action_type: transfer
                   subject:
                     entity_type: individual
@@ -919,7 +1005,7 @@ paths:
                       name: Beneficiary VASP, Inc.
                       code: BVASP-US
                   travel_rule_details:
-                    status: PENDING
+                    status: AWAITING_COUNTERPARTY
                     protocol: IVMS101
                     required: true
                     originator_data:
@@ -937,6 +1023,7 @@ paths:
                 Approved with no rule hits:
                   value:
                     uuid: abcdef12-3456-4890-abcd-ef1234567890
+                    environment: live
                     transaction_number: 4123
                     txn_id: your-txn-2026-05-17-001
                     txn_date: '2026-05-17T08:42:00Z'
@@ -945,6 +1032,7 @@ paths:
                     action_type: withdrawal
                     direction: OUTBOUND
                     status: APPROVED
+                    source: LIVE
                     amount: '1500'
                     currency: EUR
                     currency_type: fiat
@@ -986,6 +1074,7 @@ paths:
                       device: {}
                       external_party_snapshot: null
                     payment_methods: []
+                    documents: []
                     activities:
                     - uuid: d4e5f6a7-8901-4bcd-9ef0-123456789abc
                       activity_type: TRANSACTION_CREATED
@@ -1001,10 +1090,12 @@ paths:
                     travel_rule: null
                     network_snapshot: null
                     remediation: null
+                    action_required: null
                     cost_breakdown: null
                 Flagged for review:
                   value:
                     uuid: abcdef12-3456-4890-abcd-ef1234567891
+                    environment: live
                     transaction_number: 4124
                     txn_id: your-txn-2026-05-17-002
                     txn_date: '2026-05-17T08:42:00Z'
@@ -1013,6 +1104,7 @@ paths:
                     action_type: withdrawal
                     direction: OUTBOUND
                     status: IN_REVIEW
+                    source: LIVE
                     amount: '0.5'
                     currency: BTC
                     currency_type: crypto
@@ -1055,6 +1147,7 @@ paths:
                       device: {}
                       external_party_snapshot: null
                     payment_methods: []
+                    documents: []
                     activities: []
                     alerts:
                     - uuid: a7b8c9d0-1234-4abc-9def-567890abcdef
@@ -1078,15 +1171,14 @@ paths:
                       severity: HIGH
                       score_delta: 78
                       status_target: IN_REVIEW
-                      action_summary:
-                        add_score: 78
-                        change_status: IN_REVIEW
+                      action_summary: score +78; change_status:IN_REVIEW
                       metadata: {}
                       created_at: '2026-05-17T08:42:12Z'
                     provider_results: []
                     travel_rule: null
                     network_snapshot: null
                     remediation: null
+                    action_required: null
                     cost_breakdown: null
         '400':
           description: Validation failed (missing required fields, duplicate `transaction_id`, unknown enum value, invalid currency, etc.).
@@ -1122,6 +1214,14 @@ paths:
                 Forbidden:
                   value:
                     detail: You do not have permission to perform this action.
+        '409':
+          description: Another request with the same `transaction_id` created the transaction while this one was being processed, so only one of two simultaneous submissions succeeds. Read the existing transaction instead of resubmitting.
+          content:
+            application/json:
+              examples:
+                Concurrent duplicate:
+                  value:
+                    detail: A transaction with this transaction_id already exists.
         '429':
           description: Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.
           content:
@@ -1169,6 +1269,7 @@ paths:
                 In review with an alert:
                   value:
                     uuid: abcdef12-3456-4890-abcd-ef1234567890
+                    environment: live
                     transaction_number: 4123
                     txn_id: your-txn-2026-05-17-001
                     txn_date: '2026-05-17T08:42:00Z'
@@ -1177,6 +1278,7 @@ paths:
                     action_type: withdrawal
                     direction: OUTBOUND
                     status: IN_REVIEW
+                    source: LIVE
                     amount: '1500'
                     currency: EUR
                     currency_type: fiat
@@ -1219,6 +1321,7 @@ paths:
                       device: {}
                       external_party_snapshot: null
                     payment_methods: []
+                    documents: []
                     activities: []
                     alerts:
                     - uuid: a7b8c9d0-1234-4abc-9def-567890abcdef
@@ -1235,6 +1338,7 @@ paths:
                     travel_rule: null
                     network_snapshot: null
                     remediation: null
+                    action_required: null
                     cost_breakdown: null
         '403':
           description: Missing, invalid, or revoked API key, or the key cannot read this application's transactions. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
@@ -1385,11 +1489,11 @@ paths:
                       example: out
                     amount:
                       type: number
-                      description: Transaction amount (up to 18 decimal places). A decimal string is also accepted.
+                      description: 'Transaction amount (up to 18 decimal places). A decimal string is also accepted and is the only way to preserve more than about 15 significant digits: a JSON number is parsed as a binary float first, so `0.123456789012345678` is stored as `0.12345678901234568`.'
                       example: 0.25
                     currency:
                       type: string
-                      description: Currency code, e.g. `EUR`, `USD`, `ETH`.
+                      description: 'Currency code. Any ISO 4217 alphabetic code is accepted (e.g. `EUR`, `USD`, `NGN`), as is a crypto asset symbol (e.g. `BTC`). Prefer a currently-circulating code. Not every accepted code has an exchange rate: when none is available for the code (for example the ISO accounting unit `XSU`, or a crypto symbol Didit does not price), automatic conversion fails and `preferred_currency_amount` is returned null unless the request supplied a pre-converted `amountInDefaultCurrency`.'
                       example: ETH
                     currencyType:
                       type: string
@@ -1401,7 +1505,7 @@ paths:
                       description: Pre-converted amount in the default currency (maps to `amount_in_default_currency`). If omitted, automatic FX conversion is attempted.
                     defaultCurrencyCode:
                       type: string
-                      description: The default currency code for the converted amount (maps to `default_currency`).
+                      description: The default currency code for the converted amount (maps to `default_currency`). Any currently-circulating ISO 4217 code.
                     paymentDetails:
                       type:
                       - string
@@ -1583,16 +1687,16 @@ paths:
                     txn_id: wd-2026-07-07-0042
                     transaction_type: travelRule
                     direction: OUTBOUND
-                    status: AWAITING_USER
+                    status: APPROVED
                     amount: '0.25'
                     currency: ETH
                     travel_rule:
                       uuid: 33333333-4444-5555-6666-777777777777
-                      status: ON_HOLD
+                      status: UNCONFIRMED_OWNERSHIP
                       required: true
                     action_required:
                       type: wallet_ownership
-                      url: https://verification.didit.me/wallet-ownership/3s9x...urlsafe
+                      url: https://verify.didit.me/wallet-ownership/3s9x...urlsafe
                       widget_session_id: 77777777-8888-9999-aaaa-bbbbbbbbbbbb
                       expires_at: '2026-07-07T13:00:00Z'
         '400':
@@ -1602,9 +1706,13 @@ paths:
               examples:
                 Missing fields:
                   value:
-                    info:
+                    transaction_details:
                       currency:
                       - This field is required.
+                Duplicate txnId:
+                  value:
+                    transaction_id:
+                    - A transaction with this transaction_id already exists.
         '401':
           description: 'The transaction token was rejected: missing, unknown, revoked, over its `max_uses`, or expired. Expired-token responses always contain the word `expired` in the detail, which is how the SDKs distinguish `expired_token` from `invalid_token` errors.'
           content:
@@ -1616,6 +1724,14 @@ paths:
                 Expired token:
                   value:
                     detail: Transaction token expired.
+        '409':
+          description: Another request with the same `txnId` created the transaction while this one was being processed, so only one of two simultaneous submissions succeeds. Read the existing transaction instead of resubmitting.
+          content:
+            application/json:
+              examples:
+                Concurrent duplicate:
+                  value:
+                    detail: A transaction with this transaction_id already exists.
   /v1/transactions/{transaction_id}/:
     get:
       summary: Get a transaction from an SDK
@@ -1661,8 +1777,534 @@ paths:
                 Not found:
                   value:
                     detail: Not found.
+  /v3/transactions/rules/:
+    get:
+      summary: List rules
+      description: 'List the application''s transaction-monitoring rules: your custom rules plus any library presets you have installed. Filter by source, category, mode, bundle or free-text search; order with `ordering` (run_count, approved_pct, reviewed_pct, declined_pct, latest_triggered_at, title, created_at, source, each with an optional `-` prefix).'
+      operationId: listTransactionRules
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: source
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PRESET
+          - CUSTOM
+        description: PRESET or CUSTOM
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter by rule category
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - DISABLED
+          - TEST
+        description: ACTIVE, DISABLED or TEST
+      - name: bundle
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter presets by bundle
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Case-insensitive match against title and description
+      - name: ordering
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Comma-separated ordering fields, default source,-run_count
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Page size
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Page offset
+      responses:
+        '200':
+          description: Paginated rules.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionRuleDetail'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/transactions/rules/?source=CUSTOM&ordering=-run_count' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+    post:
+      summary: Create rule
+      description: Create a CUSTOM transaction-monitoring rule. Titles are unique per application (duplicate -> 400). A `change_status` action targeting `AWAITING_USER` must carry `workflow_id`. Rules created in ACTIVE mode apply to new transactions immediately - the recommended workflow is create in TEST mode, backtest, then switch mode to ACTIVE.
+      operationId: createTransactionRule
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRuleCreateRequest'
+            example:
+              title: Structuring - inbound (custom)
+              description: 20+ inbound EUR transfers, all under 10,000 EUR, 30 days
+              category: finance
+              mode: TEST
+              evaluation_mode: ALL
+              scope:
+                transaction_types:
+                - finance
+                directions:
+                - INBOUND
+              conditions:
+              - field: currency
+                operator: eq
+                value: EUR
+              - field: amount
+                operator: lt
+                value: 10000
+              aggregation:
+              - metric: count
+                operator: gte
+                value: 20
+                window: 30d
+                filters:
+                  direction: INBOUND
+                  transaction_type: finance
+                  subject_vendor_data: __current__
+                  currency: EUR
+              - metric: max
+                field: amount
+                operator: lt
+                value: 10000
+                window: 30d
+                filters:
+                  direction: INBOUND
+                  transaction_type: finance
+                  subject_vendor_data: __current__
+                  currency: EUR
+              actions:
+              - type: add_score
+                value: 35
+      responses:
+        '201':
+          description: The created rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleDetail'
+        '400':
+          description: Validation error - duplicate title, unknown operator/metric, malformed window, invalid scope direction, or AWAITING_USER without workflow_id.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                title:
+                - A rule with this name already exists.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/transactions/rules/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"title\": \"Structuring - inbound (custom)\", \"description\": \"20+ inbound EUR transfers, all under 10,000 EUR, 30 days\", \"category\": \"finance\", \"mode\": \"TEST\", \"evaluation_mode\": \"ALL\", \"scope\": {\"transaction_types\": [\"finance\"], \"directions\": [\"INBOUND\"]}, \"conditions\": [{\"field\": \"currency\", \"operator\": \"eq\", \"value\": \"EUR\"}, {\"field\": \"amount\", \"operator\": \"lt\", \"value\": 10000}], \"aggregation\": [{\"metric\": \"count\", \"operator\": \"gte\", \"value\": 20, \"window\": \"30d\", \"filters\": {\"direction\": \"INBOUND\", \"transaction_type\": \"finance\", \"subject_vendor_data\": \"__current__\", \"currency\": \"EUR\"}}, {\"metric\": \"max\", \"field\": \"amount\", \"operator\": \"lt\", \"value\": 10000, \"window\": \"30d\", \"filters\": {\"direction\": \"INBOUND\", \"transaction_type\": \"finance\", \"subject_vendor_data\": \"__current__\", \"currency\": \"EUR\"}}], \"actions\": [{\"type\": \"add_score\", \"value\": 35}]}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nrule = {\n  \"title\": \"Structuring - inbound (custom)\",\n  \"description\": \"20+ inbound EUR transfers, all under 10,000 EUR, 30 days\",\n  \"category\": \"finance\",\n  \"mode\": \"TEST\",\n  \"evaluation_mode\": \"ALL\",\n  \"scope\": {\n    \"transaction_types\": [\n      \"finance\"\n    ],\n    \"directions\": [\n      \"INBOUND\"\n    ]\n  },\n  \"conditions\": [\n    {\n      \"field\": \"currency\",\n      \"operator\": \"eq\",\n      \"value\": \"EUR\"\n    },\n    {\n      \"field\": \"amount\",\n      \"operator\": \"lt\",\n      \"value\": 10000\n    }\n  ],\n  \"aggregation\": [\n    {\n      \"metric\": \"count\",\n      \"operator\": \"gte\",\n      \"value\": 20,\n      \"window\": \"30d\",\n      \"filters\": {\n        \"direction\": \"INBOUND\",\n        \"transaction_type\": \"finance\",\n        \"subject_vendor_data\": \"__current__\",\n        \"currency\": \"EUR\"\n      }\n    },\n    {\n      \"metric\": \"max\",\n      \"field\": \"amount\",\n      \"operator\": \"lt\",\n      \"value\": 10000,\n      \"window\": \"30d\",\n      \"filters\": {\n        \"direction\": \"INBOUND\",\n        \"transaction_type\": \"finance\",\n        \"subject_vendor_data\": \"__current__\",\n        \"currency\": \"EUR\"\n      }\n    }\n  ],\n  \"actions\": [\n    {\n      \"type\": \"add_score\",\n      \"value\": 35\n    }\n  ]\n}\n\nresp = requests.post(\n    'https://verification.didit.me/v3/transactions/rules/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json=rule,\n    timeout=15,\n)\nresp.raise_for_status()\nprint(resp.json()['uuid'], resp.json()['mode'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const rule = {\n  \"title\": \"Structuring - inbound (custom)\",\n  \"description\": \"20+ inbound EUR transfers, all under 10,000 EUR, 30 days\",\n  \"category\": \"finance\",\n  \"mode\": \"TEST\",\n  \"evaluation_mode\": \"ALL\",\n  \"scope\": {\n    \"transaction_types\": [\n      \"finance\"\n    ],\n    \"directions\": [\n      \"INBOUND\"\n    ]\n  },\n  \"conditions\": [\n    {\n      \"field\": \"currency\",\n      \"operator\": \"eq\",\n      \"value\": \"EUR\"\n    },\n    {\n      \"field\": \"amount\",\n      \"operator\": \"lt\",\n      \"value\": 10000\n    }\n  ],\n  \"aggregation\": [\n    {\n      \"metric\": \"count\",\n      \"operator\": \"gte\",\n      \"value\": 20,\n      \"window\": \"30d\",\n      \"filters\": {\n        \"direction\": \"INBOUND\",\n        \"transaction_type\": \"finance\",\n        \"subject_vendor_data\": \"__current__\",\n        \"currency\": \"EUR\"\n      }\n    },\n    {\n      \"metric\": \"max\",\n      \"field\": \"amount\",\n      \"operator\": \"lt\",\n      \"value\": 10000,\n      \"window\": \"30d\",\n      \"filters\": {\n        \"direction\": \"INBOUND\",\n        \"transaction_type\": \"finance\",\n        \"subject_vendor_data\": \"__current__\",\n        \"currency\": \"EUR\"\n      }\n    }\n  ],\n  \"actions\": [\n    {\n      \"type\": \"add_score\",\n      \"value\": 35\n    }\n  ]\n};\n\nconst resp = await fetch('https://verification.didit.me/v3/transactions/rules/', {\n  method: 'POST',\n  headers: {\n    'x-api-key': process.env.DIDIT_API_KEY,\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify(rule),\n});\nif (!resp.ok) throw new Error(await resp.text());\nconst created = await resp.json();\nconsole.log(created.uuid, created.mode);"
+  /v3/transactions/rules/{rule_uuid}/:
+    parameters:
+    - name: rule_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The rule's uuid from list or create.
+    get:
+      summary: Get rule
+      description: Retrieve one rule with its full configuration and execution counters.
+      operationId: getTransactionRule
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: The rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleDetail'
+        '404':
+          description: No such rule on this application.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/transactions/rules/RULE_UUID/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+    patch:
+      summary: Update rule
+      description: Partially update a rule. Custom rules accept every configuration field. Library (PRESET) rules accept only `mode` - use it to activate, disable, or switch a preset to TEST; any other field returns 400.
+      operationId: updateTransactionRule
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRuleUpdateRequest'
+            example:
+              mode: ACTIVE
+      responses:
+        '200':
+          description: The updated rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleDetail'
+        '400':
+          description: Validation error, or a non-mode field on a library rule.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X PATCH 'https://verification.didit.me/v3/transactions/rules/RULE_UUID/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"mode\": \"ACTIVE\"}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.patch(\n    'https://verification.didit.me/v3/transactions/rules/RULE_UUID/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={'mode': 'ACTIVE'},\n    timeout=15,\n)\nresp.raise_for_status()\nprint(resp.json()['mode'])"
+    delete:
+      summary: Delete rule
+      description: 'Delete a CUSTOM rule. Deletion is immediate and permanent: the rule stops evaluating for new transactions and disappears from listings, while past rule runs on already-evaluated transactions keep their recorded results. Library rules cannot be deleted - uninstall them via the install endpoint instead (they can always be reinstalled from the library).'
+      operationId: deleteTransactionRule
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '204':
+          description: Deleted.
+        '400':
+          description: The rule is a library preset - uninstall instead.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                detail: Library rules cannot be deleted. Uninstall them via the rules install endpoint instead.
+        '404':
+          description: No such rule on this application.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/transactions/rules/RULE_UUID/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+  /v3/transactions/rules/backtest/:
+    post:
+      summary: Backtest rule configuration
+      description: Evaluate a hypothetical rule configuration against your recent transactions (most recent first, up to the backtest cap) without creating a rule or touching any transaction. Use it before activating a rule to see how often it would have matched and how many subjects it would have affected.
+      operationId: backtestTransactionRules
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRuleBacktestRequest'
+            example:
+              conditions:
+              - field: currency
+                operator: eq
+                value: EUR
+              - field: amount
+                operator: lt
+                value: 10000
+              aggregation:
+              - metric: count
+                operator: gte
+                value: 20
+                window: 30d
+                filters:
+                  direction: INBOUND
+                  transaction_type: finance
+                  subject_vendor_data: __current__
+                  currency: EUR
+              - metric: max
+                field: amount
+                operator: lt
+                value: 10000
+                window: 30d
+                filters:
+                  direction: INBOUND
+                  transaction_type: finance
+                  subject_vendor_data: __current__
+                  currency: EUR
+              evaluation_mode: ALL
+              scope:
+                transaction_types:
+                - finance
+                directions:
+                - INBOUND
+              period_days: 90
+      responses:
+        '200':
+          description: Backtest statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleBacktestResult'
+              example:
+                evaluated: 4820
+                matched: 12
+                affected_entities: 4
+                period_days: 90
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/transactions/rules/backtest/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"conditions\": [{\"field\": \"currency\", \"operator\": \"eq\", \"value\": \"EUR\"}, {\"field\": \"amount\", \"operator\": \"lt\", \"value\": 10000}], \"aggregation\": [{\"metric\": \"count\", \"operator\": \"gte\", \"value\": 20, \"window\": \"30d\", \"filters\": {\"direction\": \"INBOUND\", \"transaction_type\": \"finance\", \"subject_vendor_data\": \"__current__\", \"currency\": \"EUR\"}}, {\"metric\": \"max\", \"field\": \"amount\", \"operator\": \"lt\", \"value\": 10000, \"window\": \"30d\", \"filters\": {\"direction\": \"INBOUND\", \"transaction_type\": \"finance\", \"subject_vendor_data\": \"__current__\", \"currency\": \"EUR\"}}], \"evaluation_mode\": \"ALL\", \"scope\": {\"transaction_types\": [\"finance\"], \"directions\": [\"INBOUND\"]}, \"period_days\": 90}'"
+      - lang: python
+        label: Python
+        source: "import os\n\nimport requests\n\nresp = requests.post(\n    'https://verification.didit.me/v3/transactions/rules/backtest/',\n    headers={'x-api-key': os.environ['DIDIT_API_KEY']},\n    json={\n    \"conditions\": [\n        {\n            \"field\": \"currency\",\n            \"operator\": \"eq\",\n            \"value\": \"EUR\"\n        },\n        {\n            \"field\": \"amount\",\n            \"operator\": \"lt\",\n            \"value\": 10000\n        }\n    ],\n    \"aggregation\": [\n        {\n            \"metric\": \"count\",\n            \"operator\": \"gte\",\n            \"value\": 20,\n            \"window\": \"30d\",\n            \"filters\": {\n                \"direction\": \"INBOUND\",\n                \"transaction_type\": \"finance\",\n                \"subject_vendor_data\": \"__current__\",\n                \"currency\": \"EUR\"\n            }\n        },\n        {\n            \"metric\": \"max\",\n            \"field\": \"amount\",\n            \"operator\": \"lt\",\n            \"value\": 10000,\n            \"window\": \"30d\",\n            \"filters\": {\n                \"direction\": \"INBOUND\",\n                \"transaction_type\": \"finance\",\n                \"subject_vendor_data\": \"__current__\",\n                \"currency\": \"EUR\"\n            }\n        }\n    ],\n    \"evaluation_mode\": \"ALL\",\n    \"scope\": {\n        \"transaction_types\": [\n            \"finance\"\n        ],\n        \"directions\": [\n            \"INBOUND\"\n        ]\n    },\n    \"period_days\": 90\n},\n    timeout=30,\n)\nresp.raise_for_status()\nstats = resp.json()\nprint(stats['matched'], 'matches across', stats['affected_entities'], 'subjects')"
+  /v3/transactions/rules/library/:
+    get:
+      summary: List rule library
+      description: Browse the full preset rule library (150+ rules) with each entry's complete configuration and an `is_installed` flag for this application. Filter by bundle, category, or free-text search.
+      operationId: listTransactionRuleLibrary
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: bundle
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter by bundle, e.g. finance, aml_ctf, crypto_monitoring, travel_rule
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter by category
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Case-insensitive match against title and description
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Page size
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Page offset
+      responses:
+        '200':
+          description: Paginated library entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionRuleLibraryEntry'
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X GET 'https://verification.didit.me/v3/transactions/rules/library/?bundle=finance' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+  /v3/transactions/rules/install/:
+    post:
+      summary: Install library rules
+      description: Install one or more presets onto the application, by `library_keys` or a whole `bundle`. Installed presets evaluate immediately in their default mode; already-installed keys are skipped.
+      operationId: installTransactionRuleLibrary
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRuleInstallRequest'
+            example:
+              library_keys:
+              - structuring-inbound
+              - structuring-outbound
+      responses:
+        '200':
+          description: What was installed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleInstallResult'
+              example:
+                installed_library_keys:
+                - structuring-inbound
+                - structuring-outbound
+                installed_count: 2
+        '400':
+          description: Neither library_keys nor bundle provided.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X POST 'https://verification.didit.me/v3/transactions/rules/install/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"library_keys\": [\"structuring-inbound\", \"structuring-outbound\"]}'"
+    delete:
+      summary: Uninstall library rules
+      description: Remove installed presets from the application, by `library_keys` or a whole `bundle`. Uninstalled presets stop evaluating immediately and can be reinstalled from the library at any time.
+      operationId: uninstallTransactionRuleLibrary
+      tags:
+      - Transactions
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRuleInstallRequest'
+            example:
+              bundle: responsible_gaming
+      responses:
+        '200':
+          description: How many presets were removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRuleInstallResult'
+              example:
+                uninstalled_count: 5
+        '400':
+          description: Neither library_keys nor bundle provided.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl -X DELETE 'https://verification.didit.me/v3/transactions/rules/install/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"bundle\": \"responsible_gaming\"}'"
 components:
   schemas:
+    TransactionRuleAggregation:
+      type: object
+      required:
+      - value
+      properties:
+        metric:
+          type: string
+          enum:
+          - count
+          - sum
+          - max
+          - min
+          - avg
+          - distinct_count
+          default: count
+          description: How the matching historical transactions are aggregated. unique_count is accepted as an alias of distinct_count.
+        field:
+          type: string
+          default: amount
+          description: Field aggregated by sum/max/min/avg/distinct_count. Ignored for count.
+        operator:
+          type: string
+          enum:
+          - eq
+          - ne
+          - gt
+          - gte
+          - lt
+          - lte
+          default: eq
+          description: Comparison applied to the computed metric.
+        value:
+          type: number
+          description: Threshold the computed metric is compared against.
+        window:
+          type: string
+          pattern: ^\d+(m|h|d)$
+          default: 1d
+          description: 'Look-back window ending at the transaction''s txn_date: <N>m (MINUTES, not months), <N>h (hours) or <N>d (days), e.g. 30m, 24h, 7d, 30d.'
+        filters:
+          type: object
+          additionalProperties: true
+          description: 'Narrows which historical transactions are aggregated. Keys are field paths from the condition field catalog; a value of "__current__" resolves to the same field''s value on the transaction being evaluated (e.g. {"subject_vendor_data": "__current__"} scopes the window to the same subject), and a list value means membership. Filters compare by equality or membership ONLY - there is no lt/gte filter, so a range such as "historical transactions under 10,000" cannot be expressed here. Put the range on the metric instead (metric max with operator lt keeps every transaction in the window below the threshold).'
+      description: Velocity check over the application's historical transactions inside the window. Every aggregation entry must match for the rule to match, regardless of evaluation_mode. An aggregation constrains only the window; the transaction being evaluated is constrained by scope and conditions, so repeat direction, currency or transaction_type on both halves when the rule promises them.
     TransactionDetail:
       type: object
       description: Full monitoring record for one transaction, as returned by `GET /v3/transactions/{transaction_id}/` and `POST /v3/transactions/`.
@@ -1671,6 +2313,12 @@ components:
           type: string
           format: uuid
           description: Didit-stable transaction identifier. Use as `{transaction_id}` for follow-up calls.
+        environment:
+          type: string
+          enum:
+          - live
+          - sandbox
+          description: Environment of the application that owns the transaction. A `sandbox` transaction is stored but never evaluated, screened, notified or billed, so its empty `rule_runs` means "not evaluated".
         transaction_number:
           type: integer
           description: Application-scoped sequential transaction number shown in Console (e.g. `4123`).
@@ -1706,12 +2354,18 @@ components:
           - DECLINED
           - AWAITING_USER
           description: Current monitoring verdict. Transactions are created `APPROVED`; rules may flip them to `IN_REVIEW`/`DECLINED` synchronously.
+        source:
+          type: string
+          enum:
+          - LIVE
+          - IMPORTED
+          description: 'How the record originated: `LIVE` for transactions submitted through the API or SDK, `IMPORTED` for transactions loaded through the console import.'
         amount:
           type: string
           description: Transaction amount as a decimal string with trailing zeros stripped (e.g. `"1500"`, `"0.5"`, `"0.123456789012345678"`). Up to 18 decimal places.
         currency:
           type: string
-          description: Currency code of `amount` (e.g. `EUR`, `USD`, `BTC`).
+          description: 'Currency code of `amount`. Any ISO 4217 alphabetic code is accepted (e.g. `EUR`, `USD`, `NGN`), as is a crypto asset symbol (e.g. `BTC`). Prefer a currently-circulating code. Not every accepted code has an exchange rate: when none is available for the code (for example the ISO accounting unit `XSU`, or a crypto symbol Didit does not price), automatic conversion fails and `preferred_currency_amount` is returned null unless the request supplied a pre-converted `amount_in_default_currency`.'
         currency_type:
           type:
           - string
@@ -1869,12 +2523,62 @@ components:
                 description: Institution details as submitted. `{}` when omitted.
               device:
                 type: object
-                description: Normalized device context, including server-side IP enrichment under `network_context` (geolocation, VPN/data-center flags) when an IP was provided.
+                description: Normalized device context, including server-side IP enrichment under network_context (geolocation, VPN/data-center flags) when an IP was provided.
+                properties:
+                  fingerprint:
+                    type: string
+                    description: Unique device fingerprint.
+                  persistent_device_id:
+                    type: string
+                    description: Stable cross-session device identifier (v2 fingerprint schema).
+                  user_agent:
+                    type: string
+                    description: Browser or app user agent string.
+                  browser_family:
+                    type: string
+                    description: Browser family (e.g. Chrome, Firefox, Safari).
+                  browser_version:
+                    type: string
+                    description: Browser version string.
+                  platform:
+                    type: string
+                    description: Platform identifier (web, ios, android, macos, windows, linux).
+                  os_family:
+                    type: string
+                    description: Operating system family (e.g. iOS, Android, Windows).
+                  os_version:
+                    type: string
+                    description: Operating system version string.
+                  accept_language:
+                    type: string
+                    description: Accept-Language header value.
+                  session_id:
+                    type: string
+                    description: Session identifier (stored in metadata).
+                  session_age_ms:
+                    type: number
+                    description: Session age in milliseconds.
+                  network_context:
+                    type: object
+                    description: Network context with IP address and geo-location.
+                    properties:
+                      ip_address:
+                        type: string
+                        description: Client IP address.
+                      ip_country_code:
+                        type: string
+                        description: Geo-resolved country of the IP (ISO 3166-1 alpha-3).
+                      latitude:
+                        type: number
+                        description: Geographic latitude of the IP.
+                      longitude:
+                        type: number
+                        description: Geographic longitude of the IP.
               external_party_snapshot:
                 type:
                 - object
                 - 'null'
-                description: Frozen copy of the party data for `EXTERNAL` parties (or after the linked entity was deleted). `null` while linked to a live entity.
+                description: Frozen copy of the party data for `EXTERNAL` parties. `null` while the party is linked to a Didit user or business.
           description: Transaction parties (applicant, counterparty).
         payment_methods:
           type: array
@@ -1944,6 +2648,52 @@ components:
                 - BENEFICIARY
                 description: 'How this method was used in the transaction. The create endpoint assigns `SOURCE`/`DESTINATION` from the direction (outbound: subject = SOURCE; inbound: subject = DESTINATION).'
           description: Payment methods linked to the transaction.
+        documents:
+          type: array
+          description: Files attached to the transaction from the console. `[]` when none.
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              label:
+                type:
+                - string
+                - 'null'
+              note:
+                type:
+                - string
+                - 'null'
+              uploaded_by:
+                type:
+                - string
+                - 'null'
+              created_at:
+                type: string
+                format: date-time
+              files:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      format: uuid
+                    file_url:
+                      type:
+                      - string
+                      - 'null'
+                      format: uri
+                      description: Short-lived signed download URL; fetch it when needed rather than storing it.
+                    original_filename:
+                      type:
+                      - string
+                      - 'null'
+                    file_size:
+                      type:
+                      - integer
+                      - 'null'
         activities:
           type: array
           items:
@@ -2046,7 +2796,7 @@ components:
                 type: string
               matched:
                 type: boolean
-                description: Whether the rule's conditions matched this transaction.
+                description: Whether the rule's conditions matched this transaction. A run is recorded only for matched rules, so live evaluations always carry `true`.
               is_test:
                 type: boolean
                 description: True when the rule ran in TEST mode (no effect on status/score).
@@ -2069,10 +2819,13 @@ components:
                 - 'null'
                 description: Status set by a `change_status` action, if any.
               action_summary:
-                type: object
-                description: Summary of the actions the rule executed.
+                type:
+                - string
+                - 'null'
+                description: 'Summary of the actions the rule executed, joined with `; ` (e.g. `score +30; change_status:IN_REVIEW; add_tag:high_risk_country`). Parts: `score +N`, `change_status:<STATUS>`, `add_tag:<name>`, `add_note`, `add_to_list`, `open_case`. `null` when the rule executed no action.'
               metadata:
                 type: object
+                description: 'Evaluation detail: `scope_match`, `conditions[]` and `aggregations[]`. Each condition entry carries `field`, `operator`, `expected_value`, the `current_value` read from the transaction, `matched`, `group_index` and `group_logic`. Each aggregation entry (velocity / count / sum) carries `metric`, `field`, `operator`, `expected_value`, the `computed_value` the aggregate evaluated to, `window`, `filters`, `matched` and `sample_references`; deferred async aggregations have `computed_value: null` and `deferred: true`.'
               created_at:
                 type: string
                 format: date-time
@@ -2119,7 +2872,7 @@ components:
           type:
           - object
           - 'null'
-          description: Travel Rule compliance check, present when `travel_rule_details` was submitted.
+          description: 'Travel Rule transfer or check. Populated when `travel_rule_details` was submitted, and also when Travel Rule is enabled and the transaction was created with `transaction_category: travelRule` (Didit initiates the exchange itself, even without `travel_rule_details`). `null` when no transfer or check exists. On an inbound transfer, the counterparty''s `originator_data` and `beneficiary_data` stay masked (`data_masked: true`) until wallet ownership is confirmed.'
           properties:
             uuid:
               type: string
@@ -2136,15 +2889,34 @@ components:
               type: integer
             originator_data:
               type: object
+              description: Originator party. For an inbound transfer the counterparty's values are masked until ownership is confirmed.
             beneficiary_data:
               type: object
+              description: Beneficiary party. For an inbound transfer the counterparty's values are masked until ownership is confirmed.
+            name_match:
+              type:
+              - object
+              - 'null'
+              description: The name comparison that decided the transfer (score and strictness). Null until one ran. The compared names are masked together with the parties.
+            data_match:
+              $ref: '#/components/schemas/TravelRuleDataMatch'
+            mismatched_fields:
+              type: array
+              items:
+                type: string
+              description: Shortcut for `data_match.mismatched_fields`. Empty when nothing differs.
+            data_unmasked:
+              $ref: '#/components/schemas/TravelRuleDataUnmasked'
+            data_masked:
+              type: boolean
+              description: True while the counterparty's personal data is masked in this response.
             metadata:
               type: object
         network_snapshot:
           type:
           - object
           - 'null'
-          description: Graph snapshot of related transactions/parties used by the rules engine, present when submitted.
+          description: Graph snapshot of related transactions/parties used by the rules engine. Either the `network_snapshot` submitted with the transaction or the graph Didit builds from a successful AML wallet screening (which replaces a submitted one). `null` when neither exists.
           properties:
             uuid:
               type: string
@@ -2230,12 +3002,1002 @@ components:
           type:
           - object
           - 'null'
-          description: Per-feature credit cost breakdown for this transaction.
+          description: 'Cost of this transaction: `total_price` and `items`, one per charge, each with `usage_type`, `price`, `details` and `created_at`. A re-screen of the same transaction is a new item.'
+    TransactionRuleBacktestRequest:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleCondition'
+          default: []
+        aggregation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAggregation'
+          default: []
+        evaluation_mode:
+          type: string
+          enum:
+          - ALL
+          - ANY
+          default: ALL
+        scope:
+          $ref: '#/components/schemas/TransactionRuleScope'
+        period_days:
+          type: integer
+          minimum: 1
+          maximum: 365
+          default: 90
+      description: 'Hypothetical rule configuration to evaluate against recent transactions. Read-only and free: nothing is created or modified. Send the same conditions, aggregation, evaluation_mode AND scope as the rule you intend to activate. Omitted conditions, aggregation and scope add no constraints of their own; dropping scope can include directions or transaction types the saved rule skips. Omitted evaluation_mode defaults to ALL (which can reduce matches for an ANY rule), and omitted period_days defaults to 90 days, not unlimited history.'
+    TransactionRuleCondition:
+      type: object
+      required:
+      - field
+      - operator
+      properties:
+        field:
+          type: string
+          description: 'Transaction field path to evaluate. Core fields: amount, currency, direction, action_type, score, severity, transaction_type, payment_details, preferred_currency_amount (falls back to amount_in_default_currency), default_currency_code, subject_country, counterparty_country, subject_vendor_data, counterparty_vendor_data, subject_device_fingerprint, counterparty_device_fingerprint, subject_browser_family, subject_browser_version, subject_platform, subject_accept_language, subject_session_age_ms, subject_ip_country, counterparty_ip_country, subject_ip_address, counterparty_ip_address, subject_payment_method_type, subject_payment_method_country, subject_payment_method_fingerprint, subject_payment_method_account_id (and the counterparty_payment_method_* equivalents), travel_rule_status, travel_rule_required, travel_rule_obligations_count, counterparty_dd_status (your decision on the Travel Rule counterparty: APPROVED, RESTRICTED or BLOCKED, an entity following its brand''s), counterparty_risk_level (LOW, MEDIUM or HIGH; HIGH while your own counterparty screening is flagged), counterparty_jurisdiction (the counterparty VASP''s country), counterparty_responsiveness (RESPONSIVE, UNRESPONSIVE or UNKNOWN), subject_days_since_previous_transaction, tags, and custom_values.<key> for any key submitted in custom_properties on transaction create. Country-code fields accept ISO-2 or ISO-3; both sides are normalized to ISO-3 before comparison.'
+        operator:
+          type: string
+          enum:
+          - eq
+          - ne
+          - gt
+          - gte
+          - lt
+          - lte
+          - in
+          - not_in
+          - contains
+          - not_contains
+          - contains_any
+          - regex
+          - fuzzy_match
+          - exists
+          - is_not_empty
+          - is_not_null
+          - not_exists
+          - is_empty
+          - is_null
+          description: Comparison operator. in/not_in test membership (value may be a list or a single scalar). contains/not_contains are case-insensitive substring checks against a string value. contains_any takes a list of strings and matches when any is a case-insensitive substring of the field value. regex matches the value pattern against the field. fuzzy_match compares against the value string with the required `score` threshold (0-100). gt/gte/lt/lte never match when either side is missing. exists/is_not_empty/is_not_null (aliases) and not_exists/is_empty/is_null (aliases) are presence checks that ignore `value`.
+        value:
+          description: Comparison value. Its shape depends on the operator and value_type; omit for the presence-check operators.
+        value_type:
+          type: string
+          enum:
+          - list
+          - field
+          - relative_date
+          description: 'Optional value interpretation. `list`: value is a List UUID and the list''s entries become the comparison value. `field`: value is another field path, compared field-to-field. `relative_date`: value is a relative-date object, e.g. {"direction": "past", "unit": "days", "amount": 30}.'
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: 'Required when operator is fuzzy_match: the 0-100 similarity threshold.'
+        group_index:
+          type: integer
+          description: Optional grouped logic. When any condition carries group_index, conditions sharing an index form a group and grouped evaluation replaces evaluation_mode.
+        group_logic:
+          type: string
+          enum:
+          - AND
+          - OR
+          default: AND
+          description: How conditions combine WITHIN a group.
+        groups_logic:
+          type: string
+          enum:
+          - AND
+          - OR
+          default: OR
+          description: How group outcomes combine ACROSS groups. Read from the first condition.
+      description: A condition reads only the transaction being evaluated - it never filters the aggregation window.
+    TransactionRuleCreateRequest:
+      type: object
+      required:
+      - title
+      - category
+      - mode
+      properties:
+        title:
+          type: string
+          description: Rule name. Unique per application among non-deleted rules; duplicates return 400.
+        description:
+          type:
+          - string
+          - 'null'
+        category:
+          type: string
+          description: Risk theme used for grouping and reporting, e.g. finance, aml_ctf, anomaly_detection, fatf, device_intelligence, crypto_monitoring, travel_rule, responsible_gaming, e_commerce.
+        mode:
+          type: string
+          enum:
+          - ACTIVE
+          - DISABLED
+          - TEST
+          description: ACTIVE evaluates live. TEST evaluates and records rule runs but never touches score or status - the recommended starting mode. DISABLED is skipped.
+        evaluation_mode:
+          type: string
+          enum:
+          - ALL
+          - ANY
+          default: ALL
+          description: Whether every condition must match (ALL) or at least one (ANY). Ignored when conditions use group_index.
+        scope:
+          $ref: '#/components/schemas/TransactionRuleScope'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleCondition'
+        aggregation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAggregation'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAction'
+        metadata:
+          type: object
+          description: Free-form metadata stored on the rule.
+      description: Creates a CUSTOM rule. Rules in ACTIVE mode take effect immediately for new transactions - create in TEST mode and backtest first.
+    TravelRuleDataUnmasked:
+      type:
+      - object
+      - 'null'
+      description: Audit record of the moment the counterparty's data was unmasked. Null while the data is still masked, and for outbound transfers.
+      properties:
+        at:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          enum:
+          - ownership_confirmed
+          - wallet_proof
+          - address_book_match
+          - own_verified_wallet
+          - inquiry_approved
+          description: 'What confirmed ownership: your confirmation through the console or the API, a wallet proof in the widget, a verified address-book wallet, your own verified wallet, or your approval of an inbound TRP inquiry.'
+        actor:
+          type: string
+          description: 'Who confirmed it: the console user''s email or the API key''s label. Blank for an automatic decision.'
+    TravelRuleDataMatch:
+      type:
+      - object
+      - 'null'
+      description: Field-by-field comparison of the transfer's party data with what the other side knows about the wallet holder. It names fields and results, never values, so it stays readable while the counterparty's data is masked. Null until a comparison ran.
+      properties:
+        matched:
+          type: boolean
+          description: True when no compared field differs.
+        mismatched_fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - name
+            - date_of_birth
+            - address
+            - account
+          description: The fields that differ.
+        fields:
+          type: object
+          description: One entry per field compared for the party's entity type (`name`, `date_of_birth`, `address`, `account`; a company has no `date_of_birth`).
+          additionalProperties:
+            type: object
+            properties:
+              result:
+                type: string
+                enum:
+                - matched
+                - mismatched
+                - not_compared
+                description: '`not_compared` when the rule is `NONE` or either side has no value for the field.'
+              strictness:
+                type: string
+                enum:
+                - NONE
+                - STRICT
+                - CONTAINS
+                - DEFAULT
+                - FUZZY
+    WalletScreeningResult:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: Provider that performed the screening (e.g. `merklescience`, `crystal`).
+        screening_type:
+          type: string
+          enum:
+          - WALLET_SCREENING
+          description: Always `WALLET_SCREENING` for this endpoint.
+        risk_score:
+          type: integer
+          description: Normalised 0-100 risk score. Higher means greater exposure to risky entities. Merkle Science grades an address 0-5, which maps to 0, 15, 35, 55, 75 or 95.
+        severity:
+          type: string
+          enum:
+          - UNKNOWN
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          description: 'Risk bucket derived from `risk_score`: `0-9` UNKNOWN, `10-39` LOW, `40-69` MEDIUM, `70-89` HIGH, `90-100` CRITICAL. `UNKNOWN` is the lowest band, not a separate no-data state: `risk_score` 0 (the common clean-address case) means no adverse assessment, while a non-zero score in the 1-9 range is a real but sub-LOW signal - read the `risk_score`, not just the band. Never treat `UNKNOWN` as an affirmative low-risk or clear rating; do not display it as a pass.'
+        status:
+          type: string
+          enum:
+          - SCREENED
+          - PENDING
+          - ERROR
+          description: Screening outcome status.
+        summary:
+          type: string
+          description: Human-readable summary of the screening result.
+        wallet_address:
+          type: string
+          description: The screened address, echoed back.
+        transaction_hash:
+          type:
+          - string
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        blockchain:
+          type: string
+          description: The blockchain that was screened.
+        block_timestamp:
+          type:
+          - string
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        total_value_usd:
+          type:
+          - number
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        fee_usd:
+          type:
+          - number
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        sender_rows:
+          type: array
+          items:
+            type: object
+          description: Transaction screening field, shared with the result shape. Always empty on a wallet screening result.
+        receiver_rows:
+          type: array
+          items:
+            type: object
+          description: Transaction screening field, shared with the result shape. Always empty on a wallet screening result.
+        transaction_flows:
+          type: array
+          items:
+            type: object
+          description: Transaction screening field, shared with the result shape. Always empty on a wallet screening result.
+        transaction_flows_status:
+          type:
+          - string
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        transaction_flows_error:
+          type:
+          - string
+          - 'null'
+          description: Transaction screening field, shared with the result shape. Always `null` on a wallet screening result.
+        source_of_funds:
+          type: array
+          description: Where the address received funds from, attributed by entity. Each entry is an exposure breakdown.
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+                description: Normalised risk category, e.g. `exchange_licensed`, `dex`, `defi`, `payment_processor`, `mixer`, `darknet_market`, `sanctioned`, `stolen_funds`, `high_risk_exchange`.
+              percentage:
+                type: number
+                description: Share of the direction's total exposure, 0-100.
+              amount_usd:
+                type:
+                - number
+                - 'null'
+                description: USD value attributed to this entity.
+              entity_name:
+                type:
+                - string
+                - 'null'
+                description: Name of the attributed entity, for example an exchange, a mixer or a sanctioned group.
+              entity_type:
+                type:
+                - string
+                - 'null'
+                description: Provider entity type (e.g. `Exchange`, `DeFi`, `Sanctions`, `Theft`).
+              entity_subtype:
+                type:
+                - string
+                - 'null'
+                description: More granular subtype (e.g. `Mandatory KYC and AML`, `OFAC`, `Yield Aggregator`).
+              hops:
+                type:
+                - integer
+                - 'null'
+                description: 'Number of hops to the entity (1 for a direct counterparty), when the provider reports one. Always `null` for Merkle Science, which reports only whether exposure is direct or indirect: use `exposure_type`.'
+              description:
+                type:
+                - string
+                - 'null'
+                description: '`entity_type / entity_subtype`, as the provider labels the entity.'
+              is_direct:
+                type: boolean
+                description: True when `exposure_type` is `direct`.
+              exposure_direction:
+                type: string
+                enum:
+                - incoming
+                - outgoing
+                - connected
+                description: Whether the funds came from (`incoming`) or went to (`outgoing`) this entity.
+              exposure_type:
+                type: string
+                enum:
+                - direct
+                - indirect
+                description: '`direct` (1 hop) or `indirect` (multi-hop) exposure.'
+              provider_entity_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for the entity.
+              provider_entity_type_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for `entity_type`.
+              provider_entity_subtype_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for `entity_subtype`.
+              country:
+                type:
+                - string
+                - 'null'
+                description: Primary ISO 3166-1 alpha-2 country of the entity. Empty or `null` when the provider does not know it.
+              raw_amount:
+                type:
+                - number
+                - 'null'
+                description: Amount in the asset's own unit, when the provider reports it.
+              raw_currency:
+                type:
+                - string
+                - 'null'
+                description: Unit of `raw_amount`, when the provider reports it.
+        destination_of_funds:
+          type: array
+          description: Where the address sent funds to, attributed by entity. Same item shape as `source_of_funds` with `exposure_direction` = `outgoing`.
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+                description: Normalised risk category, e.g. `exchange_licensed`, `dex`, `defi`, `payment_processor`, `mixer`, `darknet_market`, `sanctioned`, `stolen_funds`, `high_risk_exchange`.
+              percentage:
+                type: number
+                description: Share of the direction's total exposure, 0-100.
+              amount_usd:
+                type:
+                - number
+                - 'null'
+                description: USD value attributed to this entity.
+              entity_name:
+                type:
+                - string
+                - 'null'
+                description: Name of the attributed entity, for example an exchange, a mixer or a sanctioned group.
+              entity_type:
+                type:
+                - string
+                - 'null'
+                description: Provider entity type (e.g. `Exchange`, `DeFi`, `Sanctions`, `Theft`).
+              entity_subtype:
+                type:
+                - string
+                - 'null'
+                description: More granular subtype (e.g. `Mandatory KYC and AML`, `OFAC`, `Yield Aggregator`).
+              hops:
+                type:
+                - integer
+                - 'null'
+                description: 'Number of hops to the entity (1 for a direct counterparty), when the provider reports one. Always `null` for Merkle Science, which reports only whether exposure is direct or indirect: use `exposure_type`.'
+              description:
+                type:
+                - string
+                - 'null'
+                description: '`entity_type / entity_subtype`, as the provider labels the entity.'
+              is_direct:
+                type: boolean
+                description: True when `exposure_type` is `direct`.
+              exposure_direction:
+                type: string
+                enum:
+                - incoming
+                - outgoing
+                - connected
+                description: Whether the funds came from (`incoming`) or went to (`outgoing`) this entity.
+              exposure_type:
+                type: string
+                enum:
+                - direct
+                - indirect
+                description: '`direct` (1 hop) or `indirect` (multi-hop) exposure.'
+              provider_entity_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for the entity.
+              provider_entity_type_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for `entity_type`.
+              provider_entity_subtype_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for `entity_subtype`.
+              country:
+                type:
+                - string
+                - 'null'
+                description: Primary ISO 3166-1 alpha-2 country of the entity. Empty or `null` when the provider does not know it.
+              raw_amount:
+                type:
+                - number
+                - 'null'
+                description: Amount in the asset's own unit, when the provider reports it.
+              raw_currency:
+                type:
+                - string
+                - 'null'
+                description: Unit of `raw_amount`, when the provider reports it.
+        counterparty_connections:
+          type: array
+          description: 'Entities the provider attributes the screened address to. For Merkle Science these come from the address''s own owner and user tags, so the same entity can appear twice, and they carry no fund flows: `received_usd`, `sent_usd`, `received_hops` and `sent_hops` are `null` and `percentage` is 0. Do not route on `risk_level` or `is_direct` here: use `sanctions_hit`, `dominant_risk_category` and `risk_factors[].is_high_risk` for the verdict, and `exposure_type` in `source_of_funds`/`destination_of_funds` for directness.'
+          items:
+            type: object
+            properties:
+              entity_name:
+                type:
+                - string
+                - 'null'
+                description: Attributed entity name.
+              entity_type:
+                type:
+                - string
+                - 'null'
+                description: Provider entity type.
+              entity_subtype:
+                type:
+                - string
+                - 'null'
+                description: Provider entity subtype.
+              risk_level:
+                type: string
+                description: Lowercase and provider-dependent. For Merkle Science it is the address's own 0-5 risk grade (`no_risk`, `low`, `medium_low`, `medium`, `high`, `critical`), raised to `high` when the entity's category is high risk; it is not a separate grade of the entity.
+              categories:
+                type: array
+                items:
+                  type: string
+                description: Normalised risk categories of the entity.
+              received_usd:
+                type:
+                - number
+                - 'null'
+                description: USD received from the entity, when the provider reports it.
+              sent_usd:
+                type:
+                - number
+                - 'null'
+                description: USD sent to the entity, when the provider reports it.
+              received_hops:
+                type:
+                - integer
+                - 'null'
+                description: Hops to the entity on the receiving side, when the provider reports them.
+              sent_hops:
+                type:
+                - integer
+                - 'null'
+                description: Hops to the entity on the sending side, when the provider reports them.
+              percentage:
+                type: number
+                description: Share of the address's exposure, when the provider reports it; otherwise 0.
+              is_direct:
+                type: boolean
+                description: Always `true` for Merkle Science, whose connections are attributions rather than counterparties.
+              country:
+                type:
+                - string
+                - 'null'
+                description: Country of the entity, when known.
+              provider_entity_id:
+                type:
+                - string
+                - 'null'
+                description: The provider's own identifier for the entity.
+        network_nodes:
+          type: array
+          items:
+            type: object
+          description: Exposure graph nodes for transaction screening. Empty on a wallet screening result.
+        network_edges:
+          type: array
+          items:
+            type: object
+          description: Exposure graph edges for transaction screening. Empty on a wallet screening result.
+        sanctions_hit:
+          type: boolean
+          description: True if the address has direct or indirect sanctions exposure.
+        pep_counterparty:
+          type:
+          - boolean
+          - 'null'
+          description: Politically exposed person exposure. `null` when no PEP finding is available, which is every result today because no provider reports one; `false` only for an explicit negative screening result. Do not read `null` as a completed PEP check.
+        dominant_risk_category:
+          type:
+          - string
+          - 'null'
+          description: Highest-weighted high-risk category, or `null` when none is dominant (e.g. `sanctioned`, `mixer`, `stolen_funds`).
+        risk_factors:
+          type: array
+          description: 'Ranked explanation of `risk_score`: what produced this verdict. Providers grade an address on their own model and return only a verdict (Merkle Science returns an integer 0-5), so the score alone is not actionable. Ordered high-risk first, then by the value that moved through each driver, capped at the five strongest; `source_of_funds` and `destination_of_funds` always carry the complete breakdown. A high `risk_score` with no `is_high_risk` entry means the provider reported no sanctions or attributed-entity match and graded the address purely on its own exposure model - `summary` states this explicitly.'
+          items:
+            type: object
+            properties:
+              source:
+                type: string
+                enum:
+                - attribution
+                - exposure
+                description: '`attribution` is what the provider says the address itself is (its own tag or cluster); `exposure` is where its funds actually moved.'
+              category:
+                type: string
+                description: Normalised risk category, same vocabulary as the exposure breakdown.
+              label:
+                type: string
+                description: The provider's own wording for the driver (e.g. `Gambling / Crypto only`), which is what you would also see in the provider's console.
+              entity_name:
+                type:
+                - string
+                - 'null'
+                description: Attributed entity behind the driver, for example a gambling site or an exchange.
+              direction:
+                type: string
+                enum:
+                - incoming
+                - outgoing
+                - connected
+                - unknown
+                - attribution
+                description: Direction of the fund flow, `attribution` when the driver is the address's own tag, or `unknown` when the provider did not report a direction.
+              exposure_type:
+                type: string
+                enum:
+                - direct
+                - indirect
+                - unknown
+                - attribution
+                description: '`direct` (1 hop) or `indirect` (multi-hop), `attribution` for the address''s own tag, or `unknown` when the provider did not state how many hops away the counterparty is. Treat `unknown` as unclassified, not as `direct`.'
+              amount_usd:
+                type:
+                - number
+                - 'null'
+                format: float
+                description: USD value attributed to this driver.
+              percentage:
+                type: number
+                format: float
+                description: Share of the address's TOTAL screened volume, both directions combined - unlike `percentage` inside `source_of_funds`/`destination_of_funds`, which is normalised per direction. Comparable and summable across the whole list.
+              is_high_risk:
+                type: boolean
+                description: Whether the category is one Didit treats as high risk (`sanctioned`, `mixer`, `stolen_funds`, `ransomware`, `scam`, `darknet_market`, `terrorist_financing`, `child_exploitation`, `hacked_exchange`, `high_risk_exchange`, `seized_funds`).
+              description:
+                type: string
+                description: One-line rendering of the driver, e.g. `9.01% indirect outgoing exposure to Gambling / Crypto only (Example Gambling)`.
+        raw_response:
+          type: object
+          additionalProperties: true
+          description: 'The provider''s own payload. Its shape is provider-specific and can change without notice: read the normalised fields instead of parsing it.'
+        report_signature:
+          type: string
+          description: Opaque HMAC-SHA256 signature over this exact result, scoped to your application. Not meaningful on its own — repost the full response body, unmodified and including this field, to `POST /v3/wallet-screening/pdf/` to render it as a PDF. The PDF endpoint rejects the request with `400` if `report_signature` is missing or if any signed field (e.g. `risk_score`, `severity`, `sanctions_hit`) was edited before repost.
+      required:
+      - provider
+      - screening_type
+      - risk_score
+      - severity
+      - status
+      - summary
+      - wallet_address
+      - blockchain
+      - sanctions_hit
+      - dominant_risk_category
+      - source_of_funds
+      - destination_of_funds
+      - counterparty_connections
+      - report_signature
+    TransactionRuleDetail:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: Rule name. Unique per application among non-deleted rules; duplicates return 400.
+        description:
+          type:
+          - string
+          - 'null'
+        category:
+          type: string
+          description: Risk theme used for grouping and reporting, e.g. finance, aml_ctf, anomaly_detection, fatf, device_intelligence, crypto_monitoring, travel_rule, responsible_gaming, e_commerce.
+        mode:
+          type: string
+          enum:
+          - ACTIVE
+          - DISABLED
+          - TEST
+          description: ACTIVE evaluates live. TEST evaluates and records rule runs but never touches score or status - the recommended starting mode. DISABLED is skipped.
+        evaluation_mode:
+          type: string
+          enum:
+          - ALL
+          - ANY
+          default: ALL
+          description: Whether every condition must match (ALL) or at least one (ANY). Ignored when conditions use group_index.
+        scope:
+          $ref: '#/components/schemas/TransactionRuleScope'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleCondition'
+        aggregation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAggregation'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAction'
+        metadata:
+          type: object
+          description: Free-form metadata stored on the rule.
+        severity:
+          type:
+          - string
+          - 'null'
+          enum:
+          - UNKNOWN
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          description: Informational severity carried by library rules; not settable on custom rules.
+        source:
+          type: string
+          enum:
+          - PRESET
+          - CUSTOM
+          description: PRESET rules come from the library (install/uninstall, mode-only edits); CUSTOM rules are fully yours.
+        library_key:
+          type:
+          - string
+          - 'null'
+          description: Stable library identifier; null for custom rules.
+        latest_triggered_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        run_count:
+          type: integer
+          description: How many transactions matched this rule.
+        approved_count:
+          type: integer
+        reviewed_count:
+          type: integer
+        declined_count:
+          type: integer
+        awaiting_user_count:
+          type: integer
+        approved_pct:
+          type: number
+        reviewed_pct:
+          type: number
+        declined_pct:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    TransactionRuleLibraryEntry:
+      type: object
+      properties:
+        library_key:
+          type: string
+        title:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        category:
+          type: string
+        evaluation_mode:
+          type: string
+          enum:
+          - ALL
+          - ANY
+        scope:
+          $ref: '#/components/schemas/TransactionRuleScope'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleCondition'
+        aggregation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAggregation'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAction'
+        metadata:
+          type: object
+        bundle:
+          type:
+          - string
+          - 'null'
+          description: Functional family, e.g. finance, aml_ctf, crypto_monitoring, travel_rule, responsible_gaming.
+        tags:
+          type: array
+          items:
+            type: string
+        industries:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+        is_installed:
+          type: boolean
+          description: Whether this preset is currently installed on the application.
+    TransactionRuleAction:
+      oneOf:
+      - type: object
+        required:
+        - type
+        - value
+        properties:
+          type:
+            type: string
+            enum:
+            - add_score
+          value:
+            type: integer
+            description: Points added to the transaction's risk score. May be negative.
+        description: Add points to the transaction's cumulative risk score; the total decides the status via the application's review/decline thresholds.
+      - type: object
+        required:
+        - type
+        - value
+        properties:
+          type:
+            type: string
+            enum:
+            - change_status
+          value:
+            type: string
+            enum:
+            - APPROVED
+            - IN_REVIEW
+            - DECLINED
+            - AWAITING_USER
+            description: 'Status to set immediately, regardless of score. Alias key: status.'
+          workflow_id:
+            type: string
+            format: uuid
+            description: 'REQUIRED when value is AWAITING_USER: the verification workflow the subject is asked to complete. Alias key: remediation_workflow_id. Didit creates a hosted remediation session for the subject when the rule fires.'
+        description: Directly set the transaction status. DECLINED always wins across matched rules.
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - add_tags
+          tag_uuid:
+            type: string
+            format: uuid
+            description: Existing application tag to attach.
+          tag_name:
+            type: string
+            description: Tag name to attach; created on first use (stored uppercased). Provide tag_uuid or tag_name.
+          tag_color:
+            type: string
+            description: 'Hex color used when tag_name creates a new tag, e.g. #007AFE.'
+        description: Attach an application tag to the matched transaction.
+      - type: object
+        required:
+        - type
+        - note
+        properties:
+          type:
+            type: string
+            enum:
+            - add_note
+          note:
+            type: string
+            description: 'Note text attached to the transaction (author: Rule Engine). Alias key: value.'
+        description: Attach an automated analyst note to the matched transaction.
+      - type: object
+        required:
+        - type
+        - list_id
+        properties:
+          type:
+            type: string
+            enum:
+            - add_to_list
+          list_id:
+            type: string
+            format: uuid
+            description: List to add the subject's vendor_data to.
+        description: Add the subject's vendor_data to a blocklist, allowlist or custom list.
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - open_case
+          blueprint:
+            type: string
+            format: uuid
+            description: Case blueprint UUID; defaults to the application's default blueprint.
+          grouping:
+            type: string
+            enum:
+            - by_applicant
+            - by_rule_and_applicant
+            description: Whether repeat matches join one case per applicant or one per rule+applicant.
+          attach_matched_transaction:
+            type: boolean
+            description: Attach the matched transaction to the case.
+        description: Open (or add to) an investigation case. Only the first open_case action on a rule is applied.
+      description: One rule action. A rule can carry several; all are applied together when it matches. Rules in TEST mode record what they would have done without applying any action.
+    TransactionRuleInstallResult:
+      type: object
+      properties:
+        installed_library_keys:
+          type: array
+          items:
+            type: string
+          description: 'POST (install) only: presets installed by this call.'
+        installed_count:
+          type: integer
+          description: POST (install) only.
+        uninstalled_count:
+          type: integer
+          description: 'DELETE (uninstall) only: presets removed by this call.'
+    TransactionRuleUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Rule name. Unique per application among non-deleted rules; duplicates return 400.
+        description:
+          type:
+          - string
+          - 'null'
+        category:
+          type: string
+          description: Risk theme used for grouping and reporting, e.g. finance, aml_ctf, anomaly_detection, fatf, device_intelligence, crypto_monitoring, travel_rule, responsible_gaming, e_commerce.
+        mode:
+          type: string
+          enum:
+          - ACTIVE
+          - DISABLED
+          - TEST
+          description: ACTIVE evaluates live. TEST evaluates and records rule runs but never touches score or status - the recommended starting mode. DISABLED is skipped.
+        evaluation_mode:
+          type: string
+          enum:
+          - ALL
+          - ANY
+          default: ALL
+          description: Whether every condition must match (ALL) or at least one (ANY). Ignored when conditions use group_index.
+        scope:
+          $ref: '#/components/schemas/TransactionRuleScope'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleCondition'
+        aggregation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAggregation'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionRuleAction'
+        metadata:
+          type: object
+          description: Free-form metadata stored on the rule.
+      description: Partial update. Custom rules accept every field; library (PRESET) rules accept only mode - anything else returns 400.
+    TransactionRuleInstallRequest:
+      type: object
+      properties:
+        library_keys:
+          type: array
+          items:
+            type: string
+          description: Specific presets to install or uninstall.
+        bundle:
+          type: string
+          description: Install or uninstall every preset in this bundle instead.
+      description: Provide library_keys OR bundle.
+    TransactionRuleBacktestResult:
+      type: object
+      properties:
+        evaluated:
+          type: integer
+          description: Transactions evaluated (most recent first, capped).
+        matched:
+          type: integer
+          description: Transactions the configuration would have matched.
+        affected_entities:
+          type: integer
+          description: Distinct subjects (by vendor_data) among the matches.
+        period_days:
+          type: integer
+    TransactionRuleScope:
+      type: object
+      properties:
+        transaction_types:
+          type: array
+          items:
+            type: string
+          description: Restrict to transaction types, e.g. finance, kyc, travel_rule, user_event. Empty or missing = no restriction.
+        directions:
+          type: array
+          items:
+            type: string
+            enum:
+            - INBOUND
+            - OUTBOUND
+          description: Restrict to transaction directions (case-insensitive on write).
+        action_types:
+          type: array
+          items:
+            type: string
+          description: Restrict to your action_type values, e.g. withdrawal, deposit.
+      description: Which transactions the rule applies to. Only these three keys are accepted.
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -2246,3 +4008,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

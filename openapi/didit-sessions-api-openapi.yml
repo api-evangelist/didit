@@ -134,7 +134,7 @@ paths:
                     workflow_version: 1
                     callback: https://example.com/kyb/callback
         '400':
-          description: 'Bad request — the payload failed validation (missing or unknown `workflow_id`, invalid `language`, blocklisted `vendor_data`, malformed `portrait_image`, `address` without `country`/`poa_country`, invalid `sandbox_scenario`, etc.) or your organization does not have enough credits to start the session.
+          description: 'Bad request — the payload failed validation (missing or unknown `workflow_id`, invalid `language`, blocklisted `vendor_data`, malformed `portrait_image`, `address` without `country`/`poa_country`, invalid `sandbox_scenario`, `sign` documents, fields or values the workflow''s Electronic Signature step refuses, such as `signature_document_not_supported`, `signature_document_conversion_failed`, `field_anchor_not_found` or `field_value_missing`, etc.) or your organization does not have enough credits to start the session.
 
 
             The body is an object keyed by the offending field name (or `detail` for non-field errors). Values are an **array of strings** for input-validation failures (e.g. missing required field, invalid language, oversized portrait image) and a **plain string** for failures detected while creating the session (unknown `workflow_id`, blocklisted `vendor_data`, no reference face available for a Face Match workflow). Handle both shapes.'
@@ -567,8 +567,29 @@ paths:
                   x-readme-id: '0.6'
                 sandbox_scenario:
                   type: string
-                  description: Sandbox-only scenario slug. Only accepted when the API key belongs to a sandbox-mode application; rejected on live applications. When set, the create flow expands the scenario's bundled magic values onto the session's input fields (contact_details, expected_details) so the mocked providers reproduce the scenario's outcome through the real workflow pipeline. See the scenario catalog at GET /v1/sandbox/scenarios/ or [Sandbox & Test Data](/integration/sandbox-testing). You can also arm (or re-arm) a scenario after create via POST /v3/session/{sessionId}/sandbox/arm/, as long as the session is still `Not Started`.
+                  description: Sandbox-only scenario slug. Only accepted when the API key belongs to a sandbox-mode application; rejected on live applications. When set, the create flow expands the scenario's bundled magic values onto the session's input fields (contact_details, expected_details) so the mocked providers reproduce the scenario's outcome through the real workflow pipeline. See the scenario catalog at GET /v1/sandbox/scenarios/ or [Sandbox & Test Data](/integration/sandbox-testing). You can also arm (or re-arm) a scenario after create via POST /v3/session/{sessionId}/sandbox/arm/, as long as the session is still `Not Started`. For non-doc lookup, use `lookup_partial_match`, `lookup_no_match`, or `lookup_provider_error` to test the configured attempt budget and fallback. For identity wallets, use `wallet_cancelled`, `wallet_timeout`, or `wallet_provider_error`; `approve` simulates a verified wallet. All catalog wallets can be tested in sandbox, including schemes unavailable on live applications. Simulated attempts are not charged.
                   example: decline_document_expired
+                sign:
+                  type: object
+                  description: 'Electronic Signature input for this session. `documents` are the documents to sign, for a workflow whose Electronic Signature step takes documents from the session (`signature_documents_source` `session` or `both`): up to 20 documents and 50 MB in total. `field_values` fills the fields whose `prefill` is `api.<key>`, on workflow and session documents alike. Creating a session again for the same `workflow_id` and `vendor_data` returns the pending session; if that call sends `sign`, its documents, fields and values must be identical to the first ones, and anything different returns `400` with `{"sign": "signature_document_changed"}`. See [Electronic signature documents](/sessions-api/create-session#electronic-signature-documents).'
+                  properties:
+                    documents:
+                      type: array
+                      minItems: 1
+                      maxItems: 20
+                      items:
+                        $ref: '#/components/schemas/SessionSignDocument'
+                    field_values:
+                      type: object
+                      description: 'Values keyed by the `<key>` of each `api.<key>` pre-fill source: strings of 1 to 500 characters for `text` and `data` fields, booleans for a `checkbox`. `400` with `field_value_unknown` for a key no field uses, `field_value_missing` for a required field without its value, and `field_value_invalid` for a value that fails its field''s validation.'
+                      additionalProperties:
+                        oneOf:
+                        - type: string
+                          minLength: 1
+                          maxLength: 500
+                        - type: boolean
+                      example:
+                        credit_limit: 3,000 EUR
               example:
                 workflow_id: 11111111-2222-3333-4444-555555555555
                 vendor_data: user-123
@@ -854,6 +875,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionImportJob'
+        '404':
+          description: Import job not found for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
         '403':
           description: Missing, invalid, or revoked API key, or the key cannot read import jobs for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
           content:
@@ -863,14 +892,6 @@ paths:
                   summary: Missing, invalid, or revoked API key
                   value:
                     detail: You do not have permission to perform this action.
-        '404':
-          description: Import job not found for this application.
-          content:
-            application/json:
-              examples:
-                Not found:
-                  value:
-                    detail: Not found.
       security:
       - ApiKeyAuth: []
   /v3/session/imports/{importId}/errors/:
@@ -943,6 +964,14 @@ paths:
                         status: unknown_status
                         first_name: Jane
                       created_at: '2026-05-17T08:44:02Z'
+        '404':
+          description: Import job not found for this application.
+          content:
+            application/json:
+              examples:
+                Not found:
+                  value:
+                    detail: Not found.
         '403':
           description: Missing, invalid, or revoked API key, or the key cannot read import jobs for this application. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.
           content:
@@ -952,50 +981,14 @@ paths:
                   summary: Missing, invalid, or revoked API key
                   value:
                     detail: You do not have permission to perform this action.
-        '404':
-          description: Import job not found for this application.
-          content:
-            application/json:
-              examples:
-                Not found:
-                  value:
-                    detail: Not found.
       security:
       - ApiKeyAuth: []
   /v3/session/{sessionId}/delete/:
     delete:
-      summary: Soft-delete a verification session (KYC or KYB)
-      description: 'Soft-delete a single verification session — User Verification (KYC) or Business Verification (KYB) — by its `session_id`. The id is resolved against KYC sessions first, then KYB sessions, so both kinds are deleted through this one URL.
+      summary: Delete a verification session (KYC or KYB)
+      description: 'Delete a single verification session, User Verification (KYC) or Business Verification (KYB), by its `session_id`. The id is resolved against KYC sessions first, then KYB sessions, so both kinds are deleted through this one URL. **What is deleted:**
 
-
-        **What happens on deletion:**
-
-        - The session is stamped with a deletion timestamp and immediately disappears from every read endpoint — `GET /v3/session/{sessionId}/decision/` returns `404` and `GET /v3/sessions/` stops listing it.
-
-        - For KYC sessions, related face, liveness, and face-match records are soft-deleted together with the session.
-
-        - A background job then moves every stored media file owned by the session to a quarantined storage prefix: document front/back photos (full, cropped, and privacy-blurred variants), document-capture videos, portrait crops, NFC chip portrait and signature images, face reference images, liveness videos, face-match source/target images, Proof of Address documents, and any extra uploaded files (KYC); uploaded company documents and extra files (KYB). Previously issued media URLs (`https:///...`) stop resolving once the move completes — the move is asynchronous, so a URL issued just before deletion may keep working for a short window after the `204`.
-
-
-        **What is retained:** the underlying database records (decision, extracted data, audit events) are kept internally, marked with the deletion timestamp — they become unreachable through the API but are not erased at the moment of the call. Blocklist entries created from this session (face or document) are **not** removed — manage those with the blocklist endpoints. Credits already consumed are not refunded.
-
-
-        **Irreversible:** there is no restore/undelete endpoint.
-
-
-        **Side effects:** no webhook is emitted for deletions.
-
-
-        **Idempotency:** not idempotent at the HTTP level — the first call returns `204`; repeating it returns `404` because the session no longer resolves.
-
-
-        **Authentication:** send your application''s API key in the `x-api-key` header; the session must belong to that application. Console user access tokens (`Authorization: Bearer ...`) may also call this endpoint when they carry the `delete:sessions` permission. Authentication and permission failures both return `403` — this API never returns `401`.
-
-
-        **Rate limit:** shared write budget of 300 requests/min per API key across all POST/PATCH/DELETE endpoints; exceeding it returns `429`.
-
-
-        To bulk-delete KYC sessions by their numeric `session_number`, use `POST /v3/sessions/delete/` instead.'
+        - The session and every verification attempt it holds, including results that a resubmission replaced: the decision, extracted data, all related feature records (ID verification, face, liveness, face match, AML, registry checks, IP analysis, and so on), its reviews and its activity log. - All stored files owned by the session: document front/back photos (full, cropped, and privacy-blurred variants), document-capture videos, portrait crops, NFC chip portrait and signature images, face reference images, liveness videos, face-match source/target images, Proof of Address documents, and any extra uploaded files (KYC); uploaded company documents and extra files (KYB). Electronic Signature documents, signed PDFs, evidence PDFs and signature images (KYC and KYB): their download paths stop working. Previously issued media URLs (`https:///...`) stop resolving. - The session''s face data. Its face embedding is deleted too, unless you choose to keep an image-free template (see **Face biometric data**). - Webhook deliveries still queued for the session, and their retries. Webhooks already delivered are not affected. - For a Business Verification (KYB) session: the verifications it created for its key people (KYC) and its corporate owners (KYB), recursively, reported as `deleted_child_verifications`. A verification it only links to, such as an existing approved KYC it reused, is not deleted. The session disappears from every read endpoint immediately: `GET /v3/session/{sessionId}/decision/` returns `404` and `GET /v3/sessions/` stops listing it. Ongoing AML monitoring and KYB registry monitoring started by the deleted verifications stop. **What is not affected:** blocklist entries created from this session (face or document) are **not** removed; manage those with the blocklist endpoints. Share tokens issued for the session are not revoked, but there is nothing left for them to import: an import with one returns `400` with `{"share_token": ["Original session does not exist."]}`. Credits already consumed are **not** refunded. The parent User or Business entity is **not** deleted; use `POST /v3/users/delete/` or `POST /v3/businesses/delete/` for those. If the User''s profile portrait came from this session, the portrait is removed with it. **Face biometric data:** by default the session''s face embedding is deleted with the session (`face_retention_outcome: deleted`). An application that opted in to biometric-template retention (`face_retention_policy: retain_until_user_deleted` on `PATCH /v3/webhook/`), or a request with `retain_face_embeddings: true`, keeps one separately managed, image-free face biometric template anchored to the session''s User (`retained_with_user`) so that duplicate detection, Face Search, and biometric authentication keep working. The template never contains the face image, media, identity fields, the decision, or the deleted session''s id; it is biometric data deleted at `biometric_template_expires_at`, or earlier on User deletion, privacy erasure, or an explicit purge through `/v3/biometric-templates/`. A session without a linked User cannot retain a template (`ineligible_no_vendor_user`). Send `deletion_instruction: privacy_erasure` for data-subject requests: it purges every retained template for that User and never retains a new one. **Irreversible:** deletion is permanent and there is no restore endpoint. Export anything you need (for example a decision PDF) before you call it. **Side effects:** no webhook is emitted for deletions. **Response:** `200 OK` once the deletion has completed, with a JSON body reporting the `face_retention_outcome`, the retained template''s expiry and, for a KYB session, `deleted_child_verifications`.'
       operationId: delete_v3_session_by_id
       tags:
       - Sessions
@@ -1009,8 +1002,93 @@ paths:
           format: uuid
           example: 11111111-2222-3333-4444-555555555555
       responses:
-        '204':
-          description: Session soft-deleted. Empty body. The media quarantine continues asynchronously after the response.
+        '200':
+          description: Session deleted. The body reports what happened to the session's face biometric data and, for a KYB session, how many verifications it created were deleted with it.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: The deleted session.
+                  session_number:
+                    type:
+                    - integer
+                    - 'null'
+                    description: The deleted session's number.
+                  face_retention_outcome:
+                    type: string
+                    enum:
+                    - retained_with_user
+                    - deleted
+                    - none
+                    - ineligible_no_vendor_user
+                    description: 'What happened to the session''s face biometric data. `deleted`: the face embedding was deleted with the session (default). `retained_with_user`: the session is deleted and one image-free biometric template stays anchored to the User; see `biometric_template_uuid`. `none`: the session had no face embedding (for example a KYB session, or a KYC session without a liveness selfie). `ineligible_no_vendor_user`: retention was requested but the session has no linked User, so the embedding was deleted with the session. A biometric-store failure is never reported through this field on this endpoint: it returns `503` and the session is not deleted.'
+                  biometric_template_uuid:
+                    type:
+                    - string
+                    - 'null'
+                    format: uuid
+                    description: Id of the retained biometric template when `face_retention_outcome` is `retained_with_user`; `null` otherwise. Manage it through `/v3/biometric-templates/{template_uuid}/`.
+                  biometric_template_expires_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: When the retained biometric template is deleted, when `face_retention_outcome` is `retained_with_user`; `null` when no template is retained.
+                  deleted_child_verifications:
+                    type: integer
+                    description: 'For a Business Verification (KYB) session: how many verifications it created (its key people''s KYC sessions and its corporate owners'' KYB sessions, recursively) were deleted with it. Always `0` for a KYC session.'
+              examples:
+                Deleted (default):
+                  value:
+                    session_id: 4c5c7f3a-3b1d-4b7e-9c39-2b4f7e6a1d02
+                    session_number: 1024
+                    face_retention_outcome: deleted
+                    biometric_template_uuid: null
+                    biometric_template_expires_at: null
+                    deleted_child_verifications: 0
+                Retained with User:
+                  value:
+                    session_id: 4c5c7f3a-3b1d-4b7e-9c39-2b4f7e6a1d02
+                    session_number: 1024
+                    face_retention_outcome: retained_with_user
+                    biometric_template_uuid: 9d2f4b6e-1c3a-4e8f-b7d5-0a1c2e3f4a5b
+                    biometric_template_expires_at: '2027-10-09T10:15:00Z'
+                    deleted_child_verifications: 0
+                'Ineligible: no User':
+                  summary: Retention requested on a session created without vendor_data
+                  value:
+                    session_id: 7a1e9c2d-5f4b-4c3a-8e2d-1b0a9f8e7d6c
+                    session_number: 1031
+                    face_retention_outcome: ineligible_no_vendor_user
+                    biometric_template_uuid: null
+                    biometric_template_expires_at: null
+                    deleted_child_verifications: 0
+                KYB session:
+                  value:
+                    session_id: 0f3c9b7e-2d1a-4e5f-8c6b-7a9d8e1f2c3b
+                    session_number: 88
+                    face_retention_outcome: none
+                    biometric_template_uuid: null
+                    biometric_template_expires_at: null
+                    deleted_child_verifications: 3
+                  summary: A business verification deleted with the three verifications it created for its key people
+        '400':
+          description: Validation error — nothing is deleted.
+          content:
+            application/json:
+              examples:
+                Privacy erasure cannot retain:
+                  value:
+                    retain_face_embeddings:
+                    - Privacy erasure cannot retain biometric templates.
+                No finite retention duration:
+                  summary: Retention requested without face_retention_days on the request or the application
+                  value:
+                    detail: A finite biometric-template retention duration is required.
         '403':
           description: 'Authentication or permission failure. Missing/invalid credentials also return `403` — this API never returns `401`. Exception: when the `sessionId` does not resolve to a live session, the pre-auth owner lookup returns `404` first, even with missing or invalid credentials.'
           content:
@@ -1030,7 +1108,7 @@ paths:
                   value:
                     detail: You do not have permission to perform this action.
         '404':
-          description: No live KYC or KYB session with this `session_id` exists — the id is unknown or the session was already soft-deleted (repeating a successful delete lands here).
+          description: No live KYC or KYB session with this `session_id` exists — the id is unknown or the session was already deleted (repeating a successful delete lands here).
           content:
             application/json:
               schema:
@@ -1057,22 +1135,100 @@ paths:
                   summary: Write budget exhausted
                   value:
                     detail: Write request rate limit exceeded. You can make up to 300 requests per minute.
+        '503':
+          description: The deletion could not finish because a storage service, a biometric store, or a monitoring provider was unavailable. The session is still in place; repeat the same request until it returns `200`. Some of its stored files or its face embedding may already be deleted, so do not rely on them after a `503`. Retries converge on a single template.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Session deletion unavailable:
+                  summary: A storage service or a monitoring provider was unavailable
+                  value:
+                    detail: The session could not be deleted because a storage service or a monitoring provider is unavailable. The session is still in place; repeat the request to finish deleting it.
+                Biometric store unavailable:
+                  summary: A biometric store was unavailable while retaining or purging a template
+                  value:
+                    detail: The biometric-template operation could not finish because an external store is unavailable. The operation is retryable.
       security:
       - ApiKeyAuth: []
       x-codeSamples:
       - lang: curl
-        label: curl
+        label: curl (default policy)
         source: "curl -X DELETE \\\n  https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/ \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: curl
+        label: curl (retain template)
+        source: "curl -X DELETE \\\n  https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/ \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"retain_face_embeddings\": true, \"face_retention_days\": 365}'"
+      - lang: curl
+        label: curl (privacy erasure)
+        source: "curl -X DELETE \\\n  https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/ \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"deletion_instruction\": \"privacy_erasure\", \"instruction_id\": \"dsar-2026-0142\"}'"
       - lang: python
         label: Python
-        source: "import requests\n\nresponse = requests.delete(\n    \"https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n)\nresponse.raise_for_status()  # 204 on success; 404 if unknown or already deleted"
+        source: "import requests\n\nresponse = requests.delete(\n    \"https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    json={\"retain_face_embeddings\": True, \"face_retention_days\": 365},\n)\nresponse.raise_for_status()\nprint(response.json()[\"face_retention_outcome\"])"
       - lang: javascript
         label: JavaScript
-        source: "const response = await fetch(\n  'https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/',\n  {\n    method: 'DELETE',\n    headers: { 'x-api-key': 'YOUR_API_KEY' },\n  },\n);\nif (response.status !== 204) throw new Error(`HTTP ${response.status}`);"
+        source: "const resp = await fetch(\n  'https://verification.didit.me/v3/session/11111111-2222-3333-4444-555555555555/delete/',\n  {\n    method: 'DELETE',\n    headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n    body: JSON.stringify({ deletion_instruction: 'privacy_erasure', instruction_id: 'dsar-2026-0142' }),\n  },\n);\nconst body = await resp.json();\nconsole.log(body.face_retention_outcome);"
+      requestBody:
+        required: false
+        description: Optional. Omit the body entirely to follow the application's retention policy with an operational deletion.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                retain_face_embeddings:
+                  type:
+                  - boolean
+                  - 'null'
+                  description: Override the application's `face_retention_policy` for this deletion. `true` keeps one image-free face biometric template anchored to the session's User after the session is deleted; `false` deletes the face embedding with the session; omit or `null` to follow the application policy. Ignored for KYB sessions and for sessions without a face embedding.
+                  example: true
+                face_retention_days:
+                  type: integer
+                  minimum: 1
+                  maximum: 3650
+                  description: Finite retention duration, in days, for a retained template. Required when a template is retained unless the application already sets `face_retention_days`. The template's `expires_at` is the earliest of this duration, the application's general data-retention window, and `face_retention_deadline`.
+                  example: 365
+                face_retention_deadline:
+                  type: string
+                  format: date-time
+                  description: Optional hard expiry for a retained template. Must be in the future.
+                  example: '2027-08-28T00:00:00Z'
+                deletion_instruction:
+                  type: string
+                  enum:
+                  - operational_session_delete
+                  - privacy_erasure
+                  default: operational_session_delete
+                  description: 'The class of instruction you are giving. `operational_session_delete` deletes the session and retains a template only when the policy or `retain_face_embeddings` says so. `privacy_erasure` purges every retained biometric template anchored to the session''s User before deleting the session, cannot be overridden by the application policy, and cannot be combined with `retain_face_embeddings: true` (`400`).'
+                  example: operational_session_delete
+                instruction_id:
+                  type: string
+                  maxLength: 255
+                  description: Your durable reference for this deletion instruction (for example an erasure-ticket id). Recorded on the audit trail and on any retained template. Generated by Didit when omitted.
+                  example: dsar-2026-0142
+            examples:
+              Retain a biometric template:
+                summary: Delete the session, keep an image-free template for 365 days
+                value:
+                  retain_face_embeddings: true
+                  face_retention_days: 365
+                  instruction_id: post-approval-cleanup-2026-08
+              Force deletion on an opted-in application:
+                summary: Delete the face embedding regardless of the application policy
+                value:
+                  retain_face_embeddings: false
+              Privacy erasure:
+                summary: 'Data-subject request: delete the session and purge every retained template for that person'
+                value:
+                  deletion_instruction: privacy_erasure
+                  instruction_id: dsar-2026-0142
   /v3/session/{sessionId}/generate-pdf/:
     get:
       summary: Download a PDF report for a verification session
-      description: 'Render and download a compliance-ready PDF report for a finished verification session. The same path serves both User Verification (KYC) and Business Verification (KYB) sessions — the server looks the `sessionId` up in both tables and picks the matching report template.
+      description: 'Render and download a compliance-ready PDF report for a finished verification session. The same path serves both User Verification (KYC) and Business Verification (KYB) sessions — the server resolves the `sessionId` against both session types and picks the matching report template.
 
 
         **Eligible statuses.** The session must already carry a final or reviewable status:
@@ -1103,10 +1259,10 @@ paths:
         **Latency.** Rendering downloads every stored image (document sides, selfies, extra files) before composing the PDF, so media-heavy sessions can take several seconds. Use a generous client read timeout (60 s recommended) and stream the body to disk.
 
 
-        **Trailing slash.** The canonical route ends with a trailing slash (`…/generate-pdf/`). Requests without it receive a `301` redirect to the slashed URL — most HTTP clients follow it automatically for `GET`, but plain `curl` needs `-L` (or call the slashed URL directly, as in the samples).
+        **Trailing slash.** The canonical route ends with a trailing slash (`…/generate-pdf/`). A request without it is served directly with the same response — there is no `301` redirect, so no client has to follow redirects and `curl` does not need `-L`. Use the slashed URL as in the samples.
 
 
-        If you need the underlying data as JSON instead of a rendered report, use `GET /v3/session/{sessionId}/decision/`.'
+        If you need the underlying data as JSON instead of a rendered report, use `GET /v3/session/{sessionId}/decision/`. For every reportable session of one user in a single document, use `GET /v3/users/{vendor_data}/generate-pdf/`.'
       operationId: get_v3_session_generate_pdf
       tags:
       - Sessions
@@ -1456,6 +1612,12 @@ paths:
                   description: Language for the notification email. Accepts any string at schema level; unsupported codes silently fall back to English (`en`).
                   default: en
                   example: en
+                email_preview_token:
+                  type: string
+                  writeOnly: true
+                  minLength: 1
+                  maxLength: 512
+                  description: Optional signed receipt from Preview Resubmission Email. When supplied with send_email=true and new_status=Resubmitted, the recipient, language, checks, current session state, sender and message must still match the preview. A changed or expired receipt returns 409 before changing the session or sending email. Existing integrations may omit this field.
             examples:
               Approve Session:
                 summary: Approve a session after manual review
@@ -1561,7 +1723,7 @@ paths:
                   value:
                     detail: You do not have permission to perform this action.
         '404':
-          description: No KYC or KYB session with this `session_id` exists in your application (soft-deleted sessions also return `404`).
+          description: No KYC or KYB session with this `session_id` exists in your application (deleted sessions also return `404`).
           content:
             application/json:
               examples:
@@ -1569,6 +1731,16 @@ paths:
                   summary: Unknown session_id
                   value:
                     detail: Not found.
+        '429':
+          description: A resubmit targeting only backend-only features (AML, DATABASE_VALIDATION, IP_ANALYSIS) was repeated within the 30-second cooldown window; an immediate repeat cannot change the outcome. Back off and retry after the interval indicated in `Retry-After`.
+          content:
+            application/json:
+              examples:
+                Backend-only resubmit throttled:
+                  value:
+                    detail: This session was already resubmitted for backend-only features within the last 30 seconds; repeating it cannot change the outcome. Wait before resubmitting again.
+        '409':
+          description: The email preview changed or expired. Generate a new preview before confirming; no session changes or email delivery occur.
       x-codeSamples:
       - lang: curl
         label: curl
@@ -1591,7 +1763,7 @@ paths:
         **When to use this endpoint vs webhooks.** Use this endpoint for dashboards, back-office search, reconciliation, and batch exports. Do not poll it to track the progress of individual verifications - configure webhooks instead, which push `status.updated` events the moment a session changes. For one session''s full result, call `GET /v3/session/{sessionId}/decision/`.
 
 
-        **KYC and KYB rows.** `session_kind` selects which tables are listed:
+        **KYC and KYB sessions.** `session_kind` selects which kinds are listed:
 
         - `user` (default) - User Verification (KYC) sessions only. Backward-compatible behavior.
 
@@ -2432,6 +2604,24 @@ paths:
                     share_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
                     for_application_id: a5f3bca2-46e2-411e-90ef-a580900a57ee
                     session_kind: business
+        '401':
+          description: Missing or invalid credentials. Unlike most v3 endpoints, this endpoint authenticates through the permission decorator and returns `401` when no valid token/key is presented.
+          content:
+            application/json:
+              examples:
+                Unauthorized:
+                  summary: Unauthorized
+                  value:
+                    detail: Authentication credentials were not provided or are invalid.
+        '404':
+          description: No session with the given `session_id` exists in your application.
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  summary: Session not found
+                  value:
+                    detail: Not found.
         '400':
           description: Validation error. Field errors are keyed by field name; the not-finished error arrives under a `detail` key (as an array).
           content:
@@ -2457,15 +2647,6 @@ paths:
                   value:
                     ttl_in_seconds:
                     - Ensure this value is greater than or equal to 60.
-        '401':
-          description: Missing or invalid credentials. Unlike most v3 endpoints, this endpoint authenticates through the permission decorator and returns `401` when no valid token/key is presented.
-          content:
-            application/json:
-              examples:
-                Unauthorized:
-                  summary: Unauthorized
-                  value:
-                    detail: Authentication credentials were not provided or are invalid.
         '403':
           description: The credentials are valid but lack the `write:sessions` permission for this application.
           content:
@@ -2475,15 +2656,6 @@ paths:
                   value:
                     detail: You do not have permission to perform this action.
                   summary: No Permission
-        '404':
-          description: No session with the given `session_id` exists in your application.
-          content:
-            application/json:
-              examples:
-                Not Found:
-                  summary: Session not found
-                  value:
-                    detail: Not found.
       parameters:
       - in: path
         name: sessionId
@@ -2507,7 +2679,7 @@ paths:
                 for_application_id:
                   type: string
                   format: uuid
-                  description: UUID of the Didit application that will redeem the token. Must exist, must not be soft-deleted, and must differ from the calling application. Find it in the Business Console under **Settings → Application**.
+                  description: UUID of the Didit application that will redeem the token. Must exist, must not be deleted, and must differ from the calling application. Find it in the Business Console under **Settings → Application**.
                   example: a5f3bca2-46e2-411e-90ef-a580900a57ee
                 ttl_in_seconds:
                   type: integer
@@ -2538,14 +2710,16 @@ paths:
       - Sessions
       responses:
         '201':
-          description: 'Session cloned. For user (KYC) sessions the body is the V2 decision payload (`session_id`, `session_number`, `status`, `workflow_id`, per-feature blocks such as `id_verification`, `liveness`, `aml`, plus `created_at`/`expires_at` — no `session_kind` field). For business (KYB) sessions it is the V3 KYB decision payload, which includes `session_kind: "business"` and blocks like `registry_checks` and `aml_screenings`. With `trust_review: false` the cloned session''s `status` is forced to `In Review`.'
+          description: 'Session cloned. The body is the V3 decision payload for both kinds, discriminated by `session_kind`: `"user"` (KYC) with list-based feature blocks such as `id_verifications`, `liveness_checks`, `aml_screenings`; `"business"` (KYB) with blocks like `registry_checks` and `key_people_checks`. Both include `shared_from_session` — the `session_id` of the original session in the source application. With `trust_review: false` the cloned session''s `status` is forced to `In Review`.'
           content:
             application/json:
               examples:
                 User session imported:
-                  summary: Cloned KYC session (truncated — full V2 decision payload in reality)
+                  summary: Cloned KYC session (truncated — full V3 decision payload in reality)
                   value:
                     session_id: 11111111-2222-3333-4444-555555555555
+                    session_kind: user
+                    shared_from_session: 99999999-8888-7777-6666-555555555555
                     session_number: 43762
                     session_url: null
                     status: In Review
@@ -2558,6 +2732,7 @@ paths:
                   value:
                     session_id: 22222222-3333-4444-5555-666666666666
                     session_kind: business
+                    shared_from_session: 88888888-7777-6666-5555-444444444444
                     session_number: 982
                     session_url: null
                     status: Approved
@@ -2659,40 +2834,12 @@ paths:
         source: "const response = await fetch(\n  'https://verification.didit.me/v3/session/import-shared/',\n  {\n    method: 'POST',\n    headers: {\n      'x-api-key': 'YOUR_API_KEY',\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({\n      share_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',\n      trust_review: false,\n      workflow_id: '9f9b1234-aaaa-bbbb-cccc-1234567890ab',\n      vendor_data: 'user-1',\n    }),\n  },\n);\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst imported = await response.json();"
   /v3/sessions/delete/:
     post:
-      summary: Bulk soft-delete KYC sessions by session_number
-      description: 'Bulk soft-delete User Verification (KYC) sessions by their numeric `session_number`, or wipe every KYC session in your application with `delete_all: true`.
+      summary: Bulk delete KYC sessions by session_number
+      description: 'Bulk delete User Verification (KYC) sessions by their numeric `session_number`, or every KYC session in your application with `delete_all: true`. `session_number` is the human-friendly incrementing counter shown in the Console session list and returned as `session_number` by the create-session and decision endpoints; it is **not** the `session_id` UUID. To delete a session by UUID, or to delete a Business Verification (KYB) session, which this endpoint never touches, use `DELETE /v3/session/{sessionId}/delete/` instead. **Up to 20 sessions are deleted in the request, more run as a job.** The number of matching sessions decides, whether they are selected by `session_numbers` or with `delete_all`:
 
+        - Up to 20 matching sessions: they are deleted before the response, which is `200` with one entry per session in `results[]`. - More than 20: the response is `202` with a deletion job, and the sessions are deleted in the background. Poll `GET /v3/sessions/delete/{job_id}/` until `status` is `COMPLETED` or `FAILED`. A job reports counts per outcome, never which sessions it deleted. A `delete_all` job deletes only the sessions created before the request; sessions started while it runs are not deleted. Each deleted session gets exactly the same treatment as the single-session delete endpoint: the session, every verification attempt it holds, its decision and extracted data, its related feature records (ID verification, face, liveness, face match, and so on) and all of its stored files are deleted, it disappears from every read endpoint, and previously issued media URLs stop resolving. Webhook deliveries still queued for a deleted session, and their retries, are dropped; webhooks already delivered are not affected. Blocklist entries are **not** removed, credits already consumed are **not** refunded, and the parent User entities are **not** deleted (use `POST /v3/users/delete/` for those); no webhook is emitted for the deletion. Deletion is permanent and irreversible. **Selection semantics:**
 
-        `session_number` is the human-friendly incrementing counter shown in the Console session list and returned as `session_number` by the create-session and decision endpoints — it is **not** the `session_id` UUID. To delete a session by UUID — or to delete a Business Verification (KYB) session, which this endpoint never touches — use `DELETE /v3/session/{sessionId}/delete/` instead.
-
-
-        Each deleted session gets exactly the same treatment as the single-session delete endpoint: stamped with a deletion timestamp, removed from all read endpoints, related face/liveness/face-match records soft-deleted, and all stored media moved to a quarantined storage prefix by a background job so previously issued media URLs stop resolving. Database records are retained internally but become unreachable through the API; blocklist entries are **not** removed; no webhook is emitted; there is no undo.
-
-
-        **Selection semantics:**
-
-        - Entries in `session_numbers` that do not match a live KYC session in your application — unknown numbers, already-deleted sessions, or sessions owned by another application — are **silently skipped**. There is no per-item failure report: the endpoint returns `204` whether it deleted all, some, or none of the listed sessions.
-
-        - Validation failures (a non-numeric entry, an empty list, or neither `session_numbers` nor `delete_all` provided) reject the **whole request** with `400` and delete nothing.
-
-        - All deletions run inside a single database transaction.
-
-        - There is no documented cap on the list length; the shared write rate limit (below) is the practical bound.
-
-
-        **Idempotency:** fully idempotent — repeating the same request returns `204` again (already-deleted numbers are skipped).
-
-
-        **`delete_all: true` — destructive:** soft-deletes **every** non-deleted KYC session in the application; `session_numbers` is ignored when set. There is no confirmation step and no undo.
-
-
-        **Authentication:** API key in the `x-api-key` header. Missing or invalid credentials return `403` (`{"detail": "You do not have permission to perform this action."}`) — this API never returns `401`.
-
-
-        **Rate limit:** shared write budget of 300 requests/min per API key across all POST/PATCH/DELETE endpoints; exceeding it returns `429`.
-
-
-        This endpoint accepts API keys only — Business Console user Bearer tokens are rejected with `403` (unlike the single-session delete, which accepts both).'
+        - Entries in `session_numbers` that do not match a live KYC session in your application (unknown numbers, already-deleted sessions, or sessions owned by another application) are **silently skipped**: they do not appear in `results` and are not counted in a job''s `total`. - Validation failures (a non-numeric entry, an empty list, neither `session_numbers` nor `delete_all` provided, or a template retention the application cannot honour) reject the **whole request** with `400` and delete nothing. - Sessions are deleted in groups. If a group cannot be deleted (for example because a storage service is unavailable), every session in that group is reported as `face_retention_outcome: failed_retryable` and stays in place; the other groups are unaffected. Repeat the request for those sessions. A job retries such a group by itself. - There is no documented cap on the list length; the shared write rate limit (below) is the practical bound. **Face biometric data:** the optional `retain_face_embeddings`, `face_retention_days`, `face_retention_deadline`, `deletion_instruction`, and `instruction_id` fields have the same meaning as on `DELETE /v3/session/{sessionId}/delete/` and apply to every matched session. Each result reports its own `face_retention_outcome`. **Response:** `200 OK` with `results[]` for up to 20 matching sessions, or `202 Accepted` with a deletion job for more. Every result confirms deletion except `face_retention_outcome: failed_retryable`, which reports a session that was NOT deleted and should be retried. Earlier versions of this endpoint returned `204 No Content`; update clients that assert on `204`. **Idempotency:** repeating the same request deletes nothing more: numbers that no longer match a session are skipped. **`delete_all: true` (destructive):** deletes **every** remaining KYC session in the application; `session_numbers` is ignored when set. There is no confirmation step and no undo.'
       operationId: batch_delete_sessions
       tags:
       - Sessions
@@ -2707,7 +2854,7 @@ paths:
               properties:
                 session_numbers:
                   type: array
-                  description: Numeric `session_number` values of the KYC sessions to soft-delete, as digit-only strings (JSON numbers are also accepted and coerced). Required unless `delete_all` is `true`; an empty list returns `400`. Any non-digit entry rejects the whole request with `400` (unless `delete_all` is `true`, in which case validation is skipped and the entries are ignored). Numbers that do not match a live session in your application are silently skipped.
+                  description: Numeric `session_number` values of the KYC sessions to delete, as digit-only strings (JSON numbers are also accepted and coerced). Required unless `delete_all` is `true`; an empty list returns `400`. Any non-digit entry rejects the whole request with `400` (unless `delete_all` is `true`, in which case validation is skipped and the entries are ignored). Numbers that do not match a live session in your application are silently skipped.
                   items:
                     type: string
                     pattern: ^[0-9]+$
@@ -2719,9 +2866,39 @@ paths:
                   - '1003'
                 delete_all:
                   type: boolean
-                  description: When `true`, every non-deleted KYC session in the calling application is soft-deleted and `session_numbers` is ignored. Defaults to `false`. Irreversible — there is no confirmation step.
+                  description: When `true`, every remaining KYC session in the calling application is deleted and `session_numbers` is ignored. More than 20 matching sessions run as a deletion job (`202`) that covers only the sessions created before the request. Defaults to `false`. Irreversible; there is no confirmation step.
                   default: false
                   example: false
+                retain_face_embeddings:
+                  type:
+                  - boolean
+                  - 'null'
+                  description: Override the application's `face_retention_policy` for this deletion. `true` keeps one image-free face biometric template anchored to the session's User after the session is deleted; `false` deletes the face embedding with the session; omit or `null` to follow the application policy. Ignored for KYB sessions and for sessions without a face embedding.
+                  example: true
+                face_retention_days:
+                  type: integer
+                  minimum: 1
+                  maximum: 3650
+                  description: Finite retention duration, in days, for a retained template. Required when a template is retained unless the application already sets `face_retention_days`. The template's `expires_at` is the earliest of this duration, the application's general data-retention window, and `face_retention_deadline`.
+                  example: 365
+                face_retention_deadline:
+                  type: string
+                  format: date-time
+                  description: Optional hard expiry for a retained template. Must be in the future.
+                  example: '2027-08-28T00:00:00Z'
+                deletion_instruction:
+                  type: string
+                  enum:
+                  - operational_session_delete
+                  - privacy_erasure
+                  default: operational_session_delete
+                  description: 'The class of instruction you are giving. `operational_session_delete` deletes the session and retains a template only when the policy or `retain_face_embeddings` says so. `privacy_erasure` purges every retained biometric template anchored to the session''s User before deleting the session, cannot be overridden by the application policy, and cannot be combined with `retain_face_embeddings: true` (`400`).'
+                  example: operational_session_delete
+                instruction_id:
+                  type: string
+                  maxLength: 255
+                  description: Your durable reference for this deletion instruction (for example an erasure-ticket id). Recorded on the audit trail and on any retained template. Generated by Didit when omitted.
+                  example: dsar-2026-0142
             examples:
               Specific sessions:
                 summary: Delete specific sessions by number
@@ -2734,9 +2911,180 @@ paths:
                 summary: Delete every KYC session in the application
                 value:
                   delete_all: true
+              Delete and retain templates:
+                summary: Delete sessions but keep image-free biometric templates for 365 days
+                value:
+                  session_numbers:
+                  - '1001'
+                  - '1002'
+                  retain_face_embeddings: true
+                  face_retention_days: 365
+                  instruction_id: post-approval-cleanup-2026-08
+              Privacy erasure:
+                summary: Delete sessions and purge every retained template for their Users
+                value:
+                  session_numbers:
+                  - '1001'
+                  deletion_instruction: privacy_erasure
+                  instruction_id: dsar-2026-0142
       responses:
-        '204':
-          description: Request accepted and all matching sessions soft-deleted. Empty body. Returned even when some or all `session_numbers` matched nothing (unknown or already deleted) — there is no per-item report.
+        '200':
+          description: 'Up to 20 sessions matched and were processed in the request. One result per matched session; numbers that matched nothing (unknown or already deleted) are skipped and do not appear. A result confirms deletion except when `face_retention_outcome` is `failed_retryable`: that session was NOT deleted and should be retried.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        session_id:
+                          type: string
+                          format: uuid
+                          description: The deleted session.
+                        session_number:
+                          type:
+                          - integer
+                          - 'null'
+                          description: The deleted session's number.
+                        face_retention_outcome:
+                          type: string
+                          enum:
+                          - retained_with_user
+                          - deleted
+                          - none
+                          - ineligible_no_vendor_user
+                          - failed_retryable
+                          description: 'What happened to the session''s face biometric data. `deleted`: the face embedding was deleted with the session (default). `retained_with_user`: the session is deleted and one image-free biometric template stays anchored to the User; see `biometric_template_uuid`. `none`: the session had no face embedding (for example a document-only KYC session without a liveness selfie; KYB sessions are never selected by this endpoint). `ineligible_no_vendor_user`: retention was requested but the session has no linked User, so the embedding was deleted with the session. `failed_retryable` (batch endpoint only): the group this session was deleted with could not be deleted (a storage service, a biometric store, or a monitoring provider was unavailable); this session is still in place, repeat the request for it.'
+                        biometric_template_uuid:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                          description: Id of the retained biometric template when `face_retention_outcome` is `retained_with_user`; `null` otherwise. Manage it through `/v3/biometric-templates/{template_uuid}/`.
+                        biometric_template_expires_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                          description: When the retained biometric template is deleted, when `face_retention_outcome` is `retained_with_user`; `null` when no template is retained.
+                        deleted_child_verifications:
+                          type: integer
+                          description: Always `0` on this endpoint, which deletes KYC sessions only. Deleting a Business Verification (KYB) session with `DELETE /v3/session/{sessionId}/delete/` reports the verifications it created that were deleted with it.
+              examples:
+                Mixed outcomes:
+                  value:
+                    results:
+                    - session_id: 4c5c7f3a-3b1d-4b7e-9c39-2b4f7e6a1d02
+                      session_number: 1001
+                      face_retention_outcome: deleted
+                      biometric_template_uuid: null
+                      biometric_template_expires_at: null
+                      deleted_child_verifications: 0
+                    - session_id: b8e1d2c3-4f5a-4b6c-8d7e-9f0a1b2c3d4e
+                      session_number: 1002
+                      face_retention_outcome: retained_with_user
+                      biometric_template_uuid: 9d2f4b6e-1c3a-4e8f-b7d5-0a1c2e3f4a5b
+                      biometric_template_expires_at: '2027-10-09T10:15:00Z'
+                      deleted_child_verifications: 0
+                    - session_id: 7a1e9c2d-5f4b-4c3a-8e2d-1b0a9f8e7d6c
+                      session_number: 1003
+                      face_retention_outcome: ineligible_no_vendor_user
+                      biometric_template_uuid: null
+                      biometric_template_expires_at: null
+                      deleted_child_verifications: 0
+                    - session_id: c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f
+                      session_number: 1004
+                      face_retention_outcome: failed_retryable
+                      biometric_template_uuid: null
+                      biometric_template_expires_at: null
+                      deleted_child_verifications: 0
+        '202':
+          description: More than 20 sessions matched. They are deleted in the background; poll `GET /v3/sessions/delete/{job_id}/` until `status` is `COMPLETED` or `FAILED`.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: 'A bulk session deletion running in the background: progress and counts per outcome, never which sessions it deleted.'
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    description: Poll `GET /v3/sessions/delete/{job_id}/` with this id.
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                    description: '`PENDING`: accepted, not started yet. `PROCESSING`: deleting; `processed` and `outcomes` are updating. `COMPLETED`: every selected session is accounted for. `FAILED`: the job stopped early; see `error`.'
+                  total:
+                    type: integer
+                    description: Sessions selected when the deletion was requested.
+                  processed:
+                    type: integer
+                    description: Sessions the job has finished with so far.
+                  outcomes:
+                    type: object
+                    description: How many sessions ended in each outcome. Every key is always present.
+                    properties:
+                      deleted:
+                        type: integer
+                        description: Sessions deleted together with their face embedding.
+                      none:
+                        type: integer
+                        description: Sessions deleted that had no face embedding.
+                      retained_with_user:
+                        type: integer
+                        description: Sessions deleted while one image-free biometric template was retained for their User, as the request or the application policy asked.
+                      ineligible_no_vendor_user:
+                        type: integer
+                        description: Sessions deleted, with their face embedding, because retention was requested but they had no linked User.
+                      failed_retryable:
+                        type: integer
+                        description: Sessions reported as not deleted. A job retries a group it could not delete by itself instead of counting it here.
+                      already_deleted:
+                        type: integer
+                        description: Selected sessions that were already deleted, for example by another request, when the job reached them.
+                  deleted_child_verifications:
+                    type: integer
+                    description: Verifications that the deleted business verifications created, deleted with them. Always `0` for a job started by `POST /v3/sessions/delete/`, which deletes KYC sessions only.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: '`null` unless `status` is `FAILED`; then why the deletion stopped. The sessions the job had not reached are still in place: repeat the request to delete them.'
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: When the deletion was requested.
+                  completed_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: When the job finished; `null` while it runs.
+              examples:
+                Job accepted:
+                  value:
+                    job_id: 5b8f2c1e-7d3a-4f6b-9e2c-1a0d8f7e6c5b
+                    status: PENDING
+                    total: 250
+                    processed: 0
+                    outcomes:
+                      deleted: 0
+                      none: 0
+                      retained_with_user: 0
+                      ineligible_no_vendor_user: 0
+                      failed_retryable: 0
+                      already_deleted: 0
+                    deleted_child_verifications: 0
+                    error: null
+                    created_at: '2026-10-09T10:15:00Z'
+                    completed_at: null
         '400':
           description: Validation error — nothing was deleted. Error values are arrays of message strings keyed by field name.
           content:
@@ -2764,6 +3112,15 @@ paths:
                   value:
                     session_numbers:
                     - All session_numbers must be numeric.
+                Privacy erasure cannot retain:
+                  summary: deletion_instruction privacy_erasure combined with retain_face_embeddings true
+                  value:
+                    retain_face_embeddings:
+                    - Privacy erasure cannot retain biometric templates.
+                No finite retention duration:
+                  summary: Retention requested without face_retention_days on the request or the application
+                  value:
+                    detail: A finite biometric-template retention duration is required.
         '403':
           description: Missing or invalid API key. This API returns `403` for authentication failures — never `401`.
           content:
@@ -2798,10 +3155,178 @@ paths:
         source: "curl -X POST \\\n  https://verification.didit.me/v3/sessions/delete/ \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"session_numbers\": [\"1001\", \"1002\", \"1003\"]\n  }'"
       - lang: python
         label: Python
-        source: "import requests\n\nresponse = requests.post(\n    \"https://verification.didit.me/v3/sessions/delete/\",\n    headers={\n        \"x-api-key\": \"YOUR_API_KEY\",\n        \"Content-Type\": \"application/json\",\n    },\n    json={\"session_numbers\": [\"1001\", \"1002\", \"1003\"]},\n)\nresponse.raise_for_status()  # 204 on success, even if some numbers matched nothing\n\n# Destructive: delete every KYC session in the application\n# requests.post(\n#     \"https://verification.didit.me/v3/sessions/delete/\",\n#     headers={\"x-api-key\": \"YOUR_API_KEY\"},\n#     json={\"delete_all\": True},\n# )"
+        source: "import requests\n\nresponse = requests.post(\n    \"https://verification.didit.me/v3/sessions/delete/\",\n    headers={\n        \"x-api-key\": \"YOUR_API_KEY\",\n        \"Content-Type\": \"application/json\",\n    },\n    json={\"session_numbers\": [\"1001\", \"1002\", \"1003\"]},\n)\nresponse.raise_for_status()\nif response.status_code == 202:  # more than 20 sessions: poll the job\n    job_id = response.json()[\"job_id\"]\nelse:  # 200: one result per matched session\n    print(response.json()[\"results\"])\n\n# Destructive: delete every KYC session in the application\n# requests.post(\n#     \"https://verification.didit.me/v3/sessions/delete/\",\n#     headers={\"x-api-key\": \"YOUR_API_KEY\"},\n#     json={\"delete_all\": True},\n# )"
       - lang: javascript
         label: JavaScript
-        source: "const response = await fetch(\n  'https://verification.didit.me/v3/sessions/delete/',\n  {\n    method: 'POST',\n    headers: {\n      'x-api-key': 'YOUR_API_KEY',\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({ session_numbers: ['1001', '1002', '1003'] }),\n  },\n);\nif (response.status !== 204) throw new Error(`HTTP ${response.status}`);"
+        source: "const response = await fetch(\n  'https://verification.didit.me/v3/sessions/delete/',\n  {\n    method: 'POST',\n    headers: {\n      'x-api-key': 'YOUR_API_KEY',\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({ session_numbers: ['1001', '1002', '1003'] }),\n  },\n);\nif (response.status !== 200 && response.status !== 202) throw new Error(`HTTP ${response.status}`);\nconst body = await response.json();\n// 200: body.results, one per matched session. 202: poll /v3/sessions/delete/${body.job_id}/"
+  /v3/sessions/delete/{job_id}/:
+    get:
+      summary: Get a bulk session deletion job
+      description: 'Progress of a bulk session deletion that `POST /v3/sessions/delete/` answered with `202` (more than 20 matching sessions, selected by `session_numbers` or with `delete_all`). Poll every few seconds while `status` is `PENDING` or `PROCESSING`; stop when it is `COMPLETED` or `FAILED`.
+
+
+        The job reports how many sessions ended in each outcome and how many it has processed, never which sessions it deleted. A `FAILED` job carries the reason in `error`; the sessions it had not reached are still in place, so repeat the deletion request to delete them.
+
+
+        **Authentication:** API key in the `x-api-key` header. A job is only visible to the application that created it; any other `job_id` returns `404`. Missing or invalid credentials return `403`; this API never returns `401`.'
+      operationId: get_session_deletion_job
+      tags:
+      - Sessions
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The `job_id` returned with the `202` from `POST /v3/sessions/delete/`.
+      x-codeSamples:
+      - lang: curl
+        label: curl
+        source: "curl 'https://verification.didit.me/v3/sessions/delete/JOB_ID/' \\\n  -H 'x-api-key: YOUR_API_KEY'"
+      - lang: python
+        label: Python
+        source: "import time\nimport requests\n\nurl = 'https://verification.didit.me/v3/sessions/delete/JOB_ID/'\nwhile True:\n    job = requests.get(url, headers={'x-api-key': 'YOUR_API_KEY'}).json()\n    if job['status'] in ('COMPLETED', 'FAILED'):\n        break\n    time.sleep(3)\nprint(job['status'], job['outcomes'], job['error'])"
+      - lang: javascript
+        label: JavaScript
+        source: "const url = 'https://verification.didit.me/v3/sessions/delete/JOB_ID/';\nlet job;\ndo {\n  await new Promise((r) => setTimeout(r, 3000));\n  job = await (await fetch(url, { headers: { 'x-api-key': 'YOUR_API_KEY' } })).json();\n} while (job.status === 'PENDING' || job.status === 'PROCESSING');\nconsole.log(job.status, job.outcomes, job.error);"
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: 'A bulk session deletion running in the background: progress and counts per outcome, never which sessions it deleted.'
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    description: Poll `GET /v3/sessions/delete/{job_id}/` with this id.
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                    description: '`PENDING`: accepted, not started yet. `PROCESSING`: deleting; `processed` and `outcomes` are updating. `COMPLETED`: every selected session is accounted for. `FAILED`: the job stopped early; see `error`.'
+                  total:
+                    type: integer
+                    description: Sessions selected when the deletion was requested.
+                  processed:
+                    type: integer
+                    description: Sessions the job has finished with so far.
+                  outcomes:
+                    type: object
+                    description: How many sessions ended in each outcome. Every key is always present.
+                    properties:
+                      deleted:
+                        type: integer
+                        description: Sessions deleted together with their face embedding.
+                      none:
+                        type: integer
+                        description: Sessions deleted that had no face embedding.
+                      retained_with_user:
+                        type: integer
+                        description: Sessions deleted while one image-free biometric template was retained for their User, as the request or the application policy asked.
+                      ineligible_no_vendor_user:
+                        type: integer
+                        description: Sessions deleted, with their face embedding, because retention was requested but they had no linked User.
+                      failed_retryable:
+                        type: integer
+                        description: Sessions reported as not deleted. A job retries a group it could not delete by itself instead of counting it here.
+                      already_deleted:
+                        type: integer
+                        description: Selected sessions that were already deleted, for example by another request, when the job reached them.
+                  deleted_child_verifications:
+                    type: integer
+                    description: Verifications that the deleted business verifications created, deleted with them. Always `0` for a job started by `POST /v3/sessions/delete/`, which deletes KYC sessions only.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: '`null` unless `status` is `FAILED`; then why the deletion stopped. The sessions the job had not reached are still in place: repeat the request to delete them.'
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: When the deletion was requested.
+                  completed_at:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: When the job finished; `null` while it runs.
+              examples:
+                Processing:
+                  value:
+                    job_id: 5b8f2c1e-7d3a-4f6b-9e2c-1a0d8f7e6c5b
+                    status: PROCESSING
+                    total: 250
+                    processed: 100
+                    outcomes:
+                      deleted: 82
+                      none: 18
+                      retained_with_user: 0
+                      ineligible_no_vendor_user: 0
+                      failed_retryable: 0
+                      already_deleted: 0
+                    deleted_child_verifications: 0
+                    error: null
+                    created_at: '2026-10-09T10:15:00Z'
+                    completed_at: null
+                Completed:
+                  value:
+                    job_id: 5b8f2c1e-7d3a-4f6b-9e2c-1a0d8f7e6c5b
+                    status: COMPLETED
+                    total: 250
+                    processed: 250
+                    outcomes:
+                      deleted: 204
+                      none: 44
+                      retained_with_user: 0
+                      ineligible_no_vendor_user: 0
+                      failed_retryable: 0
+                      already_deleted: 2
+                    deleted_child_verifications: 0
+                    error: null
+                    created_at: '2026-10-09T10:15:00Z'
+                    completed_at: '2026-10-09T10:16:40Z'
+                Failed:
+                  value:
+                    job_id: 5b8f2c1e-7d3a-4f6b-9e2c-1a0d8f7e6c5b
+                    status: FAILED
+                    total: 250
+                    processed: 100
+                    outcomes:
+                      deleted: 82
+                      none: 18
+                      retained_with_user: 0
+                      ineligible_no_vendor_user: 0
+                      failed_retryable: 0
+                      already_deleted: 0
+                    deleted_child_verifications: 0
+                    error: The deletion stopped before it finished. The sessions it had not reached are still in place; repeat the request to delete them.
+                    created_at: '2026-10-09T10:15:00Z'
+                    completed_at: '2026-10-09T10:15:52Z'
+        '403':
+          description: Missing or invalid API key. This API returns `403` for authentication failures, never `401`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Missing or invalid API key:
+                  summary: No x-api-key header, or the key is invalid
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: No deletion job with this `job_id` exists for the calling application. Jobs are only visible to the application that created them.
   /v3/sessions/{session_id}/reviews/:
     get:
       summary: List session reviews and activity log
@@ -4665,7 +5190,7 @@ paths:
                 vat_number:
                   type: string
                   maxLength: 64
-                  description: EU VAT number. Merged into the `registry_data` snapshot only — editing it here does not re-run VIES validation, so `vat_validation_status` and the other `vat_*` result fields are unchanged.
+                  description: EU VAT number. Merged into the `registry_data` snapshot only — editing it here does not re-run VAT and tax ID validation, so `vat_validation_status` and the other `vat_*` result fields are unchanged.
                 control_scheme:
                   type: string
                   description: Control / governance scheme when the registry exposes it. Stored in the registry snapshot only.
@@ -4778,6 +5303,7 @@ paths:
                     type:
                     - string
                     - 'null'
+                    description: Alternative, trading, former or original-language company names as text, when reported.
                   nature_of_business:
                     type:
                     - string
@@ -4826,25 +5352,49 @@ paths:
                     enum:
                     - valid
                     - invalid
+                    - format_valid
+                    - invalid_format
                     - could_not_validate
                     - not_applicable
-                    description: Result of the EU VIES check run at registry submit. `not_applicable` when no VAT number was provided or the company is outside the EU VAT area (EU-27 plus Northern Ireland).
+                    description: 'Result of validating the VAT number or, when there is none, the `tax_number`, at registry submit. `valid` / `invalid`: decided by the official registry of the country (EU VIES, Norway, Switzerland, Brazil, Colombia, Costa Rica, Ecuador, Paraguay; Poland also by its domestic VAT register). `format_valid` / `invalid_format`: decided by the country''s format and check-digit rules where no registry can be queried. `could_not_validate`: the registry was unavailable. `not_applicable`: no number, a country without registry or rules, or a sandbox session.'
+                  vat_validated_number:
+                    type:
+                    - string
+                    - 'null'
+                    description: The number that was checked, as the source knows it (for example the VAT number derived from a French SIREN or a Dutch RSIN). `null` when no check ran.
+                  vat_validation_source:
+                    type:
+                    - string
+                    - 'null'
+                    enum:
+                    - eu_vies
+                    - pl_vat_white_list
+                    - no_brreg
+                    - ch_uid_register
+                    - br_receita_federal
+                    - co_rues
+                    - cr_hacienda
+                    - ec_sri
+                    - py_dnit
+                    - format_rules
+                    - null
+                    description: 'The source that decided `vat_validation_status`: an official registry, or `format_rules`. `null` when no check ran.'
                   vat_validated_name:
                     type:
                     - string
                     - 'null'
-                    description: Trader name registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
+                    description: Name registered with the source that validated the number, when it discloses one. Only set when the status is `valid`.
                   vat_validated_address:
                     type:
                     - string
                     - 'null'
-                    description: Trader address registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
+                    description: Address registered with the source that validated the number, when it discloses one. Only set when the status is `valid`.
                   vat_checked_at:
                     type:
                     - string
                     - 'null'
                     format: date-time
-                    description: Timestamp of the VIES check. `null` when no check ran.
+                    description: Timestamp of the check. `null` when no check ran.
                   financial_summary:
                     type:
                     - object
@@ -4880,12 +5430,10 @@ paths:
                     description: Registry industry classification, when available.
                   accounts:
                     type:
-                    - array
+                    - object
                     - 'null'
-                    items:
-                      type: object
-                      additionalProperties: true
-                    description: Registry filing-accounts detail, when available.
+                    additionalProperties: true
+                    description: Registry filing dates, when available. Annual returns and general meetings use last_annual_return_date and last_agm_date; they are distinct from financial accounts.
                   registry_data:
                     type:
                     - object
@@ -5068,8 +5616,787 @@ paths:
       - lang: javascript
         label: JavaScript
         source: "const response = await fetch(\n  'https://verification.didit.me/v3/session/33333333-4444-5555-6666-777777777777/kyb/' +\n    '88888888-9999-aaaa-bbbb-cccccccccccc/update-data/',\n  {\n    method: 'PATCH',\n    headers: {\n      'x-api-key': process.env.DIDIT_API_KEY,\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({\n      company_name: 'Docs Probe Corp',\n      registration_number: 'DPC-001',\n      country_code: 'US',\n      incorporation_date: '2015-04-12',\n      legal_address: '1 Example Plaza, Wilmington, DE 19801',\n      registry_status: 'active',\n    }),\n  },\n);\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst company = await response.json(); // full company record"
+  /v3/session/{sessionId}/kyb/parties/{partyUuid}/:
+    patch:
+      summary: Skip (or re-require) a Key People party on a Business Verification (KYB) session
+      description: 'Exempt a Key People party from verification, or put it back in scope. This is the operator escape hatch for a party that can never finish its own check - most often because the individual KYC session handed to a UBO or director was deleted, which freezes that child''s status and leaves the KYB parked in `Awaiting User` with nothing left that could move it.
+
+
+        Setting `is_skipped: true` drops the party out of the Key People aggregation and immediately recomputes the `KYBKeyPeopleCheck` and the parent session status, so the business session can settle and then be approved or declined. Sending `is_skipped: false` puts the party back in scope and the check goes back to waiting on it.
+
+
+        Unlike the applicant-facing skip in the hosted Key People screen, this endpoint is **not** gated by the role''s `allow_skip` setting - that flag limits what the applicant may decide, not what your analyst may override. `requires_verification` is deliberately left untouched, so an overridden party reads as `requires_verification: true` **and** `is_skipped: true` and the record still shows what the rules asked for.
+
+
+        The party must belong to the session in the path (`404` with `"Party does not belong to the given session."` otherwise) and to your application. A PATCH that actually changes the flag fires the `data.updated` webhook on the business session with trigger `console_key_people_skip`; a PATCH that sets the flag to its current value is a no-op that echoes the party back.
+
+
+        Accepts an API key or a console user token; either way the credential needs the `write:businesses` permission.'
+      operationId: patch_v3_session_kyb_party_update
+      tags:
+      - Sessions
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        description: UUID of the parent Business Verification (KYB) session.
+        schema:
+          type: string
+          format: uuid
+          example: 33333333-4444-5555-6666-777777777777
+      - name: partyUuid
+        in: path
+        required: true
+        description: UUID of the Key People party to update (`key_people_checks[].submitted.parties[].uuid` on the business session decision). Must belong to the session referenced by `sessionId`.
+        schema:
+          type: string
+          format: uuid
+          example: 0a3f1e2c-7c2f-4a1b-9d55-2f8d2a5d6b41
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_skipped
+              properties:
+                is_skipped:
+                  type: boolean
+                  description: '`true` exempts the party from verification so the Key People check can settle without it; `false` puts it back in scope.'
+                  example: true
+      responses:
+        '200':
+          description: Party updated (or echoed unchanged when the flag already had this value). Returns the party - the same shape as an entry of `key_people_checks[].submitted.parties[]` on the business session decision.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Key People party record - the same shape as an entry of `key_people_checks[].submitted.parties[]` on the business session decision.
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: Party identifier.
+                  entity_type:
+                    type: string
+                    enum:
+                    - person
+                    - company
+                    description: Whether the party is an individual or a company.
+                  name:
+                    type: string
+                    description: Display name of the party.
+                  is_skipped:
+                    type: boolean
+                    description: Whether the party is exempt from verification.
+                  requires_verification:
+                    type: boolean
+                    description: What the role and threshold rules asked for. Left untouched by this endpoint.
+                  kyc_session_status:
+                    type:
+                    - string
+                    - 'null'
+                    description: Status of the linked individual KYC session, frozen at deletion time when the session was deleted.
+                  kyc_session_url:
+                    type:
+                    - string
+                    - 'null'
+                    description: Link to the linked individual KYC session. `null` when there is none or when it was deleted.
+                  kyc_session_deleted:
+                    type: boolean
+                    description: The linked individual KYC session was deleted, so it can never settle.
+                  kyb_sub_session_deleted:
+                    type: boolean
+                    description: Corporate-party counterpart of `kyc_session_deleted`.
+        '400':
+          description: 'Validation error on the request body. `is_skipped` is the only field this endpoint reads, and it is required. Field errors arrive as `{"<field>": ["<message>"]}`. Body validation runs *after* the party lookup, so a malformed `is_skipped` sent to a party that does not exist reports `404`, not `400`.'
+          content:
+            application/json:
+              examples:
+                Missing is_skipped:
+                  summary: Empty body, or a body that omits `is_skipped`
+                  value:
+                    is_skipped:
+                    - This field is required.
+                Non-boolean is_skipped:
+                  summary: Value is not a boolean — `"maybe"`, `2`, `[]`. Booleans plus `"true"`/`"false"`, `1`/`0` and `"yes"`/`"no"` are all accepted
+                  value:
+                    is_skipped:
+                    - Must be a valid boolean.
+                Null is_skipped:
+                  summary: '`is_skipped` is present but `null`'
+                  value:
+                    is_skipped:
+                    - This field may not be null.
+        '403':
+          description: Missing/invalid credentials or insufficient permissions. This API returns `403` for authentication failures — never `401`.
+          content:
+            application/json:
+              examples:
+                Invalid Credentials:
+                  summary: Missing or invalid x-api-key
+                  value:
+                    detail: Authentication credentials were not provided or are invalid.
+                Missing Privilege:
+                  summary: Credential lacks write:businesses
+                  value:
+                    detail: You do not have permission to perform this action.
+        '404':
+          description: 'Unknown party, or a party that belongs to a different session. Each case has a distinct `detail` message (see examples). Credential and permission checks run before the party lookup, so an unauthorised call reports `403` rather than `404`. There is no separate session lookup: an unknown `sessionId` paired with a party of yours reports the mismatch message.'
+          content:
+            application/json:
+              examples:
+                Unknown party:
+                  summary: No party with this UUID in your application
+                  value:
+                    detail: Not found.
+                Party / session mismatch:
+                  summary: partyUuid exists but hangs off another session
+                  value:
+                    detail: Party does not belong to the given session.
+        '429':
+          description: Shared write rate limit exceeded (300 POST/PATCH/DELETE requests per minute per API key). Inspect `Retry-After` and the `X-RateLimit-*` response headers before retrying.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Rate limited:
+                  summary: Write budget exhausted
+                  value:
+                    detail: Write request rate limit exceeded. You can make up to 300 requests per minute.
+  /v3/session/{sessionId}/signatures/{nodeId}/documents/{documentId}/file/:
+    get:
+      summary: Download a signed document
+      description: 'Download the signed PDF of one document of an Electronic Signature step. Use the `signed_file` path of `signatures[].documents[]` in the decision. The PDF holds the document the signer was shown with their field values stamped, the evidence page (unless `signature_evidence_page` is off) and the PAdES signature with its timestamp. Didit checks the file against `sha256_signed` before returning it.
+
+
+        Works for User Verification (KYC) and Business Verification (KYB) sessions. Needs `read:sessions`; your API key works. See the Electronic Signature report.'
+      operationId: get_v3_session_signature_document_file
+      tags:
+      - Sessions
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        description: The User Verification (KYC) or Business Verification (KYB) session.
+        schema:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+      - name: nodeId
+        in: path
+        required: true
+        description: 'The Electronic Signature step: `node_id` of the item in `signatures[]`.'
+        schema:
+          type: string
+          example: feature_signature
+      - name: documentId
+        in: path
+        required: true
+        description: '`id` of the document in `signatures[].documents[]`.'
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: The signed PDF.
+          headers:
+            Content-Disposition:
+              description: Attachment with the file name.
+              schema:
+                type: string
+                example: attachment; filename="agreement-signed.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Missing or invalid credentials, or a credential that can't read this session. Didit's API-key authentication answers `403`, never `401`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: You do not have permission to perform this action.
+        '404':
+          description: 'No signed document matches: the session, step or document doesn''t exist, was deleted, or isn''t signed yet.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Not signed yet:
+                  summary: The signer hasn't signed
+                  value:
+                    code: signature_not_signed
+                    detail: signature_not_signed
+                Unknown document:
+                  summary: No such document in this step
+                  value:
+                    code: signature_not_found
+                    detail: signature_not_found
+        '409':
+          description: The stored file no longer matches its recorded SHA-256. Nothing is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Changed file:
+                  summary: Stored file doesn't match its hash
+                  value:
+                    code: signature_document_changed
+                    detail: signature_document_changed
+  /v3/session/{sessionId}/signatures/{nodeId}/evidence/:
+    get:
+      summary: Download the signature evidence
+      description: 'Download a signer''s evidence PDF: the level and format, the signer and their verified identity session, the code confirmation, the IP address, each document with its original SHA-256 and field values, the certificate, the timestamp and the SHA-256 of every signed file. Use the `evidence_file` path of the signer''s item in `signatures[]`.
+
+
+        Always pass `signature_id` when a Business Verification step has several signers: without it, the route picks one of the step''s signers. Needs `read:sessions`; your API key works.'
+      operationId: get_v3_session_signature_evidence
+      tags:
+      - Sessions
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        description: The User Verification (KYC) or Business Verification (KYB) session.
+        schema:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+      - name: nodeId
+        in: path
+        required: true
+        description: 'The Electronic Signature step: `node_id` of the item in `signatures[]`.'
+        schema:
+          type: string
+          example: feature_signature
+      - name: signature_id
+        in: query
+        required: false
+        description: '`id` of the signer''s item in `signatures[]`.'
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: The evidence PDF.
+          headers:
+            Content-Disposition:
+              description: Attachment with the file name.
+              schema:
+                type: string
+                example: attachment; filename="signature-evidence.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Missing or invalid credentials, or a credential that can't read this session. Didit's API-key authentication answers `403`, never `401`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: You do not have permission to perform this action.
+        '404':
+          description: 'No evidence matches: the session, step or signer doesn''t exist, was deleted, or hasn''t signed.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Not signed yet:
+                  summary: The signer hasn't signed
+                  value:
+                    code: signature_not_signed
+                    detail: signature_not_signed
+                Unknown signer:
+                  summary: No such signature in this step
+                  value:
+                    code: signature_not_found
+                    detail: signature_not_found
+        '409':
+          description: The stored file no longer matches its recorded SHA-256. Nothing is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Changed file:
+                  summary: Stored file doesn't match its hash
+                  value:
+                    code: signature_document_changed
+                    detail: signature_document_changed
+  /v3/session/{sessionId}/signatures/{nodeId}/fields/{fieldId}/image/:
+    get:
+      summary: Download a signature image
+      description: Download the signature or initials a signer applied to a field, as PNG. Use the `image_url` of the field in `signatures[].documents[].fields[]`. Needs `read:sessions`; your API key works.
+      operationId: get_v3_session_signature_field_image
+      tags:
+      - Sessions
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        description: The User Verification (KYC) or Business Verification (KYB) session.
+        schema:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+      - name: nodeId
+        in: path
+        required: true
+        description: 'The Electronic Signature step: `node_id` of the item in `signatures[]`.'
+        schema:
+          type: string
+          example: feature_signature
+      - name: fieldId
+        in: path
+        required: true
+        description: The field on this signer's copy, as in the field's `image_url`.
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: The image.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: The stored image no longer matches its recorded SHA-256.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              example:
+                code: signature_document_changed
+                detail: signature_document_changed
+        '403':
+          description: Missing or invalid credentials, or a credential that can't read this session. Didit's API-key authentication answers `403`, never `401`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: You do not have permission to perform this action.
+        '404':
+          description: 'No image matches: the session, step or field doesn''t exist, was deleted, or has no applied signature or initials.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Unknown field:
+                  summary: No such field
+                  value:
+                    code: signature_field_not_found
+                    detail: signature_field_not_found
+  /v3/session/{sessionId}/signatures/{nodeId}/validate/:
+    post:
+      summary: Validate signatures again
+      description: 'Re-check the signed documents of an Electronic Signature step. Didit re-reads every signed PDF, checks its SHA-256 and validates the PAdES signature, the certificate, the revocation data and the timestamp, then saves the result in each signer''s `validation` and returns the updated items. Nothing is signed again. Send `signature_id` to check one signer; without it, every signer of the step is checked, and the call fails if any of them hasn''t signed.
+
+
+        Needs `write:sessions`; your API key works. In the console it''s the **Validate again** button.'
+      operationId: post_v3_session_signature_validate
+      tags:
+      - Sessions
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        description: The User Verification (KYC) or Business Verification (KYB) session.
+        schema:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+      - name: nodeId
+        in: path
+        required: true
+        description: 'The Electronic Signature step: `node_id` of the item in `signatures[]`.'
+        schema:
+          type: string
+          example: feature_signature
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                signature_id:
+                  type: string
+                  format: uuid
+                  description: '`id` of one signer''s item in `signatures[]`.'
+            example:
+              signature_id: 0e6c2a8e-6c2f-4b8e-9a51-3f2f6a7d9b10
+      responses:
+        '200':
+          description: The checked signers, with their updated `validation`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signatures:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignatureResult'
+        '400':
+          description: A stored signed PDF no longer matches the SHA-256 recorded when it was signed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Document changed:
+                  summary: A signed file no longer matches its hash
+                  value:
+                    code: signature_document_changed
+                    detail: signature_document_changed
+        '403':
+          description: Missing or invalid credentials, or a credential that can't read this session. Didit's API-key authentication answers `403`, never `401`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              example:
+                detail: You do not have permission to perform this action.
+        '404':
+          description: 'No signature matches: the session, step or signer doesn''t exist or was deleted.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Unknown signer:
+                  summary: No such signature in this step
+                  value:
+                    code: signature_not_found
+                    detail: signature_not_found
+        '409':
+          description: A signer of the step hasn't signed, so there's nothing to validate.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  detail:
+                    type: string
+              examples:
+                Not signed:
+                  summary: A signer hasn't signed yet
+                  value:
+                    code: signature_not_signed
+                    detail: signature_not_signed
 components:
   schemas:
+    SessionSignDocument:
+      type: object
+      required:
+      - file_name
+      - content_base64
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Title shown to the signer. Defaults to `file_name`.
+        file_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: File name, ending in `.pdf` or `.docx`.
+        content_base64:
+          type: string
+          format: byte
+          description: The file, base64-encoded. A PDF can have up to 20 MB and 100 pages, without a password, scripts or attached files. A Word file (`.docx`) can have up to 20 MB and is converted to PDF while the request runs, in at most 25 seconds; the PDF then has the same limits. Up to 5 Word files per session. A Word file with macros, tracked changes, links to external content or embedded objects is refused with `signature_document_not_supported`, and one that can't be converted returns `signature_document_conversion_failed`, each with a `reason`.
+        fields:
+          type: array
+          description: Optional fields to place on this document, up to 200. Pages and positions refer to the PDF, or to the converted PDF for a Word file. Without fields, the signer reads the document and agrees to it.
+          items:
+            $ref: '#/components/schemas/SignatureField'
+          maxItems: 200
+    SignatureFieldResult:
+      type: object
+      description: A field of a signed document, with its value on this signer's copy. See [Fields](/core-technology/electronic-signature/report-electronic-signature#fields).
+      properties:
+        key:
+          type: string
+          description: The field's key, as used in `sign.field_values`.
+        type:
+          type: string
+          enum:
+          - signature
+          - initials
+          - full_name
+          - date_signed
+          - text
+          - checkbox
+          - email
+          - data
+        role:
+          type: string
+          enum:
+          - verified_person
+          - legal_representative
+          - key_people
+        label:
+          type: string
+        page:
+          type: integer
+          description: Page number, from 1. For a Word document, a page of the converted PDF.
+        x:
+          type: number
+          description: Left edge, as a fraction of the page width.
+        y:
+          type: number
+          description: Top edge, as a fraction of the page height.
+        width:
+          type: number
+          description: Width, as a fraction of the page width.
+        height:
+          type: number
+          description: Height, as a fraction of the page height.
+        required:
+          type: boolean
+        value:
+          description: A string for `text`, `email`, `full_name`, `date_signed` and `data`, a boolean for a `checkbox`, and `true` for an applied signature or initials. `null` when empty.
+        display_value:
+          type:
+          - string
+          - 'null'
+          description: 'The value as stamped on the page: dates in the field''s `date_format`, `Yes` or `No` for a checkbox, `Signed` for a signature or initials.'
+        value_source:
+          type:
+          - string
+          - 'null'
+          enum:
+          - signer
+          - identity
+          - contact
+          - company
+          - session
+          - metadata
+          - api
+          - signing_time
+          - null
+          description: 'Where the value came from: `signer` (typed, ticked or applied by the signer), `identity` (the verified ID), `contact` (the verified email or phone), `company` (the verified company), `session` (`vendor_data`), `metadata`, `api` (`sign.field_values`) or `signing_time` (the date signed).'
+        filled_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        image_url:
+          type:
+          - string
+          - 'null'
+          description: 'Signature and initials only: the path of the applied image. See [Download a signature image](/sessions-api/electronic-signature/download-field-image).'
+        value_unavailable_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - source_empty
+          - null
+          description: '`source_empty` when a pre-filled field had no value in the session and `signature_field_data_missing_action` let the signer sign anyway.'
+    SessionImportJob:
+      type: object
+      required:
+      - uuid
+      - status
+      - import_type
+      - source_format
+      - source_filename
+      - total_rows
+      - processed_rows
+      - created_count
+      - updated_count
+      - skipped_count
+      - failed_count
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Import job id. Use this value to poll progress and fetch row errors.
+        status:
+          type: string
+          enum:
+          - PENDING
+          - PROCESSING
+          - COMPLETED
+          - FAILED
+          - PAUSED
+          - CANCELLED
+        import_type:
+          type: string
+          enum:
+          - user_verification
+          - business_verification
+          - status_rules
+          - transactions
+        source_format:
+          type: string
+          enum:
+          - csv
+          - ndjson
+        source_filename:
+          type: string
+        total_rows:
+          type: integer
+          format: int64
+        processed_rows:
+          type: integer
+          format: int64
+        checkpoint_row:
+          type: integer
+          format: int64
+        created_count:
+          type: integer
+          format: int64
+        updated_count:
+          type: integer
+          format: int64
+        skipped_count:
+          type: integer
+          format: int64
+        failed_count:
+          type: integer
+          format: int64
+        total_media_bytes:
+          type: integer
+          format: int64
+        last_error:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        started_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    SignatureFieldAnchor:
+      type: object
+      description: Places a field by a piece of text in the document instead of a position. Didit doesn't remove the text from the PDF, so write it in the same color as the page background. When the text isn't found, the call returns `400` with `field_anchor_not_found`. See [Place fields by anchor text](/sessions-api/create-session#place-fields-by-anchor-text).
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Text searched in the document. For a Word file, in the converted PDF.
+        occurrence:
+          type: string
+          enum:
+          - first
+          - all
+          default: first
+          description: '`all` places one field per match; the keys after the first get `_2`, `_3` and so on.'
+        offset_x:
+          type: number
+          description: Added to the left edge of the text, as a fraction of the page width.
+        offset_y:
+          type: number
+          description: Added to the top edge of the text, as a fraction of the page height.
+        width:
+          type: number
+          minimum: 0.02
+          maximum: 1
+          description: Width of the field, as a fraction of the page width.
+        height:
+          type: number
+          minimum: 0.012
+          maximum: 1
+          description: Height of the field, as a fraction of the page height.
     SessionImportError:
       type: object
       required:
@@ -5096,6 +6423,561 @@ components:
         created_at:
           type: string
           format: date-time
+    SignatureFieldValidation:
+      type:
+      - object
+      - 'null'
+      description: Rules for a `text` field's value. The console preview, the signing flow and the API apply the same rules.
+      properties:
+        kind:
+          type: string
+          enum:
+          - any
+          - letters
+          - number
+          - email
+          - pattern
+          description: '`letters`: letters in any script, spaces, hyphens and apostrophes. `number`: digits with an optional decimal separator. `pattern`: the value must match `pattern`.'
+        min_length:
+          type: integer
+          minimum: 0
+          maximum: 500
+          description: From `0` up to `max_length`.
+        max_length:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 120
+        pattern:
+          type:
+          - string
+          - 'null'
+          minLength: 1
+          maxLength: 200
+          description: 'Required with `kind: "pattern"`. A regular expression the whole value must match. Lookarounds and backreferences aren''t supported.'
+        message:
+          type:
+          - string
+          - 'null'
+          maxLength: 120
+          description: Shown to the signer instead of the default error.
+    SignatureField:
+      type: object
+      description: 'A field to place on a session document: which signer fills it, how, and where. Give either a position (`page`, `x`, `y`, `width` and `height`) or an `anchor`. Positions are fractions of the page as it''s displayed, from its top-left corner, rounded to 4 decimals, and the field must fit inside the page. A document takes up to 200 fields and one signer up to 500, and every role with fields on a document needs a `signature` or `initials` field there. See [Fields on the document](/core-technology/electronic-signature/overview#fields-on-the-document).'
+      required:
+      - key
+      - type
+      properties:
+        key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          description: Names the field in the results and in `sign.field_values`. Unique within the document.
+        type:
+          type: string
+          enum:
+          - signature
+          - initials
+          - full_name
+          - date_signed
+          - text
+          - checkbox
+          - email
+          - data
+          description: 'What the field holds. The signer applies their adopted `signature` and `initials`, types `text`, ticks a `checkbox`, and types an `email` when the session has no verified email. Didit fills `full_name` (the verified name), `date_signed` (the date of signing, in the signer''s time zone), `data` (from `prefill`) and a verified `email`, and shows them read-only. There is no date picker type: use `text`.'
+        role:
+          type: string
+          enum:
+          - verified_person
+          - legal_representative
+          - key_people
+          description: Who fills the field, with the `signature_signer` values. A step fills and stamps only the fields of its own signer. Defaults to the step's signer.
+        page:
+          type: integer
+          minimum: 1
+          description: Page number, from 1 to the document's page count. For a Word document, a page of the converted PDF.
+        x:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Left edge, as a fraction of the page width.
+        y:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Top edge, as a fraction of the page height.
+        width:
+          type: number
+          minimum: 0.02
+          maximum: 1
+          description: Width, as a fraction of the page width. A signature is at least `0.12` wide.
+        height:
+          type: number
+          minimum: 0.012
+          maximum: 1
+          description: Height, as a fraction of the page height. A signature is at least `0.035` high.
+        anchor:
+          $ref: '#/components/schemas/SignatureFieldAnchor'
+        required:
+          type: boolean
+          description: '`signature` and `initials` are required unless you set `false`. `full_name`, `date_signed` and `data` are always required. The signer can''t finish a document until its required fields have a value, and a required checkbox must be ticked.'
+        label:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Shown to the signer and in the results. Defaults from the type.
+        placeholder:
+          type:
+          - string
+          - 'null'
+          maxLength: 80
+          description: '`text` and `email` only.'
+        validation:
+          $ref: '#/components/schemas/SignatureFieldValidation'
+        prefill:
+          type:
+          - string
+          - 'null'
+          description: 'Where the value comes from: `identity.full_name`, `identity.first_name`, `identity.last_name`, `identity.date_of_birth` (`DD/MM/YYYY`), `identity.nationality`, `identity.document_number`, `identity.document_type`, `identity.issuing_country`, `identity.address`, `contact.email`, `contact.phone`, `company.name`, `company.registration_number`, `company.address`, `company.country` (KYB), `session.vendor_data`, `metadata.<key>` (a key of the session''s `metadata`) or `api.<key>` (a key of `sign.field_values`). Required for `data`. `full_name` always uses `identity.full_name` and `email` uses `contact.email`. The values of `data`, `full_name` and verified `email` fields are fixed when the signer starts signing.'
+        editable_when_prefilled:
+          type: boolean
+          default: false
+          description: '`text` and `email` only: the signer can change a pre-filled value.'
+        checked_by_default:
+          type: boolean
+          default: false
+          description: '`checkbox` only: the box starts ticked.'
+        date_format:
+          type: string
+          enum:
+          - DD/MM/YYYY
+          - MM/DD/YYYY
+          - YYYY-MM-DD
+          - D MMMM YYYY
+          default: DD/MM/YYYY
+          description: '`date_signed` only.'
+    SignatureResult:
+      type: object
+      description: One signer's result for one Electronic Signature step. See the [Electronic Signature report](/core-technology/electronic-signature/report-electronic-signature).
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Pass it as `signature_id` to download this signer's evidence or validate their signature.
+        node_id:
+          type: string
+          description: The workflow step that produced it.
+        status:
+          type: string
+          enum:
+          - intro
+          - review
+          - code
+          - signing
+          - signed
+          - declined
+          description: Where the signer is in the step. Only `signed` means the documents are signed.
+        verdict:
+          type: string
+          enum:
+          - Not Finished
+          - Approved
+          - In Review
+          - Declined
+          description: The step's outcome. A warning sets it through its rule; custom status rules apply after.
+        level:
+          type: string
+          enum:
+          - aes
+          - qes
+          description: '`aes`. `qes` is coming soon.'
+        format:
+          type: string
+          enum:
+          - pades
+        profile:
+          type:
+          - string
+          - 'null'
+          description: '`PAdES-B-LT` once signed.'
+        signer:
+          type: object
+          properties:
+            name:
+              type:
+              - string
+              - 'null'
+              description: Verified name.
+            capacity:
+              type: string
+              enum:
+              - self
+              - company
+            company:
+              type:
+              - string
+              - 'null'
+            role:
+              type:
+              - string
+              - 'null'
+              description: The key person's designation, as declared.
+            roles:
+              type: array
+              items:
+                type: string
+              description: The key person's structured roles, as declared for the company.
+            identity_session_id:
+              type: string
+              format: uuid
+              description: The KYC session that verified the signer.
+        identity_used:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            kyc_id:
+              type:
+              - string
+              - 'null'
+              format: uuid
+            verified:
+              type: boolean
+            expected_name:
+              type:
+              - string
+              - 'null'
+              description: The name the signer had to match.
+        certificate:
+          type:
+          - object
+          - 'null'
+          description: The certificate the documents were signed with. `null` until signed.
+          properties:
+            issuer:
+              type: string
+            issued_to:
+              type: string
+            serial:
+              type: string
+              description: Serial number, hexadecimal.
+            valid_from:
+              type: string
+              format: date-time
+            valid_until:
+              type: string
+              format: date-time
+        confirmation:
+          type: object
+          properties:
+            channel:
+              type: string
+              enum:
+              - email
+              - sms
+            destination:
+              type:
+              - string
+              - 'null'
+              description: The masked contact the code went to.
+            confirmed_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+            attempts:
+              type: integer
+              description: Codes entered, the right one included.
+        timestamp:
+          type:
+          - object
+          - 'null'
+          description: The trusted timestamp in the signature. `null` until signed.
+          properties:
+            time:
+              type: string
+              format: date-time
+            qualified:
+              type: boolean
+              description: Always `false` for AES.
+            valid:
+              type: boolean
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: The document on this signer's copy. Use it to download the signed file.
+              uuid:
+                type: string
+                format: uuid
+                description: Same as `id`.
+              title:
+                type: string
+              file_name:
+                type: string
+              pages:
+                type: integer
+                description: Pages of the document signed. For Word, of the converted PDF.
+              size_bytes:
+                type: integer
+              sha256_original:
+                type: string
+                description: SHA-256 of the document as the signer was shown it.
+              sha256_signed:
+                type:
+                - string
+                - 'null'
+                description: SHA-256 of the signed PDF, once signed.
+              status:
+                type: string
+                enum:
+                - signed
+                - declined
+                - not_signed
+                - not_reached
+                description: '`not_signed`: opened but not signed. `not_reached`: never opened.'
+              opened_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+              read_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When the signer reached the end of a document without fields, when the step requires it.
+              read_to_end:
+                type: boolean
+              consented_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When the signer agreed to a document without fields, or finished the fields of a document with fields.
+              consent:
+                type: boolean
+              signed_file:
+                type:
+                - string
+                - 'null'
+                description: Path of the signed PDF, once signed. See [Download a signed document](/sessions-api/electronic-signature/download-signed-document).
+              mode:
+                type: string
+                enum:
+                - fields
+                - read_and_agree
+                description: '`fields` for a document with fields, `read_and_agree` for a document without.'
+              source_format:
+                type: string
+                enum:
+                - pdf
+                - docx
+                description: '`pdf`, or `docx` for a Word document Didit converted to PDF.'
+              conversion:
+                type:
+                - object
+                - 'null'
+                description: '`null` for a PDF. For a Word document, the original file and the conversion.'
+                properties:
+                  from:
+                    type: string
+                    enum:
+                    - docx
+                  file_name:
+                    type: string
+                    description: Your original Word file name.
+                  sha256:
+                    type: string
+                    description: SHA-256 of your original Word file.
+                  size_bytes:
+                    type: integer
+                    description: Size of your original Word file.
+                  converter:
+                    type: string
+                    description: Version of the converter that produced the PDF.
+              fields:
+                type: array
+                description: Fields on the document, with their values. Empty for a document without fields.
+                items:
+                  $ref: '#/components/schemas/SignatureFieldResult'
+        adopted_signature:
+          type:
+          - object
+          - 'null'
+          description: The signature and initials the signer adopted for signature and initials fields. `null` until the signer adopts one.
+          properties:
+            method:
+              type: string
+              enum:
+              - typed
+              - drawn
+              description: '`typed`: the verified name in a handwriting style. `drawn`: drawn with a finger or a mouse.'
+            font:
+              type:
+              - string
+              - 'null'
+              description: The handwriting style of a typed signature. `null` when drawn.
+            adopted_at:
+              type: string
+              format: date-time
+        electronic_signature_consent_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the signer agreed, on the review screen, to sign the documents electronically. Set when any document has fields.
+        evidence_file:
+          type:
+          - string
+          - 'null'
+          description: Path of the evidence PDF, once signed. See [Download the signature evidence](/sessions-api/electronic-signature/download-evidence).
+        warnings:
+          type: array
+          description: Warnings raised for this signer. See [Electronic Signature warnings](/core-technology/electronic-signature/warnings-electronic-signature).
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                - SIGNATURE_DECLINED
+                - SIGNATURE_OTP_FAILED
+                - SIGNATURE_NAME_MISMATCH
+                - SIGNATURE_IDENTITY_NOT_VERIFIED
+                - SIGNATURE_DOCUMENT_CHANGED
+                - SIGNATURE_FIELD_DATA_MISSING
+              node_id:
+                type: string
+        validation:
+          type:
+          - object
+          - 'null'
+          description: 'The last cryptographic check of the signed documents. `null` until the documents are signed. If Didit can''t confirm the outcome of signing, it''s `{"valid": null, "reason": "signature_provider_outcome_unknown", "checked_at": ...}` and `status` stays `signing`: treat it as not signed.'
+          properties:
+            valid:
+              type:
+              - boolean
+              - 'null'
+              description: '`true` when every document is valid. `null` when the outcome of signing couldn''t be confirmed.'
+            reason:
+              type: string
+              description: 'Set when `valid` is `null`: `signature_provider_outcome_unknown`.'
+            checked_at:
+              type: string
+              format: date-time
+            documents:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  checked_at:
+                    type: string
+                    format: date-time
+                  valid:
+                    type: boolean
+                    description: '`true` when the signature and the timestamp are both valid and trusted.'
+                  integrity:
+                    type: boolean
+                    description: '`true` when the document is unchanged since signing.'
+                  trusted:
+                    type: boolean
+                    description: '`true` when the signing certificate chains to a trusted root.'
+                  revoked:
+                    type: boolean
+                  trusted_list:
+                    type: object
+                    description: 'EU Trusted List check. For AES: `{"status": "not_applicable", "reason": "aes_not_qualified"}`.'
+                    properties:
+                      status:
+                        type: string
+                      reason:
+                        type: string
+                  certificate:
+                    type:
+                    - object
+                    - 'null'
+                    description: The certificate the documents were signed with. `null` until signed.
+                    properties:
+                      issuer:
+                        type: string
+                      issued_to:
+                        type: string
+                      serial:
+                        type: string
+                        description: Serial number, hexadecimal.
+                      valid_from:
+                        type: string
+                        format: date-time
+                      valid_until:
+                        type: string
+                        format: date-time
+                  timestamp:
+                    type:
+                    - object
+                    - 'null'
+                    description: The trusted timestamp in the signature. `null` until signed.
+                    properties:
+                      time:
+                        type: string
+                        format: date-time
+                      qualified:
+                        type: boolean
+                        description: Always `false` for AES.
+                      valid:
+                        type: boolean
+        declined_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        declined_action:
+          type: string
+          enum:
+          - DECLINE
+          - REVIEW
+          - NO_ACTION
+        signed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          description: When the signing link stops working.
+        email_sent_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        email_unavailable_reason:
+          type:
+          - string
+          - 'null'
+        ip_address:
+          type:
+          - string
+          - 'null'
+          description: The signer's IP address when they asked for their code.
+        place:
+          type:
+          - string
+          - 'null'
+          description: 'Not collected: always `null`.'
+        place_unavailable_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - not_collected
     ReviewItem:
       type: object
       description: One entry in a session's review / activity feed. Status changes carry `previous_status`, `new_status`, `previous_value`, `new_value`, and `changed_fields`; comments carry `comment` and (for Console comments) `mentioned_emails`; the remaining fields are `null` or empty when they do not apply to the activity type.
@@ -5220,97 +7102,12 @@ components:
           format: date-time
           description: When the entry was written, ISO 8601 UTC.
           example: '2026-06-12T00:19:31.918735Z'
-    SessionImportJob:
-      type: object
-      required:
-      - uuid
-      - status
-      - import_type
-      - source_format
-      - source_filename
-      - total_rows
-      - processed_rows
-      - created_count
-      - updated_count
-      - skipped_count
-      - failed_count
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          description: Import job id. Use this value to poll progress and fetch row errors.
-        status:
-          type: string
-          enum:
-          - PENDING
-          - PROCESSING
-          - COMPLETED
-          - FAILED
-          - PAUSED
-          - CANCELLED
-        import_type:
-          type: string
-          enum:
-          - user_verification
-          - business_verification
-          - status_rules
-          - transactions
-        source_format:
-          type: string
-          enum:
-          - csv
-          - ndjson
-        source_filename:
-          type: string
-        total_rows:
-          type: integer
-          format: int64
-        processed_rows:
-          type: integer
-          format: int64
-        checkpoint_row:
-          type: integer
-          format: int64
-        created_count:
-          type: integer
-          format: int64
-        updated_count:
-          type: integer
-          format: int64
-        skipped_count:
-          type: integer
-          format: int64
-        failed_count:
-          type: integer
-          format: int64
-        total_media_bytes:
-          type: integer
-          format: int64
-        last_error:
-          type:
-          - string
-          - 'null'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        started_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        completed_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -5321,3 +7118,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

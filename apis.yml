@@ -328,6 +328,106 @@ apis:
     url: https://docs.didit.me/api-reference
   - type: Documentation
     url: https://docs.didit.me
+- aid: didit:didit-aml-ongoing-monitoring-api
+  name: Didit AML Ongoing Monitoring API
+  description: The AML Ongoing Monitoring API from Didit — 3 operation(s) for aml ongoing monitoring.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - AML Ongoing Monitoring
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-aml-ongoing-monitoring-api-openapi.yml
+- aid: didit:didit-biometric-templates-api
+  name: Didit Biometric Templates API
+  description: The Biometric Templates API from Didit — 4 operation(s) for biometric templates.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Biometric Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-biometric-templates-api-openapi.yml
+- aid: didit:didit-case-assignment-api
+  name: Didit Case Assignment API
+  description: The Case Assignment API from Didit — 6 operation(s) for case assignment.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Case Assignment
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-case-assignment-api-openapi.yml
+- aid: didit:didit-case-management-api
+  name: Didit Case Management API
+  description: The Case Management API from Didit — 15 operation(s) for case management.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Case Management
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-case-management-api-openapi.yml
+- aid: didit:didit-digital-id-wallets-api
+  name: Didit Digital ID wallets API
+  description: The Digital ID wallets API from Didit — 29 operation(s) for digital id wallets.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Digital ID wallets
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-digital-id-wallets-api-openapi.yml
+- aid: didit:didit-draft-api
+  name: Didit Draft API
+  description: The draft API from Didit — 1 operation(s) for draft.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - draft
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-draft-api-openapi.yml
+- aid: didit:didit-fraud-check-api
+  name: Didit Fraud Check API
+  description: The Fraud Check API from Didit — 3 operation(s) for fraud check.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Fraud Check
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-fraud-check-api-openapi.yml
+- aid: didit:didit-history-api
+  name: Didit History API
+  description: The history API from Didit — 1 operation(s) for history.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - history
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-history-api-openapi.yml
+- aid: didit:didit-networks-api
+  name: Didit Networks API
+  description: The Networks API from Didit — 16 operation(s) for networks.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - Networks
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-networks-api-openapi.yml
+- aid: didit:didit-publish-api
+  name: Didit Publish API
+  description: The publish API from Didit — 1 operation(s) for publish.
+  humanURL: https://docs.didit.me
+  baseURL: https://verification.didit.me
+  tags:
+  - publish
+  properties:
+  - type: OpenAPI
+    url: openapi/didit-publish-api-openapi.yml
 common:
 - type: Website
   url: https://www.didit.me/

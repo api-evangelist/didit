@@ -1,0 +1,795 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Fraud Check API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Fraud Check
+paths:
+  /v3/fraud/checks/{check_id}/:
+    get:
+      operationId: root_retrieve
+      description: Fetch a previously created check by its `check_id`.
+      summary: Retrieve a Fraud Check
+      parameters:
+      - in: path
+        name: check_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudCheckResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudClientCredentialsErrorMessage'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudClientCredentialsForbiddenErrorMessage'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      tags:
+      - Fraud Check
+  /v3/fraud/checks/:
+    post:
+      operationId: create_fraud_check
+      description: 'Submit one or more typed identifiers and receive normalization, fresh enrichment, authoritative validation where the country and identifier type are covered, independent risk dimensions and a recommendation in one response.
+
+
+        These profiles support identifier checks. Selfie-based identity binding (`biometric_identity`) requires profile version `2026-09-14.2` and a Brazilian CPF; it runs only with the user''s consent and when your organization is entitled to it. Earlier versions report it as `not_available_in_profile_version`. Modules that cannot run are reported as skipped with a deterministic reason; a source that could not answer is never reported as an identity mismatch.'
+      summary: Run a Fraud Check
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudCheckResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudClientCredentialsErrorMessage'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudClientCredentialsForbiddenErrorMessage'
+          description: ''
+        '409':
+          description: 'Conflict, returned without a charge: the `client_reference` was already used with a different request body; a check with the same `client_reference` is still running (retry after `Retry-After` seconds with the same reference); or the verification this check records into was deleted before the check completed.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                - error
+              examples:
+                different_body:
+                  summary: Reference reused with a different body
+                  value:
+                    error: client_reference has already been used with a different request body.
+                still_running:
+                  summary: A check with this reference is still running
+                  value:
+                    error: A check with this client_reference is already running. Retry with the same reference later.
+                verification_deleted:
+                  summary: The verification was deleted before the check completed
+                  value:
+                    error: This verification was deleted before the check completed.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying, sent when a check with the same `client_reference` is still running.
+              schema:
+                type: integer
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      tags:
+      - Fraud Check
+  /v3/fraud/checks/plan/:
+    post:
+      operationId: plan_create
+      description: Validate selected checks and estimate their price without executing, creating a session or billing.
+      summary: Plan a Fraud Check
+      tags:
+      - Fraud Check
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FraudCheckRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudCheckPlan'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudBadRequestErrorMessage'
+          description: ''
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+components:
+  schemas:
+    FraudCheckInput:
+      type: object
+      properties:
+        reference:
+          type: string
+          description: Redacted handle for the submitted identifier.
+        type:
+          $ref: '#/components/schemas/FraudTypeEnum'
+        namespace:
+          type: object
+          additionalProperties: {}
+        quality:
+          type: string
+        normalization:
+          type: object
+          additionalProperties: {}
+        availability:
+          $ref: '#/components/schemas/FraudAvailabilityEnum'
+      required:
+      - availability
+      - namespace
+      - normalization
+      - quality
+      - reference
+      - type
+    FraudDimensionEnum:
+      enum:
+      - identity
+      - contact
+      - device_network
+      - behavioral
+      - fraud_network
+      type: string
+      description: '* `identity` - Identity
+
+        * `contact` - Contact
+
+        * `device_network` - Device Network
+
+        * `behavioral` - Behavioral
+
+        * `fraud_network` - Fraud Network'
+    FraudCheckIdentityRelationship:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/FraudResultEnum'
+        reference_type:
+          type: string
+        country:
+          type: string
+        availability:
+          $ref: '#/components/schemas/FraudAvailabilityEnum'
+        reason_codes:
+          type: array
+          items:
+            type: string
+      required:
+      - availability
+      - country
+      - reason_codes
+      - reference_type
+      - result
+    FraudCheckRequestRequest:
+      type: object
+      properties:
+        client_reference:
+          type: string
+          minLength: 1
+          description: 'Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.'
+          maxLength: 255
+        profile:
+          type: string
+          minLength: 1
+          default: standard
+          description: Orchestration profile id. Defaults to the Didit `standard` profile.
+          maxLength: 64
+        profile_version:
+          type: string
+          minLength: 1
+          description: Pin a frozen profile version. Defaults to the current version of the profile.
+          maxLength: 32
+        subject:
+          $ref: '#/components/schemas/FraudCheckSubjectRequest'
+        context:
+          $ref: '#/components/schemas/FraudCheckContextRequest'
+        checks:
+          $ref: '#/components/schemas/FraudCheckModuleSelectionRequest'
+        vendor_data:
+          type: string
+          maxLength: 1000
+        metadata: {}
+      required:
+      - subject
+    FraudCheckModuleSelectionRequest:
+      type: object
+      properties:
+        include:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudExcludeEnum'
+        exclude:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudExcludeEnum'
+    FraudTypeEnum:
+      enum:
+      - email
+      - phone
+      - national_id
+      - tax_number
+      - passport_number
+      - driving_licence_number
+      - residence_permit_number
+      - voter_id
+      - external_id
+      type: string
+      description: '* `email` - Email
+
+        * `phone` - Phone
+
+        * `national_id` - National Id
+
+        * `tax_number` - Tax Number
+
+        * `passport_number` - Passport Number
+
+        * `driving_licence_number` - Driving Licence Number
+
+        * `residence_permit_number` - Residence Permit Number
+
+        * `voter_id` - Voter Id
+
+        * `external_id` - External Id'
+    FraudCheckIdentifierRequest:
+      type: object
+      properties:
+        type:
+          allOf:
+          - $ref: '#/components/schemas/FraudTypeEnum'
+          description: 'Identifier type. Determines which namespace fields are required.
+
+
+            * `email` - Email
+
+            * `phone` - Phone
+
+            * `national_id` - National Id
+
+            * `tax_number` - Tax Number
+
+            * `passport_number` - Passport Number
+
+            * `driving_licence_number` - Driving Licence Number
+
+            * `residence_permit_number` - Residence Permit Number
+
+            * `voter_id` - Voter Id
+
+            * `external_id` - External Id'
+        value:
+          type: string
+          minLength: 1
+          description: The identifier value, in any customary format.
+          maxLength: 255
+        country:
+          type: string
+          description: 'ISO-3166 alpha-2 or alpha-3 issuing country. Required for government identifier types: the same digits mean different people in different countries.'
+          maxLength: 3
+        issuer:
+          type: string
+          description: Optional issuing authority or sub-national issuer, when the country alone is not unique.
+          maxLength: 128
+      required:
+      - type
+      - value
+    FraudClientCredentialsErrorMessage:
+      type: object
+      properties:
+        detail:
+          type: string
+          default: 'Authentication failed: Invalid client access token.'
+    FraudCheckPlannedModule:
+      type: object
+      properties:
+        module:
+          $ref: '#/components/schemas/FraudExcludeEnum'
+        available:
+          type: boolean
+        availability_reason:
+          type:
+          - string
+          - 'null'
+        will_run:
+          type: boolean
+        selection_reason:
+          type:
+          - string
+          - 'null'
+        estimated_price:
+          type:
+          - string
+          - 'null'
+      required:
+      - availability_reason
+      - available
+      - estimated_price
+      - module
+      - selection_reason
+      - will_run
+    FraudCheckAttributesRequest:
+      type: object
+      description: Corroborating attributes. All optional; they widen module coverage.
+      properties:
+        first_name:
+          type: string
+          maxLength: 128
+        last_name:
+          type: string
+          maxLength: 128
+        full_name:
+          type: string
+          maxLength: 256
+        date_of_birth:
+          type: string
+          format: date
+        nationality:
+          type: string
+          maxLength: 3
+        gender:
+          type: string
+          maxLength: 16
+        address:
+          type: string
+          maxLength: 512
+        city:
+          type: string
+          maxLength: 128
+        state:
+          type: string
+          maxLength: 128
+        postal_code:
+          type: string
+          maxLength: 32
+    FraudBandEnum:
+      enum:
+      - low
+      - medium
+      - high
+      - unknown
+      type: string
+      description: '* `low` - Low
+
+        * `medium` - Medium
+
+        * `high` - High
+
+        * `unknown` - Unknown'
+    FraudCheckPlan:
+      type: object
+      properties:
+        profile_id:
+          type: string
+        profile_version:
+          type: string
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudCheckPlannedModule'
+        estimated_price:
+          type:
+          - string
+          - 'null'
+        currency:
+          type:
+          - string
+          - 'null'
+        is_sandbox:
+          type: boolean
+        can_afford:
+          type: boolean
+      required:
+      - can_afford
+      - currency
+      - estimated_price
+      - is_sandbox
+      - modules
+      - profile_id
+      - profile_version
+    FraudExcludeEnum:
+      enum:
+      - normalization
+      - email_risk
+      - email_social
+      - phone_social
+      - phone_risk
+      - ip_risk
+      - database_validation
+      - networks_same_org
+      - networks_cross_org
+      - biometric_identity
+      type: string
+      description: '* `normalization` - Normalization
+
+        * `email_risk` - Email Risk
+
+        * `email_social` - Email Social
+
+        * `phone_social` - Phone Social
+
+        * `phone_risk` - Phone Risk
+
+        * `ip_risk` - Ip Risk
+
+        * `database_validation` - Database Validation
+
+        * `networks_same_org` - Networks Same Org
+
+        * `networks_cross_org` - Networks Cross Org
+
+        * `biometric_identity` - Biometric Identity'
+    FraudClientCredentialsForbiddenErrorMessage:
+      type: object
+      properties:
+        detail:
+          type: string
+          default: Forbidden - User doesn't have permission
+    FraudStatusEnum:
+      enum:
+      - planned
+      - completed
+      - skipped
+      - failed
+      type: string
+      description: '* `planned` - Planned
+
+        * `completed` - Completed
+
+        * `skipped` - Skipped
+
+        * `failed` - Failed'
+    FraudCheckContextRequest:
+      type: object
+      properties:
+        ip_address:
+          type: string
+          minLength: 1
+        user_agent:
+          type: string
+          maxLength: 512
+        country:
+          type: string
+          description: Country the subject claims to be in. Contextual only - never proof of identity ownership.
+          maxLength: 3
+        purpose:
+          type: string
+          maxLength: 128
+        consent_obtained:
+          type: boolean
+    FraudProcessingStatusEnum:
+      enum:
+      - pending
+      - running
+      - completed
+      - failed
+      type: string
+      description: '* `pending` - Pending
+
+        * `running` - Running
+
+        * `completed` - Completed
+
+        * `failed` - Failed'
+    FraudCheckModuleReport:
+      type: object
+      properties:
+        module:
+          $ref: '#/components/schemas/FraudExcludeEnum'
+        status:
+          $ref: '#/components/schemas/FraudStatusEnum'
+        reason:
+          type:
+          - string
+          - 'null'
+        latency_ms:
+          type: integer
+        freshness:
+          type:
+          - string
+          - 'null'
+        billable_units:
+          type: integer
+      required:
+      - billable_units
+      - freshness
+      - latency_ms
+      - module
+      - reason
+      - status
+    FraudCheckRisk:
+      type: object
+      properties:
+        dimension:
+          $ref: '#/components/schemas/FraudDimensionEnum'
+        score:
+          type:
+          - integer
+          - 'null'
+        band:
+          $ref: '#/components/schemas/FraudBandEnum'
+        availability:
+          $ref: '#/components/schemas/FraudAvailabilityEnum'
+        requested_but_unavailable:
+          type: boolean
+          description: True when the request supplied everything this dimension needed and the platform still could not answer it. Such a check is never recommended for approval on the strength of the dimensions that did answer.
+        reason_codes:
+          type: array
+          items:
+            type: string
+        evidence_indexes:
+          type: array
+          items:
+            type: integer
+      required:
+      - availability
+      - band
+      - dimension
+      - evidence_indexes
+      - reason_codes
+      - requested_but_unavailable
+      - score
+    FraudAvailabilityEnum:
+      enum:
+      - available
+      - not_requested
+      - no_reference
+      - insufficient_history
+      - unsupported_region
+      - source_unavailable
+      type: string
+      description: '* `available` - Available
+
+        * `not_requested` - Not Requested
+
+        * `no_reference` - No Reference
+
+        * `insufficient_history` - Insufficient History
+
+        * `unsupported_region` - Unsupported Region
+
+        * `source_unavailable` - Source Unavailable'
+    FraudRecommendationEnum:
+      enum:
+      - approve
+      - review
+      - reject
+      type: string
+      description: '* `approve` - Approve
+
+        * `review` - Review
+
+        * `reject` - Reject'
+    FraudBadRequestErrorMessage:
+      type: object
+      properties:
+        detail:
+          type: string
+          default: Bad Request - Invalid request data
+    FraudNextActionEnum:
+      enum:
+      - none
+      - manual_review
+      - step_up
+      - resubmit_capture
+      type: string
+      description: '* `none` - None
+
+        * `manual_review` - Manual Review
+
+        * `step_up` - Step Up
+
+        * `resubmit_capture` - Resubmit Capture'
+    FraudResultEnum:
+      enum:
+      - match
+      - mismatch
+      - inconclusive
+      - no_reference
+      type: string
+      description: '* `match` - Match
+
+        * `mismatch` - Mismatch
+
+        * `inconclusive` - Inconclusive
+
+        * `no_reference` - No Reference'
+    FraudCheckResponse:
+      type: object
+      properties:
+        check_id:
+          type: string
+          format: uuid
+        request_id:
+          type: string
+          format: uuid
+          description: Native verification session created for this check.
+        client_reference:
+          type:
+          - string
+          - 'null'
+        processing_status:
+          $ref: '#/components/schemas/FraudProcessingStatusEnum'
+        profile_id:
+          type: string
+        profile_version:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudCheckInput'
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudCheckModuleReport'
+        attribute_evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        compound_evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        risk:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudCheckRisk'
+        network:
+          type: object
+          additionalProperties: {}
+        enrichment:
+          type: object
+          additionalProperties: {}
+        identity_relationship:
+          allOf:
+          - $ref: '#/components/schemas/FraudCheckIdentityRelationship'
+        recommendation:
+          $ref: '#/components/schemas/FraudRecommendationEnum'
+        next_action:
+          $ref: '#/components/schemas/FraudNextActionEnum'
+        decision_reasons:
+          type: array
+          items:
+            type: string
+        coverage:
+          type: object
+          additionalProperties: {}
+        usage:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        vendor_data:
+          type:
+          - string
+          - 'null'
+        metadata: {}
+      required:
+      - attribute_evidence
+      - check_id
+      - client_reference
+      - completed_at
+      - compound_evidence
+      - coverage
+      - created_at
+      - decision_reasons
+      - inputs
+      - modules
+      - network
+      - next_action
+      - processing_status
+      - profile_id
+      - profile_version
+      - recommendation
+      - risk
+      - usage
+    FraudCheckSubjectRequest:
+      type: object
+      properties:
+        selfie:
+          type: string
+          minLength: 1
+          description: Base64 JPEG, PNG or WebP selfie, up to 6 MB. No reference image or URL.
+          maxLength: 8388672
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudCheckIdentifierRequest'
+          description: One or more typed identifiers. One is enough.
+          maxItems: 10
+          minItems: 1
+        attributes:
+          $ref: '#/components/schemas/FraudCheckAttributesRequest'
+      required:
+      - identifiers
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

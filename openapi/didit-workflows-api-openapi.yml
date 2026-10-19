@@ -463,7 +463,7 @@ paths:
         source: "const res = await fetch(`https://verification.didit.me/v3/workflows/${settingsUuid}/`, {\n  method: \"PATCH\",\n  headers: {\n    'x-api-key': 'YOUR_API_KEY',\n    \"Content-Type\": \"application/json\",\n  },\n  body: JSON.stringify({ workflow_label: \"Premium KYC\" }),\n});\nif (!res.ok) throw new Error(`Didit ${res.status}`);\nconst workflow = await res.json();\nconsole.log(workflow.workflow_label);"
     delete:
       summary: Delete workflow
-      description: Permanently delete one workflow version (hard delete, no undo). Existing sessions keep their verification results but their workflow reference is cleared; other versions in the same `workflow_id` group are not deleted.
+      description: Permanently delete one workflow version (no undo). Existing sessions keep their verification results but their workflow reference is cleared; other versions in the same `workflow_id` group are not deleted.
       operationId: delete_workflow
       tags:
       - Workflows
@@ -512,6 +512,95 @@ paths:
         source: "const res = await fetch(`https://verification.didit.me/v3/workflows/${settingsUuid}/`, {\n  method: \"DELETE\",\n  headers: { 'x-api-key': 'YOUR_API_KEY' },\n});\nif (res.status !== 204) throw new Error(`Didit ${res.status}`);"
 components:
   schemas:
+    SimpleWorkflowUpdateRequest:
+      type: object
+      description: 'Update workflow metadata or replace the full linear feature list. STRICT field whitelist: any key not listed here is rejected with a 400.'
+      properties:
+        workflow_label:
+          type: string
+          maxLength: 50
+          description: Display name for the workflow (max 50 characters).
+        is_default:
+          type: boolean
+          description: Set this workflow as the default for new sessions.
+        status:
+          type: string
+          enum:
+          - draft
+          - published
+          description: Controls versioning. Omit to update the current version in place (drafts auto-publish). `published` on an already-published version creates and returns a NEW version. `draft` is only valid while the version is still a draft.
+        features:
+          type: array
+          minItems: 1
+          description: If provided, this replaces the full feature order and configuration.
+          items:
+            $ref: '#/components/schemas/SimpleWorkflowFeature'
+        is_white_label_enabled:
+          type: boolean
+          description: Enable white-label customization for sessions created with this workflow.
+        is_desktop_allowed:
+          type: boolean
+          description: Allow the verification flow to run on desktop browsers.
+        max_retry_attempts:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Maximum retry attempts allowed after a declined verification. `0` blocks the user after the first decline.
+        retry_window_days:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          maximum: 365
+          description: Rolling window in days used to count retries. `null` enforces an all-time limit.
+        face_liveness_max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Maximum liveness submissions per session. This value is also copied into generated liveness and age-estimation workflow nodes unless the feature-level config overrides it.
+        face_match_max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Maximum face-match submissions per session. This value is also copied into generated face-match workflow nodes unless the feature-level config overrides it.
+        session_expiration_time:
+          type: integer
+          minimum: 3600
+          maximum: 2419200
+          description: Seconds before an unfinished session expires. Minimum 1 hour (3600), maximum 4 weeks (2419200).
+    SimpleWorkflowFeature:
+      type: object
+      required:
+      - feature
+      properties:
+        feature:
+          type: string
+          description: Feature to run. Use the uppercase values shown here.
+          enum:
+          - OCR
+          - NFC
+          - LIVENESS
+          - FACE_MATCH
+          - PROOF_OF_ADDRESS
+          - QUESTIONNAIRE
+          - DOCUMENT_AI
+          - PHONE_VERIFICATION
+          - EMAIL_VERIFICATION
+          - DATABASE_VALIDATION
+          - AML
+          - IP_ANALYSIS
+          - AGE_ESTIMATION
+          - KYB_REGISTRY
+          - KYB_DOCUMENTS
+          - KYB_KEY_PEOPLE
+          - SIGNATURE
+        config:
+          type: object
+          description: 'Feature-specific settings. For `QUESTIONNAIRE`, include `questionnaire_uuid` with the `questionnaire_id` returned by the questionnaire create endpoint. For `OCR`, `methods` selects which ID Verification methods each country may use (document capture, non-doc lookup against a government or other authoritative source, and digital identity wallets); omit it and every country is document capture only. For `SIGNATURE`, see [Electronic Signature settings](/management-api/workflows/feature-configs#electronic-signature): `signature_level` accepts `aes` only for now, and workflow documents and their fields are managed in the console, so through the API send documents and fields per session with `signature_documents_source: "session"`.'
+          additionalProperties: true
+        label:
+          type: string
+          description: Optional internal label for this workflow node.
     WorkflowListItem:
       type: object
       description: One workflow version in the list view.
@@ -605,94 +694,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    SimpleWorkflowUpdateRequest:
-      type: object
-      description: 'Update workflow metadata or replace the full linear feature list. STRICT field whitelist: any key not listed here is rejected with a 400.'
-      properties:
-        workflow_label:
-          type: string
-          maxLength: 50
-          description: Display name for the workflow (max 50 characters).
-        is_default:
-          type: boolean
-          description: Set this workflow as the default for new sessions.
-        status:
-          type: string
-          enum:
-          - draft
-          - published
-          description: Controls versioning. Omit to update the current version in place (drafts auto-publish). `published` on an already-published version creates and returns a NEW version. `draft` is only valid while the version is still a draft.
-        features:
-          type: array
-          minItems: 1
-          description: If provided, this replaces the full feature order and configuration.
-          items:
-            $ref: '#/components/schemas/SimpleWorkflowFeature'
-        is_white_label_enabled:
-          type: boolean
-          description: Enable white-label customization for sessions created with this workflow.
-        is_desktop_allowed:
-          type: boolean
-          description: Allow the verification flow to run on desktop browsers.
-        max_retry_attempts:
-          type: integer
-          minimum: 0
-          maximum: 10
-          description: Maximum retry attempts allowed after a declined verification. `0` blocks the user after the first decline.
-        retry_window_days:
-          type:
-          - integer
-          - 'null'
-          minimum: 1
-          maximum: 365
-          description: Rolling window in days used to count retries. `null` enforces an all-time limit.
-        face_liveness_max_attempts:
-          type: integer
-          minimum: 1
-          maximum: 3
-          description: Maximum liveness submissions per session. This value is also copied into generated liveness and age-estimation workflow nodes unless the feature-level config overrides it.
-        face_match_max_attempts:
-          type: integer
-          minimum: 1
-          maximum: 3
-          description: Maximum face-match submissions per session. This value is also copied into generated face-match workflow nodes unless the feature-level config overrides it.
-        session_expiration_time:
-          type: integer
-          minimum: 3600
-          maximum: 2419200
-          description: Seconds before an unfinished session expires. Minimum 1 hour (3600), maximum 4 weeks (2419200).
-    SimpleWorkflowFeature:
-      type: object
-      required:
-      - feature
-      properties:
-        feature:
-          type: string
-          description: Feature to run. Use the uppercase values shown here.
-          enum:
-          - OCR
-          - NFC
-          - LIVENESS
-          - FACE_MATCH
-          - PROOF_OF_ADDRESS
-          - QUESTIONNAIRE
-          - DOCUMENT_AI
-          - PHONE_VERIFICATION
-          - EMAIL_VERIFICATION
-          - DATABASE_VALIDATION
-          - AML
-          - IP_ANALYSIS
-          - AGE_ESTIMATION
-          - KYB_REGISTRY
-          - KYB_DOCUMENTS
-          - KYB_KEY_PEOPLE
-        config:
-          type: object
-          description: Feature-specific settings. For `QUESTIONNAIRE`, include `questionnaire_uuid` with the `questionnaire_id` returned by the questionnaire create endpoint.
-          additionalProperties: true
-        label:
-          type: string
-          description: Optional internal label for this workflow node.
     SimpleWorkflowRequest:
       type: object
       description: 'Create a simple linear workflow. The API converts this feature list into a node-based workflow graph internally. STRICT field whitelist: any key not listed here (including `workflow_type`) is rejected with a 400.'
@@ -765,6 +766,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -775,3 +777,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

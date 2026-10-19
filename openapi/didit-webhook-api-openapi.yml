@@ -664,7 +664,7 @@ paths:
       - ApiKeyAuth: []
     delete:
       summary: Delete webhook destination
-      description: Soft-delete a webhook destination. Future events stop; historical delivery records are retained for audit. Calling again returns 404.
+      description: Delete a webhook destination. Future events stop being pushed to its URL. Past delivery records are not affected and stay queryable from the Business Console, so deleting a destination is not a way to remove your delivery history. Calling again returns 404.
       operationId: delete_webhook_destination
       tags:
       - Webhook
@@ -718,16 +718,6 @@ paths:
       - ApiKeyAuth: []
 components:
   schemas:
-    WebhookSubscribedEvents:
-      type: array
-      description: Event filter for this webhook destination. Didit delivers only webhooks whose event type exactly matches one of these values — there is no wildcard subscription. When sent, the list must contain at least one valid event (an explicit `[]` is rejected with 400); a destination whose list is empty (field omitted at create) receives nothing. On update the list is replaced wholesale, never merged.
-      minItems: 1
-      uniqueItems: true
-      items:
-        $ref: '#/components/schemas/WebhookEvent'
-      example:
-      - status.updated
-      - data.updated
     WebhookEvent:
       type: string
       description: Supported webhook event name. Use these exact strings in `subscribed_events`; unsupported values are rejected.
@@ -742,11 +732,22 @@ components:
       - transaction.created
       - transaction.status.updated
       - travel_rule.status.updated
+    WebhookSubscribedEvents:
+      type: array
+      description: Event filter for this webhook destination. Didit delivers only webhooks whose event type exactly matches one of these values — there is no wildcard subscription. When sent, the list must contain at least one valid event (an explicit `[]` is rejected with 400); a destination whose list is empty (field omitted at create) receives nothing. On update the list is replaced wholesale, never merged.
+      minItems: 1
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/WebhookEvent'
+      example:
+      - status.updated
+      - data.updated
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -757,3 +758,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

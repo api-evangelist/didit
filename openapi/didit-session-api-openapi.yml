@@ -14,7 +14,7 @@ paths:
       description: 'Retrieve the complete decision report for a verification session — the rolled-up session `status` plus one report per verification feature the workflow executed. This is the canonical read endpoint for both User Verification (KYC) and Business Verification (KYB) sessions: the same path serves both, and the top-level `session_kind` discriminator tells you which shape you received (`"user"` or `"business"`).
 
 
-        **Every feature report is a plural array.** V3 workflows are graphs that can run the same feature more than once, so each block (`id_verifications`, `nfc_verifications`, `liveness_checks`, `face_matches`, `poa_verifications`, `document_ai_documents`, `phone_verifications`, `email_verifications`, `aml_screenings`, `ip_analyses`, `database_validations`, `questionnaire_responses`) is a JSON array whose items each carry a `node_id` identifying the workflow graph node that produced them. Read NFC as `response.nfc_verifications[0]` — never as a singular `nfc` field. A block is `null` until the workflow has run that feature at least once; features the workflow does not include never appear with data.
+        **Every feature report is a plural array.** V3 workflows are graphs that can run the same feature more than once, so each block (`id_verifications`, `nfc_verifications`, `liveness_checks`, `face_matches`, `poa_verifications`, `document_ai_documents`, `phone_verifications`, `email_verifications`, `aml_screenings`, `ip_analyses`, `database_validations`, `questionnaire_responses`) is a JSON array whose items each carry a `node_id` identifying the workflow graph node that produced them. Read NFC as `response.nfc_verifications[0]` — never as a singular `nfc` field. A block is `null` until the workflow has run that feature at least once; features the workflow does not include never appear with data. Electronic Signature results are in `signatures`, which is present only when the workflow has an Electronic Signature step.
 
 
         **When to call.** The recommended pattern is event-driven: wait for the `status.updated` webhook that fires when the session reaches a decision (`Approved`, `Declined`, `In Review`), then call this endpoint once to fetch the full report. Polling also works — the endpoint can be called at any point in the session lifecycle and returns the data produced so far — but webhook-then-fetch is cheaper and faster. Media URLs in the response (document images, videos, PDFs) are short-lived presigned links: fetch them promptly or re-request the decision to get fresh ones, and do not persist them as long-term references.
@@ -188,6 +188,22 @@ paths:
                         formatted_address: Avda de Madrid 34, 28822 Madrid, Spain
                       front_image_camera_front_face_match_score: 95.5
                       back_image_camera_front_face_match_score: 93.2
+                      document_selfie_face_matches:
+                      - session_id: 3f0c9a52-7b1e-4d68-a2c4-5e9d8b7f1a20
+                        session_number: 1180
+                        similarity_percentage: 97.4
+                        vendor_data: user_ref_001
+                        vendor_user_id: null
+                        biometric_template_id: null
+                        verification_date: '2026-09-02T09:15:00Z'
+                        user_details:
+                          full_name: Jane Doe
+                        match_image_url: https://<media-host>/match_face.jpg
+                        status: Approved
+                        is_blocklisted: false
+                        is_allowlisted: false
+                        api_service: null
+                        source: session
                       front_image_quality_score:
                         focus_score: 85.3
                         brightness_score: 92.1
@@ -237,9 +253,110 @@ paths:
                         short_description: QR not detected
                         long_description: The system couldn't find or read the QR code on the document, which is necessary for document verification. This could be due to poor image quality or an unsupported document type.
                         node_id: feature_ocr_1
+                      verification_method: document
+                      assurance: documentary
+                      wallet_provider: null
+                      fallback_from: null
+                      id_lookup: null
+                      wallet_verification: null
+                      document_liveness:
+                        portrait_replace:
+                          score: 96.46
+                          front: 96.46
+                          back: 98.2
+                          decline_threshold: 35
+                          review_threshold: 70
+                          bucket: approve
+                        printed_copy:
+                          score: 91.2
+                          front: 91.2
+                          back: 93.7
+                          decline_threshold: 35
+                          review_threshold: 77
+                          bucket: approve
+                        screen_replay:
+                          score: 99.9
+                          front: 99.9
+                          back: 99.5
+                          decline_threshold: 30
+                          review_threshold: 70
+                          bucket: approve
+                    - node_id: feature_ocr_2
+                      status: Approved
+                      issuing_state: ZAF
+                      issuing_state_name: South Africa
+                      first_name: Thabo
+                      last_name: Mokoena
+                      full_name: Thabo Mokoena
+                      date_of_birth: '1991-06-15'
+                      personal_number: '9106155043088'
+                      verification_method: id_lookup
+                      assurance: data_match
+                      wallet_provider: null
+                      fallback_from: null
+                      id_lookup:
+                        source: Department of Home Affairs
+                        checked_at: '2026-09-04T09:12:44Z'
+                        attempts: 1
+                        max_attempts: 2
+                        outcome: match
+                        comparison:
+                        - field: identification_number
+                          label: ID number
+                          provided: '9106155043088'
+                          record: '9106155043088'
+                          result: match
+                        - field: full_name
+                          label: Full name
+                          provided: Thabo Mokoena
+                          record: Thabo Mokoena
+                          result: match
+                        - field: date_of_birth
+                          label: Date of birth
+                          provided: '1991-06-15'
+                          record: '1991-06-15'
+                          result: match
+                        registry_portrait: https://<media-host>/registry_portrait.jpg
+                        face_match_score: 96.4
+                        source_errors: []
+                      wallet_verification: null
+                      warnings: []
+                    - node_id: feature_ocr_3
+                      status: Approved
+                      issuing_state: DNK
+                      issuing_state_name: Denmark
+                      first_name: Freja
+                      last_name: Nielsen
+                      full_name: Freja Nielsen
+                      date_of_birth: '1988-03-02'
+                      verification_method: wallet
+                      assurance: cryptographic
+                      wallet_provider: mitid
+                      fallback_from: null
+                      id_lookup: null
+                      wallet_verification:
+                        provider: mitid
+                        provider_name: MitID
+                        issuing_authority: Danish Agency for Digital Government
+                        issuing_country: DNK
+                        credential_type: person_identification
+                        level_of_assurance: substantial
+                        verified_at: '2026-09-04T09:12:44Z'
+                        signature_valid: true
+                        attributes:
+                          full_name: Freja Nielsen
+                          date_of_birth: '1988-03-02'
+                          cpr_alias: b0f1c2d3-e4f5-4678-9abc-def012345678
+                        portrait: null
+                        face_match_score: null
+                      warnings: []
                     nfc_verifications:
                     - node_id: feature_nfc_1
                       status: In Review
+                      is_nfc_skipped: false
+                      skip_reason: null
+                      chip_protocol: icao
+                      jpki: null
                       portrait_image: https://<media-host>/portrait.jpg
                       signature_image: https://<media-host>/signature.jpg
                       chip_data:
@@ -389,7 +506,7 @@ paths:
                       breaches:
                       - name: TAPAirPortugal
                         domain: flytap.com
-                        logo_path: https://logos.haveibeenpwned.com/TAPAirPortugal.png
+                        logo_path: https://logos.example.com/TAPAirPortugal.png
                         breach_date: '2022-08-25'
                         description: In August 2022, the Portuguese airline <a href="https://www.bleepingcomputer.com/news/security/ragnar-locker-ransomware-claims-attack-on-portugals-flag-airline/" target="_blank" rel="noopener">TAP Air Portugal was the target of a ransomware attack perpetrated by the Ragnar Locker gang</a> who later leaked the compromised data via a public dark web site. Over 5M unique email addresses were exposed alongside other personal data including names, genders, DoBs, phone numbers and physical addresses.
                         is_verified: true
@@ -503,6 +620,45 @@ paths:
                         additional_names: []
                       extra_files:
                       - https://<media-host>/extra_poa.pdf
+                      detected_codes:
+                      - type: QR_CODE
+                        page_number: 1
+                        position:
+                        - - 820
+                          - 1120
+                        - - 1002
+                          - 1120
+                        - - 1002
+                          - 1302
+                        - - 820
+                          - 1302
+                        x: 820
+                        y: 1120
+                        width: 182
+                        height: 182
+                        page_width: 1190
+                        page_height: 1684
+                        raw_payload: aHR0cHM6Ly9hZ3Vhc2RlbG5vcnRlLmNvbS9mYWN0dXJhLzk5ODgxMQ==
+                        parsed_payload: https://aguasdelnorte.com/factura/998811
+                      - type: CODE_128
+                        page_number: 1
+                        position:
+                        - - 112
+                          - 1480
+                        - - 560
+                          - 1480
+                        - - 560
+                          - 1540
+                        - - 112
+                          - 1540
+                        x: 112
+                        y: 1480
+                        width: 448
+                        height: 60
+                        page_width: 1190
+                        page_height: 1684
+                        raw_payload: MDA5OTg4MTEwMDA0Mg==
+                        parsed_payload: 0099881100042
                       warnings: []
                     document_ai_documents:
                     - status: Approved
@@ -520,6 +676,26 @@ paths:
                           balance: 15230.55
                           currency: EUR
                           statement_date: '2026-05-31'
+                        detected_codes:
+                        - type: QR_CODE
+                          page_number: 2
+                          position:
+                          - - 124
+                            - 86
+                          - - 306
+                            - 86
+                          - - 306
+                            - 268
+                          - - 124
+                            - 268
+                          x: 124
+                          y: 86
+                          width: 182
+                          height: 182
+                          page_width: 1190
+                          page_height: 1684
+                          raw_payload: SU5WLTIwMjYtMDA0Mg==
+                          parsed_payload: INV-2026-0042
                         fields:
                         - key: account_holder
                           name: Account holder
@@ -1049,6 +1225,8 @@ paths:
                         document_number: null
                       is_ongoing_monitoring_enabled: true
                       next_ongoing_monitoring_bill_date: '2026-07-24'
+                      last_ongoing_screening_at: '2026-09-12T04:03:11Z'
+                      last_ongoing_screening_datasets_updated_at: '2026-09-11T06:00:00Z'
                       warnings:
                       - feature: AML
                         risk: POSSIBLE_MATCH_FOUND
@@ -1125,7 +1303,7 @@ paths:
                           ip_city: Barcelona
                           is_vpn_or_tor: false
                           is_data_center: false
-                        confidence: 0
+                        confidence: 0.0
                         match_mode: co_occurrence
                       - session_id: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
                         session_number: 42830
@@ -1153,7 +1331,7 @@ paths:
                           ip_city: Madrid
                           is_vpn_or_tor: false
                           is_data_center: false
-                        confidence: 1
+                        confidence: 1.0
                         match_mode: deterministic
                         recovery_similarity: 0.9874
                         tls_ja4_corroborated: true
@@ -1234,7 +1412,7 @@ paths:
                         verification_status: null
                         is_from_registry: true
                         fetch_status: resolved
-                        alternative_names: []
+                        alternative_names: null
                         nature_of_business: 62012 - Business and domestic software development
                         registered_capital: 100 GBP
                         registered_capital_amount: '100.00'
@@ -1268,7 +1446,7 @@ paths:
                           is_active: true
                           kyc_status: Pending
                           kyc_session_url: https://verify.didit.me/session/def456ghi789
-                          effective_ownership_percent: 75
+                          effective_ownership_percent: 75.0
                         addresses:
                         - type: registered
                           address: 1 Example Street, London, EC1A 1AA
@@ -1299,7 +1477,7 @@ paths:
                         - id: ubo-1
                           name: John Doe
                           type: person
-                          ownership_percent: 75
+                          ownership_percent: 75.0
                       warnings: []
                     aml_screenings: null
                     document_verifications:
@@ -1320,7 +1498,7 @@ paths:
                             company_name:
                               document: ACME HOLDINGS LTD
                               registry: ACME HOLDINGS LTD
-                              score: 1
+                              score: 1.0
                               match: true
                             registration_number:
                               document: '12345678'
@@ -1470,7 +1648,7 @@ paths:
                           kyc_aml_categories: null
                           kyc_notification_sent_at: null
                           child_beneficial_owners: []
-                          effective_ownership_percent: 75
+                          effective_ownership_percent: 75.0
                       submitted:
                         parties:
                         - uuid: cccc3333-dddd-4444-eeee-555566667777
@@ -1492,8 +1670,8 @@ paths:
                           requires_verification: true
                           roles:
                           - role: ubo
-                            ownership_percent: 75
-                            voting_percent: 75
+                            ownership_percent: 75.0
+                            voting_percent: 75.0
                           - role: director
                             ownership_percent: null
                             voting_percent: null
@@ -1701,11 +1879,195 @@ paths:
                     description: '**Array of ID verification (OCR) reports** produced by ID-document steps in the workflow graph. Always a JSON array — read `id_verifications[0]` and iterate if your workflow can run more than one ID check (for example a primary check plus a step-up). `null` until at least one ID step has produced data. Each item is the full report, including `node_id`, feature-level `status`, extracted document fields, image URLs, quality scores, MRZ, address parsing, cross-session matches, and `warnings[]`.'
                     items:
                       type: object
-                      description: One ID verification report — the full report for a single OCR pass.
+                      description: One ID verification report - the full report for a single ID Verification step. `verification_method` says which of the three methods produced it (document capture, non-doc lookup or wallet sign-in) and the method-specific evidence block is populated accordingly.
                       properties:
                         node_id:
                           type: string
                           description: Workflow graph node id of the OCR step that produced this report.
+                        verification_method:
+                          type: string
+                          enum:
+                          - document
+                          - id_lookup
+                          - wallet
+                          description: Which ID Verification method produced this report. `document` - the user photographed a physical ID (the default, and the value on every session created before the other methods existed). `id_lookup` - the user typed their national ID number and it was checked against a government register or another authoritative source for that country (`id_lookup.source` names which). `wallet` - the user signed in with a government or bank digital identity.
+                        assurance:
+                          type: string
+                          enum:
+                          - documentary
+                          - data_match
+                          - cryptographic
+                          description: 'Assurance tier derived from `verification_method`: `documentary` for a document that was captured and checked, `data_match` for details that matched a record held by the source queried, `cryptographic` for attributes an identity provider authenticated and signed.'
+                        wallet_provider:
+                          type:
+                          - string
+                          - 'null'
+                          description: Catalog wallet id when `verification_method` is `wallet` (`mitid`, `bankid_se`, `itsme`, ...). `null` otherwise.
+                        fallback_from:
+                          type:
+                          - object
+                          - 'null'
+                          description: Why a non-document method ended the ID step. Set on the declined report when a lookup or a wallet sign-in failed and the country's fallback switch was `decline`. `null` otherwise.
+                          properties:
+                            method:
+                              type: string
+                              enum:
+                              - id_lookup
+                              - wallet
+                              description: The method that failed.
+                            reason:
+                              type: string
+                              description: The outcome that ended it, e.g. `no_match`, `provider_error`, `cancelled`, `timeout`.
+                            action:
+                              type: string
+                              description: The configured action that was taken, e.g. `decline`.
+                        id_lookup:
+                          type:
+                          - object
+                          - 'null'
+                          description: Registry evidence. Present only when `verification_method` is `id_lookup`; `null` otherwise.
+                          properties:
+                            source:
+                              type: string
+                              description: Customer-facing name of the source queried, e.g. `Department of Home Affairs` (a government register) or `UK credit bureau and financial services records` (not a government register). This is the only statement of provenance for the lookup; do not assume a government source.
+                            checked_at:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                              description: When the register answered.
+                            attempts:
+                              type: integer
+                              description: 1-based attempt number this report came from.
+                            max_attempts:
+                              type: integer
+                              description: Attempt budget configured for the country (1 to 5, default 1).
+                            outcome:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - match
+                              - partial_match
+                              - no_match
+                              - provider_error
+                              - format_rejected
+                              description: What the register answered. Only `match`, `partial_match` and `no_match` count against the attempt budget and bill.
+                            comparison:
+                              type: array
+                              description: 'One row per comparable field the source answered on, plus one row per source error. Comparison rows use the normalised field names below rather than the country''s request field keys, because several request fields (first and last name, or any of the identifier aliases) collapse into a single comparison. A source that failed appends a row with `field: "provider"` and `result: "error"`, so read `result` before treating a row as a field verdict.'
+                              items:
+                                type: object
+                                required:
+                                - field
+                                - label
+                                - provided
+                                - record
+                                - result
+                                properties:
+                                  field:
+                                    type: string
+                                    enum:
+                                    - identification_number
+                                    - full_name
+                                    - date_of_birth
+                                    - address
+                                    - provider
+                                    description: 'Normalised comparison field. `provider` is not a user field: it marks a source error row.'
+                                  label:
+                                    type: string
+                                    description: Display label for the row, e.g. `ID number`, `Full name`, `Provider`.
+                                  provided:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: What the user typed. `null` on a `provider` error row.
+                                  record:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: What the source held. On a `provider` error row this carries the error message instead.
+                                  result:
+                                    type: string
+                                    enum:
+                                    - match
+                                    - partial
+                                    - no_match
+                                    - error
+                                    description: Per-field comparison result. `error` appears only on a `provider` row and means that source did not answer; treat it as evidence about the query, never as a field mismatch.
+                            registry_portrait:
+                              type:
+                              - string
+                              - 'null'
+                              format: uri
+                              description: Short-lived presigned URL to the portrait the source returned. Only the four government registers that return one (South Africa, Nigeria, Argentina, Panama).
+                            face_match_score:
+                              type:
+                              - number
+                              - 'null'
+                              description: Selfie against the registry portrait, 0-100. Only where the register returns a portrait.
+                        wallet_verification:
+                          type:
+                          - object
+                          - 'null'
+                          description: Credential evidence. Present only when `verification_method` is `wallet`; `null` otherwise.
+                          properties:
+                            provider:
+                              type: string
+                              description: Catalog wallet id, e.g. `mitid`.
+                            provider_name:
+                              type:
+                              - string
+                              - 'null'
+                              description: Wallet name as the end user knows it, e.g. `MitID`.
+                            issuing_authority:
+                              type:
+                              - string
+                              - 'null'
+                              description: The authority behind the wallet, e.g. `Danish Agency for Digital Government`.
+                            issuing_country:
+                              type: string
+                              description: ISO 3166-1 alpha-3 country the wallet was offered in.
+                            credential_type:
+                              type:
+                              - string
+                              - 'null'
+                              description: Credential the wallet presented, e.g. `person_identification`.
+                            level_of_assurance:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - low
+                              - substantial
+                              - high
+                              description: The level of assurance the wallet asserted. A sign-in that asserts less than the level requested fails instead of downgrading.
+                            verified_at:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                              description: The wallet's authentication instant.
+                            signature_valid:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the signed assertion the wallet returned validated.
+                            attributes:
+                              type: object
+                              additionalProperties: true
+                              description: The attributes the wallet shared, keyed as the wallet's catalog entry lists them.
+                            portrait:
+                              type:
+                              - string
+                              - 'null'
+                              format: uri
+                              description: Short-lived presigned URL to the portrait the wallet shared, where it shares one.
+                            face_match_score:
+                              type:
+                              - number
+                              - 'null'
+                              description: Selfie against the wallet portrait, 0-100, where the wallet shares one.
                         status:
                           type: string
                           enum:
@@ -2056,6 +2418,98 @@ paths:
                           - number
                           - 'null'
                           description: Face match score between the portrait extracted from the back document image and the front camera image
+                        document_selfie_face_matches:
+                          type:
+                          - array
+                          - 'null'
+                          description: Previous sessions or face blocklist entries whose face matched the selfie the front camera took during document capture (Silent Capture Face Search). Same entry format as `liveness_checks[].matches`. `null` for sessions created before this field existed or when the search did not run; an empty array when it ran and found nothing. `match_image_url` is a presigned URL that expires.
+                          items:
+                            type: object
+                            properties:
+                              session_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                                description: Session ID of the matching face. `null` when `source` is `imported`, `list_entry`, or `retained_template`.
+                              session_number:
+                                type:
+                                - integer
+                                - 'null'
+                              similarity_percentage:
+                                type: number
+                                description: Face similarity between the two images, clamped to 0–100.
+                              vendor_data:
+                                type:
+                                - string
+                                - 'null'
+                                description: '`vendor_data` of the matching session or linked User for imported and retained-template faces.'
+                              vendor_user_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                                description: Linked User id for `imported` and `retained_template` matches and for session matches linked to a User. `null` for list entries and sessions without a User.
+                              biometric_template_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                                description: Id of the retained biometric template. Set only when `source` is `retained_template`; `null` otherwise.
+                              verification_date:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: When the matching face was captured, or when a retained template was created. `null` for list entries.
+                              user_details:
+                                type:
+                                - object
+                                - 'null'
+                                description: Identity data from the matching session or imported User profile. Always `null` for `retained_template` and `list_entry` matches.
+                                properties:
+                                  full_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  document_type:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  document_number:
+                                    type:
+                                    - string
+                                    - 'null'
+                              match_image_url:
+                                type:
+                                - string
+                                - 'null'
+                                format: uri
+                                description: Reference image for image-backed matches. Always `null` for `retained_template` matches because retained templates contain no image.
+                              status:
+                                type:
+                                - string
+                                - 'null'
+                                description: Lifecycle status of the matching session. `null` for non-session sources.
+                              is_blocklisted:
+                                type: boolean
+                                description: Whether the matching face is on a blocklist.
+                              is_allowlisted:
+                                type: boolean
+                                description: Whether the matching face is on an allowlist.
+                              api_service:
+                                type:
+                                - string
+                                - 'null'
+                                description: Standalone API service of the matching session (e.g. `PASSIVE_LIVENESS`, `FACE_MATCH`); `null` for workflow sessions and non-session sources.
+                              source:
+                                type: string
+                                enum:
+                                - session
+                                - imported
+                                - list_entry
+                                - retained_template
+                                description: 'Origin of the matching face: `session`, `imported` (User face upload), `list_entry` (allow/block list), or `retained_template` (an image-free biometric template stored on a User, listed under `/v3/biometric-templates/`).'
                         front_image_quality_score:
                           type:
                           - object
@@ -2209,14 +2663,153 @@ paths:
                                 - 'null'
                                 format: uri
                                 description: URL of the front document image from the matching document
+                        document_liveness:
+                          type:
+                          - object
+                          - 'null'
+                          description: Document-liveness scores per fraud type, reported whether or not a warning fired, so an approved document can still be audited. `null` when the check did not run.
+                          properties:
+                            portrait_replace:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                score:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Likelihood that the document is genuine for this fraud type, 0-100 (higher = more likely genuine). The lowest of the two sides - the value the decision used. `null` when neither side produced a usable score.
+                                front:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the front side; `null` when not captured or when the score was dropped.
+                                back:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the back side; `null` when not captured or when the score was dropped.
+                                decline_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The decline threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                review_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The review threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                bucket:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - approve
+                                  - review
+                                  - decline
+                                  - null
+                                  description: The fraud-type bucket saved at evaluation time. Null when there is no usable score, the check was not applied, or historical evaluation evidence is unavailable. Later workflow edits do not change it.
+                            printed_copy:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                score:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Likelihood that the document is genuine for this fraud type, 0-100 (higher = more likely genuine). The lowest of the two sides - the value the decision used. `null` when neither side produced a usable score.
+                                front:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the front side; `null` when not captured or when the score was dropped.
+                                back:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the back side; `null` when not captured or when the score was dropped.
+                                decline_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The decline threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                review_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The review threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                bucket:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - approve
+                                  - review
+                                  - decline
+                                  - null
+                                  description: The fraud-type bucket saved at evaluation time. Null when there is no usable score, the check was not applied, or historical evaluation evidence is unavailable. Later workflow edits do not change it.
+                            screen_replay:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                score:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Likelihood that the document is genuine for this fraud type, 0-100 (higher = more likely genuine). The lowest of the two sides - the value the decision used. `null` when neither side produced a usable score.
+                                front:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the front side; `null` when not captured or when the score was dropped.
+                                back:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: Score for the back side; `null` when not captured or when the score was dropped.
+                                decline_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The decline threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                review_threshold:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  description: The review threshold saved when this document was evaluated. Later workflow edits do not change it. Null when historical evaluation evidence is unavailable.
+                                bucket:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - approve
+                                  - review
+                                  - decline
+                                  - null
+                                  description: The fraud-type bucket saved at evaluation time. Null when there is no usable score, the check was not applied, or historical evaluation evidence is unavailable. Later workflow edits do not change it.
+                  nfc_skip_reason:
+                    type:
+                    - string
+                    - 'null'
+                    enum:
+                    - USER_SKIPPED
+                    - DOCUMENT_WITHOUT_CHIP
+                    - CHIP_CERTIFICATE_UNAVAILABLE
+                    - DEVICE_WITHOUT_NFC
+                    - INTEGRATION_WITHOUT_NFC_ACCESS
+                    - MRZ_KEY_UNAVAILABLE
+                    - JPKI_UNAVAILABLE
+                    description: 'Why NFC chip verification did not run, populated whenever the workflow includes an NFC step. `null` while NFC is pending or when the chip was actually read. Values: `USER_SKIPPED` - the user chose to skip on an NFC-capable device (allowed by `allow_nfc_skip`); `DOCUMENT_WITHOUT_CHIP` - the document has no readable NFC chip (not an ICAO 9303 electronic document); `CHIP_CERTIFICATE_UNAVAILABLE` - the issuing country''s signing certificate (CSCA) covering the document''s issue period is unavailable, so the chip signature cannot be verified; `DEVICE_WITHOUT_NFC` - the device reported no NFC reader; `INTEGRATION_WITHOUT_NFC_ACCESS` - the verification ran without a native SDK (e.g. in a web browser), which has no access to the phone''s NFC reader; `MRZ_KEY_UNAVAILABLE` - the chip access key could not be derived from the document''s MRZ; `JPKI_UNAVAILABLE` - the document is a Japan My Number Card, whose chip is read through JPKI, and JPKI was not available for this verification: it is not enabled, or the app''s native SDK cannot read My Number Cards.'
                   nfc_verifications:
                     type:
                     - array
                     - 'null'
-                    description: '**Array of NFC / ePassport reports** produced by NFC steps in the workflow graph. **This is always a JSON array, never a singular `nfc` object** — read `nfc_verifications[0]` and iterate if your workflow can run NFC more than once. `null` until at least one NFC step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `chip_data`, `authenticity` (SOD + DG integrity), `certificate_summary`, and `warnings[]`.'
+                    description: '**Array of NFC / ePassport reports** produced by NFC steps in the workflow graph. **This is always a JSON array, never a singular `nfc` object** — read `nfc_verifications[0]` and iterate if your workflow can run NFC more than once. `null` until at least one NFC step has produced data. Each item is the full report, including `node_id`, feature-level `status`, `chip_protocol`, `chip_data`, `authenticity` (SOD + DG integrity), `certificate_summary`, and `warnings[]`. A Japan My Number Card is read through JPKI instead of ICAO 9303: its item has `chip_protocol: "jpki"`, carries its evidence under `jpki`, and leaves the ICAO fields `null`. When the NFC step was bypassed before it could ever be offered (chipless document, missing certificate, no NFC capability reported, unreadable MRZ key, JPKI unavailable for a My Number Card), this stays `null` and `nfc_skip_reason` explains why; a skip at the step itself (user tapped skip, or the reader turned out unavailable at scan time) still produces a report with `is_nfc_skipped: true`.'
                     items:
                       type: object
-                      description: One NFC report — the full report for a single ePassport chip read.
+                      description: 'One NFC report: the full report for a single chip read (an ICAO 9303 ePassport or eID chip, or a Japan My Number Card read through JPKI).'
                       properties:
                         node_id:
                           type: string
@@ -2230,14 +2823,188 @@ paths:
                           - In Review
                           - Resub Requested
                           description: Feature-level status of this NFC step. Independent of the top-level session `status` — a session can reach its overall decision while an individual feature stays `In Review`.
+                        is_nfc_skipped:
+                          type: boolean
+                          description: '`true` when this NFC step was explicitly skipped instead of read; `skip_reason` says why.'
+                        skip_reason:
+                          type:
+                          - string
+                          - 'null'
+                          enum:
+                          - USER_SKIPPED
+                          - DOCUMENT_WITHOUT_CHIP
+                          - CHIP_CERTIFICATE_UNAVAILABLE
+                          - DEVICE_WITHOUT_NFC
+                          - INTEGRATION_WITHOUT_NFC_ACCESS
+                          - MRZ_KEY_UNAVAILABLE
+                          - JPKI_UNAVAILABLE
+                          description: Why this NFC step was skipped. Only set when `is_nfc_skipped` is `true`. Same taxonomy as the session-level `nfc_skip_reason`, which additionally covers the cases where NFC never produced a report at all.
+                        chip_protocol:
+                          type: string
+                          enum:
+                          - icao
+                          - jpki
+                          description: 'How the NFC step reads the chip. `icao`: ICAO 9303 ePassport or eID chip, opened with the access key from the MRZ. `jpki`: Japan My Number Card, where the card signs a one-time challenge after the holder enters the card PIN in a native SDK; the result is under `jpki`. Also set on skipped steps, so you can tell a skipped My Number Card read apart.'
+                        jpki:
+                          type:
+                          - object
+                          - 'null'
+                          description: What a Japan My Number Card read through JPKI proved. Present when `chip_protocol` is `jpki` and the card was read. `null` for ICAO chips, for skipped steps, and when the NFC step closed without any card read (that case raises `JPKI_SIGNATURE_INVALID`). Never carries the certificates, their serial numbers, the signatures or the 12-digit My Number.
+                          properties:
+                            certificate_types:
+                              type: array
+                              items:
+                                type: string
+                                enum:
+                                - user_authentication
+                                - signature
+                              description: The card certificates read. `user_authentication` (4-digit PIN) is always read; `signature` (signature PIN) is read when the NFC node's `jpki_request_attributes` setting is on.
+                            chain_valid:
+                              type: boolean
+                              description: '`true` when every certificate read chains to the JPKI certification authority, is inside its validity period and is a My Number Card certificate of its type.'
+                            signature_valid:
+                              type: boolean
+                              description: '`true` when every signature the card made over the one-time challenge verifies. The card only signs after its PIN is entered, so this proves possession of the card and knowledge of the PIN.'
+                            revocation_status:
+                              type: string
+                              enum:
+                              - good
+                              - revoked
+                              - unchecked
+                              description: '`good` when the revocation check confirmed every certificate is valid, `revoked` when any certificate is revoked (for example a card reported lost), `unchecked` when no revocation answer was available. `unchecked` is never treated as `good`: the NFC node''s `jpki_revocation_unchecked_action` decides the outcome (default `REVIEW`).'
+                            ca_generation:
+                              type:
+                              - string
+                              - 'null'
+                              description: Generation of the JPKI certification authority that issued the certificates, for example `2023`. `null` when no certificate chains to one.
+                            certificate_expires_at:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                              description: The earliest expiry among the certificates read.
+                            certificates:
+                              type: array
+                              items:
+                                type: object
+                                description: What one certificate read from the card proved. Never the certificate itself or its serial number.
+                                properties:
+                                  type:
+                                    type: string
+                                    enum:
+                                    - user_authentication
+                                    - signature
+                                    description: Which card certificate this entry describes.
+                                  chain_valid:
+                                    type: boolean
+                                    description: '`true` when the certificate chains to the JPKI certification authority of its type, is inside its validity period and is a My Number Card certificate of that type.'
+                                  signature_valid:
+                                    type: boolean
+                                    description: '`true` when the card''s signature over the one-time challenge verifies against this certificate.'
+                                  ca_generation:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Generation of the JPKI certification authority that issued the certificate, for example `2023`. `null` when no trusted issuer was found.
+                                  not_valid_before:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    format: date-time
+                                    description: Start of the certificate's validity period. `null` when the certificate could not be read.
+                                  not_valid_after:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    format: date-time
+                                    description: End of the certificate's validity period. `null` when the certificate could not be read.
+                                  failure:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    enum:
+                                    - unreadable_certificate
+                                    - untrusted_issuer
+                                    - expired
+                                    - not_yet_valid
+                                    - wrong_policy
+                                    - key_usage
+                                    - null
+                                    description: 'Why `chain_valid` is `false`: `unreadable_certificate`, `untrusted_issuer` (not issued by the JPKI certification authority of its type), `expired`, `not_yet_valid`, `wrong_policy` (not a My Number Card certificate of that type) or `key_usage` (the key may not sign). `null` when the chain is valid.'
+                              description: Per-certificate results, one entry per certificate read.
+                            attributes:
+                              type:
+                              - object
+                              - 'null'
+                              description: The holder's data from the signature certificate, once its chain is valid. `null` when the signature certificate was not requested or did not chain to the JPKI certification authority.
+                              properties:
+                                full_name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Name as registered, usually in Japanese script.
+                                date_of_birth:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  format: date
+                                  description: Date of birth, `YYYY-MM-DD`. `null` when the registered date is incomplete.
+                                gender:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - M
+                                  - F
+                                  - null
+                                  description: '`M`, `F`, or `null` when not registered.'
+                                address:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Registered address.
+                                name_substitute_characters:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Position string marking the characters of `full_name` that were replaced by a substitute because the original character is outside the standard character set. `null` when none were replaced.
+                                address_substitute_characters:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Position string marking substitute characters in `address`, as for `name_substitute_characters`.
+                            attributes_match_ocr:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: '`true` when the attributes match the data read from the photo of the same card, `false` when any attribute differs (`JPKI_AND_OCR_DATA_NOT_SAME`), `null` when nothing could be compared, including whenever `attributes` is `null`.'
+                            mismatched_attributes:
+                              type: array
+                              items:
+                                type: string
+                                enum:
+                                - full_name
+                                - date_of_birth
+                                - gender
+                                - address
+                              description: Names of the attributes that differ from the photo data, never their values. Empty when everything compared matches.
                         portrait_image:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: uri
+                          description: 'Presigned URL to the portrait read from the chip (ICAO DG2). `null` for a JPKI read (`chip_protocol: "jpki"`) and for skipped steps.'
                         signature_image:
-                          type: string
+                          type:
+                          - string
+                          - 'null'
                           format: uri
+                          description: 'Presigned URL to the holder''s signature image read from the chip (ICAO DG7), when the chip stores one. `null` for a JPKI read (`chip_protocol: "jpki"`) and for skipped steps.'
                         chip_data:
-                          type: object
+                          type:
+                          - object
+                          - 'null'
+                          description: 'Personal data parsed from the ICAO chip''s Data Groups. `null` for a JPKI read (`chip_protocol: "jpki"`) and for skipped steps.'
                           properties:
                             document_type:
                               type: string
@@ -2264,14 +3031,20 @@ paths:
                             place_of_birth:
                               type: string
                         authenticity:
-                          type: object
+                          type:
+                          - object
+                          - 'null'
+                          description: 'ICAO passive authentication: SOD signature (`sod_integrity`) and Data Group hashes (`dg_integrity`). `null` for a JPKI read, which reports its proof under `jpki`.'
                           properties:
                             sod_integrity:
                               type: boolean
                             dg_integrity:
                               type: boolean
                         certificate_summary:
-                          type: object
+                          type:
+                          - object
+                          - 'null'
+                          description: 'Summary of the ICAO Document Signer Certificate. `null` for a JPKI read (`chip_protocol: "jpki"`) and for skipped steps.'
                           properties:
                             issuer:
                               type: string
@@ -2364,7 +3137,7 @@ paths:
                           description: Estimated age of the person
                         matches:
                           type: array
-                          description: 'Similar faces found by the duplicate-face search (top matches, blocklisted/allowlisted entries first). Each entry''s `source` tells you where the matching face came from: `session` (another verification session), `imported` (a face uploaded against a vendor user), or `list_entry` (an org-managed allow/block list face). `session_id`, `session_number`, `status` and `api_service` are `null` for non-session sources. `imported` matches still populate `vendor_data`, `verification_date` and — when the vendor user has a name on file — `user_details` (with `full_name` only) from the vendor-user record; `list_entry` matches return all of these as `null`.'
+                          description: 'Similar faces found by the duplicate-face search (top matches, blocklisted/allowlisted entries first). Each entry''s `source` tells you where the matching face came from: `session` (another verification session), `imported` (a face uploaded against a vendor user), `list_entry` (an org-managed allow/block list face), or `retained_template` (an image-free biometric template stored on a User, listed under `/v3/biometric-templates/`). `session_id`, `session_number`, `status` and `api_service` are `null` for non-session sources. `imported` matches still populate `vendor_data`, `verification_date` and — when the vendor user has a name on file — `user_details` (with `full_name` only) from the vendor-user record; `retained_template` matches populate `vendor_user_id`, `vendor_data`, `biometric_template_id` and `verification_date`, while their image and identity fields are `null`; `list_entry` matches return all of these as `null`.'
                           items:
                             type: object
                             properties:
@@ -2373,7 +3146,7 @@ paths:
                                 - string
                                 - 'null'
                                 format: uuid
-                                description: Session ID of the matching face. `null` when `source` is `imported` or `list_entry`.
+                                description: Session ID of the matching face. `null` when `source` is `imported`, `list_entry`, or `retained_template`.
                               session_number:
                                 type:
                                 - integer
@@ -2385,15 +3158,30 @@ paths:
                                 type:
                                 - string
                                 - 'null'
+                                description: '`vendor_data` of the matching session or linked User for imported and retained-template faces.'
+                              vendor_user_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                                description: Linked User id for `imported` and `retained_template` matches and for session matches linked to a User. `null` for list entries and sessions without a User.
+                              biometric_template_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                                description: Id of the retained biometric template. Set only when `source` is `retained_template`; `null` otherwise.
                               verification_date:
                                 type:
                                 - string
                                 - 'null'
                                 format: date-time
+                                description: When the matching face was captured, or when a retained template was created. `null` for list entries.
                               user_details:
                                 type:
                                 - object
                                 - 'null'
+                                description: Identity data from the matching session or imported User profile. Always `null` for `retained_template` and `list_entry` matches.
                                 properties:
                                   full_name:
                                     type:
@@ -2412,6 +3200,7 @@ paths:
                                 - string
                                 - 'null'
                                 format: uri
+                                description: Reference image for image-backed matches. Always `null` for `retained_template` matches because retained templates contain no image.
                               status:
                                 type:
                                 - string
@@ -2434,7 +3223,8 @@ paths:
                                 - session
                                 - imported
                                 - list_entry
-                                description: 'Origin of the matching face: `session`, `imported` (vendor-user face upload), or `list_entry` (allow/block list).'
+                                - retained_template
+                                description: 'Origin of the matching face: `session`, `imported` (User face upload), `list_entry` (allow/block list), or `retained_template` (an image-free biometric template stored on a User, listed under `/v3/biometric-templates/`).'
                         warnings:
                           type: array
                           items:
@@ -3238,6 +4028,11 @@ paths:
                               node_id:
                                 type: string
                                 description: The workflow graph node ID that generated this warning
+                        detected_codes:
+                          type: array
+                          description: 'QR codes and barcodes detected across every processed page of the document. Empty when none are found. A located but undecodable QR code has `parsed_payload: null`.'
+                          items:
+                            $ref: '#/components/schemas/DocumentAIDetectedCode'
                   document_ai_documents:
                     type:
                     - array
@@ -3306,6 +4101,11 @@ paths:
                                 - 'null'
                                 additionalProperties: true
                                 description: Values extracted by Document AI, keyed by the configured field `key`. Each value is a string, number, or `null`.
+                              detected_codes:
+                                type: array
+                                description: 'QR codes and barcodes detected across every processed page. Empty when none are found. A located but undecodable QR code has `parsed_payload: null`.'
+                                items:
+                                  $ref: '#/components/schemas/DocumentAIDetectedCode'
                               fields:
                                 type: array
                                 description: The configured extraction fields for this document.
@@ -3511,6 +4311,11 @@ paths:
                         status:
                           type: string
                           description: Status of the questionnaire
+                  signatures:
+                    type: array
+                    description: Electronic Signature results, one item per signer and signature step, for User and Business Verification. Present only when the workflow has an Electronic Signature step; an empty array until a signer reaches it. See the [Electronic Signature report](/core-technology/electronic-signature/report-electronic-signature).
+                    items:
+                      $ref: '#/components/schemas/SignatureResult'
                   aml_screenings:
                     type:
                     - array
@@ -4110,7 +4915,19 @@ paths:
                           - string
                           - 'null'
                           format: date
-                          description: Date (YYYY-MM-DD) when this ongoing-monitoring subscription will next be billed. Computed as the date of the last ongoing-monitoring billing plus 365 days when `is_ongoing_monitoring_enabled = true`; otherwise `null`.
+                          description: Date (YYYY-MM-DD) when this ongoing-monitoring subscription will next be billed. Computed as the date of the last ongoing-monitoring billing plus 365 days when `is_ongoing_monitoring_enabled = true`; otherwise `null`. This is a billing date, not a screening date - use `last_ongoing_screening_at` for that.
+                        last_ongoing_screening_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                          description: When ongoing monitoring last completed a re-screening of this record, whether or not the result changed. `null` when the record has never been re-screened; it is never back-filled from the enablement or billing date.
+                        last_ongoing_screening_datasets_updated_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                          description: The most recent AML dataset update date the provider reported at the time of that screening. `null` when the provider reported no dataset dates; never estimated.
                         warnings:
                           type: array
                           items:
@@ -4813,9 +5630,10 @@ paths:
                               - string
                               - 'null'
                             alternative_names:
-                              type: array
-                              items:
-                                type: string
+                              type:
+                              - string
+                              - 'null'
+                              description: Alternative, trading, former or original-language company names as text, when reported.
                             nature_of_business:
                               type:
                               - string
@@ -4866,25 +5684,49 @@ paths:
                               enum:
                               - valid
                               - invalid
+                              - format_valid
+                              - invalid_format
                               - could_not_validate
                               - not_applicable
-                              description: Result of the EU VIES check run at registry submit. `not_applicable` when no VAT number was provided or the company is outside the EU VAT area (EU-27 plus Northern Ireland).
+                              description: 'Result of validating the VAT number or, when there is none, the `tax_number`, at registry submit. `valid` / `invalid`: decided by the official registry of the country (EU VIES, Norway, Switzerland, Brazil, Colombia, Costa Rica, Ecuador, Paraguay; Poland also by its domestic VAT register). `format_valid` / `invalid_format`: decided by the country''s format and check-digit rules where no registry can be queried. `could_not_validate`: the registry was unavailable. `not_applicable`: no number, a country without registry or rules, or a sandbox session.'
+                            vat_validated_number:
+                              type:
+                              - string
+                              - 'null'
+                              description: The number that was checked, as the source knows it (for example the VAT number derived from a French SIREN or a Dutch RSIN). `null` when no check ran.
+                            vat_validation_source:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - eu_vies
+                              - pl_vat_white_list
+                              - no_brreg
+                              - ch_uid_register
+                              - br_receita_federal
+                              - co_rues
+                              - cr_hacienda
+                              - ec_sri
+                              - py_dnit
+                              - format_rules
+                              - null
+                              description: 'The source that decided `vat_validation_status`: an official registry, or `format_rules`. `null` when no check ran.'
                             vat_validated_name:
                               type:
                               - string
                               - 'null'
-                              description: Trader name registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
+                              description: Name registered with the source that validated the number, when it discloses one. Only set when the status is `valid`.
                             vat_validated_address:
                               type:
                               - string
                               - 'null'
-                              description: Trader address registered with VIES, when the member state discloses it. Only set when the VAT number is `valid`.
+                              description: Address registered with the source that validated the number, when it discloses one. Only set when the status is `valid`.
                             vat_checked_at:
                               type:
                               - string
                               - 'null'
                               format: date-time
-                              description: Timestamp of the VIES check. `null` when no check ran.
+                              description: Timestamp of the check. `null` when no check ran.
                             financial_summary:
                               type:
                               - object
@@ -4926,6 +5768,53 @@ paths:
                                     - string
                                     - 'null'
                                     format: uri
+                                  first_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Given name when explicitly reported by the registry; not inferred from the full name.
+                                  last_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Family name when explicitly reported by the registry.
+                                  address:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Officer address reported by the registry.
+                                  appointment_date:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Date the officer was appointed.
+                                    format: date
+                                  termination_date:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Date the appointment ended, when reported.
+                                    format: date
+                                  date_of_birth:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Complete registry-reported birth date. Null when only a birth year or month is known.
+                                    format: date
+                                  date_of_birth_year:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 1
+                                    maximum: 9999
+                                    description: Registry-reported birth year, including when the full date is unavailable.
+                                  date_of_birth_month:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 1
+                                    maximum: 12
+                                    description: Registry-reported birth month. Null when only the year is known.
                             beneficial_owners:
                               type: array
                               items:
@@ -4982,27 +5871,75 @@ paths:
                                     type:
                                     - number
                                     - 'null'
+                                  company_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  registration_number:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  country_of_birth:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  email:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  nationality:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  designation:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  voting_min_shares:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  voting_max_shares:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  date_of_birth:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Complete birth date when reported.
+                                    format: date
+                                  appointment_date:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Appointment date when reported.
+                                    format: date
+                                  shareholding:
+                                    $ref: '#/components/schemas/KYBRegistryShareholding'
                             addresses:
                               type:
                               - array
                               - 'null'
+                              description: Every address the registry states, one canonical shape. Null when it states none.
                               items:
-                                type: object
+                                $ref: '#/components/schemas/KYBRegistryAddress'
                             industries:
                               type:
                               - array
                               - 'null'
+                              description: The activities the registry classifies the company under, one canonical shape. Null when it states none.
                               items:
-                                type: object
+                                $ref: '#/components/schemas/KYBRegistryIndustry'
                             accounts:
                               type:
-                              - array
+                              - object
                               - 'null'
-                              items:
-                                type: object
+                              additionalProperties: true
+                              description: Registry filing dates, when available. Annual returns and general meetings use last_annual_return_date and last_agm_date; they are distinct from financial accounts.
                             registry_data:
                               type: object
-                              description: Raw payload returned by the registry provider.
+                              description: 'Raw record returned by the registry source, kept for reviewers. Its shape differs by country and source and is not a stable contract: read the canonical fields (`addresses`, `industries`, `ownership`, `beneficial_owners[].shareholding`) instead.'
                             user_provided_data:
                               type: object
                               description: Data confirmed or edited by the end user.
@@ -5018,9 +5955,26 @@ paths:
                               format: date-time
                             is_editable:
                               type: boolean
+                            ownership:
+                              $ref: '#/components/schemas/KYBRegistryOwnership'
+                            registry_tier:
+                              type:
+                              - string
+                              - 'null'
+                              description: 'The registry tier the workflow ordered: `basic`, `shareholders` or `ubo`. Also in `ownership.tier_requested`.'
+                            registry_tier_delivered:
+                              type:
+                              - string
+                              - 'null'
+                              description: The tier the registry delivered and that is billed. Also in `ownership.tier_delivered`.
+                            registry_ownership_status:
+                              type:
+                              - string
+                              - 'null'
+                              description: '`not_requested`, `pending`, `delivered` or `unavailable`. Also in `ownership.status`.'
                         ownership_structure:
                           type: object
-                          description: Raw ownership-chain JSON as returned by the registry provider.
+                          description: Raw ownership snapshot kept for reviewers; its shape differs by registry source and is not a stable contract. Read `company.beneficial_owners` and `company.ownership` instead.
                         warnings:
                           type: array
                           items:
@@ -5090,21 +6044,21 @@ paths:
                                     type:
                                     - string
                                     - 'null'
+                                    description: Date the officer was appointed.
                                     format: date
-                                    description: Date the officer was appointed, when the registry provides it.
                                   termination_date:
                                     type:
                                     - string
                                     - 'null'
+                                    description: Date the appointment ended, when reported.
                                     format: date
-                                    description: Date the appointment ended. `null` for active officers.
                                   is_active:
                                     type: boolean
                                   address:
                                     type:
                                     - string
                                     - 'null'
-                                    description: Officer's address as recorded in the registry.
+                                    description: Officer address reported by the registry.
                                   aml_status:
                                     type:
                                     - string
@@ -5237,6 +6191,36 @@ paths:
                                     - string
                                     - 'null'
                                     description: ISO 8601 timestamp of the last verification-invite notification sent for this person's child session. `null` when none was sent.
+                                  first_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Given name when explicitly reported by the registry; not inferred from the full name.
+                                  last_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Family name when explicitly reported by the registry.
+                                  date_of_birth:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Complete registry-reported birth date. Null when only a birth year or month is known.
+                                    format: date
+                                  date_of_birth_year:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 1
+                                    maximum: 9999
+                                    description: Registry-reported birth year, including when the full date is unavailable.
+                                  date_of_birth_month:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 1
+                                    maximum: 12
+                                    description: Registry-reported birth month. Null when only the year is known.
                             beneficial_owners:
                               type: array
                               description: Beneficial owners discovered via the registry check, each enriched with the status of any child KYC session and AML screening spawned for them.
@@ -5261,6 +6245,7 @@ paths:
                                     type:
                                     - string
                                     - 'null'
+                                    description: Complete birth date when reported.
                                     format: date
                                   country_of_birth:
                                     type:
@@ -5270,17 +6255,14 @@ paths:
                                     type:
                                     - string
                                     - 'null'
-                                    format: email
                                   company_name:
                                     type:
                                     - string
                                     - 'null'
-                                    description: 'For corporate UBOs (`entity_type = company`): the owning company''s name.'
                                   registration_number:
                                     type:
                                     - string
                                     - 'null'
-                                    description: 'For corporate UBOs: the owning company''s registration number.'
                                   entity_type:
                                     type: string
                                     enum:
@@ -5453,6 +6435,20 @@ paths:
                                     - number
                                     - 'null'
                                     description: Parsed numeric ownership percentage — the max bound when available, otherwise the min bound. `null` when neither bound could be parsed.
+                                  voting_min_shares:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  voting_max_shares:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  appointment_date:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Appointment date when reported.
+                                    format: date
                         submitted:
                           type: object
                           description: Parties submitted by the business admin during the Key People flow (BusinessParty rows where source=USER).
@@ -5932,6 +6928,55 @@ paths:
                     - live
                     - sandbox
                     description: Whether the session was created by a live application (`live`) or a sandbox application (`sandbox`). Sandbox sessions are free, fully simulated, and never bill credits.
+                  resubmissions:
+                    type: array
+                    description: Returned only with `include=resubmissions`, for user and business sessions. One entry per resubmission request, oldest first. Each entry carries the results the resubmitted steps returned before the request, so earlier submissions stay readable. Deleting the session deletes every submission.
+                    items:
+                      type: object
+                      properties:
+                        number:
+                          type: integer
+                          description: 1 for the first resubmission of the session, 2 for the second, and so on.
+                        created_at:
+                          type: string
+                          format: date-time
+                          description: When the resubmission was requested.
+                        previous_status:
+                          type: string
+                          description: The session status just before the request.
+                        nodes:
+                          type: array
+                          description: The workflow steps sent back to the user.
+                          items:
+                            type: object
+                            properties:
+                              node_id:
+                                type: string
+                              feature:
+                                type: string
+                        reasons:
+                          type:
+                          - object
+                          - 'null'
+                          additionalProperties:
+                            type: string
+                          description: The reason given for each step, keyed by `node_id`.
+                        requested_by:
+                          type:
+                          - object
+                          - 'null'
+                          description: Who requested the resubmission.
+                          properties:
+                            name:
+                              type: string
+                            email:
+                              type: string
+                            type:
+                              type: string
+                        results:
+                          type: object
+                          additionalProperties: true
+                          description: What the resubmitted steps returned before the request, under the same keys and in the same shape as the current results of this response (`id_verifications`, `nfc_verifications`, `liveness_checks`, `face_matches`, `poa_verifications`, `phone_verifications`, `email_verifications`, `aml_screenings`, `ip_analyses`, `database_validations`, `questionnaire_responses`, `document_ai_documents`, `geolocation_checks`; for business sessions also `document_verifications`). Only the keys of the steps that were sent back appear.
         '403':
           description: 'Authentication or authorization failed. **This endpoint never returns `401`** — Didit''s API-key authentication does not emit a `WWW-Authenticate` challenge, so missing or invalid credentials also surface as `403`. Two `detail` strings distinguish the failure modes:
 
@@ -5960,10 +7005,10 @@ paths:
                   value:
                     detail: You do not have permission to perform this action.
         '404':
-          description: 'Session not found. Returned when no live session matches the supplied `sessionId` in either the User Verification (KYC) or Business Verification (KYB) table — including soft-deleted sessions. Body is the standard `{"detail": ...}` envelope.
+          description: 'Session not found. Returned when no live session matches the supplied `sessionId` as either a User Verification (KYC) or a Business Verification (KYB) session — a session that has been deleted also lands here. Body is the standard `{"detail": ...}` envelope.
 
 
-            **Two distinct `detail` strings.** If the `sessionId` does not exist in either table, the pre-auth owner lookup fails and you receive `{"detail": "Not found."}` — this happens before credential validation, so it is returned even for unauthenticated calls. If the session exists but cannot be retrieved under the authenticated application (for example a stale or just-deleted record), the view returns `{"detail": "Session not found."}`. Both indicate the same outcome — the session is not accessible — so match on the `404` status code rather than the string.'
+            **Two distinct `detail` strings.** If the `sessionId` is unknown as both a KYC and a KYB session, the pre-auth owner lookup fails and you receive `{"detail": "Not found."}` — this happens before credential validation, so it is returned even for unauthenticated calls. If the session exists but cannot be retrieved under the authenticated application (for example a stale or just-deleted record), the view returns `{"detail": "Session not found."}`. Both indicate the same outcome — the session is not accessible — so match on the `404` status code rather than the string.'
           content:
             application/json:
               schema:
@@ -5974,7 +7019,7 @@ paths:
                     example: Not found.
               examples:
                 Unknown session id:
-                  summary: sessionId does not exist in either session table
+                  summary: sessionId is unknown to this application
                   value:
                     detail: Not found.
                 Session not retrievable:
@@ -6023,7 +7068,7 @@ paths:
       - name: sessionId
         in: path
         required: true
-        description: 'UUID of the verification session whose decision you want to retrieve. This is the `session_id` returned by `POST /v3/session/`. The same path works for both User Verification (KYC) and Business Verification (KYB) sessions — the server looks the id up in both tables.
+        description: 'UUID of the verification session whose decision you want to retrieve. This is the `session_id` returned by `POST /v3/session/`. The same path works for both User Verification (KYC) and Business Verification (KYB) sessions — the server resolves the id against both session types.
 
 
           **Must be a valid UUID.** The route only matches well-formed UUIDs, so a malformed value is rejected by the URL router before any application code runs and the response is a `404` **HTML** page rather than the JSON `{"detail": ...}` envelope shown below. Validate the UUID format client-side so you can distinguish an input error from a genuine missing-session `404`.'
@@ -6034,11 +7079,13 @@ paths:
       - name: include
         in: query
         required: false
-        description: 'Comma-separated list of extra payload sections. The only supported value is `events`. When `include=events` is passed, the response additionally contains the session event timeline (`events`), the full activity log (`activity_reviews`), blocklist flags (`blocklisted`), a per-session `cost_breakdown`, workflow metadata (`workflow_type`, `workflow_version`, `workflow_version_id`), and session metadata (`api_service` — string or `null`, set only for standalone-API sessions; `session_type` — `API`, `HOSTED`, or `MIGRATED`; `has_device_nfc_support` — boolean). Two fields change relative to the plain shape: the top-level `session_kind` discriminator is **omitted** (the events shape only exists for user sessions), and the `features` array switches from plain strings to `{feature, node_id}` objects — where the email feature is reported as `EMAIL` instead of `EMAIL_VERIFICATION`. This expanded shape is primarily used by the Didit Console; most API integrations should omit the parameter. **KYB limitation:** `include=events` only applies to user (KYC) sessions. Business sessions (`session_kind = "business"`) always return the standard business decision shape — `events`, `activity_reviews`, `blocklisted`, `cost_breakdown` and the extra `workflow_*`/session metadata are never returned for business sessions, and their `features` array stays a plain string array.'
+        description: 'Comma-separated list of extra payload sections. Supported values: `events` and `resubmissions`, alone or together (`events,resubmissions`). When `include=events` is passed, the response additionally contains the session event timeline (`events`, including the `WORKFLOW_BRANCH_EVALUATED` / `WORKFLOW_STATUS_NODE_REACHED` routing events described on the Retrieve Session page), the full activity log (`activity_reviews`), blocklist flags (`blocklisted`), a per-session `cost_breakdown`, workflow metadata (`workflow_type`, `workflow_version`, `workflow_version_id`, and `workflow_terminal_node_id` - the last recorded workflow status node that set a session status, or `null` if none has been recorded; historical provenance that is not cleared by manual approvals, declines or resubmissions, and is replaced by a later workflow status node), and session metadata (`api_service` — string or `null`, set only for standalone-API sessions; `session_type` — `API`, `HOSTED`, or `MIGRATED`; `has_device_nfc_support` — boolean). Two fields change relative to the plain shape: the top-level `session_kind` discriminator is **omitted** (the events shape only exists for user sessions), and the `features` array switches from plain strings to `{feature, node_id}` objects — where the email feature is reported as `EMAIL` instead of `EMAIL_VERIFICATION`. This expanded shape is primarily used by the Didit Console; most API integrations should omit the parameter. **KYB limitation:** `include=events` only applies to user (KYC) sessions. Business sessions (`session_kind = "business"`) always return the standard business decision shape — `events`, `activity_reviews`, `blocklisted`, `cost_breakdown` and the extra `workflow_*`/session metadata are never returned for business sessions, and their `features` array stays a plain string array. With `include=resubmissions` (user and business sessions alike) the response also contains `resubmissions`: one entry per resubmission request, oldest first, each with `number`, `created_at`, `previous_status`, `nodes`, `reasons`, `requested_by` and `results` (what the resubmitted steps returned before the request, under the same keys and in the same shape as the current results). Each `cost_breakdown` item carries `usage_type`, `price`, `details` and `created_at`: a resubmitted step that runs again is billed as a new item.'
         schema:
           type: string
           enum:
           - events
+          - resubmissions
+          - events,resubmissions
           example: events
       security:
       - ApiKeyAuth: []
@@ -6054,12 +7101,945 @@ paths:
         source: "const sessionId = '11111111-2222-3333-4444-555555555555';\nconst response = await fetch(\n  `https://verification.didit.me/v3/session/${sessionId}/decision/`,\n  {\n    method: 'GET',\n    headers: {\n      'x-api-key': 'YOUR_API_KEY',\n      Accept: 'application/json',\n    },\n  }\n);\n\nif (!response.ok) {\n  throw new Error(`Decision fetch failed: ${response.status}`);\n}\nconst decision = await response.json();\n\nconsole.log('session_kind:', decision.session_kind);\nconsole.log('top-level status:', decision.status);\n\n// nfc_verifications is ALWAYS an array — never a singular `nfc` field.\nfor (const nfc of decision.nfc_verifications ?? []) {\n  console.log('nfc node_id:', nfc.node_id, 'status:', nfc.status);\n}\n\nfor (const idCheck of decision.id_verifications ?? []) {\n  console.log('id node_id:', idCheck.node_id, 'status:', idCheck.status);\n}"
       tags:
       - Session
+  /v3/session/{sessionId}/resubmission-preview/:
+    post:
+      summary: Preview a resubmission email
+      description: 'Render the email that would accompany a KYC or KYB resubmission without changing the session, resetting checks, extending its expiry, running checks or sending mail. Requires write:sessions and an application-scoped session in Approved, Declined, In Review, Kyc Expired or Abandoned status. The server validates the selected workflow steps and renders its fixed translated template with the applicable verified white-label sender and branding. The request cannot set a subject, message body or action URL.
+
+
+        The response includes the recipient, sender, subject, HTML, resolved steps and a signed preview_token. requires_user_action describes whether the selected steps include an interactive check. Email delivery remains conditional: if automatic checks finalize the verification during the subsequent resubmission, no action-request email is sent.
+
+
+        This preview does not reserve session state or authorize delivery. After reviewing it, call Update Session Status with new_status=Resubmitted, the same selection, recipient and language, and email_preview_token set to the returned preview_token. The receipt expires after 15 minutes. When a receipt is supplied, changed inputs, message content, sender or session state return 409 before any mutation or send. Existing integrations may omit the receipt. Regenerate the preview after a conflict. Treat the response as sensitive verification content; responses use Cache-Control: no-store. Render HTML in a sandboxed frame, never directly in your application DOM.'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - in: path
+        name: sessionId
+        required: true
+        description: UUID of the verification session to update. Accepts both user (KYC) and business (KYB) session IDs — the service resolves the ID across both session types.
+        schema:
+          type: string
+          format: uuid
+          example: 11111111-2222-3333-4444-555555555555
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email_address
+              properties:
+                nodes_to_resubmit:
+                  type: array
+                  description: Steps to preview, using the same validation, selection and workflow ordering as a resubmission. Omit to auto-select recorded attempts needing resubmission.
+                  items:
+                    type: object
+                    required:
+                    - node_id
+                    - feature
+                    properties:
+                      node_id:
+                        type: string
+                        description: Node identifier as it appears in the session's workflow definition (for example `feature_ocr`, `feature_liveness`).
+                        example: feature_ocr
+                      feature:
+                        type: string
+                        description: Feature type of the node. The aliases `ID_VERIFICATION`, `POA`, `PHONE`, and `EMAIL` are normalized server-side to `OCR`, `PROOF_OF_ADDRESS`, `PHONE_VERIFICATION`, and `EMAIL_VERIFICATION`. `KYB_REGISTRY`, `KYB_KEY_PEOPLE`, and `KYB` pass schema validation but are always rejected with the business-rule `400` shown in the examples.
+                        enum:
+                        - OCR
+                        - OCR_BACK
+                        - NFC
+                        - AML
+                        - FACE
+                        - LIVENESS
+                        - FACE_MATCH
+                        - IP_ANALYSIS
+                        - AGE_ESTIMATION
+                        - PROOF_OF_ADDRESS
+                        - PHONE_VERIFICATION
+                        - EMAIL_VERIFICATION
+                        - FACE_SEARCH
+                        - DATABASE_VALIDATION
+                        - QUESTIONNAIRE
+                        - DOCUMENT_AI
+                        - KYB_DOCUMENTS
+                        - ID_VERIFICATION
+                        - POA
+                        - PHONE
+                        - EMAIL
+                        - KYB_REGISTRY
+                        - KYB_KEY_PEOPLE
+                        - KYB
+                        example: OCR
+                email_address:
+                  type: string
+                  format: email
+                  description: Recipient shown in the preview. No email is sent.
+                  example: user@example.com
+                email_language:
+                  type: string
+                  description: Language for the notification email. Accepts any string at schema level; unsupported codes silently fall back to English (`en`).
+                  default: en
+                  example: en
+      responses:
+        '200':
+          description: Preview only. The session is unchanged and no email is sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - recipient
+                - sender
+                - subject
+                - html
+                - nodes_to_resubmit
+                - requires_user_action
+                - preview_token
+                properties:
+                  recipient:
+                    type: string
+                    format: email
+                  sender:
+                    type: string
+                  subject:
+                    type: string
+                  html:
+                    type: string
+                    description: Rendered email. Inline image attachments use data URLs for preview.
+                  nodes_to_resubmit:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - node_id
+                      - feature
+                      properties:
+                        node_id:
+                          type: string
+                          description: Node identifier as it appears in the session's workflow definition (for example `feature_ocr`, `feature_liveness`).
+                          example: feature_ocr
+                        feature:
+                          type: string
+                          description: Feature type of the node. The aliases `ID_VERIFICATION`, `POA`, `PHONE`, and `EMAIL` are normalized server-side to `OCR`, `PROOF_OF_ADDRESS`, `PHONE_VERIFICATION`, and `EMAIL_VERIFICATION`. `KYB_REGISTRY`, `KYB_KEY_PEOPLE`, and `KYB` pass schema validation but are always rejected with the business-rule `400` shown in the examples.
+                          enum:
+                          - OCR
+                          - OCR_BACK
+                          - NFC
+                          - AML
+                          - FACE
+                          - LIVENESS
+                          - FACE_MATCH
+                          - IP_ANALYSIS
+                          - AGE_ESTIMATION
+                          - PROOF_OF_ADDRESS
+                          - PHONE_VERIFICATION
+                          - EMAIL_VERIFICATION
+                          - FACE_SEARCH
+                          - DATABASE_VALIDATION
+                          - QUESTIONNAIRE
+                          - DOCUMENT_AI
+                          - KYB_DOCUMENTS
+                          - ID_VERIFICATION
+                          - POA
+                          - PHONE
+                          - EMAIL
+                          - KYB_REGISTRY
+                          - KYB_KEY_PEOPLE
+                          - KYB
+                          example: OCR
+                  requires_user_action:
+                    type: boolean
+                    description: Whether at least one selected check requires user interaction. This does not predict the final workflow outcome.
+                  preview_token:
+                    type: string
+                    description: Signed confirmation receipt, valid for 15 minutes. Pass it as email_preview_token when confirming the same message.
+        '400':
+          description: Invalid email, state or workflow selection.
+        '403':
+          description: Authentication or write:sessions permission is missing.
+        '404':
+          description: No session exists in the requested application.
+      tags:
+      - Session
+      operationId: postV3SessionBySessionIdResubmissionPreview
+      x-operation-id-source: derived
 components:
+  schemas:
+    KYBRegistryIndustry:
+      type: object
+      description: An activity the registry classifies the company under, in the same shape for every country and registry source.
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Activity code as the registry prints it (for example `73110`).
+        description:
+          type:
+          - string
+          - 'null'
+          description: Activity label, when the registry publishes one.
+        scheme:
+          type:
+          - string
+          - 'null'
+          description: 'Classification system, one name per system whichever source reported it: `UK SIC 2007`, `US SIC`, `NACE Rev. 2`, `NACE Rev. 2.1`, `NAF Rev. 2`, `CNAE`, `SBI`, `NOGA 2008`, `CAE Rev. 4`, `Canada SIC 1977`; other national systems keep the registry''s own name. Null when the registry does not name the system.'
+        is_primary:
+          type: boolean
+          description: True for the company's main activity. Exactly one entry is primary when the list is not empty.
+      required:
+      - code
+      - description
+      - scheme
+      - is_primary
+    KYBRegistryShareholding:
+      type:
+      - object
+      - 'null'
+      description: 'What an owner holds, in the same shape for every country and registry source. Null when the registry states no holding. A band (for example a UK PSC''s 25-50%) is not a stake: `percentage` is null and the band stays in `ownership_min_shares` / `ownership_max_shares`.'
+      properties:
+        share_class:
+          type:
+          - string
+          - 'null'
+          description: Share class or type as the registry names it.
+        number_of_shares:
+          type:
+          - number
+          - 'null'
+          description: Number of shares held.
+        currency:
+          type:
+          - string
+          - 'null'
+          description: ISO 4217 currency of the values below.
+        nominal_value:
+          type:
+          - number
+          - 'null'
+          description: Nominal value per share.
+        total_value:
+          type:
+          - number
+          - 'null'
+          description: Total value of the holding.
+        percentage:
+          type:
+          - number
+          - 'null'
+          description: Exact stake in percent, to four decimal places.
+      required:
+      - share_class
+      - number_of_shares
+      - currency
+      - nominal_value
+      - total_value
+      - percentage
+    KYBRegistryOwnership:
+      type: object
+      description: The outcome of the ownership (Shareholders / UBO) tier, in the same shape for every country and registry source.
+      properties:
+        status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - not_requested
+          - pending
+          - delivered
+          - unavailable
+          - null
+          description: '`delivered` when the registry published ownership; `unavailable` when it did not (see `unavailable_reason`); `pending` while the registry is still fetching it; `not_requested` for the Basic tier.'
+        tier_requested:
+          type:
+          - string
+          - 'null'
+          enum:
+          - basic
+          - shareholders
+          - ubo
+          - null
+          description: The tier the workflow ordered.
+        tier_delivered:
+          type:
+          - string
+          - 'null'
+          enum:
+          - basic
+          - shareholders
+          - ubo
+          - null
+          description: The tier the registry delivered (and that is billed). A UBO request answered with direct shareholders only is `shareholders`.
+        unavailable_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - no_owners_on_record
+          - no_natural_person_owner
+          - ownership_section_unavailable
+          - company_not_found
+          - ambiguous_company_match
+          - missing_registration_number
+          - entity_type_not_covered
+          - provider_unavailable
+          - other
+          - null
+          description: Why a requested ownership tier was not delivered. Null unless `status` is `unavailable` or `pending`.
+        direct_ownership_complete:
+          type:
+          - boolean
+          - 'null'
+          description: True when the direct shareholders' stated stakes add up to 100% (within one percentage point of rounding); false when they do not; null when ownership was not delivered or a stake is not stated.
+        unresolved:
+          type: array
+          description: Parts of the ownership chain the registry could not resolve, for example no group structure on record above the direct owners.
+          items:
+            type: object
+            properties:
+              reason:
+                type: string
+              section:
+                type:
+                - string
+                - 'null'
+      required:
+      - status
+      - tier_requested
+      - tier_delivered
+      - unavailable_reason
+      - direct_ownership_complete
+      - unresolved
+    SignatureFieldResult:
+      type: object
+      description: A field of a signed document, with its value on this signer's copy. See [Fields](/core-technology/electronic-signature/report-electronic-signature#fields).
+      properties:
+        key:
+          type: string
+          description: The field's key, as used in `sign.field_values`.
+        type:
+          type: string
+          enum:
+          - signature
+          - initials
+          - full_name
+          - date_signed
+          - text
+          - checkbox
+          - email
+          - data
+        role:
+          type: string
+          enum:
+          - verified_person
+          - legal_representative
+          - key_people
+        label:
+          type: string
+        page:
+          type: integer
+          description: Page number, from 1. For a Word document, a page of the converted PDF.
+        x:
+          type: number
+          description: Left edge, as a fraction of the page width.
+        y:
+          type: number
+          description: Top edge, as a fraction of the page height.
+        width:
+          type: number
+          description: Width, as a fraction of the page width.
+        height:
+          type: number
+          description: Height, as a fraction of the page height.
+        required:
+          type: boolean
+        value:
+          description: A string for `text`, `email`, `full_name`, `date_signed` and `data`, a boolean for a `checkbox`, and `true` for an applied signature or initials. `null` when empty.
+        display_value:
+          type:
+          - string
+          - 'null'
+          description: 'The value as stamped on the page: dates in the field''s `date_format`, `Yes` or `No` for a checkbox, `Signed` for a signature or initials.'
+        value_source:
+          type:
+          - string
+          - 'null'
+          enum:
+          - signer
+          - identity
+          - contact
+          - company
+          - session
+          - metadata
+          - api
+          - signing_time
+          - null
+          description: 'Where the value came from: `signer` (typed, ticked or applied by the signer), `identity` (the verified ID), `contact` (the verified email or phone), `company` (the verified company), `session` (`vendor_data`), `metadata`, `api` (`sign.field_values`) or `signing_time` (the date signed).'
+        filled_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        image_url:
+          type:
+          - string
+          - 'null'
+          description: 'Signature and initials only: the path of the applied image. See [Download a signature image](/sessions-api/electronic-signature/download-field-image).'
+        value_unavailable_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - source_empty
+          - null
+          description: '`source_empty` when a pre-filled field had no value in the session and `signature_field_data_missing_action` let the signer sign anyway.'
+    DocumentAIDetectedCode:
+      type: object
+      required:
+      - type
+      - page_number
+      - position
+      - x
+      - y
+      - width
+      - height
+      - page_width
+      - page_height
+      - raw_payload
+      - parsed_payload
+      properties:
+        type:
+          type: string
+          description: Detected symbology, for example `QR_CODE`, `CODE_128`, `EAN_13`, `DATA_MATRIX`, or `PDF_417`.
+        page_number:
+          type: integer
+          minimum: 1
+          description: 1-based page number.
+        position:
+          type:
+          - array
+          - 'null'
+          description: Detected polygon in rendered-page pixel coordinates. `null` when no reliable location is available.
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: integer
+        x:
+          type:
+          - integer
+          - 'null'
+          description: Left edge of the bounding box in rendered-page pixels.
+        y:
+          type:
+          - integer
+          - 'null'
+          description: Top edge of the bounding box in rendered-page pixels.
+        width:
+          type:
+          - integer
+          - 'null'
+          description: Bounding-box width in rendered-page pixels.
+        height:
+          type:
+          - integer
+          - 'null'
+          description: Bounding-box height in rendered-page pixels.
+        page_width:
+          type: integer
+          description: Rendered page width in pixels.
+        page_height:
+          type: integer
+          description: Rendered page height in pixels.
+        raw_payload:
+          type: string
+          description: Raw decoder payload as a base64 string when available; otherwise an empty string.
+        parsed_payload:
+          description: Decoded string or structured value. `null` when the code was located but could not be decoded.
+    SignatureResult:
+      type: object
+      description: One signer's result for one Electronic Signature step. See the [Electronic Signature report](/core-technology/electronic-signature/report-electronic-signature).
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Pass it as `signature_id` to download this signer's evidence or validate their signature.
+        node_id:
+          type: string
+          description: The workflow step that produced it.
+        status:
+          type: string
+          enum:
+          - intro
+          - review
+          - code
+          - signing
+          - signed
+          - declined
+          description: Where the signer is in the step. Only `signed` means the documents are signed.
+        verdict:
+          type: string
+          enum:
+          - Not Finished
+          - Approved
+          - In Review
+          - Declined
+          description: The step's outcome. A warning sets it through its rule; custom status rules apply after.
+        level:
+          type: string
+          enum:
+          - aes
+          - qes
+          description: '`aes`. `qes` is coming soon.'
+        format:
+          type: string
+          enum:
+          - pades
+        profile:
+          type:
+          - string
+          - 'null'
+          description: '`PAdES-B-LT` once signed.'
+        signer:
+          type: object
+          properties:
+            name:
+              type:
+              - string
+              - 'null'
+              description: Verified name.
+            capacity:
+              type: string
+              enum:
+              - self
+              - company
+            company:
+              type:
+              - string
+              - 'null'
+            role:
+              type:
+              - string
+              - 'null'
+              description: The key person's designation, as declared.
+            roles:
+              type: array
+              items:
+                type: string
+              description: The key person's structured roles, as declared for the company.
+            identity_session_id:
+              type: string
+              format: uuid
+              description: The KYC session that verified the signer.
+        identity_used:
+          type: object
+          properties:
+            session_id:
+              type: string
+              format: uuid
+            kyc_id:
+              type:
+              - string
+              - 'null'
+              format: uuid
+            verified:
+              type: boolean
+            expected_name:
+              type:
+              - string
+              - 'null'
+              description: The name the signer had to match.
+        certificate:
+          type:
+          - object
+          - 'null'
+          description: The certificate the documents were signed with. `null` until signed.
+          properties:
+            issuer:
+              type: string
+            issued_to:
+              type: string
+            serial:
+              type: string
+              description: Serial number, hexadecimal.
+            valid_from:
+              type: string
+              format: date-time
+            valid_until:
+              type: string
+              format: date-time
+        confirmation:
+          type: object
+          properties:
+            channel:
+              type: string
+              enum:
+              - email
+              - sms
+            destination:
+              type:
+              - string
+              - 'null'
+              description: The masked contact the code went to.
+            confirmed_at:
+              type:
+              - string
+              - 'null'
+              format: date-time
+            attempts:
+              type: integer
+              description: Codes entered, the right one included.
+        timestamp:
+          type:
+          - object
+          - 'null'
+          description: The trusted timestamp in the signature. `null` until signed.
+          properties:
+            time:
+              type: string
+              format: date-time
+            qualified:
+              type: boolean
+              description: Always `false` for AES.
+            valid:
+              type: boolean
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: The document on this signer's copy. Use it to download the signed file.
+              uuid:
+                type: string
+                format: uuid
+                description: Same as `id`.
+              title:
+                type: string
+              file_name:
+                type: string
+              pages:
+                type: integer
+                description: Pages of the document signed. For Word, of the converted PDF.
+              size_bytes:
+                type: integer
+              sha256_original:
+                type: string
+                description: SHA-256 of the document as the signer was shown it.
+              sha256_signed:
+                type:
+                - string
+                - 'null'
+                description: SHA-256 of the signed PDF, once signed.
+              status:
+                type: string
+                enum:
+                - signed
+                - declined
+                - not_signed
+                - not_reached
+                description: '`not_signed`: opened but not signed. `not_reached`: never opened.'
+              opened_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+              read_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When the signer reached the end of a document without fields, when the step requires it.
+              read_to_end:
+                type: boolean
+              consented_at:
+                type:
+                - string
+                - 'null'
+                format: date-time
+                description: When the signer agreed to a document without fields, or finished the fields of a document with fields.
+              consent:
+                type: boolean
+              signed_file:
+                type:
+                - string
+                - 'null'
+                description: Path of the signed PDF, once signed. See [Download a signed document](/sessions-api/electronic-signature/download-signed-document).
+              mode:
+                type: string
+                enum:
+                - fields
+                - read_and_agree
+                description: '`fields` for a document with fields, `read_and_agree` for a document without.'
+              source_format:
+                type: string
+                enum:
+                - pdf
+                - docx
+                description: '`pdf`, or `docx` for a Word document Didit converted to PDF.'
+              conversion:
+                type:
+                - object
+                - 'null'
+                description: '`null` for a PDF. For a Word document, the original file and the conversion.'
+                properties:
+                  from:
+                    type: string
+                    enum:
+                    - docx
+                  file_name:
+                    type: string
+                    description: Your original Word file name.
+                  sha256:
+                    type: string
+                    description: SHA-256 of your original Word file.
+                  size_bytes:
+                    type: integer
+                    description: Size of your original Word file.
+                  converter:
+                    type: string
+                    description: Version of the converter that produced the PDF.
+              fields:
+                type: array
+                description: Fields on the document, with their values. Empty for a document without fields.
+                items:
+                  $ref: '#/components/schemas/SignatureFieldResult'
+        adopted_signature:
+          type:
+          - object
+          - 'null'
+          description: The signature and initials the signer adopted for signature and initials fields. `null` until the signer adopts one.
+          properties:
+            method:
+              type: string
+              enum:
+              - typed
+              - drawn
+              description: '`typed`: the verified name in a handwriting style. `drawn`: drawn with a finger or a mouse.'
+            font:
+              type:
+              - string
+              - 'null'
+              description: The handwriting style of a typed signature. `null` when drawn.
+            adopted_at:
+              type: string
+              format: date-time
+        electronic_signature_consent_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the signer agreed, on the review screen, to sign the documents electronically. Set when any document has fields.
+        evidence_file:
+          type:
+          - string
+          - 'null'
+          description: Path of the evidence PDF, once signed. See [Download the signature evidence](/sessions-api/electronic-signature/download-evidence).
+        warnings:
+          type: array
+          description: Warnings raised for this signer. See [Electronic Signature warnings](/core-technology/electronic-signature/warnings-electronic-signature).
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                - SIGNATURE_DECLINED
+                - SIGNATURE_OTP_FAILED
+                - SIGNATURE_NAME_MISMATCH
+                - SIGNATURE_IDENTITY_NOT_VERIFIED
+                - SIGNATURE_DOCUMENT_CHANGED
+                - SIGNATURE_FIELD_DATA_MISSING
+              node_id:
+                type: string
+        validation:
+          type:
+          - object
+          - 'null'
+          description: 'The last cryptographic check of the signed documents. `null` until the documents are signed. If Didit can''t confirm the outcome of signing, it''s `{"valid": null, "reason": "signature_provider_outcome_unknown", "checked_at": ...}` and `status` stays `signing`: treat it as not signed.'
+          properties:
+            valid:
+              type:
+              - boolean
+              - 'null'
+              description: '`true` when every document is valid. `null` when the outcome of signing couldn''t be confirmed.'
+            reason:
+              type: string
+              description: 'Set when `valid` is `null`: `signature_provider_outcome_unknown`.'
+            checked_at:
+              type: string
+              format: date-time
+            documents:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  checked_at:
+                    type: string
+                    format: date-time
+                  valid:
+                    type: boolean
+                    description: '`true` when the signature and the timestamp are both valid and trusted.'
+                  integrity:
+                    type: boolean
+                    description: '`true` when the document is unchanged since signing.'
+                  trusted:
+                    type: boolean
+                    description: '`true` when the signing certificate chains to a trusted root.'
+                  revoked:
+                    type: boolean
+                  trusted_list:
+                    type: object
+                    description: 'EU Trusted List check. For AES: `{"status": "not_applicable", "reason": "aes_not_qualified"}`.'
+                    properties:
+                      status:
+                        type: string
+                      reason:
+                        type: string
+                  certificate:
+                    type:
+                    - object
+                    - 'null'
+                    description: The certificate the documents were signed with. `null` until signed.
+                    properties:
+                      issuer:
+                        type: string
+                      issued_to:
+                        type: string
+                      serial:
+                        type: string
+                        description: Serial number, hexadecimal.
+                      valid_from:
+                        type: string
+                        format: date-time
+                      valid_until:
+                        type: string
+                        format: date-time
+                  timestamp:
+                    type:
+                    - object
+                    - 'null'
+                    description: The trusted timestamp in the signature. `null` until signed.
+                    properties:
+                      time:
+                        type: string
+                        format: date-time
+                      qualified:
+                        type: boolean
+                        description: Always `false` for AES.
+                      valid:
+                        type: boolean
+        declined_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        declined_action:
+          type: string
+          enum:
+          - DECLINE
+          - REVIEW
+          - NO_ACTION
+        signed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          description: When the signing link stops working.
+        email_sent_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        email_unavailable_reason:
+          type:
+          - string
+          - 'null'
+        ip_address:
+          type:
+          - string
+          - 'null'
+          description: The signer's IP address when they asked for their code.
+        place:
+          type:
+          - string
+          - 'null'
+          description: 'Not collected: always `null`.'
+        place_unavailable_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - not_collected
+    KYBRegistryAddress:
+      type: object
+      description: An address the registry states, in the same shape for every country and registry source. Every key is always present; a part the registry does not publish is null.
+      properties:
+        type:
+          type:
+          - string
+          - 'null'
+          description: 'Address type in lower case: `registered` for the registered office; other types as the registry names them (for example `postal`, `office`). `null` when the registry does not say what the address is.'
+        address:
+          type: string
+          description: The full address as one line. Always present on every address.
+        street:
+          type:
+          - string
+          - 'null'
+          description: Street and number.
+        city:
+          type:
+          - string
+          - 'null'
+          description: City or locality.
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal code.
+        region:
+          type:
+          - string
+          - 'null'
+          description: Region, state or province.
+        country_code:
+          type:
+          - string
+          - 'null'
+          description: ISO 3166-1 alpha-2 country code.
+        description:
+          type:
+          - string
+          - 'null'
+          description: The registry's own label for the address, when it gives one.
+      required:
+      - type
+      - address
+      - street
+      - city
+      - postal_code
+      - region
+      - country_code
+      - description
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -6070,3 +8050,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

@@ -1,0 +1,855 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Case Assignment API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Case Assignment
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/teams/:
+    get:
+      summary: List review teams
+      description: Requires `list:cases` for the requested application.
+      operationId: list_case_teams
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+          default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseReviewTeam'
+                  count:
+                    type: integer
+                    description: Matching count, capped at 100. Follow next to continue beyond the cap.
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+    post:
+      summary: Create review team
+      description: Requires `write:cases` for the requested application.
+      operationId: create_case_teams
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseReviewTeam'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseReviewTeamCreate'
+  /v3/organization/{organization_id}/application/{application_id}/cases/routing-rules/{record_uuid}/:
+    get:
+      summary: Retrieve routing rule
+      description: Requires `read:cases` for the requested application.
+      operationId: retrieve_case_routing_rules
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: record_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRoutingRule'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+        '404':
+          description: Record not found in this application.
+    patch:
+      summary: Update routing rule
+      description: Requires `write:cases` for the requested application.
+      operationId: update_case_routing_rules
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: record_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRoutingRule'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+        '404':
+          description: Record not found in this application.
+        '409':
+          description: The routing rule changed since expected_version. Review the latest rule before retrying.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseRoutingRuleUpdate'
+  /v3/organization/{organization_id}/application/{application_id}/cases/routing-rules/:
+    get:
+      summary: List routing rules
+      description: Requires `list:cases` for the requested application.
+      operationId: list_case_routing_rules
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+          default: 0
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseRoutingRule'
+                  count:
+                    type: integer
+                    description: Matching count, capped at 100. Follow next to continue beyond the cap.
+                  next:
+                    type:
+                    - string
+                    - 'null'
+                  previous:
+                    type:
+                    - string
+                    - 'null'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+    post:
+      summary: Create routing rule
+      description: Requires `write:cases` for the requested application. Set publish=false to create an unpublished draft; Publish creates its first live version. Discarding a never-published draft deletes it.
+      operationId: create_case_routing_rules
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRoutingRule'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseRoutingRuleCreate'
+  /v3/organization/{organization_id}/application/{application_id}/cases/teams/{record_uuid}/:
+    get:
+      summary: Retrieve review team
+      description: Requires `read:cases` for the requested application.
+      operationId: retrieve_case_teams
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: record_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseReviewTeam'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+        '404':
+          description: Record not found in this application.
+    patch:
+      summary: Update review team
+      description: Requires `write:cases` for the requested application.
+      operationId: update_case_teams
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: record_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseReviewTeam'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+        '404':
+          description: Record not found in this application.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseReviewTeamUpdate'
+  /v3/organization/{organization_id}/application/{application_id}/cases/routing-rules/preview/:
+    post:
+      summary: Test case routing
+      description: Requires `read:cases` for the requested application. Evaluates current rules or a supplied draft against current reviewer access, availability, skills and capacity. It does not save the draft or reserve reviewer capacity.
+      operationId: preview_case_routing
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRoutingPreview'
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseRoutingPreviewRequest'
+  /v3/organization/{organization_id}/application/{application_id}/cases/reviewers/:
+    get:
+      summary: List eligible case reviewers
+      description: Requires `list:cases` for the requested application.
+      operationId: list_case_reviewers
+      tags:
+      - Case Assignment
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+                          format: uuid
+                        email:
+                          type: string
+                          format: email
+                        name:
+                          type: string
+        '400':
+          description: Invalid input.
+        '403':
+          description: Insufficient permission.
+        '503':
+          description: Reviewer access could not be verified. Retry later.
+components:
+  schemas:
+    CaseRoutingPreviewRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          enum:
+          - MANUAL
+          - AML_SCREENING
+          - TRANSACTION_RULE
+          - WORKFLOW_BUILDER
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          default: MEDIUM
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 50
+        rule_uuid:
+          type: string
+          format: uuid
+        draft:
+          $ref: '#/components/schemas/CaseRoutingRuleCreate'
+      required:
+      - source
+    CaseRoutingPreview:
+      type: object
+      properties:
+        rule_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        rule_name:
+          type:
+          - string
+          - 'null'
+        rule_version:
+          type:
+          - integer
+          - 'null'
+        blueprint_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        team_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        assignee_user_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        reason:
+          type: string
+        candidates:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: string
+                format: uuid
+              eligible:
+                type: boolean
+              active_cases:
+                type:
+                - integer
+                - 'null'
+              reason:
+                type:
+                - string
+                - 'null'
+        matched_rules:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              name:
+                type: string
+              priority:
+                type: integer
+    CaseReviewTeamMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        availability:
+          type: string
+          enum:
+          - available
+          - unavailable
+          default: available
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 10
+        skills:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 25
+        available_from:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        available_until:
+          type:
+          - string
+          - 'null'
+          format: date-time
+      required:
+      - user_id
+    CaseReviewTeam:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseReviewTeamMember'
+          maxItems: 250
+        is_active:
+          type: boolean
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    CaseRoutingRuleCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        priority:
+          type: integer
+          minimum: 0
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseRoutingCondition'
+          maxItems: 20
+        required_skills:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 25
+        blueprint:
+          type: string
+          format: uuid
+        team:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+        publish:
+          type: boolean
+          writeOnly: true
+          description: Set false to save a never-published draft. The record remains inactive at version 0 until the draft is explicitly published. Omitting this field preserves immediate creation for existing integrations.
+      required:
+      - name
+      - conditions
+      - blueprint
+    CaseRoutingRuleUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        priority:
+          type: integer
+          minimum: 0
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseRoutingCondition'
+          maxItems: 20
+        required_skills:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 25
+        blueprint:
+          type: string
+          format: uuid
+        team:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+        expected_version:
+          type: integer
+          minimum: 1
+          writeOnly: true
+          description: Version opened by the editor. When supplied, stale writes return 409 without changing the rule.
+    CaseRoutingCondition:
+      type: object
+      properties:
+        field:
+          type: string
+          enum:
+          - source
+          - priority
+          - tags
+        operator:
+          type: string
+          enum:
+          - equals
+          - in
+          - contains
+        value:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      required:
+      - field
+      - operator
+      - value
+      description: Source and priority support equals or in with supported values. Tags support contains with one non-empty tag.
+    CaseRoutingRule:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        priority:
+          type: integer
+          minimum: 0
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseRoutingCondition'
+          maxItems: 20
+        required_skills:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 25
+        blueprint:
+          type: string
+          format: uuid
+        team:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        blueprint_name:
+          type: string
+          readOnly: true
+        team_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+    CaseReviewTeamUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseReviewTeamMember'
+          maxItems: 250
+        is_active:
+          type: boolean
+    CaseReviewTeamCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseReviewTeamMember'
+          maxItems: 250
+        is_active:
+          type: boolean
+      required:
+      - name
+      - members
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

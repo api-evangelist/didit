@@ -166,7 +166,7 @@ paths:
   /v3/users/{vendor_data}/:
     get:
       summary: Get user
-      description: Fetch one user by `vendor_data` (exact match). Adds `metadata`, `comments`, and `updated_at` to the list view, and switches `tags` to the detailed tag-link shape. Returns soft-deleted users too.
+      description: Fetch one user by `vendor_data` (exact match). Adds `metadata`, `comments`, and `updated_at` to the list view, and switches `tags` to the detailed tag-link shape.
       operationId: get_user
       tags:
       - Users
@@ -503,10 +503,168 @@ paths:
                 value:
                   full_name: Jane Elizabeth Smith
                   date_of_birth: '1985-11-22'
+  /v3/users/{vendor_data}/generate-pdf/:
+    get:
+      summary: Download the full user history PDF report
+      description: 'Render and download one compliance-ready PDF containing the full verification history of the user identified by `vendor_data`. It is the same document the Console produces from **User detail → Actions → Download PDF**, so periodic compliance exports no longer need a person clicking in the Console.
+
+
+        **What the report contains.** A cover page with the profile summary (name, date of birth, issuing states, approved emails and phones), the latest status of every feature, the session counters and an index of the sessions included — followed by the standard report of every included session, in chronological order (oldest first). Each session report is the same document `GET /v3/session/{sessionId}/generate-pdf/` returns for that session.
+
+
+        **Eligible sessions.** Only User Verification (KYC) sessions in `Approved`, `Declined`, `In Review` or `Kyc Expired` are included; sessions in any other status are skipped. If the user has no session in one of those statuses the endpoint returns `403` — see below.
+
+
+        **Cap.** The report is capped at the **20 most recent** reportable sessions. When a user has more, the newest 20 are included and the cover page states how many older sessions were left out. Use `GET /v3/sessions/?vendor_data=…` for the complete list as JSON.
+
+
+        **Branding.** If your application has white-label customization, the cover and every session report are rendered with your logo and privacy-policy URL; otherwise they carry Didit branding. Reports are rendered in English — there is no language parameter.
+
+
+        **No caching.** Every call re-renders the PDF from the current data, so a report generated after a manual review reflects the reviewer''s decision. Two calls for the same user can produce byte-different files — archive the downloaded file if you need an immutable copy.
+
+
+        **Latency.** Rendering is synchronous and downloads every stored image of every included session, so a user with many media-heavy sessions can take tens of seconds. Use a generous client read timeout (120 s recommended) and stream the body to disk. Generation stops at a server-side time budget instead of running until your client gives up: if that budget is reached, the response is still a valid PDF containing the most recent sessions, and the cover states how many were omitted.
+
+
+        **Scope.** The user is resolved inside the application that owns the API key. A key can never export a user of another application — such a user does not exist for it and the endpoint returns `404`.
+
+
+        **Trailing slash.** The canonical route ends with a trailing slash (`…/generate-pdf/`). A request without it is served directly with the same response — there is no `301` redirect, so no client has to follow redirects and `curl` does not need `-L`. Use the slashed URL as in the samples.'
+      operationId: get_user_generate_pdf
+      tags:
+      - Users
+      parameters:
+      - name: vendor_data
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Your unique identifier for the user — a free-form string (NOT a UUID). This is the same value you passed as `vendor_data` when creating the user's sessions, matched exactly as sent. URL-encode it; a value containing `/` cannot be addressed by this route.
+        example: user-abc-123
+      responses:
+        '200':
+          description: The rendered PDF document, returned directly as binary `application/pdf` — there is no JSON wrapper and no download-URL indirection. The body starts with the `%PDF` magic bytes. Save it to a `.pdf` file or stream it through to your caller.
+          headers:
+            Content-Disposition:
+              description: '`attachment; filename=user_{didit_internal_id}.pdf` — the file is named after the user''s stable Didit identifier (`didit_internal_id` on `GET /v3/users/{vendor_data}/`), not after `vendor_data`.'
+              schema:
+                type: string
+                example: attachment; filename=user_f4e5e1f2-94a9-4f86-8c16-2b7d9b4db418.pdf
+            Content-Length:
+              description: Total size of the PDF in bytes; the body is not chunked.
+              schema:
+                type: integer
+                example: 148213
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 'No credentials supplied. Requests to `/v3/users/*` paths without an `x-api-key` header (or `Authorization: Bearer` token) are rejected by the authentication middleware before reaching the API.'
+          content:
+            application/json:
+              examples:
+                Missing credentials:
+                  value:
+                    detail: You must be authenticated with a valid access token to access this endpoint.
+        '403':
+          description: 'Authorization or eligibility failure. Distinguish the two by the `detail` string:
+
+
+            - `"You do not have permission to perform this action."` — the API key is invalid or revoked, or the request carries a Console user token instead of an application API key.
+
+            - `"This user has no sessions in review, declined, approved or kyc expired to report."` — the user exists in your application but none of its sessions is in a reportable status yet (for example every session is still `In Progress`, or the user was created through `POST /v3/users/create/` and has never verified). Wait for a `status.updated` webhook before requesting the report.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: This user has no sessions in review, declined, approved or kyc expired to report.
+              examples:
+                Invalid credentials:
+                  summary: Revoked or invalid API key, or a Console user token
+                  value:
+                    detail: You do not have permission to perform this action.
+                No reportable sessions:
+                  summary: User exists but has no Approved / Declined / In Review / Kyc Expired session
+                  value:
+                    detail: This user has no sessions in review, declined, approved or kyc expired to report.
+        '404':
+          description: No user with the supplied `vendor_data` exists in the application behind the API key. Users of other applications are invisible to this key and return the same `404`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: User not found.
+              examples:
+                Unknown user:
+                  summary: vendor_data does not match any user of this application
+                  value:
+                    detail: User not found.
+        '429':
+          description: Rate limit exceeded. PDF generation has a dedicated limit of **50 requests per minute per credential** (API key, Bearer token, or source IP when unauthenticated), shared between this endpoint and `GET /v3/session/{sessionId}/generate-pdf/`, in addition to the global 600/min GET limit. Wait `Retry-After` seconds (also reflected in the `X-RateLimit-*` headers), then retry. Reports are not cached server-side, so download each report once and store the file instead of re-fetching it.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying the request.
+              schema:
+                type: integer
+                minimum: 1
+                example: 30
+            X-RateLimit-Limit:
+              description: Maximum number of PDF generations allowed in the current window (50).
+              schema:
+                type: integer
+                example: 50
+            X-RateLimit-Remaining:
+              description: Requests remaining in the current window.
+              schema:
+                type: integer
+                example: 0
+            X-RateLimit-Reset:
+              description: Unix timestamp (seconds) at which the current window resets.
+              schema:
+                type: integer
+                example: 1750000000
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    description: Human-readable explanation of the rate-limit breach.
+                    example: Session PDF generation rate limit exceeded. You can make up to 50 requests per minute.
+              examples:
+                Throttled:
+                  summary: More than 50 PDF generations in one minute from the same credential
+                  value:
+                    detail: Session PDF generation rate limit exceeded. You can make up to 50 requests per minute.
+      security:
+      - ApiKeyAuth: []
+      x-codeSamples:
+      - lang: curl
+        label: cURL
+        source: "curl --fail \\\n  'https://verification.didit.me/v3/users/user-abc-123/generate-pdf/' \\\n  -H 'x-api-key: YOUR_API_KEY' \\\n  --output user-history.pdf"
+      - lang: python
+        label: Python
+        source: "import requests\n\nresponse = requests.get(\n    \"https://verification.didit.me/v3/users/user-abc-123/generate-pdf/\",\n    headers={\"x-api-key\": \"YOUR_API_KEY\"},\n    stream=True,\n    timeout=120,\n)\nresponse.raise_for_status()\nwith open(\"user-history.pdf\", \"wb\") as fh:\n    for chunk in response.iter_content(chunk_size=8192):\n        fh.write(chunk)"
+      - lang: javascript
+        label: JavaScript
+        source: "import { writeFile } from 'node:fs/promises';\n\nconst vendorData = encodeURIComponent('user-abc-123');\nconst response = await fetch(\n  `https://verification.didit.me/v3/users/${vendorData}/generate-pdf/`,\n  { headers: { 'x-api-key': process.env.DIDIT_API_KEY } },\n);\nif (!response.ok) throw new Error(`PDF generation failed: HTTP ${response.status}`);\nawait writeFile('user-history.pdf', Buffer.from(await response.arrayBuffer()));"
   /v3/users/delete/:
     post:
       summary: Batch delete users
-      description: '**Hard delete** users — rows are removed permanently (including previously soft-deleted records). For everyday blocking prefer Update User Status with `BLOCKED`. Unlike the businesses endpoint, this endpoint only accepts `vendor_data_list` or `delete_all` (no `didit_internal_id_list`).'
+      description: '**Permanently delete** users — the user records are removed permanently. For everyday blocking prefer Update User Status with `BLOCKED`. Select users with `vendor_data_list`, with `didit_internal_id_list`, or with both at once; or pass `delete_all: true`. The Console''s `filter_*` batch params are rejected with a `400` rather than ignored, so a narrowed intent can never turn into a full wipe.
+
+
+        **Biometric templates:** every image-free biometric template retained for these users after session deletion (see `/v3/biometric-templates/`) is purged before the user is deleted, so the person stops matching in duplicate detection and Face Search. If a template cannot be purged because a biometric store is unavailable, the call returns `503`, no user in the request is deleted, and repeating the request finishes the job.'
       operationId: batch_delete_users
       tags:
       - Users
@@ -516,13 +674,19 @@ paths:
           application/json:
             schema:
               type: object
-              description: 'Provide `vendor_data_list` or `delete_all: true`. When `delete_all` is `true` it takes precedence and `vendor_data_list` is ignored.'
+              description: 'Provide `vendor_data_list`, `didit_internal_id_list`, or `delete_all: true`. The two lists can be combined and are OR''d. When `delete_all` is `true` it takes precedence and both lists are ignored.'
               properties:
                 vendor_data_list:
                   type: array
                   items:
                     type: string
                   description: Your own identifiers to delete, matched exactly as sent.
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Didit internal user IDs to delete - the `didit_internal_id` returned by the create and get endpoints.
                 delete_all:
                   type: boolean
                   default: false
@@ -534,6 +698,11 @@ paths:
                   vendor_data_list:
                   - user-123
                   - user-456
+              By Didit internal ID:
+                summary: Delete users by didit_internal_id
+                value:
+                  didit_internal_id_list:
+                  - 3f1c0d3e-8f0a-4c2e-9a3d-9b1f5f4a2c11
               All users:
                 summary: Wipe every user in this application
                 value:
@@ -550,7 +719,7 @@ paths:
         source: "const resp = await fetch('https://verification.didit.me/v3/users/delete/', {\n  method: 'POST',\n  headers: { 'x-api-key': process.env.DIDIT_API_KEY, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ vendor_data_list: ['user-123', 'user-456'] }),\n});\nconst body = await resp.json();\nconsole.log('deleted', body.deleted);"
       responses:
         '200':
-          description: Users deleted. Returns the number of rows actually removed.
+          description: Users deleted. Returns the number of users actually deleted.
           content:
             application/json:
               schema:
@@ -598,6 +767,19 @@ paths:
                 Rate limited:
                   value:
                     detail: Request was throttled. Expected available in 30 seconds.
+        '503':
+          description: A biometric store was unavailable while retaining or purging a biometric template. Nothing is deleted; repeat the same request. Retries are idempotent and converge on a single template.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+              examples:
+                Retryable:
+                  value:
+                    detail: The biometric-template operation could not finish because an external store is unavailable. The operation is retryable.
       security:
       - ApiKeyAuth: []
   /v3/users/{vendor_data}/update-status/:
@@ -1109,6 +1291,385 @@ paths:
                     detail: Request was throttled. Expected available in 30 seconds.
       security:
       - ApiKeyAuth: []
+  /v3/organization/{organization_id}/application/{application_id}/vendor-users/toggle-ongoing-monitoring/:
+    patch:
+      summary: Toggle AML ongoing monitoring for users
+      description: Enables or disables AML ongoing monitoring at the user level. Exactly one monitored AML screening is kept per user; users without any AML screening (for example imported users) get one created and screened first, billed as a regular AML screening. Set estimate_only to preview counts and costs without writing. Batches of 20 or fewer resolve inline (200, COMPLETED); larger batches return 202 and run asynchronously.
+      operationId: toggle_vendor_users_ongoing_monitoring
+      tags:
+      - Users
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - is_enabled
+              properties:
+                is_enabled:
+                  type: boolean
+                  description: true to enable monitoring, false to disable it.
+                estimate_only:
+                  type: boolean
+                  default: false
+                  description: When true, returns the cost estimate and performs no writes.
+                update_all:
+                  type: boolean
+                  default: false
+                  description: Apply to every entity of the application (scoped by the filter_* params when present).
+                filter_search:
+                  type: string
+                filter_status:
+                  type: array
+                  items:
+                    type: string
+                filter_country:
+                  type: string
+                filter_date_from:
+                  type: string
+                  format: date
+                filter_date_to:
+                  type: string
+                  format: date
+                didit_internal_id_list:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Entities to toggle. Required unless update_all is true.
+      responses:
+        '200':
+          description: Estimate (when estimate_only) or the completed job for small batches processed inline.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                  properties:
+                    users_total:
+                      type: integer
+                      description: Entities in the selection.
+                    already_enabled:
+                      type: integer
+                    with_existing_aml:
+                      type: integer
+                      description: Entities whose existing AML screening will be switched to monitored.
+                    needing_screening:
+                      type: integer
+                      description: Entities without any AML screening that will be screened first (billed).
+                    skipped_no_identity_data:
+                      type: integer
+                    skipped_blocked:
+                      type: integer
+                    estimated_screening_cost_usd:
+                      type: number
+                      example: 0.2
+                    estimated_annual_monitoring_cost_usd:
+                      type: number
+                      example: 0.07
+                    balance_sufficient:
+                      type: boolean
+                - type: object
+                  properties:
+                    job_id:
+                      type: string
+                      format: uuid
+                    status:
+                      type: string
+                      enum:
+                      - PENDING
+                      - PROCESSING
+                      - COMPLETED
+                      - FAILED
+                    is_enabled:
+                      type: boolean
+                    total:
+                      type: integer
+                    processed:
+                      type: integer
+                    outcomes:
+                      type: object
+                      description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                      properties:
+                        enabled:
+                          type: integer
+                          description: Monitoring enabled on an existing AML screening.
+                        screened_and_enabled:
+                          type: integer
+                          description: A new AML screening was created (billed) and monitoring enabled.
+                        already_enabled:
+                          type: integer
+                          description: Monitoring was already active (legacy duplicate rows are consolidated).
+                        disabled:
+                          type: integer
+                          description: Monitoring disabled on every AML row of the entity.
+                        skipped_no_identity_data:
+                          type: integer
+                          description: 'Skipped: no full name + date of birth + country available to screen.'
+                        skipped_blocked:
+                          type: integer
+                          description: 'Skipped: the user is blocked.'
+                        skipped_sandbox:
+                          type: integer
+                          description: 'Skipped: sandbox application.'
+                        failed_provider:
+                          type: integer
+                          description: The screening provider call failed.
+                        failed_insufficient_balance:
+                          type: integer
+                          description: Balance ran out mid-job.
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                    estimate:
+                      type: object
+                      description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                      properties:
+                        users_total:
+                          type: integer
+                          description: Entities in the selection.
+                        already_enabled:
+                          type: integer
+                        with_existing_aml:
+                          type: integer
+                          description: Entities whose existing AML screening will be switched to monitored.
+                        needing_screening:
+                          type: integer
+                          description: Entities without any AML screening that will be screened first (billed).
+                        skipped_no_identity_data:
+                          type: integer
+                        skipped_blocked:
+                          type: integer
+                        estimated_screening_cost_usd:
+                          type: number
+                          example: 0.2
+                        estimated_annual_monitoring_cost_usd:
+                          type: number
+                          example: 0.07
+                        balance_sufficient:
+                          type: boolean
+        '202':
+          description: Larger batches are processed asynchronously; poll the job endpoint with the returned job_id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '403':
+          description: Missing write:sessions privilege, or insufficient balance to enable (the estimate is included in the error body).
+  /v3/organization/{organization_id}/application/{application_id}/vendor-users/toggle-ongoing-monitoring/{job_id}/:
+    get:
+      summary: Get AML ongoing monitoring job
+      description: Progress and per-outcome counters of a monitoring toggle job. Poll every couple of seconds while status is PENDING or PROCESSING.
+      operationId: get_vendor_users_ongoing_monitoring_job
+      tags:
+      - Users
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Organization UUID.
+      - name: application_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Application UUID.
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Monitoring job UUID returned by the toggle endpoint.
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                    - PENDING
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                  is_enabled:
+                    type: boolean
+                  total:
+                    type: integer
+                  processed:
+                    type: integer
+                  outcomes:
+                    type: object
+                    description: 'Per-entity outcome counters. Nothing is silently skipped: every requested entity resolves to exactly one counter.'
+                    properties:
+                      enabled:
+                        type: integer
+                        description: Monitoring enabled on an existing AML screening.
+                      screened_and_enabled:
+                        type: integer
+                        description: A new AML screening was created (billed) and monitoring enabled.
+                      already_enabled:
+                        type: integer
+                        description: Monitoring was already active (legacy duplicate rows are consolidated).
+                      disabled:
+                        type: integer
+                        description: Monitoring disabled on every AML row of the entity.
+                      skipped_no_identity_data:
+                        type: integer
+                        description: 'Skipped: no full name + date of birth + country available to screen.'
+                      skipped_blocked:
+                        type: integer
+                        description: 'Skipped: the user is blocked.'
+                      skipped_sandbox:
+                        type: integer
+                        description: 'Skipped: sandbox application.'
+                      failed_provider:
+                        type: integer
+                        description: The screening provider call failed.
+                      failed_insufficient_balance:
+                        type: integer
+                        description: Balance ran out mid-job.
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                  estimate:
+                    type: object
+                    description: Cost preview. Returned directly when estimate_only is true (no writes are performed).
+                    properties:
+                      users_total:
+                        type: integer
+                        description: Entities in the selection.
+                      already_enabled:
+                        type: integer
+                      with_existing_aml:
+                        type: integer
+                        description: Entities whose existing AML screening will be switched to monitored.
+                      needing_screening:
+                        type: integer
+                        description: Entities without any AML screening that will be screened first (billed).
+                      skipped_no_identity_data:
+                        type: integer
+                      skipped_blocked:
+                        type: integer
+                      estimated_screening_cost_usd:
+                        type: number
+                        example: 0.2
+                      estimated_annual_monitoring_cost_usd:
+                        type: number
+                        example: 0.07
+                      balance_sufficient:
+                        type: boolean
+        '404':
+          description: Unknown job for this application.
 components:
   schemas:
     UserDetailItem:
@@ -1368,6 +1929,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
     TransactionTokenAuth:
       type: apiKey
       in: header
@@ -1378,3 +1940,12 @@ components:
       in: header
       name: Session-Token
       description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.

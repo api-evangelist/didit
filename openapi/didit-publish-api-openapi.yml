@@ -1,0 +1,200 @@
+openapi: 3.2.0
+info:
+  version: 3.0.0
+  title: Didit Verification Publish API
+  description: Identity verification API. Authenticate with x-api-key header.
+servers:
+- url: https://verification.didit.me
+tags:
+- name: Publish
+paths:
+  /v3/organization/{organization_id}/application/{application_id}/cases/routing-rules/{record_uuid}/publish/:
+    post:
+      operationId: publish_case_routing_rule
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: application_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: record_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Publish
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftPreconditionRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftPreconditionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoutingPublicationPolicyDraftPreconditionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPublicationCaseRoutingRule'
+          description: ''
+        '403':
+          description: Case access is required.
+        '409':
+          description: The published version or draft revision has changed. Reload before retrying.
+      security:
+      - ApiKeyAuth: []
+      summary: Publish case routing rule
+      x-summary-source: derived
+components:
+  schemas:
+    RoutingPublicationFieldEnum:
+      enum:
+      - source
+      - priority
+      - tags
+      type: string
+      description: '* `source` - source
+
+        * `priority` - priority
+
+        * `tags` - tags'
+    RoutingPublicationPolicyDraftPreconditionRequest:
+      type: object
+      properties:
+        expected_version:
+          type: integer
+          minimum: 0
+        expected_revision:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - expected_revision
+      - expected_version
+    RoutingPublicationOperatorEnum:
+      enum:
+      - equals
+      - in
+      - contains
+      type: string
+      description: '* `equals` - equals
+
+        * `in` - in
+
+        * `contains` - contains'
+    RoutingPublicationCaseRoutingRule:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        priority:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingPublicationRoutingCondition'
+        required_skills:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 25
+        blueprint:
+          type: string
+          format: uuid
+        blueprint_name:
+          type: string
+          readOnly: true
+        team:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        team_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+        version:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - blueprint
+      - blueprint_name
+      - conditions
+      - created_at
+      - name
+      - team_name
+      - updated_at
+      - uuid
+      - version
+    RoutingPublicationRoutingCondition:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/RoutingPublicationFieldEnum'
+        operator:
+          $ref: '#/components/schemas/RoutingPublicationOperatorEnum'
+        value: {}
+      required:
+      - field
+      - operator
+      - value
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'Your application''s API key, from Developers -> API keys in the Business Console. The primary key has full access. A named key can be scoped: none, read or write per resource, limited to some workflows or to approved sessions, to a list of IP addresses, and to an expiry date. 401 means the key is missing, wrong, revoked or expired; 403 means the key has no access to this resource or action, or the request came from an address outside its IP list; 404 on a session route means the session is outside the key''s workflows or statuses. A key without media access receives image, video and PDF URLs as null, and a key without sessions write receives session links and tokens as null. See https://docs.didit.me/console/api-keys.'
+    TransactionTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Transaction-Token
+      description: Short-lived scoped token minted by your backend via POST /v3/transactions/sdk-token/. Used by the Didit SDKs on the device-facing /v1/transactions/ endpoints.
+    SessionTokenAuth:
+      type: apiKey
+      in: header
+      name: Session-Token
+      description: Short-lived token returned in the `session_token` field of POST /v3/session/. Used by the hosted verification flow (and custom sandbox UIs) to call session-scoped endpoints on behalf of the verifying user, without your server-side API key.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: The application's client-credentials access token.
+    CaseRequestToken:
+      type: apiKey
+      in: header
+      name: X-Case-Request-Token
+      description: Request-specific credential from the secure link. Grants access only to this request.
