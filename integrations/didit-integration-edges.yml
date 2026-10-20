@@ -1,35 +1,4 @@
 edges:
-- partner_name: MCP Registry
-  partner: mcp
-  partner_match: register
-  type: register
-  channel: standard-directory
-  relationship: standard-participant
-  direction: partner-built
-  evidence: https://registry.modelcontextprotocol.io/v0/servers?search=me.didit
-  contract_reference:
-    register: registry.modelcontextprotocol.io
-    spec_file: null
-    role: mcp-server-listing
-    registered_name: me.didit/mcp
-    register_id: me.didit/mcp
-    detected_by: sweep-agent-tools.py
-    detected: '2026-10-15'
-  mcp_registry:
-    servers:
-    - me.didit/mcp
-    hosted_remote: 1
-    local_package: 0
-    transports:
-      streamable-http: 1
-    auth_declared: 0
-    catalog_declared: true
-    namespace_domains:
-    - didit.me
-  matched_by:
-  - namespace-domain
-  detected_by: sweep-agent-tools.py
-  first_seen: '2026-10-14'
 - partner_name: Zapier
   partner: zapier
   partner_match: aggregator
@@ -55,10 +24,81 @@ edges:
     builder: unknown (not in the directory record)
   detected_by: sweep-workflow-automation.py
   first_seen: '2026-10-15'
+- partner_name: MCP Registry
+  partner: mcp
+  partner_match: register
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://registry.modelcontextprotocol.io/v0/servers?search=me.didit
+  contract_reference:
+    register: registry.modelcontextprotocol.io
+    spec_file: null
+    role: mcp-server-listing
+    registered_name: me.didit/mcp
+    register_id: me.didit/mcp
+    detected_by: sweep-agent-tools.py
+    detected: '2026-10-19'
+  mcp_registry:
+    servers:
+    - me.didit/mcp
+    hosted_remote: 1
+    local_package: 0
+    transports:
+      streamable-http: 1
+    auth_declared: 0
+    catalog_declared: true
+    namespace_domains:
+    - didit.me
+  matched_by:
+  - namespace-domain
+  detected_by: sweep-agent-tools.py
+  first_seen: '2026-10-14'
+- partner_name: iBeta (ISO/IEC 30107-3 presentation attack detection)
+  partner: null
+  partner_match: register
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://www.ibeta.com/iso-30107-3-presentation-attack-detection-confirmation-letters/
+  category: biometric conformance (PAD)
+  contract_reference:
+    register: iBeta ISO/IEC 30107-3 PAD confirmation letters (ibeta.com, NIST NVLAP-accredited lab)
+    standard: ISO/IEC 30107-3 (iBeta PAD)
+    spec_file: null
+    role: ibeta-pad-confirmed
+    registered_name: Didit Identity
+    register_id: https://www.ibeta.com/wp-content/uploads/2026/02/260104-Didit-PAD-Level-1-Confirmation-Letter-iOS.pdf
+    matched_domain: didit.me
+    matched_by: domain+verified
+    identity: 'hand-verified: Didit Identity = Didit (didit.me), identity verification'
+    identity_source: hand-verified (LOCAL_VERIFIED)
+    certified_products:
+    - product: ISO/IEC 30107-3 PAD (face)
+      modality: face
+      partner_tier: Level 1
+      lapsed: false
+      latest_letter: '2026-02-04'
+      products_tested:
+      - Didit Biometric Authentication
+    signal_note: certified_products = ONE entry per PAD product type (modality), highest level confirmed in partner_tier;
+      letters and versions are never counted. iBeta letters carry no expiry, so lapsed is false and the latest letter
+      date is recorded
+    detected_by: sweep-biometrics-testing.py
+    detected: '2026-10-20'
+  detected_by: sweep-biometrics-testing.py
+  first_seen: '2026-10-20'
 generated: '2026-10-14'
 method: searched
 checked:
 - https://registry.modelcontextprotocol.io/v0/servers
 - https://zapier.com/api/v4/apps/
+- https://fidoalliance.org/certification/identity-verification/face-verification/fido-certified-products/
+- https://pages.nist.gov/IREX10/
+- https://pages.nist.gov/frvt/html/frvt11.html
+- https://pages.nist.gov/frvt/html/frvt1N.html
+- https://www.ibeta.com/iso-30107-3-presentation-attack-detection-confirmation-letters/
 source:
 - https://zapier.com/api/v4/apps/
