@@ -429,6 +429,8 @@ apis:
   - type: OpenAPI
     url: openapi/didit-publish-api-openapi.yml
 common:
+- type: PostmanWorkspace
+  url: https://www.postman.com/kinlaneapi/didit/overview
 - type: Website
   url: https://www.didit.me/
 - type: DeveloperPortal
