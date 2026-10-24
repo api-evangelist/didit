@@ -1,0 +1,346 @@
+{
+  "info": {
+    "_postman_id": "fe308f5f-e589-4a96-9874-f4c175662950",
+    "name": "Didit Verification History API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:12:39.000Z",
+    "updatedAt": "2026-10-22T01:12:39.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-fe308f5f-e589-4a96-9874-f4c175662950"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "organization",
+          "item": [
+            {
+              "name": "{organization_id}",
+              "item": [
+                {
+                  "name": "application",
+                  "item": [
+                    {
+                      "name": "{application_id}",
+                      "item": [
+                        {
+                          "name": "cases",
+                          "item": [
+                            {
+                              "name": "routing-rules",
+                              "item": [
+                                {
+                                  "name": "{record_uuid}",
+                                  "item": [
+                                    {
+                                      "name": "history",
+                                      "item": [
+                                        {
+                                          "name": "List case routing rule history",
+                                          "id": "6e40a8b1-5a40-4022-b0c8-83ce28ded1e1",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "apikey",
+                                              "apikey": [
+                                                {
+                                                  "key": "key",
+                                                  "value": "x-api-key",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "value",
+                                                  "value": "{{apiKey}}",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "in",
+                                                  "value": "header",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/history/?ordering=<string>&limit=<integer>&offset=<integer>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                "history",
+                                                ""
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Which field to use when ordering the results.",
+                                                  "key": "ordering",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "Number of results to return per page.",
+                                                  "key": "limit",
+                                                  "value": "<integer>"
+                                                },
+                                                {
+                                                  "description": "The initial index from which to return the results.",
+                                                  "key": "offset",
+                                                  "value": "<integer>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "5b35e124-467b-49f2-b245-e4db5a851407",
+                                                  "key": "organization_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "e8cb9c50-a444-4152-85c6-8f16e189006c",
+                                                  "key": "application_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "dfa281bc-b255-4f41-a097-714c81a84354",
+                                                  "key": "record_uuid",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "8553dd8c-b564-45d5-888d-18181dddd070",
+                                              "name": "New Response",
+                                              "originalRequest": {
+                                                "method": "GET",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/history/?ordering=<string>&limit=<integer>&offset=<integer>",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "history",
+                                                    ""
+                                                  ],
+                                                  "query": [
+                                                    {
+                                                      "description": "Which field to use when ordering the results.",
+                                                      "key": "ordering",
+                                                      "value": "<string>"
+                                                    },
+                                                    {
+                                                      "description": "Number of results to return per page.",
+                                                      "key": "limit",
+                                                      "value": "<integer>"
+                                                    },
+                                                    {
+                                                      "description": "The initial index from which to return the results.",
+                                                      "key": "offset",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "OK",
+                                              "code": 200,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"count\": \"<integer>\",\n  \"results\": [\n    {\n      \"published_at\": \"<dateTime>\",\n      \"snapshot\": {},\n      \"version\": \"<integer>\",\n      \"actor_email\": \"<string,null-email>\"\n    },\n    {\n      \"published_at\": \"<dateTime>\",\n      \"snapshot\": {},\n      \"version\": \"<integer>\",\n      \"actor_email\": \"<string,null-email>\"\n    }\n  ],\n  \"next\": \"<string,null-uri>\",\n  \"previous\": \"<string,null-uri>\"\n}",
+                                              "createdAt": "2026-10-22T01:12:39.000Z",
+                                              "updatedAt": "2026-10-22T01:12:39.000Z",
+                                              "uid": "35240-8553dd8c-b564-45d5-888d-18181dddd070"
+                                            },
+                                            {
+                                              "id": "fa0ff791-efe8-4c60-a20d-d12fb13f8e6f",
+                                              "name": "Case access is required.",
+                                              "originalRequest": {
+                                                "method": "GET",
+                                                "header": [
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/history/?ordering=<string>&limit=<integer>&offset=<integer>",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "history",
+                                                    ""
+                                                  ],
+                                                  "query": [
+                                                    {
+                                                      "description": "Which field to use when ordering the results.",
+                                                      "key": "ordering",
+                                                      "value": "<string>"
+                                                    },
+                                                    {
+                                                      "description": "Number of results to return per page.",
+                                                      "key": "limit",
+                                                      "value": "<integer>"
+                                                    },
+                                                    {
+                                                      "description": "The initial index from which to return the results.",
+                                                      "key": "offset",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:39.000Z",
+                                              "updatedAt": "2026-10-22T01:12:39.000Z",
+                                              "uid": "35240-fa0ff791-efe8-4c60-a20d-d12fb13f8e6f"
+                                            }
+                                          ],
+                                          "createdAt": "2026-10-22T01:12:39.000Z",
+                                          "updatedAt": "2026-10-22T01:12:39.000Z",
+                                          "uid": "35240-6e40a8b1-5a40-4022-b0c8-83ce28ded1e1"
+                                        }
+                                      ],
+                                      "id": "ab917f10-d03f-4324-9131-4ac274f5c50c",
+                                      "createdAt": "2026-10-22T01:12:39.000Z",
+                                      "updatedAt": "2026-10-22T01:12:39.000Z",
+                                      "uid": "35240-ab917f10-d03f-4324-9131-4ac274f5c50c"
+                                    }
+                                  ],
+                                  "id": "a7446006-c8b8-4df7-badc-69e6ceaf3385",
+                                  "createdAt": "2026-10-22T01:12:39.000Z",
+                                  "updatedAt": "2026-10-22T01:12:39.000Z",
+                                  "uid": "35240-a7446006-c8b8-4df7-badc-69e6ceaf3385"
+                                }
+                              ],
+                              "id": "851dd47b-27d7-4473-8b57-31552e488417",
+                              "createdAt": "2026-10-22T01:12:39.000Z",
+                              "updatedAt": "2026-10-22T01:12:39.000Z",
+                              "uid": "35240-851dd47b-27d7-4473-8b57-31552e488417"
+                            }
+                          ],
+                          "id": "dfed4281-8b66-4c1a-a141-b7f1bed72b9f",
+                          "createdAt": "2026-10-22T01:12:39.000Z",
+                          "updatedAt": "2026-10-22T01:12:39.000Z",
+                          "uid": "35240-dfed4281-8b66-4c1a-a141-b7f1bed72b9f"
+                        }
+                      ],
+                      "id": "207f7d3c-0ae1-4daf-80d0-630195685c26",
+                      "createdAt": "2026-10-22T01:12:39.000Z",
+                      "updatedAt": "2026-10-22T01:12:39.000Z",
+                      "uid": "35240-207f7d3c-0ae1-4daf-80d0-630195685c26"
+                    }
+                  ],
+                  "id": "c55a920f-3558-4c10-98b5-3c0775601b40",
+                  "createdAt": "2026-10-22T01:12:39.000Z",
+                  "updatedAt": "2026-10-22T01:12:39.000Z",
+                  "uid": "35240-c55a920f-3558-4c10-98b5-3c0775601b40"
+                }
+              ],
+              "id": "b3bd9e19-d6ab-4608-aefa-1906713ae358",
+              "createdAt": "2026-10-22T01:12:39.000Z",
+              "updatedAt": "2026-10-22T01:12:39.000Z",
+              "uid": "35240-b3bd9e19-d6ab-4608-aefa-1906713ae358"
+            }
+          ],
+          "id": "e94d3764-1c63-41aa-9948-8fbabbff8cf2",
+          "createdAt": "2026-10-22T01:12:39.000Z",
+          "updatedAt": "2026-10-22T01:12:39.000Z",
+          "uid": "35240-e94d3764-1c63-41aa-9948-8fbabbff8cf2"
+        }
+      ],
+      "id": "2cf3883b-2f14-4a32-88f7-effeaaef8536",
+      "createdAt": "2026-10-22T01:12:39.000Z",
+      "updatedAt": "2026-10-22T01:12:39.000Z",
+      "uid": "35240-2cf3883b-2f14-4a32-88f7-effeaaef8536"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

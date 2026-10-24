@@ -1,0 +1,424 @@
+{
+  "info": {
+    "_postman_id": "060b3fd1-b2fc-45c0-bb36-3b557716df97",
+    "name": "Didit Verification Publish API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:12:51.000Z",
+    "updatedAt": "2026-10-22T01:12:52.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-060b3fd1-b2fc-45c0-bb36-3b557716df97"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "organization",
+          "item": [
+            {
+              "name": "{organization_id}",
+              "item": [
+                {
+                  "name": "application",
+                  "item": [
+                    {
+                      "name": "{application_id}",
+                      "item": [
+                        {
+                          "name": "cases",
+                          "item": [
+                            {
+                              "name": "routing-rules",
+                              "item": [
+                                {
+                                  "name": "{record_uuid}",
+                                  "item": [
+                                    {
+                                      "name": "publish",
+                                      "item": [
+                                        {
+                                          "name": "Publish case routing rule",
+                                          "id": "cfb3c486-eed3-4ef1-8885-813d86cf0f99",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "apikey",
+                                              "apikey": [
+                                                {
+                                                  "key": "key",
+                                                  "value": "x-api-key",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "value",
+                                                  "value": "{{apiKey}}",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "in",
+                                                  "value": "header",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "POST",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/x-www-form-urlencoded"
+                                              },
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "urlencoded",
+                                              "urlencoded": [
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "expected_revision",
+                                                  "value": "<string,null-uuid>"
+                                                },
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "expected_version",
+                                                  "value": "<integer>"
+                                                }
+                                              ]
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/publish/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                "publish",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "2d800c6d-8e46-496a-a29d-ddb89223c848",
+                                                  "key": "organization_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "6ae23f34-49a7-41a5-9788-81a5ea30ecda",
+                                                  "key": "application_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "2a0313f1-b1d4-4820-8ce7-91dd068b3365",
+                                                  "key": "record_uuid",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "335421d1-895f-4905-9122-6322142794a2",
+                                              "name": "New Response",
+                                              "originalRequest": {
+                                                "method": "POST",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/publish/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "publish",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "OK",
+                                              "code": 200,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"blueprint\": \"<uuid>\",\n  \"blueprint_name\": \"<string>\",\n  \"conditions\": [\n    {\n      \"field\": \"priority\",\n      \"operator\": \"contains\",\n      \"value\": {}\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"equals\",\n      \"value\": {}\n    }\n  ],\n  \"created_at\": \"<dateTime>\",\n  \"name\": \"<string>\",\n  \"team_name\": \"<string>\",\n  \"updated_at\": \"<dateTime>\",\n  \"uuid\": \"<uuid>\",\n  \"version\": \"<integer>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\"\n}",
+                                              "createdAt": "2026-10-22T01:12:52.000Z",
+                                              "updatedAt": "2026-10-22T01:12:52.000Z",
+                                              "uid": "35240-335421d1-895f-4905-9122-6322142794a2"
+                                            },
+                                            {
+                                              "id": "9100f254-21ee-44cc-90de-49971966f9a4",
+                                              "name": "Case access is required.",
+                                              "originalRequest": {
+                                                "method": "POST",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/publish/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "publish",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:52.000Z",
+                                              "updatedAt": "2026-10-22T01:12:52.000Z",
+                                              "uid": "35240-9100f254-21ee-44cc-90de-49971966f9a4"
+                                            },
+                                            {
+                                              "id": "82d0901b-4780-405a-90a4-af183f8ec507",
+                                              "name": "The published version or draft revision has changed. Reload before retrying.",
+                                              "originalRequest": {
+                                                "method": "POST",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/publish/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "publish",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Conflict",
+                                              "code": 409,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:52.000Z",
+                                              "updatedAt": "2026-10-22T01:12:52.000Z",
+                                              "uid": "35240-82d0901b-4780-405a-90a4-af183f8ec507"
+                                            }
+                                          ],
+                                          "createdAt": "2026-10-22T01:12:52.000Z",
+                                          "updatedAt": "2026-10-22T01:12:52.000Z",
+                                          "uid": "35240-cfb3c486-eed3-4ef1-8885-813d86cf0f99"
+                                        }
+                                      ],
+                                      "id": "ddd2121a-e647-450b-976e-e6328c47d498",
+                                      "createdAt": "2026-10-22T01:12:52.000Z",
+                                      "updatedAt": "2026-10-22T01:12:52.000Z",
+                                      "uid": "35240-ddd2121a-e647-450b-976e-e6328c47d498"
+                                    }
+                                  ],
+                                  "id": "da136d21-5ddc-46e5-9af4-e3d4220cb656",
+                                  "createdAt": "2026-10-22T01:12:52.000Z",
+                                  "updatedAt": "2026-10-22T01:12:52.000Z",
+                                  "uid": "35240-da136d21-5ddc-46e5-9af4-e3d4220cb656"
+                                }
+                              ],
+                              "id": "5c572b42-639d-4f0e-9b88-0e361bc3898f",
+                              "createdAt": "2026-10-22T01:12:52.000Z",
+                              "updatedAt": "2026-10-22T01:12:52.000Z",
+                              "uid": "35240-5c572b42-639d-4f0e-9b88-0e361bc3898f"
+                            }
+                          ],
+                          "id": "824f5d7d-43e2-4c37-ad88-bc05dec2f7c7",
+                          "createdAt": "2026-10-22T01:12:52.000Z",
+                          "updatedAt": "2026-10-22T01:12:52.000Z",
+                          "uid": "35240-824f5d7d-43e2-4c37-ad88-bc05dec2f7c7"
+                        }
+                      ],
+                      "id": "1100c215-cde2-47a5-bcfa-83c7be209cf7",
+                      "createdAt": "2026-10-22T01:12:52.000Z",
+                      "updatedAt": "2026-10-22T01:12:52.000Z",
+                      "uid": "35240-1100c215-cde2-47a5-bcfa-83c7be209cf7"
+                    }
+                  ],
+                  "id": "a35b5108-9aac-482f-982a-5e56d2100511",
+                  "createdAt": "2026-10-22T01:12:52.000Z",
+                  "updatedAt": "2026-10-22T01:12:52.000Z",
+                  "uid": "35240-a35b5108-9aac-482f-982a-5e56d2100511"
+                }
+              ],
+              "id": "33aa9726-e7d4-40bc-ad8f-08d5b4dbf05a",
+              "createdAt": "2026-10-22T01:12:52.000Z",
+              "updatedAt": "2026-10-22T01:12:52.000Z",
+              "uid": "35240-33aa9726-e7d4-40bc-ad8f-08d5b4dbf05a"
+            }
+          ],
+          "id": "29bf188c-5637-4d98-9883-7e6e44ad7489",
+          "createdAt": "2026-10-22T01:12:52.000Z",
+          "updatedAt": "2026-10-22T01:12:52.000Z",
+          "uid": "35240-29bf188c-5637-4d98-9883-7e6e44ad7489"
+        }
+      ],
+      "id": "eff84d87-3c27-47c2-a3f3-7b6bc2eb28b0",
+      "createdAt": "2026-10-22T01:12:52.000Z",
+      "updatedAt": "2026-10-22T01:12:52.000Z",
+      "uid": "35240-eff84d87-3c27-47c2-a3f3-7b6bc2eb28b0"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

@@ -1,507 +1,549 @@
 {
+  "info": {
+    "_postman_id": "7d3c6620-2776-4b6a-880f-02ad84a21a11",
+    "name": "Didit Verification Billing API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:09:23.000Z",
+    "updatedAt": "2026-10-22T01:09:23.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-7d3c6620-2776-4b6a-880f-02ad84a21a11"
+  },
   "item": [
     {
-      "id": "157e4bc4-6d47-466d-ab3c-9c403ad01e39",
-      "name": "Billing",
-      "description": {
-        "content": "",
-        "type": "text/plain"
-      },
+      "name": "v3",
       "item": [
         {
-          "id": "d4c78427-2bf7-4542-ba6d-8bd3d8684b28",
-          "name": "Get credit balance",
-          "request": {
-            "name": "Get credit balance",
-            "description": {
-              "content": "Get current pre-paid credit balance in USD (organization-wide) plus auto-refill config. Amounts are decimal strings — parse with a decimal library.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "billing",
-                "balance",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "GET",
-            "auth": {
-              "type": "apikey",
-              "apikey": [
-                {
-                  "key": "key",
-                  "value": "x-api-key"
-                },
-                {
-                  "key": "value",
-                  "value": "{{apiKey}}"
-                },
-                {
-                  "key": "in",
-                  "value": "header"
-                }
-              ]
-            }
-          },
-          "response": [
+          "name": "billing",
+          "item": [
             {
-              "id": "73cdd12f-d0b8-4491-a386-01066c4f1b2e",
-              "name": "Current credit balance plus the organization's auto-refill configuration.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "balance",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "GET",
-                "body": {}
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
+              "name": "balance",
+              "item": [
                 {
-                  "key": "Content-Type",
-                  "value": "application/json"
+                  "name": "Get credit balance",
+                  "id": "9ab62692-a6e2-4362-ac96-f0cc092dc346",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "apikey",
+                      "apikey": [
+                        {
+                          "key": "key",
+                          "value": "x-api-key",
+                          "type": "string"
+                        },
+                        {
+                          "key": "value",
+                          "value": "{{apiKey}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "in",
+                          "value": "header",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/v3/billing/balance/",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v3",
+                        "billing",
+                        "balance",
+                        ""
+                      ]
+                    },
+                    "description": "Get current pre-paid credit balance in USD (organization-wide) plus auto-refill config. Amounts are decimal strings \u2014 parse with a decimal library."
+                  },
+                  "response": [
+                    {
+                      "id": "95a02157-e950-49bf-a69e-1136db9717cc",
+                      "name": "Current credit balance plus the organization's auto-refill configuration.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/balance/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "balance",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"balance\": \"<string>\",\n  \"auto_refill_enabled\": \"<boolean>\",\n  \"auto_refill_amount\": \"<string,null>\",\n  \"auto_refill_threshold\": \"<string,null>\"\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-95a02157-e950-49bf-a69e-1136db9717cc"
+                    },
+                    {
+                      "id": "64075a7f-f6ac-45dc-a6ee-5bacdbb858f2",
+                      "name": "Missing, invalid, or revoked API key, or the key cannot read billing data for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/balance/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "balance",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"examples\": {\n    \"Forbidden\": {\n      \"value\": {\n        \"detail\": \"You do not have permission to perform this action.\"\n      }\n    }\n  }\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-64075a7f-f6ac-45dc-a6ee-5bacdbb858f2"
+                    },
+                    {
+                      "id": "0abd1943-f456-4e0d-8461-1a0d4f732962",
+                      "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/balance/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "balance",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"examples\": {\n    \"Throttled\": {\n      \"value\": {\n        \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n      }\n    }\n  }\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-0abd1943-f456-4e0d-8461-1a0d4f732962"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:09:23.000Z",
+                  "updatedAt": "2026-10-22T01:09:23.000Z",
+                  "uid": "35240-9ab62692-a6e2-4362-ac96-f0cc092dc346"
                 }
               ],
-              "body": "{\n  \"balance\": \"1234.5600\",\n  \"auto_refill_enabled\": true,\n  \"auto_refill_amount\": \"500.00\",\n  \"auto_refill_threshold\": \"100.00\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
+              "id": "c5390370-5b11-425b-81ff-f548d36c3590",
+              "createdAt": "2026-10-22T01:09:23.000Z",
+              "updatedAt": "2026-10-22T01:09:23.000Z",
+              "uid": "35240-c5390370-5b11-425b-81ff-f548d36c3590"
             },
             {
-              "id": "0d88d347-1a5a-4085-8dd3-38645b38a148",
-              "name": "Missing, invalid, or revoked API key, or the key cannot read billing data for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "balance",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "GET",
-                "body": {}
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "header": [
+              "name": "top-up",
+              "item": [
                 {
-                  "key": "Content-Type",
-                  "value": "application/json"
+                  "name": "Top up credits",
+                  "id": "1b5ee2e1-834c-45b7-b731-8476cc459f08",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "apikey",
+                      "apikey": [
+                        {
+                          "key": "key",
+                          "value": "x-api-key",
+                          "type": "string"
+                        },
+                        {
+                          "key": "value",
+                          "value": "{{apiKey}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "in",
+                          "value": "header",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/v3/billing/top-up/",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v3",
+                        "billing",
+                        "top-up",
+                        ""
+                      ]
+                    },
+                    "description": "Add credits via a hosted Stripe Checkout session (**$50 minimum**); not available on annual plans. Redirect the customer to the returned `checkout_session_url`."
+                  },
+                  "response": [
+                    {
+                      "id": "7788f4e9-98d8-4ef1-99de-3af1e82e0056",
+                      "name": "Stripe Checkout session created. Redirect the user to `checkout_session_url` to complete payment.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/top-up/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "top-up",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"checkout_session_id\": \"<string>\",\n  \"checkout_session_url\": \"<uri>\"\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-7788f4e9-98d8-4ef1-99de-3af1e82e0056"
+                    },
+                    {
+                      "id": "acd9d9e6-4728-4975-86c1-f71939a85ad4",
+                      "name": "Invalid payload \u2014 the amount is missing, not a number, below the $50 minimum, or the organization is on an annual plan. The error body is a JSON array.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/top-up/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "top-up",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"examples\": {\n    \"Missing amount\": {\n      \"value\": [\n        \"amount_in_dollars is required.\"\n      ]\n    },\n    \"Not a number\": {\n      \"value\": [\n        \"amount_in_dollars must be a number.\"\n      ]\n    },\n    \"Below minimum\": {\n      \"value\": [\n        \"Amount must be at least $50.\"\n      ]\n    },\n    \"Annual plan\": {\n      \"value\": [\n        \"You have an annual plan. Contact your account manager to top up.\"\n      ]\n    }\n  }\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-acd9d9e6-4728-4975-86c1-f71939a85ad4"
+                    },
+                    {
+                      "id": "d8ced23d-15bd-43de-8b61-07441ba98ab6",
+                      "name": "Missing, invalid, or revoked API key, or the key cannot create top-up sessions for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/top-up/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "top-up",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"examples\": {\n    \"Forbidden\": {\n      \"value\": {\n        \"detail\": \"You do not have permission to perform this action.\"\n      }\n    }\n  }\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-d8ced23d-15bd-43de-8b61-07441ba98ab6"
+                    },
+                    {
+                      "id": "d7ef747f-18a1-4d97-b042-1205cbf76955",
+                      "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/billing/top-up/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "billing",
+                            "top-up",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"examples\": {\n    \"Throttled\": {\n      \"value\": {\n        \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n      }\n    }\n  }\n}",
+                      "createdAt": "2026-10-22T01:09:23.000Z",
+                      "updatedAt": "2026-10-22T01:09:23.000Z",
+                      "uid": "35240-d7ef747f-18a1-4d97-b042-1205cbf76955"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:09:23.000Z",
+                  "updatedAt": "2026-10-22T01:09:23.000Z",
+                  "uid": "35240-1b5ee2e1-834c-45b7-b731-8476cc459f08"
                 }
               ],
-              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "27c91581-7ead-41a9-8915-3f581c84f8b3",
-              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "balance",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "GET",
-                "body": {}
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
+              "id": "d17b0214-abf6-491d-a0b8-d24cb55093e1",
+              "createdAt": "2026-10-22T01:09:23.000Z",
+              "updatedAt": "2026-10-22T01:09:23.000Z",
+              "uid": "35240-d17b0214-abf6-491d-a0b8-d24cb55093e1"
             }
           ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "a269315e-de86-4376-808e-24cbfd4951f1",
-          "name": "Top up credits",
-          "request": {
-            "name": "Top up credits",
-            "description": {
-              "content": "Add credits via a hosted Stripe Checkout session (**$50 minimum**); not available on annual plans. Redirect the customer to the returned `checkout_session_url`.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "billing",
-                "top-up",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": {
-              "type": "apikey",
-              "apikey": [
-                {
-                  "key": "key",
-                  "value": "x-api-key"
-                },
-                {
-                  "key": "value",
-                  "value": "{{apiKey}}"
-                },
-                {
-                  "key": "in",
-                  "value": "header"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount_in_dollars\": \"<number>\",\n  \"success_url\": \"<uri>\",\n  \"cancel_url\": \"<uri>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "af7b48b6-ddf2-4416-a479-f5c103f8046e",
-              "name": "Stripe Checkout session created. Redirect the user to `checkout_session_url` to complete payment.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "top-up",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"amount_in_dollars\": 50\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"checkout_session_id\": \"cs_test_a1B2c3D4e5F6g7H8i9J0\",\n  \"checkout_session_url\": \"https://checkout.stripe.com/c/pay/cs_test_a1B2c3D4e5F6g7H8i9J0\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "add3b66e-ee21-45fa-8225-95dfc82dbb47",
-              "name": "Invalid payload — the amount is missing, not a number, below the $50 minimum, or the organization is on an annual plan. The error body is a JSON array.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "top-up",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"amount_in_dollars\": 50\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "[\n  \"amount_in_dollars is required.\"\n]",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "74ad399e-7dcd-45cc-a91e-354ea8169ca2",
-              "name": "Missing, invalid, or revoked API key, or the key cannot create top-up sessions for this organization. This endpoint returns `403` (never `401`) for authentication failures, including requests with no credentials at all.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "top-up",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"amount_in_dollars\": 50\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"detail\": \"You do not have permission to perform this action.\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "486c3e99-11f2-460d-86fe-01dfbe614516",
-              "name": "Rate limit exceeded; back off and retry after the interval indicated in `Retry-After`.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "billing",
-                    "top-up",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: apikey",
-                      "type": "text/plain"
-                    },
-                    "key": "x-api-key",
-                    "value": "<API Key>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"amount_in_dollars\": 50\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"detail\": \"Request was throttled. Expected available in 30 seconds.\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
+          "id": "1ea8163a-a0f2-482a-a713-1b91d05ca8e9",
+          "createdAt": "2026-10-22T01:09:23.000Z",
+          "updatedAt": "2026-10-22T01:09:23.000Z",
+          "uid": "35240-1ea8163a-a0f2-482a-a713-1b91d05ca8e9"
         }
       ],
-      "event": []
+      "id": "79561c3c-4f36-474c-9efa-14ac646be300",
+      "createdAt": "2026-10-22T01:09:23.000Z",
+      "updatedAt": "2026-10-22T01:09:23.000Z",
+      "uid": "35240-79561c3c-4f36-474c-9efa-14ac646be300"
     }
   ],
-  "event": [],
   "variable": [
     {
-      "type": "string",
-      "value": "https://verification.didit.me",
-      "key": "baseUrl"
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
     }
-  ],
-  "info": {
-    "_postman_id": "17f1f34e-7bb6-4da6-858e-6df373efb23f",
-    "name": "Didit Verification Billing API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": {
-      "content": "Identity verification API. Authenticate with x-api-key header.",
-      "type": "text/plain"
-    }
-  }
+  ]
 }

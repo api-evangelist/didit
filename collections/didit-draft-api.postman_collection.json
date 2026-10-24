@@ -1,0 +1,948 @@
+{
+  "info": {
+    "_postman_id": "198b3e18-ebeb-4e41-853b-a3e75fcf4154",
+    "name": "Didit Verification Draft API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:12:25.000Z",
+    "updatedAt": "2026-10-22T01:12:25.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-198b3e18-ebeb-4e41-853b-a3e75fcf4154"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "organization",
+          "item": [
+            {
+              "name": "{organization_id}",
+              "item": [
+                {
+                  "name": "application",
+                  "item": [
+                    {
+                      "name": "{application_id}",
+                      "item": [
+                        {
+                          "name": "cases",
+                          "item": [
+                            {
+                              "name": "routing-rules",
+                              "item": [
+                                {
+                                  "name": "{record_uuid}",
+                                  "item": [
+                                    {
+                                      "name": "draft",
+                                      "item": [
+                                        {
+                                          "name": "Get case routing rule draft",
+                                          "id": "85fca8bc-502b-4b64-bf80-5e8899a3d1f4",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "apikey",
+                                              "apikey": [
+                                                {
+                                                  "key": "key",
+                                                  "value": "x-api-key",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "value",
+                                                  "value": "{{apiKey}}",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "in",
+                                                  "value": "header",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                "draft",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "3225a3b6-cf64-4f24-b673-59074018ae0f",
+                                                  "key": "organization_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "adc0d68b-0154-427e-aa48-75ee553e4e6e",
+                                                  "key": "application_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "d904c5d5-68c7-42da-8f10-b8db6f9d3a9c",
+                                                  "key": "record_uuid",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "43d9fb5c-e57f-4da2-a006-2b05b3dee02d",
+                                              "name": "New Response",
+                                              "originalRequest": {
+                                                "method": "GET",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "OK",
+                                              "code": 200,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"draft\": {\n    \"base_version\": \"<integer>\",\n    \"updated_at\": \"<dateTime>\",\n    \"revision\": \"<uuid>\",\n    \"changes\": {},\n    \"actor_email\": \"<string,null-email>\"\n  }\n}",
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-43d9fb5c-e57f-4da2-a006-2b05b3dee02d"
+                                            },
+                                            {
+                                              "id": "c1c691a6-6a97-4ade-a559-d88f506b9f51",
+                                              "name": "Case access is required.",
+                                              "originalRequest": {
+                                                "method": "GET",
+                                                "header": [
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-c1c691a6-6a97-4ade-a559-d88f506b9f51"
+                                            }
+                                          ],
+                                          "createdAt": "2026-10-22T01:12:26.000Z",
+                                          "updatedAt": "2026-10-22T01:12:26.000Z",
+                                          "uid": "35240-85fca8bc-502b-4b64-bf80-5e8899a3d1f4"
+                                        },
+                                        {
+                                          "name": "Save case routing rule draft",
+                                          "id": "e125dda6-f81e-4c93-92c3-c508f3a1b24a",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "apikey",
+                                              "apikey": [
+                                                {
+                                                  "key": "key",
+                                                  "value": "x-api-key",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "value",
+                                                  "value": "{{apiKey}}",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "in",
+                                                  "value": "header",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "PUT",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/x-www-form-urlencoded"
+                                              },
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "urlencoded",
+                                              "urlencoded": [
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "proident44e",
+                                                  "value": "[object Object]"
+                                                },
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "labore_28",
+                                                  "value": "[object Object]"
+                                                },
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "expected_revision",
+                                                  "value": "<string,null-uuid>"
+                                                },
+                                                {
+                                                  "description": "(Required) ",
+                                                  "key": "expected_version",
+                                                  "value": "<integer>"
+                                                }
+                                              ]
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                "draft",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "2e9933ee-be48-433a-bea2-faa7bcc8efe3",
+                                                  "key": "organization_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "e1eb33d7-444c-41ef-863c-660fe85c59ab",
+                                                  "key": "application_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "e58b35fe-c3c7-4bca-9e7f-4fbff884558f",
+                                                  "key": "record_uuid",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "12707a27-4d21-4510-a9f6-cd12aa819e4c",
+                                              "name": "New Response",
+                                              "originalRequest": {
+                                                "method": "PUT",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "proident44e",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "labore_28",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "OK",
+                                              "code": 200,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"base_version\": \"<integer>\",\n  \"updated_at\": \"<dateTime>\",\n  \"revision\": \"<uuid>\",\n  \"changes\": {},\n  \"actor_email\": \"<string,null-email>\"\n}",
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-12707a27-4d21-4510-a9f6-cd12aa819e4c"
+                                            },
+                                            {
+                                              "id": "9e052d5f-0ea7-49a4-931c-401279cf9c63",
+                                              "name": "Case access is required.",
+                                              "originalRequest": {
+                                                "method": "PUT",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "proident44e",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "labore_28",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-9e052d5f-0ea7-49a4-931c-401279cf9c63"
+                                            },
+                                            {
+                                              "id": "566a2037-a770-44fd-a68e-0cd0ae326c21",
+                                              "name": "The published version or draft revision has changed. Reload before retrying.",
+                                              "originalRequest": {
+                                                "method": "PUT",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/x-www-form-urlencoded"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "urlencoded",
+                                                  "urlencoded": [
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "proident44e",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "labore_28",
+                                                      "value": "[object Object]"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_revision",
+                                                      "value": "<string,null-uuid>"
+                                                    },
+                                                    {
+                                                      "description": "(Required) ",
+                                                      "key": "expected_version",
+                                                      "value": "<integer>"
+                                                    }
+                                                  ]
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Conflict",
+                                              "code": 409,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-566a2037-a770-44fd-a68e-0cd0ae326c21"
+                                            }
+                                          ],
+                                          "createdAt": "2026-10-22T01:12:26.000Z",
+                                          "updatedAt": "2026-10-22T01:12:26.000Z",
+                                          "uid": "35240-e125dda6-f81e-4c93-92c3-c508f3a1b24a"
+                                        },
+                                        {
+                                          "name": "Discard case routing rule draft",
+                                          "id": "83218b1f-2170-4b7a-b825-60d38ab67bd3",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "apikey",
+                                              "apikey": [
+                                                {
+                                                  "key": "key",
+                                                  "value": "x-api-key",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "value",
+                                                  "value": "{{apiKey}}",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "key": "in",
+                                                  "value": "header",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "DELETE",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"expected_revision\": \"<string,null-uuid>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                "draft",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "00fdeea2-105b-4872-b1bf-9a7b1f594e0f",
+                                                  "key": "organization_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "461bf874-aa60-48f2-8b4e-ff0d6acbe69a",
+                                                  "key": "application_id",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                },
+                                                {
+                                                  "id": "3b65666a-a4cd-4884-8495-cdb7a9d3492f",
+                                                  "key": "record_uuid",
+                                                  "value": "<uuid>",
+                                                  "description": "(Required) "
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "c5323aeb-d9c8-40f8-92ed-b84e8cf1e9b4",
+                                              "name": "No response body",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "raw",
+                                                  "raw": "{\n  \"expected_revision\": \"<string,null-uuid>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                                  "options": {
+                                                    "raw": {
+                                                      "headerFamily": "json",
+                                                      "language": "json"
+                                                    }
+                                                  }
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "No Content",
+                                              "code": 204,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-c5323aeb-d9c8-40f8-92ed-b84e8cf1e9b4"
+                                            },
+                                            {
+                                              "id": "77d8ad4e-8390-4838-b28f-c4fee23a4455",
+                                              "name": "Case access is required.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "raw",
+                                                  "raw": "{\n  \"expected_revision\": \"<string,null-uuid>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                                  "options": {
+                                                    "raw": {
+                                                      "headerFamily": "json",
+                                                      "language": "json"
+                                                    }
+                                                  }
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-77d8ad4e-8390-4838-b28f-c4fee23a4455"
+                                            },
+                                            {
+                                              "id": "18abc055-e61b-49fd-9cc6-ead2576642e5",
+                                              "name": "The published version or draft revision has changed. Reload before retrying.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: apikey",
+                                                    "key": "x-api-key",
+                                                    "value": "<API Key>"
+                                                  }
+                                                ],
+                                                "body": {
+                                                  "mode": "raw",
+                                                  "raw": "{\n  \"expected_revision\": \"<string,null-uuid>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                                  "options": {
+                                                    "raw": {
+                                                      "headerFamily": "json",
+                                                      "language": "json"
+                                                    }
+                                                  }
+                                                },
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/draft/",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v3",
+                                                    "organization",
+                                                    ":organization_id",
+                                                    "application",
+                                                    ":application_id",
+                                                    "cases",
+                                                    "routing-rules",
+                                                    ":record_uuid",
+                                                    "draft",
+                                                    ""
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "organization_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "record_uuid"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Conflict",
+                                              "code": 409,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-10-22T01:12:26.000Z",
+                                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                                              "uid": "35240-18abc055-e61b-49fd-9cc6-ead2576642e5"
+                                            }
+                                          ],
+                                          "createdAt": "2026-10-22T01:12:26.000Z",
+                                          "updatedAt": "2026-10-22T01:12:26.000Z",
+                                          "uid": "35240-83218b1f-2170-4b7a-b825-60d38ab67bd3"
+                                        }
+                                      ],
+                                      "id": "52877e56-006c-42ef-affa-03944817d1b3",
+                                      "createdAt": "2026-10-22T01:12:26.000Z",
+                                      "updatedAt": "2026-10-22T01:12:26.000Z",
+                                      "uid": "35240-52877e56-006c-42ef-affa-03944817d1b3"
+                                    }
+                                  ],
+                                  "id": "5c27b975-42cf-42cb-a761-a90e13e6c2cf",
+                                  "createdAt": "2026-10-22T01:12:26.000Z",
+                                  "updatedAt": "2026-10-22T01:12:26.000Z",
+                                  "uid": "35240-5c27b975-42cf-42cb-a761-a90e13e6c2cf"
+                                }
+                              ],
+                              "id": "a03782f0-6eb1-482a-9289-8ed7fcaa52a9",
+                              "createdAt": "2026-10-22T01:12:26.000Z",
+                              "updatedAt": "2026-10-22T01:12:26.000Z",
+                              "uid": "35240-a03782f0-6eb1-482a-9289-8ed7fcaa52a9"
+                            }
+                          ],
+                          "id": "74664965-2893-4b24-adbc-add970da95ff",
+                          "createdAt": "2026-10-22T01:12:26.000Z",
+                          "updatedAt": "2026-10-22T01:12:26.000Z",
+                          "uid": "35240-74664965-2893-4b24-adbc-add970da95ff"
+                        }
+                      ],
+                      "id": "ae0f5b4a-8407-46a6-9234-49a274478f5f",
+                      "createdAt": "2026-10-22T01:12:26.000Z",
+                      "updatedAt": "2026-10-22T01:12:26.000Z",
+                      "uid": "35240-ae0f5b4a-8407-46a6-9234-49a274478f5f"
+                    }
+                  ],
+                  "id": "b80fb040-23bf-4095-81d4-476d9eb81940",
+                  "createdAt": "2026-10-22T01:12:26.000Z",
+                  "updatedAt": "2026-10-22T01:12:26.000Z",
+                  "uid": "35240-b80fb040-23bf-4095-81d4-476d9eb81940"
+                }
+              ],
+              "id": "61150721-e076-4534-9e1a-9a567c6187b8",
+              "createdAt": "2026-10-22T01:12:26.000Z",
+              "updatedAt": "2026-10-22T01:12:26.000Z",
+              "uid": "35240-61150721-e076-4534-9e1a-9a567c6187b8"
+            }
+          ],
+          "id": "2bd98e92-9722-4150-a966-5dec890484c5",
+          "createdAt": "2026-10-22T01:12:26.000Z",
+          "updatedAt": "2026-10-22T01:12:26.000Z",
+          "uid": "35240-2bd98e92-9722-4150-a966-5dec890484c5"
+        }
+      ],
+      "id": "146a4593-f7fa-423d-bd2d-1660eb1ef504",
+      "createdAt": "2026-10-22T01:12:26.000Z",
+      "updatedAt": "2026-10-22T01:12:26.000Z",
+      "uid": "35240-146a4593-f7fa-423d-bd2d-1660eb1ef504"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

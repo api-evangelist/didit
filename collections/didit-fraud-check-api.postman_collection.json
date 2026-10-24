@@ -1,0 +1,1239 @@
+{
+  "info": {
+    "_postman_id": "79f005bd-d663-4cf3-b7cc-2314780a0611",
+    "name": "Didit Verification Fraud Check API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:12:33.000Z",
+    "updatedAt": "2026-10-22T01:12:34.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-79f005bd-d663-4cf3-b7cc-2314780a0611"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "fraud",
+          "item": [
+            {
+              "name": "checks",
+              "item": [
+                {
+                  "name": "{check_id}",
+                  "item": [
+                    {
+                      "name": "Retrieve a Fraud Check",
+                      "id": "ac2fe0a2-987a-484c-868b-69c8569710ea",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "apikey",
+                          "apikey": [
+                            {
+                              "key": "key",
+                              "value": "x-api-key",
+                              "type": "string"
+                            },
+                            {
+                              "key": "value",
+                              "value": "{{apiKey}}",
+                              "type": "string"
+                            },
+                            {
+                              "key": "in",
+                              "value": "header",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/:check_id/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            ":check_id",
+                            ""
+                          ],
+                          "variable": [
+                            {
+                              "id": "7beaa0be-ed97-4f59-9352-d1dbe451e2f2",
+                              "key": "check_id",
+                              "value": "<uuid>",
+                              "description": "(Required) "
+                            }
+                          ]
+                        },
+                        "description": "Fetch a previously created check by its `check_id`."
+                      },
+                      "response": [
+                        {
+                          "id": "25c00669-d713-432a-9d0e-82375e229295",
+                          "name": "New Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/fraud/checks/:check_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "fraud",
+                                "checks",
+                                ":check_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "check_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"attribute_evidence\": [\n    {\n      \"ipsum_06\": {},\n      \"cillum35\": {},\n      \"veniam009\": {}\n    },\n    {\n      \"qui139\": {},\n      \"irure26b\": {}\n    }\n  ],\n  \"check_id\": \"<uuid>\",\n  \"client_reference\": \"<string,null>\",\n  \"completed_at\": \"<string,null-date-time>\",\n  \"compound_evidence\": [\n    {\n      \"dolor_7\": {},\n      \"anim_8\": {}\n    },\n    {\n      \"consecteturb\": {},\n      \"occaecat_e\": {}\n    }\n  ],\n  \"coverage\": {\n    \"officia_5c1\": {}\n  },\n  \"created_at\": \"<dateTime>\",\n  \"decision_reasons\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"inputs\": [\n    {\n      \"availability\": \"source_unavailable\",\n      \"namespace\": {\n        \"deserunt_8f3\": {},\n        \"magna_1\": {},\n        \"sit_47f\": {}\n      },\n      \"normalization\": {\n        \"est_8_\": {},\n        \"esse8_\": {}\n      },\n      \"quality\": \"<string>\",\n      \"reference\": \"<string>\",\n      \"type\": \"phone\"\n    },\n    {\n      \"availability\": \"unsupported_region\",\n      \"namespace\": {\n        \"est0e\": {}\n      },\n      \"normalization\": {\n        \"incididunt7\": {},\n        \"commodod\": {},\n        \"incididunta0e\": {}\n      },\n      \"quality\": \"<string>\",\n      \"reference\": \"<string>\",\n      \"type\": \"tax_number\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"billable_units\": \"<integer>\",\n      \"freshness\": \"<string,null>\",\n      \"latency_ms\": \"<integer>\",\n      \"module\": \"email_social\",\n      \"reason\": \"<string,null>\",\n      \"status\": \"failed\"\n    },\n    {\n      \"billable_units\": \"<integer>\",\n      \"freshness\": \"<string,null>\",\n      \"latency_ms\": \"<integer>\",\n      \"module\": \"phone_social\",\n      \"reason\": \"<string,null>\",\n      \"status\": \"planned\"\n    }\n  ],\n  \"network\": {\n    \"ut5d\": {},\n    \"commodod\": {},\n    \"anim_c\": {}\n  },\n  \"next_action\": \"resubmit_capture\",\n  \"processing_status\": \"completed\",\n  \"profile_id\": \"<string>\",\n  \"profile_version\": \"<string>\",\n  \"recommendation\": \"approve\",\n  \"risk\": [\n    {\n      \"availability\": \"no_reference\",\n      \"band\": \"low\",\n      \"dimension\": \"contact\",\n      \"evidence_indexes\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"reason_codes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"requested_but_unavailable\": \"<boolean>\",\n      \"score\": \"<integer,null>\"\n    },\n    {\n      \"availability\": \"no_reference\",\n      \"band\": \"high\",\n      \"dimension\": \"device_network\",\n      \"evidence_indexes\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"reason_codes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"requested_but_unavailable\": \"<boolean>\",\n      \"score\": \"<integer,null>\"\n    }\n  ],\n  \"usage\": [\n    {\n      \"eiusmod56\": {},\n      \"incf7\": {},\n      \"in2\": {}\n    },\n    {\n      \"eiusmod5\": {},\n      \"utf9_\": {}\n    }\n  ],\n  \"request_id\": \"<uuid>\",\n  \"enrichment\": {\n    \"sunt_5b\": {}\n  },\n  \"identity_relationship\": {\n    \"availability\": \"insufficient_history\",\n    \"country\": \"<string>\",\n    \"reason_codes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"reference_type\": \"<string>\",\n    \"result\": \"mismatch\"\n  },\n  \"vendor_data\": \"<string,null>\",\n  \"metadata\": {}\n}",
+                          "createdAt": "2026-10-22T01:12:34.000Z",
+                          "updatedAt": "2026-10-22T01:12:34.000Z",
+                          "uid": "35240-25c00669-d713-432a-9d0e-82375e229295"
+                        },
+                        {
+                          "id": "ae5957b3-18a1-40db-a9b6-01714bcfb09d",
+                          "name": "New Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/fraud/checks/:check_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "fraud",
+                                "checks",
+                                ":check_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "check_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"detail\": \"Authentication failed: Invalid client access token.\"\n}",
+                          "createdAt": "2026-10-22T01:12:34.000Z",
+                          "updatedAt": "2026-10-22T01:12:34.000Z",
+                          "uid": "35240-ae5957b3-18a1-40db-a9b6-01714bcfb09d"
+                        },
+                        {
+                          "id": "b5a9e255-65d0-43b6-9b6b-0e9cb4cb2c3c",
+                          "name": "New Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/fraud/checks/:check_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "fraud",
+                                "checks",
+                                ":check_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "check_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"detail\": \"Forbidden - User doesn't have permission\"\n}",
+                          "createdAt": "2026-10-22T01:12:34.000Z",
+                          "updatedAt": "2026-10-22T01:12:34.000Z",
+                          "uid": "35240-b5a9e255-65d0-43b6-9b6b-0e9cb4cb2c3c"
+                        }
+                      ],
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-ac2fe0a2-987a-484c-868b-69c8569710ea"
+                    }
+                  ],
+                  "id": "74f06c20-9020-4d61-8167-b56d998cd839",
+                  "createdAt": "2026-10-22T01:12:34.000Z",
+                  "updatedAt": "2026-10-22T01:12:34.000Z",
+                  "uid": "35240-74f06c20-9020-4d61-8167-b56d998cd839"
+                },
+                {
+                  "name": "plan",
+                  "item": [
+                    {
+                      "name": "Plan a Fraud Check",
+                      "id": "d17f0a9b-0a17-4033-afc6-4d550880a6ed",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "apikey",
+                          "apikey": [
+                            {
+                              "key": "key",
+                              "value": "x-api-key",
+                              "type": "string"
+                            },
+                            {
+                              "key": "value",
+                              "value": "{{apiKey}}",
+                              "type": "string"
+                            },
+                            {
+                              "key": "in",
+                              "value": "header",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/x-www-form-urlencoded"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [
+                            {
+                              "description": "(Required) ",
+                              "key": "identifiers",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "selfie",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "attributes",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                              "key": "client_reference",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                              "key": "profile",
+                              "value": "standard"
+                            },
+                            {
+                              "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                              "key": "profile_version",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "ip_address",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "user_agent",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "country",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "purpose",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "consent_obtained",
+                              "value": "<boolean>"
+                            },
+                            {
+                              "key": "include",
+                              "value": "biometric_identity,networks_same_org"
+                            },
+                            {
+                              "key": "exclude",
+                              "value": "networks_cross_org,database_validation"
+                            },
+                            {
+                              "key": "vendor_data",
+                              "value": "<string>"
+                            }
+                          ]
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/plan/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            "plan",
+                            ""
+                          ]
+                        },
+                        "description": "Validate selected checks and estimate their price without executing, creating a session or billing."
+                      },
+                      "response": [
+                        {
+                          "id": "ecd2aff3-3756-4f73-a4b2-66c445d2be36",
+                          "name": "New Response",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "urlencoded",
+                              "urlencoded": [
+                                {
+                                  "description": "(Required) ",
+                                  "key": "identifiers",
+                                  "value": "[object Object]"
+                                },
+                                {
+                                  "description": "(Required) ",
+                                  "key": "selfie",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "(Required) ",
+                                  "key": "attributes",
+                                  "value": "[object Object]"
+                                },
+                                {
+                                  "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                                  "key": "client_reference",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                                  "key": "profile",
+                                  "value": "standard"
+                                },
+                                {
+                                  "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                                  "key": "profile_version",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "ip_address",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "user_agent",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "country",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "purpose",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "consent_obtained",
+                                  "value": "<boolean>"
+                                },
+                                {
+                                  "key": "include",
+                                  "value": "biometric_identity,networks_same_org"
+                                },
+                                {
+                                  "key": "exclude",
+                                  "value": "networks_cross_org,database_validation"
+                                },
+                                {
+                                  "key": "vendor_data",
+                                  "value": "<string>"
+                                }
+                              ]
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/fraud/checks/plan/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "fraud",
+                                "checks",
+                                "plan",
+                                ""
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"can_afford\": \"<boolean>\",\n  \"currency\": \"<string,null>\",\n  \"estimated_price\": \"<string,null>\",\n  \"is_sandbox\": \"<boolean>\",\n  \"modules\": [\n    {\n      \"availability_reason\": \"<string,null>\",\n      \"available\": \"<boolean>\",\n      \"estimated_price\": \"<string,null>\",\n      \"module\": \"database_validation\",\n      \"selection_reason\": \"<string,null>\",\n      \"will_run\": \"<boolean>\"\n    },\n    {\n      \"availability_reason\": \"<string,null>\",\n      \"available\": \"<boolean>\",\n      \"estimated_price\": \"<string,null>\",\n      \"module\": \"ip_risk\",\n      \"selection_reason\": \"<string,null>\",\n      \"will_run\": \"<boolean>\"\n    }\n  ],\n  \"profile_id\": \"<string>\",\n  \"profile_version\": \"<string>\"\n}",
+                          "createdAt": "2026-10-22T01:12:34.000Z",
+                          "updatedAt": "2026-10-22T01:12:34.000Z",
+                          "uid": "35240-ecd2aff3-3756-4f73-a4b2-66c445d2be36"
+                        },
+                        {
+                          "id": "26d88896-b01a-49ac-9937-80a35973ea14",
+                          "name": "New Response",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "urlencoded",
+                              "urlencoded": [
+                                {
+                                  "description": "(Required) ",
+                                  "key": "identifiers",
+                                  "value": "[object Object]"
+                                },
+                                {
+                                  "description": "(Required) ",
+                                  "key": "selfie",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "(Required) ",
+                                  "key": "attributes",
+                                  "value": "[object Object]"
+                                },
+                                {
+                                  "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                                  "key": "client_reference",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                                  "key": "profile",
+                                  "value": "standard"
+                                },
+                                {
+                                  "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                                  "key": "profile_version",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "ip_address",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "user_agent",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "country",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "purpose",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "key": "consent_obtained",
+                                  "value": "<boolean>"
+                                },
+                                {
+                                  "key": "include",
+                                  "value": "biometric_identity,networks_same_org"
+                                },
+                                {
+                                  "key": "exclude",
+                                  "value": "networks_cross_org,database_validation"
+                                },
+                                {
+                                  "key": "vendor_data",
+                                  "value": "<string>"
+                                }
+                              ]
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/fraud/checks/plan/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "fraud",
+                                "checks",
+                                "plan",
+                                ""
+                              ]
+                            }
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"detail\": \"Bad Request - Invalid request data\"\n}",
+                          "createdAt": "2026-10-22T01:12:34.000Z",
+                          "updatedAt": "2026-10-22T01:12:34.000Z",
+                          "uid": "35240-26d88896-b01a-49ac-9937-80a35973ea14"
+                        }
+                      ],
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-d17f0a9b-0a17-4033-afc6-4d550880a6ed"
+                    }
+                  ],
+                  "id": "5d2bd935-f061-4c54-8a1f-2871a4b42096",
+                  "createdAt": "2026-10-22T01:12:34.000Z",
+                  "updatedAt": "2026-10-22T01:12:34.000Z",
+                  "uid": "35240-5d2bd935-f061-4c54-8a1f-2871a4b42096"
+                },
+                {
+                  "name": "Run a Fraud Check",
+                  "id": "4eb24b0e-05cc-4654-aab0-2974c2fd7b6e",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "apikey",
+                      "apikey": [
+                        {
+                          "key": "key",
+                          "value": "x-api-key",
+                          "type": "string"
+                        },
+                        {
+                          "key": "value",
+                          "value": "{{apiKey}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "in",
+                          "value": "header",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/x-www-form-urlencoded"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "description": "(Required) ",
+                          "key": "identifiers",
+                          "value": "[object Object]"
+                        },
+                        {
+                          "description": "(Required) ",
+                          "key": "selfie",
+                          "value": "<string>"
+                        },
+                        {
+                          "description": "(Required) ",
+                          "key": "attributes",
+                          "value": "[object Object]"
+                        },
+                        {
+                          "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                          "key": "client_reference",
+                          "value": "<string>"
+                        },
+                        {
+                          "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                          "key": "profile",
+                          "value": "standard"
+                        },
+                        {
+                          "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                          "key": "profile_version",
+                          "value": "<string>"
+                        },
+                        {
+                          "key": "ip_address",
+                          "value": "<string>"
+                        },
+                        {
+                          "key": "user_agent",
+                          "value": "<string>"
+                        },
+                        {
+                          "key": "country",
+                          "value": "<string>"
+                        },
+                        {
+                          "key": "purpose",
+                          "value": "<string>"
+                        },
+                        {
+                          "key": "consent_obtained",
+                          "value": "<boolean>"
+                        },
+                        {
+                          "key": "include",
+                          "value": "biometric_identity,networks_same_org"
+                        },
+                        {
+                          "key": "exclude",
+                          "value": "networks_cross_org,database_validation"
+                        },
+                        {
+                          "key": "vendor_data",
+                          "value": "<string>"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/v3/fraud/checks/",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v3",
+                        "fraud",
+                        "checks",
+                        ""
+                      ]
+                    },
+                    "description": "Submit one or more typed identifiers and receive normalization, fresh enrichment, authoritative validation where the country and identifier type are covered, independent risk dimensions and a recommendation in one response.\n\nThese profiles support identifier checks. Selfie-based identity binding (`biometric_identity`) requires profile version `2026-09-14.2` and a Brazilian CPF; it runs only with the user's consent and when your organization is entitled to it. Earlier versions report it as `not_available_in_profile_version`. Modules that cannot run are reported as skipped with a deterministic reason; a source that could not answer is never reported as an identity mismatch."
+                  },
+                  "response": [
+                    {
+                      "id": "33380999-3c47-4c8d-a64d-796566f3d86c",
+                      "name": "New Response",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/x-www-form-urlencoded"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [
+                            {
+                              "description": "(Required) ",
+                              "key": "identifiers",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "selfie",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "attributes",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                              "key": "client_reference",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                              "key": "profile",
+                              "value": "standard"
+                            },
+                            {
+                              "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                              "key": "profile_version",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "ip_address",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "user_agent",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "country",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "purpose",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "consent_obtained",
+                              "value": "<boolean>"
+                            },
+                            {
+                              "key": "include",
+                              "value": "biometric_identity,networks_same_org"
+                            },
+                            {
+                              "key": "exclude",
+                              "value": "networks_cross_org,database_validation"
+                            },
+                            {
+                              "key": "vendor_data",
+                              "value": "<string>"
+                            }
+                          ]
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"attribute_evidence\": [\n    {\n      \"ipsum_06\": {},\n      \"cillum35\": {},\n      \"veniam009\": {}\n    },\n    {\n      \"qui139\": {},\n      \"irure26b\": {}\n    }\n  ],\n  \"check_id\": \"<uuid>\",\n  \"client_reference\": \"<string,null>\",\n  \"completed_at\": \"<string,null-date-time>\",\n  \"compound_evidence\": [\n    {\n      \"dolor_7\": {},\n      \"anim_8\": {}\n    },\n    {\n      \"consecteturb\": {},\n      \"occaecat_e\": {}\n    }\n  ],\n  \"coverage\": {\n    \"officia_5c1\": {}\n  },\n  \"created_at\": \"<dateTime>\",\n  \"decision_reasons\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"inputs\": [\n    {\n      \"availability\": \"source_unavailable\",\n      \"namespace\": {\n        \"deserunt_8f3\": {},\n        \"magna_1\": {},\n        \"sit_47f\": {}\n      },\n      \"normalization\": {\n        \"est_8_\": {},\n        \"esse8_\": {}\n      },\n      \"quality\": \"<string>\",\n      \"reference\": \"<string>\",\n      \"type\": \"phone\"\n    },\n    {\n      \"availability\": \"unsupported_region\",\n      \"namespace\": {\n        \"est0e\": {}\n      },\n      \"normalization\": {\n        \"incididunt7\": {},\n        \"commodod\": {},\n        \"incididunta0e\": {}\n      },\n      \"quality\": \"<string>\",\n      \"reference\": \"<string>\",\n      \"type\": \"tax_number\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"billable_units\": \"<integer>\",\n      \"freshness\": \"<string,null>\",\n      \"latency_ms\": \"<integer>\",\n      \"module\": \"email_social\",\n      \"reason\": \"<string,null>\",\n      \"status\": \"failed\"\n    },\n    {\n      \"billable_units\": \"<integer>\",\n      \"freshness\": \"<string,null>\",\n      \"latency_ms\": \"<integer>\",\n      \"module\": \"phone_social\",\n      \"reason\": \"<string,null>\",\n      \"status\": \"planned\"\n    }\n  ],\n  \"network\": {\n    \"ut5d\": {},\n    \"commodod\": {},\n    \"anim_c\": {}\n  },\n  \"next_action\": \"resubmit_capture\",\n  \"processing_status\": \"completed\",\n  \"profile_id\": \"<string>\",\n  \"profile_version\": \"<string>\",\n  \"recommendation\": \"approve\",\n  \"risk\": [\n    {\n      \"availability\": \"no_reference\",\n      \"band\": \"low\",\n      \"dimension\": \"contact\",\n      \"evidence_indexes\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"reason_codes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"requested_but_unavailable\": \"<boolean>\",\n      \"score\": \"<integer,null>\"\n    },\n    {\n      \"availability\": \"no_reference\",\n      \"band\": \"high\",\n      \"dimension\": \"device_network\",\n      \"evidence_indexes\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"reason_codes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"requested_but_unavailable\": \"<boolean>\",\n      \"score\": \"<integer,null>\"\n    }\n  ],\n  \"usage\": [\n    {\n      \"eiusmod56\": {},\n      \"incf7\": {},\n      \"in2\": {}\n    },\n    {\n      \"eiusmod5\": {},\n      \"utf9_\": {}\n    }\n  ],\n  \"request_id\": \"<uuid>\",\n  \"enrichment\": {\n    \"sunt_5b\": {}\n  },\n  \"identity_relationship\": {\n    \"availability\": \"insufficient_history\",\n    \"country\": \"<string>\",\n    \"reason_codes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"reference_type\": \"<string>\",\n    \"result\": \"mismatch\"\n  },\n  \"vendor_data\": \"<string,null>\",\n  \"metadata\": {}\n}",
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-33380999-3c47-4c8d-a64d-796566f3d86c"
+                    },
+                    {
+                      "id": "01512b73-cfb2-413f-a688-46413088941c",
+                      "name": "New Response",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/x-www-form-urlencoded"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [
+                            {
+                              "description": "(Required) ",
+                              "key": "identifiers",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "selfie",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "attributes",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                              "key": "client_reference",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                              "key": "profile",
+                              "value": "standard"
+                            },
+                            {
+                              "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                              "key": "profile_version",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "ip_address",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "user_agent",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "country",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "purpose",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "consent_obtained",
+                              "value": "<boolean>"
+                            },
+                            {
+                              "key": "include",
+                              "value": "biometric_identity,networks_same_org"
+                            },
+                            {
+                              "key": "exclude",
+                              "value": "networks_cross_org,database_validation"
+                            },
+                            {
+                              "key": "vendor_data",
+                              "value": "<string>"
+                            }
+                          ]
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"detail\": \"Authentication failed: Invalid client access token.\"\n}",
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-01512b73-cfb2-413f-a688-46413088941c"
+                    },
+                    {
+                      "id": "3237e708-5db2-45b0-9eaa-961892c206e4",
+                      "name": "New Response",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/x-www-form-urlencoded"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [
+                            {
+                              "description": "(Required) ",
+                              "key": "identifiers",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "selfie",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "attributes",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                              "key": "client_reference",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                              "key": "profile",
+                              "value": "standard"
+                            },
+                            {
+                              "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                              "key": "profile_version",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "ip_address",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "user_agent",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "country",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "purpose",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "consent_obtained",
+                              "value": "<boolean>"
+                            },
+                            {
+                              "key": "include",
+                              "value": "biometric_identity,networks_same_org"
+                            },
+                            {
+                              "key": "exclude",
+                              "value": "networks_cross_org,database_validation"
+                            },
+                            {
+                              "key": "vendor_data",
+                              "value": "<string>"
+                            }
+                          ]
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"detail\": \"Forbidden - User doesn't have permission\"\n}",
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-3237e708-5db2-45b0-9eaa-961892c206e4"
+                    },
+                    {
+                      "id": "0feb1fb6-f5e9-44b1-832e-bcc2d8c2facd",
+                      "name": "Conflict, returned without a charge: the `client_reference` was already used with a different request body; a check with the same `client_reference` is still running (retry after `Retry-After` seconds with the same reference); or the verification this che",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/x-www-form-urlencoded"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [
+                            {
+                              "description": "(Required) ",
+                              "key": "identifiers",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "selfie",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "(Required) ",
+                              "key": "attributes",
+                              "value": "[object Object]"
+                            },
+                            {
+                              "description": "Your own reference for this check. Doubles as the idempotency key: reusing it with the same body returns the original check without running or billing the modules again; reusing it with a different body returns 409.",
+                              "key": "client_reference",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Orchestration profile id. Defaults to the Didit `standard` profile.",
+                              "key": "profile",
+                              "value": "standard"
+                            },
+                            {
+                              "description": "Pin a frozen profile version. Defaults to the current version of the profile.",
+                              "key": "profile_version",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "ip_address",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "user_agent",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "country",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "purpose",
+                              "value": "<string>"
+                            },
+                            {
+                              "key": "consent_obtained",
+                              "value": "<boolean>"
+                            },
+                            {
+                              "key": "include",
+                              "value": "biometric_identity,networks_same_org"
+                            },
+                            {
+                              "key": "exclude",
+                              "value": "networks_cross_org,database_validation"
+                            },
+                            {
+                              "key": "vendor_data",
+                              "value": "<string>"
+                            }
+                          ]
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/fraud/checks/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "fraud",
+                            "checks",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Conflict",
+                      "code": 409,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds to wait before retrying, sent when a check with the same `client_reference` is still running.",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"<string>\"\n}",
+                      "createdAt": "2026-10-22T01:12:34.000Z",
+                      "updatedAt": "2026-10-22T01:12:34.000Z",
+                      "uid": "35240-0feb1fb6-f5e9-44b1-832e-bcc2d8c2facd"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:12:34.000Z",
+                  "updatedAt": "2026-10-22T01:12:34.000Z",
+                  "uid": "35240-4eb24b0e-05cc-4654-aab0-2974c2fd7b6e"
+                }
+              ],
+              "id": "c7f2041d-d064-41d2-887e-3aaf8b40b390",
+              "createdAt": "2026-10-22T01:12:34.000Z",
+              "updatedAt": "2026-10-22T01:12:34.000Z",
+              "uid": "35240-c7f2041d-d064-41d2-887e-3aaf8b40b390"
+            }
+          ],
+          "id": "210fd119-8724-4688-8770-c0e149d8508c",
+          "createdAt": "2026-10-22T01:12:34.000Z",
+          "updatedAt": "2026-10-22T01:12:34.000Z",
+          "uid": "35240-210fd119-8724-4688-8770-c0e149d8508c"
+        }
+      ],
+      "id": "6bc77cd3-3061-451d-9d31-c0ef840e12a8",
+      "createdAt": "2026-10-22T01:12:34.000Z",
+      "updatedAt": "2026-10-22T01:12:34.000Z",
+      "uid": "35240-6bc77cd3-3061-451d-9d31-c0ef840e12a8"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

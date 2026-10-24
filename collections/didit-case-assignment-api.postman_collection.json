@@ -1,0 +1,2775 @@
+{
+  "info": {
+    "_postman_id": "65f26a6b-4fee-4d51-8e8b-a03f73d9f3f4",
+    "name": "Didit Verification Case Assignment API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:11:57.000Z",
+    "updatedAt": "2026-10-22T01:11:58.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-65f26a6b-4fee-4d51-8e8b-a03f73d9f3f4"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "organization",
+          "item": [
+            {
+              "name": "{organization_id}",
+              "item": [
+                {
+                  "name": "application",
+                  "item": [
+                    {
+                      "name": "{application_id}",
+                      "item": [
+                        {
+                          "name": "cases",
+                          "item": [
+                            {
+                              "name": "teams",
+                              "item": [
+                                {
+                                  "name": "{record_uuid}",
+                                  "item": [
+                                    {
+                                      "name": "Retrieve review team",
+                                      "id": "3a10bda1-dd28-4091-9da7-78f82cae241d",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ":record_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "b5793828-790d-481a-96f7-94db492d3221",
+                                              "key": "organization_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Organization UUID."
+                                            },
+                                            {
+                                              "id": "771cfa28-8e37-4403-8566-74def071aedd",
+                                              "key": "application_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Application UUID."
+                                            },
+                                            {
+                                              "id": "8f96cc44-96ff-45bc-ba88-0730d3cfb563",
+                                              "key": "record_uuid",
+                                              "value": "<uuid>",
+                                              "description": "(Required) "
+                                            }
+                                          ]
+                                        },
+                                        "description": "Requires `read:cases` for the requested application."
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "b6e88c07-8c23-4607-b084-46796603ae8d",
+                                          "name": "Success",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-b6e88c07-8c23-4607-b084-46796603ae8d"
+                                        },
+                                        {
+                                          "id": "9363913f-2bae-46ca-ab8c-d81b4ab9e3cf",
+                                          "name": "Invalid input.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Bad Request",
+                                          "code": 400,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-9363913f-2bae-46ca-ab8c-d81b4ab9e3cf"
+                                        },
+                                        {
+                                          "id": "96b26d9b-5ae3-46fc-ac44-ec1ce76346f6",
+                                          "name": "Insufficient permission.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-96b26d9b-5ae3-46fc-ac44-ec1ce76346f6"
+                                        },
+                                        {
+                                          "id": "0a4bf5cb-2ee4-48f1-8446-2e4319037bd1",
+                                          "name": "Record not found in this application.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Not Found",
+                                          "code": 404,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-0a4bf5cb-2ee4-48f1-8446-2e4319037bd1"
+                                        }
+                                      ],
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-3a10bda1-dd28-4091-9da7-78f82cae241d"
+                                    },
+                                    {
+                                      "name": "Update review team",
+                                      "id": "b3a55edb-4625-4214-a90c-0240bec13bfb",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ":record_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "978ab57e-2f3a-4d44-a700-350652c19dfc",
+                                              "key": "organization_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Organization UUID."
+                                            },
+                                            {
+                                              "id": "1a5774be-230c-47ec-acf8-811054b91711",
+                                              "key": "application_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Application UUID."
+                                            },
+                                            {
+                                              "id": "557b9fb8-3dff-407f-911e-b41299c7d06b",
+                                              "key": "record_uuid",
+                                              "value": "<uuid>",
+                                              "description": "(Required) "
+                                            }
+                                          ]
+                                        },
+                                        "description": "Requires `write:cases` for the requested application."
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "36512edb-fc5a-4982-8cda-8b17a1ad6167",
+                                          "name": "Success",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-36512edb-fc5a-4982-8cda-8b17a1ad6167"
+                                        },
+                                        {
+                                          "id": "220f76f8-bc31-456c-a4b9-8d35d39b7c2f",
+                                          "name": "Invalid input.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Bad Request",
+                                          "code": 400,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-220f76f8-bc31-456c-a4b9-8d35d39b7c2f"
+                                        },
+                                        {
+                                          "id": "2ce8db1d-6375-4409-bd29-54d63d0db152",
+                                          "name": "Insufficient permission.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-2ce8db1d-6375-4409-bd29-54d63d0db152"
+                                        },
+                                        {
+                                          "id": "6f22f276-d7e2-47ec-8b8e-7aea9d789f9a",
+                                          "name": "Record not found in this application.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "teams",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Not Found",
+                                          "code": 404,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-6f22f276-d7e2-47ec-8b8e-7aea9d789f9a"
+                                        }
+                                      ],
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-b3a55edb-4625-4214-a90c-0240bec13bfb"
+                                    }
+                                  ],
+                                  "id": "2f3c564e-0153-4850-92de-46f3de779da3",
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-2f3c564e-0153-4850-92de-46f3de779da3"
+                                },
+                                {
+                                  "name": "List review teams",
+                                  "id": "122ff840-711c-40f7-b500-10a588f262b4",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/?limit=50&offset=0",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "cases",
+                                        "teams",
+                                        ""
+                                      ],
+                                      "query": [
+                                        {
+                                          "key": "limit",
+                                          "value": "50"
+                                        },
+                                        {
+                                          "key": "offset",
+                                          "value": "0"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "059763d7-62ce-4bfa-9c7b-ae9623397ad2",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "a6c815f6-acc7-486b-b042-4797b3c36551",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Requires `list:cases` for the requested application."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "ee5b1bf6-a709-4633-bef1-f3ee3f72802a",
+                                      "name": "Success",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"results\": [\n    {\n      \"name\": \"<string>\",\n      \"description\": \"<string>\",\n      \"members\": [\n        {\n          \"user_id\": \"<uuid>\",\n          \"availability\": \"available\",\n          \"capacity\": 10,\n          \"skills\": [\n            \"<string>\",\n            \"<string>\"\n          ],\n          \"available_from\": \"<string,null-date-time>\",\n          \"available_until\": \"<string,null-date-time>\"\n        },\n        {\n          \"user_id\": \"<uuid>\",\n          \"availability\": \"available\",\n          \"capacity\": 10,\n          \"skills\": [\n            \"<string>\",\n            \"<string>\"\n          ],\n          \"available_from\": \"<string,null-date-time>\",\n          \"available_until\": \"<string,null-date-time>\"\n        }\n      ],\n      \"is_active\": \"<boolean>\",\n      \"uuid\": \"<uuid>\",\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\"\n    },\n    {\n      \"name\": \"<string>\",\n      \"description\": \"<string>\",\n      \"members\": [\n        {\n          \"user_id\": \"<uuid>\",\n          \"availability\": \"available\",\n          \"capacity\": 10,\n          \"skills\": [\n            \"<string>\",\n            \"<string>\"\n          ],\n          \"available_from\": \"<string,null-date-time>\",\n          \"available_until\": \"<string,null-date-time>\"\n        },\n        {\n          \"user_id\": \"<uuid>\",\n          \"availability\": \"available\",\n          \"capacity\": 10,\n          \"skills\": [\n            \"<string>\",\n            \"<string>\"\n          ],\n          \"available_from\": \"<string,null-date-time>\",\n          \"available_until\": \"<string,null-date-time>\"\n        }\n      ],\n      \"is_active\": \"<boolean>\",\n      \"uuid\": \"<uuid>\",\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\"\n    }\n  ],\n  \"count\": \"<integer>\",\n  \"next\": \"<string,null>\",\n  \"previous\": \"<string,null>\"\n}",
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-ee5b1bf6-a709-4633-bef1-f3ee3f72802a"
+                                    },
+                                    {
+                                      "id": "4c3a867d-2100-4bb7-a63f-1669336b615b",
+                                      "name": "Invalid input.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-4c3a867d-2100-4bb7-a63f-1669336b615b"
+                                    },
+                                    {
+                                      "id": "0d9b5b41-3f89-44f2-86d8-d142aa71bbe1",
+                                      "name": "Insufficient permission.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-0d9b5b41-3f89-44f2-86d8-d142aa71bbe1"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-122ff840-711c-40f7-b500-10a588f262b4"
+                                },
+                                {
+                                  "name": "Create review team",
+                                  "id": "68797428-7b57-4a98-b332-045922ec4341",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"name\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"description\": \"<string>\",\n  \"is_active\": \"<boolean>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "cases",
+                                        "teams",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "85996a9e-18f0-4832-83c9-535dfb7cb3e2",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "98349382-553a-4cfa-b14c-b60ba7b0a711",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Requires `write:cases` for the requested application."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "ea78a9ee-6dcc-4672-aff6-baff852dde8b",
+                                      "name": "Success",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"description\": \"<string>\",\n  \"is_active\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Created",
+                                      "code": 201,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-ea78a9ee-6dcc-4672-aff6-baff852dde8b"
+                                    },
+                                    {
+                                      "id": "acc33de2-f792-4995-8425-159516c716a9",
+                                      "name": "Invalid input.",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"description\": \"<string>\",\n  \"is_active\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-acc33de2-f792-4995-8425-159516c716a9"
+                                    },
+                                    {
+                                      "id": "0d2a3d54-fd72-4cfa-9e1e-7043ab42c68e",
+                                      "name": "Insufficient permission.",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"members\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"availability\": \"available\",\n      \"capacity\": 10,\n      \"skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"available_from\": \"<string,null-date-time>\",\n      \"available_until\": \"<string,null-date-time>\"\n    }\n  ],\n  \"description\": \"<string>\",\n  \"is_active\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/teams/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "teams",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-0d2a3d54-fd72-4cfa-9e1e-7043ab42c68e"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-68797428-7b57-4a98-b332-045922ec4341"
+                                }
+                              ],
+                              "id": "e7b85b69-b5df-4951-b40a-9db386e03312",
+                              "createdAt": "2026-10-22T01:11:58.000Z",
+                              "updatedAt": "2026-10-22T01:11:58.000Z",
+                              "uid": "35240-e7b85b69-b5df-4951-b40a-9db386e03312"
+                            },
+                            {
+                              "name": "routing-rules",
+                              "item": [
+                                {
+                                  "name": "{record_uuid}",
+                                  "item": [
+                                    {
+                                      "name": "Retrieve routing rule",
+                                      "id": "bf6ff64a-9fad-4a67-bcfa-ccacc94e1f8e",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ":record_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "994f5e7a-e52f-4ad3-88c3-7d52260e01c8",
+                                              "key": "organization_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Organization UUID."
+                                            },
+                                            {
+                                              "id": "c1095c0b-c59b-4328-a679-852d5efb614e",
+                                              "key": "application_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Application UUID."
+                                            },
+                                            {
+                                              "id": "4267399d-9daa-4d4a-9e3a-ce4645dafa28",
+                                              "key": "record_uuid",
+                                              "value": "<uuid>",
+                                              "description": "(Required) "
+                                            }
+                                          ]
+                                        },
+                                        "description": "Requires `read:cases` for the requested application."
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "e6c24a11-6d2b-446a-b018-df6c7aee17bd",
+                                          "name": "Success",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"priority\",\n      \"operator\": \"equals\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\",\n  \"version\": \"<integer>\",\n  \"blueprint_name\": \"<string>\",\n  \"team_name\": \"<string,null>\"\n}",
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-e6c24a11-6d2b-446a-b018-df6c7aee17bd"
+                                        },
+                                        {
+                                          "id": "75020984-7f52-49e5-81c1-955ac169aba6",
+                                          "name": "Invalid input.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Bad Request",
+                                          "code": 400,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-75020984-7f52-49e5-81c1-955ac169aba6"
+                                        },
+                                        {
+                                          "id": "83ec2d62-4d7b-4269-a08d-68e6f4c6d04c",
+                                          "name": "Insufficient permission.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-83ec2d62-4d7b-4269-a08d-68e6f4c6d04c"
+                                        },
+                                        {
+                                          "id": "91f1e071-e0e9-439b-9476-595a33f8f2f7",
+                                          "name": "Record not found in this application.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Not Found",
+                                          "code": 404,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-91f1e071-e0e9-439b-9476-595a33f8f2f7"
+                                        }
+                                      ],
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-bf6ff64a-9fad-4a67-bcfa-ccacc94e1f8e"
+                                    },
+                                    {
+                                      "name": "Update routing rule",
+                                      "id": "1980bcd6-1d2c-4e64-a007-258c6ebd8969",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ":record_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "3a16efec-12ac-49de-9d6a-30728beed377",
+                                              "key": "organization_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Organization UUID."
+                                            },
+                                            {
+                                              "id": "211d667a-c65c-485d-8fed-6bb41c8dee20",
+                                              "key": "application_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Application UUID."
+                                            },
+                                            {
+                                              "id": "2665dd8d-7b15-4f96-a933-2697345e74c2",
+                                              "key": "record_uuid",
+                                              "value": "<uuid>",
+                                              "description": "(Required) "
+                                            }
+                                          ]
+                                        },
+                                        "description": "Requires `write:cases` for the requested application."
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "b817a029-27da-4cb9-980d-6ac37fd90929",
+                                          "name": "Success",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"priority\",\n      \"operator\": \"equals\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\",\n  \"version\": \"<integer>\",\n  \"blueprint_name\": \"<string>\",\n  \"team_name\": \"<string,null>\"\n}",
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-b817a029-27da-4cb9-980d-6ac37fd90929"
+                                        },
+                                        {
+                                          "id": "81bbd124-e70b-4867-934d-94261d71c635",
+                                          "name": "Invalid input.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Bad Request",
+                                          "code": 400,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-81bbd124-e70b-4867-934d-94261d71c635"
+                                        },
+                                        {
+                                          "id": "7f2d1233-50ec-4ccf-babf-13183412ff4d",
+                                          "name": "Insufficient permission.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-7f2d1233-50ec-4ccf-babf-13183412ff4d"
+                                        },
+                                        {
+                                          "id": "f6113eda-8eac-48a0-866e-c786b0bea4be",
+                                          "name": "Record not found in this application.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Not Found",
+                                          "code": 404,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-f6113eda-8eac-48a0-866e-c786b0bea4be"
+                                        },
+                                        {
+                                          "id": "a4808cc4-76f2-4acb-b108-d4023203ec5f",
+                                          "name": "The routing rule changed since expected_version. Review the latest rule before retrying.",
+                                          "originalRequest": {
+                                            "method": "PATCH",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"priority\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"expected_version\": \"<integer>\"\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/:record_uuid/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                ":record_uuid",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                },
+                                                {
+                                                  "key": "record_uuid"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Conflict",
+                                          "code": 409,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-a4808cc4-76f2-4acb-b108-d4023203ec5f"
+                                        }
+                                      ],
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-1980bcd6-1d2c-4e64-a007-258c6ebd8969"
+                                    }
+                                  ],
+                                  "id": "e5347243-c60c-4ed8-9d17-ce7f33d3a523",
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-e5347243-c60c-4ed8-9d17-ce7f33d3a523"
+                                },
+                                {
+                                  "name": "preview",
+                                  "item": [
+                                    {
+                                      "name": "Test case routing",
+                                      "id": "f0cebff5-1c1e-429f-9589-b3bd01b24ff1",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"source\": \"WORKFLOW_BUILDER\",\n  \"priority\": \"MEDIUM\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"rule_uuid\": \"<uuid>\",\n  \"draft\": {\n    \"name\": \"<string>\",\n    \"conditions\": [\n      {\n        \"field\": \"priority\",\n        \"operator\": \"equals\",\n        \"value\": \"<string>\"\n      },\n      {\n        \"field\": \"priority\",\n        \"operator\": \"contains\",\n        \"value\": \"<string>\"\n      }\n    ],\n    \"blueprint\": \"<uuid>\",\n    \"description\": \"<string>\",\n    \"priority\": \"<integer>\",\n    \"required_skills\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"team\": \"<string,null-uuid>\",\n    \"is_active\": \"<boolean>\",\n    \"publish\": \"<boolean>\"\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/preview/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            "preview",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "e85cf048-3f28-4342-a06e-0b468811f670",
+                                              "key": "organization_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Organization UUID."
+                                            },
+                                            {
+                                              "id": "9b3d5041-1389-48a6-957a-4ad0fba12ff5",
+                                              "key": "application_id",
+                                              "value": "<uuid>",
+                                              "description": "(Required) Application UUID."
+                                            }
+                                          ]
+                                        },
+                                        "description": "Requires `read:cases` for the requested application. Evaluates current rules or a supplied draft against current reviewer access, availability, skills and capacity. It does not save the draft or reserve reviewer capacity."
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "a9849cd3-246c-4f7e-8678-1e9e2b7428f0",
+                                          "name": "Success",
+                                          "originalRequest": {
+                                            "method": "POST",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"source\": \"WORKFLOW_BUILDER\",\n  \"priority\": \"MEDIUM\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"rule_uuid\": \"<uuid>\",\n  \"draft\": {\n    \"name\": \"<string>\",\n    \"conditions\": [\n      {\n        \"field\": \"priority\",\n        \"operator\": \"equals\",\n        \"value\": \"<string>\"\n      },\n      {\n        \"field\": \"priority\",\n        \"operator\": \"contains\",\n        \"value\": \"<string>\"\n      }\n    ],\n    \"blueprint\": \"<uuid>\",\n    \"description\": \"<string>\",\n    \"priority\": \"<integer>\",\n    \"required_skills\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"team\": \"<string,null-uuid>\",\n    \"is_active\": \"<boolean>\",\n    \"publish\": \"<boolean>\"\n  }\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/preview/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                "preview",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"rule_uuid\": \"<string,null-uuid>\",\n  \"rule_name\": \"<string,null>\",\n  \"rule_version\": \"<integer,null>\",\n  \"blueprint_uuid\": \"<string,null-uuid>\",\n  \"team_uuid\": \"<string,null-uuid>\",\n  \"assignee_user_id\": \"<string,null-uuid>\",\n  \"reason\": \"<string>\",\n  \"candidates\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"eligible\": \"<boolean>\",\n      \"active_cases\": \"<integer,null>\",\n      \"reason\": \"<string,null>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"eligible\": \"<boolean>\",\n      \"active_cases\": \"<integer,null>\",\n      \"reason\": \"<string,null>\"\n    }\n  ],\n  \"matched_rules\": [\n    {\n      \"uuid\": \"<uuid>\",\n      \"name\": \"<string>\",\n      \"priority\": \"<integer>\"\n    },\n    {\n      \"uuid\": \"<uuid>\",\n      \"name\": \"<string>\",\n      \"priority\": \"<integer>\"\n    }\n  ]\n}",
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-a9849cd3-246c-4f7e-8678-1e9e2b7428f0"
+                                        },
+                                        {
+                                          "id": "0c73e4b8-de3f-4ba5-ab31-48c3838f8b2c",
+                                          "name": "Invalid input.",
+                                          "originalRequest": {
+                                            "method": "POST",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"source\": \"WORKFLOW_BUILDER\",\n  \"priority\": \"MEDIUM\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"rule_uuid\": \"<uuid>\",\n  \"draft\": {\n    \"name\": \"<string>\",\n    \"conditions\": [\n      {\n        \"field\": \"priority\",\n        \"operator\": \"equals\",\n        \"value\": \"<string>\"\n      },\n      {\n        \"field\": \"priority\",\n        \"operator\": \"contains\",\n        \"value\": \"<string>\"\n      }\n    ],\n    \"blueprint\": \"<uuid>\",\n    \"description\": \"<string>\",\n    \"priority\": \"<integer>\",\n    \"required_skills\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"team\": \"<string,null-uuid>\",\n    \"is_active\": \"<boolean>\",\n    \"publish\": \"<boolean>\"\n  }\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/preview/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                "preview",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Bad Request",
+                                          "code": 400,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-0c73e4b8-de3f-4ba5-ab31-48c3838f8b2c"
+                                        },
+                                        {
+                                          "id": "7bb5e377-0de9-415d-b435-0424809354c7",
+                                          "name": "Insufficient permission.",
+                                          "originalRequest": {
+                                            "method": "POST",
+                                            "header": [
+                                              {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "body": {
+                                              "mode": "raw",
+                                              "raw": "{\n  \"source\": \"WORKFLOW_BUILDER\",\n  \"priority\": \"MEDIUM\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"rule_uuid\": \"<uuid>\",\n  \"draft\": {\n    \"name\": \"<string>\",\n    \"conditions\": [\n      {\n        \"field\": \"priority\",\n        \"operator\": \"equals\",\n        \"value\": \"<string>\"\n      },\n      {\n        \"field\": \"priority\",\n        \"operator\": \"contains\",\n        \"value\": \"<string>\"\n      }\n    ],\n    \"blueprint\": \"<uuid>\",\n    \"description\": \"<string>\",\n    \"priority\": \"<integer>\",\n    \"required_skills\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"team\": \"<string,null-uuid>\",\n    \"is_active\": \"<boolean>\",\n    \"publish\": \"<boolean>\"\n  }\n}",
+                                              "options": {
+                                                "raw": {
+                                                  "headerFamily": "json",
+                                                  "language": "json"
+                                                }
+                                              }
+                                            },
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/preview/",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v3",
+                                                "organization",
+                                                ":organization_id",
+                                                "application",
+                                                ":application_id",
+                                                "cases",
+                                                "routing-rules",
+                                                "preview",
+                                                ""
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "organization_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "text",
+                                          "header": [],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": null,
+                                          "createdAt": "2026-10-22T01:11:58.000Z",
+                                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                                          "uid": "35240-7bb5e377-0de9-415d-b435-0424809354c7"
+                                        }
+                                      ],
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-f0cebff5-1c1e-429f-9589-b3bd01b24ff1"
+                                    }
+                                  ],
+                                  "id": "a3f631e3-494f-4036-94d0-1c0243e0cffb",
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-a3f631e3-494f-4036-94d0-1c0243e0cffb"
+                                },
+                                {
+                                  "name": "List routing rules",
+                                  "id": "87320cb3-75cf-43ab-8ad5-86af75e02285",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/?limit=50&offset=0",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "cases",
+                                        "routing-rules",
+                                        ""
+                                      ],
+                                      "query": [
+                                        {
+                                          "key": "limit",
+                                          "value": "50"
+                                        },
+                                        {
+                                          "key": "offset",
+                                          "value": "0"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "f3129a86-abd8-40ec-9dd3-e68b446c6e71",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "02be5206-37a7-4c6e-a964-09e254f4c380",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Requires `list:cases` for the requested application."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "7be35c78-8b6e-4038-907a-cae04a1a4006",
+                                      "name": "Success",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"results\": [\n    {\n      \"name\": \"<string>\",\n      \"description\": \"<string>\",\n      \"priority\": \"<integer>\",\n      \"conditions\": [\n        {\n          \"field\": \"source\",\n          \"operator\": \"in\",\n          \"value\": \"<string>\"\n        },\n        {\n          \"field\": \"tags\",\n          \"operator\": \"equals\",\n          \"value\": \"<string>\"\n        }\n      ],\n      \"required_skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"blueprint\": \"<uuid>\",\n      \"team\": \"<string,null-uuid>\",\n      \"is_active\": \"<boolean>\",\n      \"uuid\": \"<uuid>\",\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\",\n      \"version\": \"<integer>\",\n      \"blueprint_name\": \"<string>\",\n      \"team_name\": \"<string,null>\"\n    },\n    {\n      \"name\": \"<string>\",\n      \"description\": \"<string>\",\n      \"priority\": \"<integer>\",\n      \"conditions\": [\n        {\n          \"field\": \"source\",\n          \"operator\": \"equals\",\n          \"value\": \"<string>\"\n        },\n        {\n          \"field\": \"tags\",\n          \"operator\": \"in\",\n          \"value\": \"<string>\"\n        }\n      ],\n      \"required_skills\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"blueprint\": \"<uuid>\",\n      \"team\": \"<string,null-uuid>\",\n      \"is_active\": \"<boolean>\",\n      \"uuid\": \"<uuid>\",\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\",\n      \"version\": \"<integer>\",\n      \"blueprint_name\": \"<string>\",\n      \"team_name\": \"<string,null>\"\n    }\n  ],\n  \"count\": \"<integer>\",\n  \"next\": \"<string,null>\",\n  \"previous\": \"<string,null>\"\n}",
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-7be35c78-8b6e-4038-907a-cae04a1a4006"
+                                    },
+                                    {
+                                      "id": "43f99717-9e40-4e1c-ae34-3a0b5fc4465b",
+                                      "name": "Invalid input.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-43f99717-9e40-4e1c-ae34-3a0b5fc4465b"
+                                    },
+                                    {
+                                      "id": "3a587534-5483-41ee-9b62-c0d65099ff17",
+                                      "name": "Insufficient permission.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/?limit=50&offset=0",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "query": [
+                                            {
+                                              "key": "limit",
+                                              "value": "50"
+                                            },
+                                            {
+                                              "key": "offset",
+                                              "value": "0"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-3a587534-5483-41ee-9b62-c0d65099ff17"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-87320cb3-75cf-43ab-8ad5-86af75e02285"
+                                },
+                                {
+                                  "name": "Create routing rule",
+                                  "id": "5a8b064e-1661-40d9-8357-31c737479d39",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"name\": \"<string>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"publish\": \"<boolean>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "cases",
+                                        "routing-rules",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "6f38515f-4ae4-45a3-9fa3-3579bf5261f3",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "455b88e5-efee-4c1a-be7a-41acf6938149",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Requires `write:cases` for the requested application. Set publish=false to create an unpublished draft; Publish creates its first live version. Discarding a never-published draft deletes it."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "3e2cd8a6-9c98-4e12-a3d0-468a54ed039d",
+                                      "name": "Success",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"publish\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Created",
+                                      "code": 201,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"conditions\": [\n    {\n      \"field\": \"priority\",\n      \"operator\": \"equals\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"in\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"uuid\": \"<uuid>\",\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\",\n  \"version\": \"<integer>\",\n  \"blueprint_name\": \"<string>\",\n  \"team_name\": \"<string,null>\"\n}",
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-3e2cd8a6-9c98-4e12-a3d0-468a54ed039d"
+                                    },
+                                    {
+                                      "id": "f2ceb7b9-d64a-4ad0-81d8-00d6bcf8681a",
+                                      "name": "Invalid input.",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"publish\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-f2ceb7b9-d64a-4ad0-81d8-00d6bcf8681a"
+                                    },
+                                    {
+                                      "id": "784e7f87-2c96-4150-ac18-365b9b84adad",
+                                      "name": "Insufficient permission.",
+                                      "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"conditions\": [\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    },\n    {\n      \"field\": \"tags\",\n      \"operator\": \"contains\",\n      \"value\": \"<string>\"\n    }\n  ],\n  \"blueprint\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"priority\": \"<integer>\",\n  \"required_skills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"team\": \"<string,null-uuid>\",\n  \"is_active\": \"<boolean>\",\n  \"publish\": \"<boolean>\"\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/routing-rules/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "routing-rules",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-784e7f87-2c96-4150-ac18-365b9b84adad"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-5a8b064e-1661-40d9-8357-31c737479d39"
+                                }
+                              ],
+                              "id": "38e2a9a7-a8c7-49ec-a9ff-fb9841ce3c2b",
+                              "createdAt": "2026-10-22T01:11:58.000Z",
+                              "updatedAt": "2026-10-22T01:11:58.000Z",
+                              "uid": "35240-38e2a9a7-a8c7-49ec-a9ff-fb9841ce3c2b"
+                            },
+                            {
+                              "name": "reviewers",
+                              "item": [
+                                {
+                                  "name": "List eligible case reviewers",
+                                  "id": "0fa0418f-e564-4318-9845-2de578069dec",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/reviewers/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "cases",
+                                        "reviewers",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "8d1f5f55-c756-4708-89a0-be7af8856a0b",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "f65ae4b2-3473-42c7-9eb2-5080f19e0cac",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Requires `list:cases` for the requested application."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "97163d3e-cff2-42c0-8f74-a4b7b907d6a3",
+                                      "name": "Success",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/reviewers/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "reviewers",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"results\": [\n    {\n      \"user_id\": \"<uuid>\",\n      \"email\": \"<email>\",\n      \"name\": \"<string>\"\n    },\n    {\n      \"user_id\": \"<uuid>\",\n      \"email\": \"<email>\",\n      \"name\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-97163d3e-cff2-42c0-8f74-a4b7b907d6a3"
+                                    },
+                                    {
+                                      "id": "66f26c9d-99d9-4f1b-9944-943f232498ea",
+                                      "name": "Invalid input.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/reviewers/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "reviewers",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-66f26c9d-99d9-4f1b-9944-943f232498ea"
+                                    },
+                                    {
+                                      "id": "aeb7c7c5-dae7-4a27-885c-4fb11e4310d7",
+                                      "name": "Insufficient permission.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/reviewers/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "reviewers",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-aeb7c7c5-dae7-4a27-885c-4fb11e4310d7"
+                                    },
+                                    {
+                                      "id": "9c15f3ba-ce96-4eff-b042-1994d8ba82a3",
+                                      "name": "Reviewer access could not be verified. Retry later.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/cases/reviewers/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "cases",
+                                            "reviewers",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Service Unavailable",
+                                      "code": 503,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:11:58.000Z",
+                                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                                      "uid": "35240-9c15f3ba-ce96-4eff-b042-1994d8ba82a3"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:11:58.000Z",
+                                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                                  "uid": "35240-0fa0418f-e564-4318-9845-2de578069dec"
+                                }
+                              ],
+                              "id": "97f15da2-0a93-46af-9276-56c1697db48f",
+                              "createdAt": "2026-10-22T01:11:58.000Z",
+                              "updatedAt": "2026-10-22T01:11:58.000Z",
+                              "uid": "35240-97f15da2-0a93-46af-9276-56c1697db48f"
+                            }
+                          ],
+                          "id": "9eec2485-43ae-4cd1-82cb-3f68351380f6",
+                          "createdAt": "2026-10-22T01:11:58.000Z",
+                          "updatedAt": "2026-10-22T01:11:58.000Z",
+                          "uid": "35240-9eec2485-43ae-4cd1-82cb-3f68351380f6"
+                        }
+                      ],
+                      "id": "eafedbfa-f70c-486f-b090-a621f97165a8",
+                      "createdAt": "2026-10-22T01:11:58.000Z",
+                      "updatedAt": "2026-10-22T01:11:58.000Z",
+                      "uid": "35240-eafedbfa-f70c-486f-b090-a621f97165a8"
+                    }
+                  ],
+                  "id": "26833af0-3565-4635-90c8-269db3d39619",
+                  "createdAt": "2026-10-22T01:11:58.000Z",
+                  "updatedAt": "2026-10-22T01:11:58.000Z",
+                  "uid": "35240-26833af0-3565-4635-90c8-269db3d39619"
+                }
+              ],
+              "id": "9564875f-cb48-48c0-a413-986d600df2ab",
+              "createdAt": "2026-10-22T01:11:58.000Z",
+              "updatedAt": "2026-10-22T01:11:58.000Z",
+              "uid": "35240-9564875f-cb48-48c0-a413-986d600df2ab"
+            }
+          ],
+          "id": "2c589c7e-8435-4b4b-8130-98e4d00b278b",
+          "createdAt": "2026-10-22T01:11:58.000Z",
+          "updatedAt": "2026-10-22T01:11:58.000Z",
+          "uid": "35240-2c589c7e-8435-4b4b-8130-98e4d00b278b"
+        }
+      ],
+      "id": "6f8c91d6-07bc-46ff-bc48-ee7f8ff1a92d",
+      "createdAt": "2026-10-22T01:11:58.000Z",
+      "updatedAt": "2026-10-22T01:11:58.000Z",
+      "uid": "35240-6f8c91d6-07bc-46ff-bc48-ee7f8ff1a92d"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

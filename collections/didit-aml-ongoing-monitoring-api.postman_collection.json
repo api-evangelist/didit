@@ -1,0 +1,980 @@
+{
+  "info": {
+    "_postman_id": "7ea6d7b8-036f-4c2f-be52-3f80ba16b697",
+    "name": "Didit Verification AML Ongoing Monitoring API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:11:42.000Z",
+    "updatedAt": "2026-10-22T01:11:43.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-7ea6d7b8-036f-4c2f-be52-3f80ba16b697"
+  },
+  "item": [
+    {
+      "name": "v3",
+      "item": [
+        {
+          "name": "users",
+          "item": [
+            {
+              "name": "aml-monitoring",
+              "item": [
+                {
+                  "name": "Enable or disable AML ongoing monitoring for users",
+                  "id": "549a88af-5363-4373-b921-580c379dc4c1",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "apikey",
+                      "apikey": [
+                        {
+                          "key": "key",
+                          "value": "x-api-key",
+                          "type": "string"
+                        },
+                        {
+                          "key": "value",
+                          "value": "{{apiKey}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "in",
+                          "value": "header",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v3",
+                        "users",
+                        "aml-monitoring",
+                        ""
+                      ]
+                    },
+                    "description": "Turns AML ongoing monitoring on or off for the selected users, with the same semantics as the Business Console. Exactly one monitored AML screening is kept per user, so a profile that verified several times is monitored and billed once; disabling turns monitoring off across all of the profile's screenings. Users without any AML screening are screened first (billed as a regular AML screening) when they have the full name, date of birth and country needed; otherwise they are reported as `skipped_no_identity_data`.\n\nSet `estimate_only: true` to preview counts and costs without writing anything. Selections of 20 profiles or fewer resolve inline and return `200` with the completed job; larger selections return `202` and run in the background - poll Get AML monitoring job with the returned `job_id`. Enabling is refused with `403` when the organization balance does not cover the estimate. Identifiers that match nothing are listed in `unmatched` and never fail the request: a selection that matches nothing completes as an empty job (`total` 0), the same convention as the batch delete endpoints."
+                  },
+                  "response": [
+                    {
+                      "id": "44c694d1-1bb8-4ea2-b3d3-c63c7c2ac363",
+                      "name": "The estimate (when `estimate_only` is true) or the completed job for a selection processed inline.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "users",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"users_total\": \"<integer>\",\n  \"already_enabled\": \"<integer>\",\n  \"with_existing_aml\": \"<integer>\",\n  \"needing_screening\": \"<integer>\",\n  \"skipped_no_identity_data\": \"<integer>\",\n  \"skipped_blocked\": \"<integer>\",\n  \"estimated_screening_cost_usd\": \"<number>\",\n  \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n  \"balance_sufficient\": \"<boolean>\",\n  \"unmatched\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-44c694d1-1bb8-4ea2-b3d3-c63c7c2ac363"
+                    },
+                    {
+                      "id": "c2ecc2c1-6053-4d6d-8a4b-223da27ced0e",
+                      "name": "Larger selections run in the background. Poll the job endpoint with `job_id`; `results` fills in as profiles are processed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "users",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Accepted",
+                      "code": 202,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"job_id\": \"<uuid>\",\n  \"status\": \"COMPLETED\",\n  \"is_enabled\": \"<boolean>\",\n  \"target_type\": \"user\",\n  \"total\": \"<integer>\",\n  \"processed\": \"<integer>\",\n  \"outcomes\": {\n    \"enabled\": \"<integer>\",\n    \"screened_and_enabled\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"disabled\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"skipped_sandbox\": \"<integer>\",\n    \"failed_provider\": \"<integer>\",\n    \"failed_insufficient_balance\": \"<integer>\"\n  },\n  \"results\": [\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"failed_provider\"\n    },\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"skipped_blocked\"\n    }\n  ],\n  \"error\": \"<string,null>\",\n  \"created_at\": \"<dateTime>\",\n  \"completed_at\": \"<string,null-date-time>\",\n  \"estimate\": {\n    \"users_total\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"with_existing_aml\": \"<integer>\",\n    \"needing_screening\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"estimated_screening_cost_usd\": \"<number>\",\n    \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n    \"balance_sufficient\": \"<boolean>\"\n  },\n  \"unmatched\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-c2ecc2c1-6053-4d6d-8a4b-223da27ced0e"
+                    },
+                    {
+                      "id": "e8d000a7-f6f8-43b4-a454-4d78d202f65e",
+                      "name": "Validation error: `is_enabled` missing, no selector, or more than 1000 identifiers across both lists.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "users",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": null,
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-e8d000a7-f6f8-43b4-a454-4d78d202f65e"
+                    },
+                    {
+                      "id": "18449a96-c7e3-4d92-873b-8d7f2195015f",
+                      "name": "Missing or invalid API key.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "users",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": null,
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-18449a96-c7e3-4d92-873b-8d7f2195015f"
+                    },
+                    {
+                      "id": "6a838977-3dc8-490a-8a4d-bb1512f3f0c5",
+                      "name": "Insufficient balance to enable monitoring for this selection. The response carries the `estimate` so you can top up the right amount.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/users/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "users",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"<string>\",\n  \"estimate\": {\n    \"users_total\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"with_existing_aml\": \"<integer>\",\n    \"needing_screening\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"estimated_screening_cost_usd\": \"<number>\",\n    \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n    \"balance_sufficient\": \"<boolean>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-6a838977-3dc8-490a-8a4d-bb1512f3f0c5"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:11:43.000Z",
+                  "updatedAt": "2026-10-22T01:11:43.000Z",
+                  "uid": "35240-549a88af-5363-4373-b921-580c379dc4c1"
+                }
+              ],
+              "id": "cb1d6681-ed96-438e-81cb-4c8f07021445",
+              "createdAt": "2026-10-22T01:11:43.000Z",
+              "updatedAt": "2026-10-22T01:11:43.000Z",
+              "uid": "35240-cb1d6681-ed96-438e-81cb-4c8f07021445"
+            }
+          ],
+          "id": "9e7862f4-d95b-4ac7-bdb1-09382fa4d63d",
+          "createdAt": "2026-10-22T01:11:43.000Z",
+          "updatedAt": "2026-10-22T01:11:43.000Z",
+          "uid": "35240-9e7862f4-d95b-4ac7-bdb1-09382fa4d63d"
+        },
+        {
+          "name": "businesses",
+          "item": [
+            {
+              "name": "aml-monitoring",
+              "item": [
+                {
+                  "name": "Enable or disable AML ongoing monitoring for businesses",
+                  "id": "9a642442-418b-4f81-a14f-e5fb5e490b85",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "auth": {
+                      "type": "apikey",
+                      "apikey": [
+                        {
+                          "key": "key",
+                          "value": "x-api-key",
+                          "type": "string"
+                        },
+                        {
+                          "key": "value",
+                          "value": "{{apiKey}}",
+                          "type": "string"
+                        },
+                        {
+                          "key": "in",
+                          "value": "header",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v3",
+                        "businesses",
+                        "aml-monitoring",
+                        ""
+                      ]
+                    },
+                    "description": "Turns AML ongoing monitoring on or off for the selected businesses, with the same semantics as the Business Console. Exactly one monitored AML screening is kept per business, so a profile that verified several times is monitored and billed once; disabling turns monitoring off across all of the profile's screenings. Businesses without any AML screening are screened first (billed as a regular AML screening) when they have the legal or display name needed; otherwise they are reported as `skipped_no_identity_data`.\n\nSet `estimate_only: true` to preview counts and costs without writing anything. Selections of 20 profiles or fewer resolve inline and return `200` with the completed job; larger selections return `202` and run in the background - poll Get AML monitoring job with the returned `job_id`. Enabling is refused with `403` when the organization balance does not cover the estimate. Identifiers that match nothing are listed in `unmatched` and never fail the request: a selection that matches nothing completes as an empty job (`total` 0), the same convention as the batch delete endpoints."
+                  },
+                  "response": [
+                    {
+                      "id": "2441bdf8-dbc0-4859-896a-52a1eb162ddd",
+                      "name": "The estimate (when `estimate_only` is true) or the completed job for a selection processed inline.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "businesses",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"users_total\": \"<integer>\",\n  \"already_enabled\": \"<integer>\",\n  \"with_existing_aml\": \"<integer>\",\n  \"needing_screening\": \"<integer>\",\n  \"skipped_no_identity_data\": \"<integer>\",\n  \"skipped_blocked\": \"<integer>\",\n  \"estimated_screening_cost_usd\": \"<number>\",\n  \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n  \"balance_sufficient\": \"<boolean>\",\n  \"unmatched\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-2441bdf8-dbc0-4859-896a-52a1eb162ddd"
+                    },
+                    {
+                      "id": "68ed5d34-6523-4f4b-9456-c11581465882",
+                      "name": "Larger selections run in the background. Poll the job endpoint with `job_id`; `results` fills in as profiles are processed.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "businesses",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Accepted",
+                      "code": 202,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"job_id\": \"<uuid>\",\n  \"status\": \"COMPLETED\",\n  \"is_enabled\": \"<boolean>\",\n  \"target_type\": \"user\",\n  \"total\": \"<integer>\",\n  \"processed\": \"<integer>\",\n  \"outcomes\": {\n    \"enabled\": \"<integer>\",\n    \"screened_and_enabled\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"disabled\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"skipped_sandbox\": \"<integer>\",\n    \"failed_provider\": \"<integer>\",\n    \"failed_insufficient_balance\": \"<integer>\"\n  },\n  \"results\": [\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"failed_provider\"\n    },\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"skipped_blocked\"\n    }\n  ],\n  \"error\": \"<string,null>\",\n  \"created_at\": \"<dateTime>\",\n  \"completed_at\": \"<string,null-date-time>\",\n  \"estimate\": {\n    \"users_total\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"with_existing_aml\": \"<integer>\",\n    \"needing_screening\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"estimated_screening_cost_usd\": \"<number>\",\n    \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n    \"balance_sufficient\": \"<boolean>\"\n  },\n  \"unmatched\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-68ed5d34-6523-4f4b-9456-c11581465882"
+                    },
+                    {
+                      "id": "592526f2-7805-4551-8ad5-73f291fc3f77",
+                      "name": "Validation error: `is_enabled` missing, no selector, or more than 1000 identifiers across both lists.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "businesses",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": null,
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-592526f2-7805-4551-8ad5-73f291fc3f77"
+                    },
+                    {
+                      "id": "0cdf23ac-9428-48dc-be1d-3cda52949afa",
+                      "name": "Missing or invalid API key.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "businesses",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": null,
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-0cdf23ac-9428-48dc-be1d-3cda52949afa"
+                    },
+                    {
+                      "id": "ce5b8e52-2a2c-418d-a9e7-80f455ad8224",
+                      "name": "Insufficient balance to enable monitoring for this selection. The response carries the `estimate` so you can top up the right amount.",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: apikey",
+                            "key": "x-api-key",
+                            "value": "<API Key>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"is_enabled\": \"<boolean>\",\n  \"estimate_only\": false,\n  \"vendor_data_list\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"didit_internal_id_list\": [\n    \"<uuid>\",\n    \"<uuid>\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/businesses/aml-monitoring/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "businesses",
+                            "aml-monitoring",
+                            ""
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"<string>\",\n  \"estimate\": {\n    \"users_total\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"with_existing_aml\": \"<integer>\",\n    \"needing_screening\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"estimated_screening_cost_usd\": \"<number>\",\n    \"estimated_annual_monitoring_cost_usd\": \"<number>\",\n    \"balance_sufficient\": \"<boolean>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-ce5b8e52-2a2c-418d-a9e7-80f455ad8224"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:11:43.000Z",
+                  "updatedAt": "2026-10-22T01:11:43.000Z",
+                  "uid": "35240-9a642442-418b-4f81-a14f-e5fb5e490b85"
+                }
+              ],
+              "id": "8856e39d-b44e-4ca5-a55f-ca0aaf13d303",
+              "createdAt": "2026-10-22T01:11:43.000Z",
+              "updatedAt": "2026-10-22T01:11:43.000Z",
+              "uid": "35240-8856e39d-b44e-4ca5-a55f-ca0aaf13d303"
+            }
+          ],
+          "id": "2a5aa8f2-52a7-4f93-b893-dcd0eeb3e97c",
+          "createdAt": "2026-10-22T01:11:43.000Z",
+          "updatedAt": "2026-10-22T01:11:43.000Z",
+          "uid": "35240-2a5aa8f2-52a7-4f93-b893-dcd0eeb3e97c"
+        },
+        {
+          "name": "aml-monitoring",
+          "item": [
+            {
+              "name": "jobs",
+              "item": [
+                {
+                  "name": "{job_id}",
+                  "item": [
+                    {
+                      "name": "Get AML ongoing monitoring job",
+                      "id": "01d3ad0a-4b9c-4df1-a78f-3c2afb9ddd4c",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "apikey",
+                          "apikey": [
+                            {
+                              "key": "key",
+                              "value": "x-api-key",
+                              "type": "string"
+                            },
+                            {
+                              "key": "value",
+                              "value": "{{apiKey}}",
+                              "type": "string"
+                            },
+                            {
+                              "key": "in",
+                              "value": "header",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v3/aml-monitoring/jobs/:job_id/",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v3",
+                            "aml-monitoring",
+                            "jobs",
+                            ":job_id",
+                            ""
+                          ],
+                          "variable": [
+                            {
+                              "id": "e9609eae-7c68-4c9b-b8a3-54ea7c0d250c",
+                              "key": "job_id",
+                              "value": "<uuid>",
+                              "description": "(Required) The `job_id` returned by the toggle endpoint."
+                            }
+                          ]
+                        },
+                        "description": "Status, outcome counters and per-record results of a monitoring toggle job started from `POST /v3/users/aml-monitoring/` or `POST /v3/businesses/aml-monitoring/`. Poll every couple of seconds while `status` is `PENDING` or `PROCESSING`; `results` is complete once it is `COMPLETED`."
+                      },
+                      "response": [
+                        {
+                          "id": "0f3716d8-9a0a-4d82-ab16-03262dd2ace1",
+                          "name": "The job.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/aml-monitoring/jobs/:job_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "aml-monitoring",
+                                "jobs",
+                                ":job_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "job_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"job_id\": \"<uuid>\",\n  \"status\": \"FAILED\",\n  \"is_enabled\": \"<boolean>\",\n  \"target_type\": \"business\",\n  \"total\": \"<integer>\",\n  \"processed\": \"<integer>\",\n  \"outcomes\": {\n    \"enabled\": \"<integer>\",\n    \"screened_and_enabled\": \"<integer>\",\n    \"already_enabled\": \"<integer>\",\n    \"disabled\": \"<integer>\",\n    \"skipped_no_identity_data\": \"<integer>\",\n    \"skipped_blocked\": \"<integer>\",\n    \"skipped_sandbox\": \"<integer>\",\n    \"failed_provider\": \"<integer>\",\n    \"failed_insufficient_balance\": \"<integer>\"\n  },\n  \"results\": [\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"screened_and_enabled\"\n    },\n    {\n      \"didit_internal_id\": \"<uuid>\",\n      \"vendor_data\": \"<string,null>\",\n      \"outcome\": \"screened_and_enabled\"\n    }\n  ],\n  \"error\": \"<string,null>\",\n  \"created_at\": \"<dateTime>\",\n  \"completed_at\": \"<string,null-date-time>\"\n}",
+                          "createdAt": "2026-10-22T01:11:43.000Z",
+                          "updatedAt": "2026-10-22T01:11:43.000Z",
+                          "uid": "35240-0f3716d8-9a0a-4d82-ab16-03262dd2ace1"
+                        },
+                        {
+                          "id": "aca8c9d5-66fd-401b-a853-3719b54d3d97",
+                          "name": "Missing or invalid API key.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/aml-monitoring/jobs/:job_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "aml-monitoring",
+                                "jobs",
+                                ":job_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "job_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": null,
+                          "createdAt": "2026-10-22T01:11:43.000Z",
+                          "updatedAt": "2026-10-22T01:11:43.000Z",
+                          "uid": "35240-aca8c9d5-66fd-401b-a853-3719b54d3d97"
+                        },
+                        {
+                          "id": "19200f09-97f8-4b73-a7ef-b6e76ebb9ef3",
+                          "name": "No such job for this application.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "description": "Added as a part of security scheme: apikey",
+                                "key": "x-api-key",
+                                "value": "<API Key>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v3/aml-monitoring/jobs/:job_id/",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v3",
+                                "aml-monitoring",
+                                "jobs",
+                                ":job_id",
+                                ""
+                              ],
+                              "variable": [
+                                {
+                                  "key": "job_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": null,
+                          "createdAt": "2026-10-22T01:11:43.000Z",
+                          "updatedAt": "2026-10-22T01:11:43.000Z",
+                          "uid": "35240-19200f09-97f8-4b73-a7ef-b6e76ebb9ef3"
+                        }
+                      ],
+                      "createdAt": "2026-10-22T01:11:43.000Z",
+                      "updatedAt": "2026-10-22T01:11:43.000Z",
+                      "uid": "35240-01d3ad0a-4b9c-4df1-a78f-3c2afb9ddd4c"
+                    }
+                  ],
+                  "id": "0540aa39-cad9-4c52-b59b-2d890dd2bb31",
+                  "createdAt": "2026-10-22T01:11:43.000Z",
+                  "updatedAt": "2026-10-22T01:11:43.000Z",
+                  "uid": "35240-0540aa39-cad9-4c52-b59b-2d890dd2bb31"
+                }
+              ],
+              "id": "985da6ab-7af7-4f38-8b4e-00ce23562e74",
+              "createdAt": "2026-10-22T01:11:43.000Z",
+              "updatedAt": "2026-10-22T01:11:43.000Z",
+              "uid": "35240-985da6ab-7af7-4f38-8b4e-00ce23562e74"
+            }
+          ],
+          "id": "e36d98dd-b7ea-4170-ad81-1eb517a6e75f",
+          "createdAt": "2026-10-22T01:11:43.000Z",
+          "updatedAt": "2026-10-22T01:11:43.000Z",
+          "uid": "35240-e36d98dd-b7ea-4170-ad81-1eb517a6e75f"
+        }
+      ],
+      "id": "bdbe3e31-4edf-467d-a0c2-042aafa34579",
+      "createdAt": "2026-10-22T01:11:43.000Z",
+      "updatedAt": "2026-10-22T01:11:43.000Z",
+      "uid": "35240-bdbe3e31-4edf-467d-a0c2-042aafa34579"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
+    }
+  ]
+}

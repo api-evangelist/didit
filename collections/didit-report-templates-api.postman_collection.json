@@ -1,756 +1,756 @@
 {
+  "info": {
+    "_postman_id": "e66986e2-83e0-4faa-89aa-6eccda7f53ca",
+    "name": "Didit Verification Report Templates API",
+    "description": "Identity verification API. Authenticate with x-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:10:05.000Z",
+    "updatedAt": "2026-10-22T01:10:05.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-e66986e2-83e0-4faa-89aa-6eccda7f53ca"
+  },
   "item": [
     {
-      "id": "a76e47de-7dd7-4c90-bfb4-a27cac260c6c",
-      "name": "Report Templates",
-      "description": {
-        "content": "",
-        "type": "text/plain"
-      },
+      "name": "v3",
       "item": [
         {
-          "id": "030a130d-918a-4c01-a3c9-0e1c10efb2bc",
-          "name": "List report templates",
-          "request": {
-            "name": "List report templates",
-            "description": {
-              "content": "List FIU report templates for the application.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "organization",
-                ":organization_id",
-                "application",
-                ":application_id",
-                "report-templates",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [
-                {
-                  "disabled": false,
-                  "key": "limit",
-                  "value": "50",
-                  "description": "Page size."
-                },
-                {
-                  "disabled": false,
-                  "key": "offset",
-                  "value": "0",
-                  "description": "Zero-based offset."
-                }
-              ],
-              "variable": [
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "organization_id",
-                  "description": "(Required) Organization UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "application_id",
-                  "description": "(Required) Application UUID."
-                }
-              ]
-            },
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "GET",
-            "auth": null
-          },
-          "response": [
+          "name": "organization",
+          "item": [
             {
-              "id": "50005635-4d1a-43ff-959a-191948a0a843",
-              "name": "Paginated templates.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [
-                    {
-                      "key": "limit",
-                      "value": "50"
-                    },
-                    {
-                      "key": "offset",
-                      "value": "0"
-                    }
-                  ],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    }
-                  ]
-                },
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "GET",
-                "body": {}
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
+              "name": "{organization_id}",
+              "item": [
                 {
-                  "key": "Content-Type",
-                  "value": "application/json"
+                  "name": "application",
+                  "item": [
+                    {
+                      "name": "{application_id}",
+                      "item": [
+                        {
+                          "name": "report-templates",
+                          "item": [
+                            {
+                              "name": "{template_uuid}",
+                              "item": [
+                                {
+                                  "name": "Get report template",
+                                  "id": "6768b7c0-590c-4c18-af9c-d70228c1c7bf",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ":template_uuid",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "ed9c3a5a-9bad-40d0-b91e-503185e9df02",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "848e22a2-27d8-42fd-825b-3d9ee2c1943c",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        },
+                                        {
+                                          "id": "ea215fc6-05ec-4a3d-b950-ca7f0a30193b",
+                                          "key": "template_uuid",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Report template UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Retrieve a report template."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "3dfcd4b5-133f-4a91-8eb8-64a6ee9ef1d6",
+                                      "name": "Template detail.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "report-templates",
+                                            ":template_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            },
+                                            {
+                                              "key": "template_uuid"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"uuid\": \"<uuid>\",\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"<string>\",\n  \"field_config\": {},\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                      "createdAt": "2026-10-22T01:10:06.000Z",
+                                      "updatedAt": "2026-10-22T01:10:06.000Z",
+                                      "uid": "35240-3dfcd4b5-133f-4a91-8eb8-64a6ee9ef1d6"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-6768b7c0-590c-4c18-af9c-d70228c1c7bf"
+                                },
+                                {
+                                  "name": "Update report template",
+                                  "id": "ddb34878-3cbe-4976-8658-e2f9640ed9dd",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"field_config\": {}\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ":template_uuid",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "30e4b5ae-43ec-42d6-81cd-54430141561c",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "a36859a8-b33a-4dd5-9b08-dddf8cbba0cd",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        },
+                                        {
+                                          "id": "4ef0026c-d06d-4083-aa8d-95afc436fb41",
+                                          "key": "template_uuid",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Report template UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Partially update a report template. Re-validates obligatory goAML fields on save."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "0271c5c6-4c41-4581-b203-0e818f903c7f",
+                                      "name": "Updated template.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"field_config\": {}\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "report-templates",
+                                            ":template_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            },
+                                            {
+                                              "key": "template_uuid"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"uuid\": \"<uuid>\",\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"<string>\",\n  \"field_config\": {},\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                      "createdAt": "2026-10-22T01:10:06.000Z",
+                                      "updatedAt": "2026-10-22T01:10:06.000Z",
+                                      "uid": "35240-0271c5c6-4c41-4581-b203-0e818f903c7f"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-ddb34878-3cbe-4976-8658-e2f9640ed9dd"
+                                },
+                                {
+                                  "name": "Delete report template",
+                                  "id": "be76ccbb-54ad-436f-8d73-f0dbd89c401f",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "DELETE",
+                                    "header": [],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ":template_uuid",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "d59b5977-439d-4050-8597-b8da260a3308",
+                                          "key": "organization_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Organization UUID."
+                                        },
+                                        {
+                                          "id": "349bea2e-bae6-44fe-bb28-67fadb01316b",
+                                          "key": "application_id",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Application UUID."
+                                        },
+                                        {
+                                          "id": "f189c39c-b2fb-4a89-85ee-26e0354669f2",
+                                          "key": "template_uuid",
+                                          "value": "<uuid>",
+                                          "description": "(Required) Report template UUID."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Delete a report template. Reports already created from it are unaffected."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "48c34e66-94e3-4fc4-bd59-07dcf18e4294",
+                                      "name": "Template deleted.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/:template_uuid/",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v3",
+                                            "organization",
+                                            ":organization_id",
+                                            "application",
+                                            ":application_id",
+                                            "report-templates",
+                                            ":template_uuid",
+                                            ""
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "organization_id"
+                                            },
+                                            {
+                                              "key": "application_id"
+                                            },
+                                            {
+                                              "key": "template_uuid"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "No Content",
+                                      "code": 204,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-10-22T01:10:06.000Z",
+                                      "updatedAt": "2026-10-22T01:10:06.000Z",
+                                      "uid": "35240-48c34e66-94e3-4fc4-bd59-07dcf18e4294"
+                                    }
+                                  ],
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-be76ccbb-54ad-436f-8d73-f0dbd89c401f"
+                                }
+                              ],
+                              "id": "413e684f-d369-40d0-8769-a571c6c8194b",
+                              "createdAt": "2026-10-22T01:10:05.000Z",
+                              "updatedAt": "2026-10-22T01:10:05.000Z",
+                              "uid": "35240-413e684f-d369-40d0-8769-a571c6c8194b"
+                            },
+                            {
+                              "name": "List report templates",
+                              "id": "57a8214e-e677-4c0f-bb5a-00bb00fc2f75",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/?limit=50&offset=0",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v3",
+                                    "organization",
+                                    ":organization_id",
+                                    "application",
+                                    ":application_id",
+                                    "report-templates",
+                                    ""
+                                  ],
+                                  "query": [
+                                    {
+                                      "description": "Page size.",
+                                      "key": "limit",
+                                      "value": "50"
+                                    },
+                                    {
+                                      "description": "Zero-based offset.",
+                                      "key": "offset",
+                                      "value": "0"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "fe6de490-9c26-4b2e-a711-d875219a22ac",
+                                      "key": "organization_id",
+                                      "value": "<uuid>",
+                                      "description": "(Required) Organization UUID."
+                                    },
+                                    {
+                                      "id": "43905919-04a5-40f4-bd7f-fd1256c8ede4",
+                                      "key": "application_id",
+                                      "value": "<uuid>",
+                                      "description": "(Required) Application UUID."
+                                    }
+                                  ]
+                                },
+                                "description": "List FIU report templates for the application."
+                              },
+                              "response": [
+                                {
+                                  "id": "f29ee8cb-a94b-4517-bd9e-c18c8939ebe2",
+                                  "name": "Paginated templates.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/?limit=50&offset=0",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ""
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Page size.",
+                                          "key": "limit",
+                                          "value": "50"
+                                        },
+                                        {
+                                          "description": "Zero-based offset.",
+                                          "key": "offset",
+                                          "value": "0"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "organization_id"
+                                        },
+                                        {
+                                          "key": "application_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"count\": \"<integer>\",\n  \"next\": \"<string,null>\",\n  \"previous\": \"<string,null>\",\n  \"results\": [\n    {\n      \"uuid\": \"<uuid>\",\n      \"name\": \"<string>\",\n      \"jurisdiction\": \"<string>\",\n      \"report_type\": \"STR\",\n      \"report_type_display\": \"<string>\",\n      \"field_config\": {},\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\"\n    },\n    {\n      \"uuid\": \"<uuid>\",\n      \"name\": \"<string>\",\n      \"jurisdiction\": \"<string>\",\n      \"report_type\": \"TFR\",\n      \"report_type_display\": \"<string>\",\n      \"field_config\": {},\n      \"created_at\": \"<dateTime>\",\n      \"updated_at\": \"<dateTime>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-f29ee8cb-a94b-4517-bd9e-c18c8939ebe2"
+                                }
+                              ],
+                              "createdAt": "2026-10-22T01:10:06.000Z",
+                              "updatedAt": "2026-10-22T01:10:06.000Z",
+                              "uid": "35240-57a8214e-e677-4c0f-bb5a-00bb00fc2f75"
+                            },
+                            {
+                              "name": "Create report template",
+                              "id": "aa03f912-e658-4f02-80d2-62d07779bb27",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "POST",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"field_config\": {}\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v3",
+                                    "organization",
+                                    ":organization_id",
+                                    "application",
+                                    ":application_id",
+                                    "report-templates",
+                                    ""
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "178e7e84-0f11-4335-b515-7c9abc5985e7",
+                                      "key": "organization_id",
+                                      "value": "<uuid>",
+                                      "description": "(Required) Organization UUID."
+                                    },
+                                    {
+                                      "id": "8d63a777-d2d6-442f-bccc-e4636274076b",
+                                      "key": "application_id",
+                                      "value": "<uuid>",
+                                      "description": "(Required) Application UUID."
+                                    }
+                                  ]
+                                },
+                                "description": "Create a reusable per-jurisdiction, per-report-type goAML header template. Rejected with 400 if any of the template-level obligatory fields (rentity_id, submission_code, currency_code_local) is missing from field_config; an invalid template cannot be saved or used to create a report. Per-filing header fields (action, submission_date, transactions) are enforced at report validate/finalize time instead."
+                              },
+                              "response": [
+                                {
+                                  "id": "69ab1f8b-97d6-4d3e-8b5b-df55b62249ce",
+                                  "name": "Template created.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"field_config\": {}\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "organization_id"
+                                        },
+                                        {
+                                          "key": "application_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Created",
+                                  "code": 201,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"uuid\": \"<uuid>\",\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"<string>\",\n  \"field_config\": {},\n  \"created_at\": \"<dateTime>\",\n  \"updated_at\": \"<dateTime>\"\n}",
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-69ab1f8b-97d6-4d3e-8b5b-df55b62249ce"
+                                },
+                                {
+                                  "id": "eb67c737-6193-45cd-aca9-4441097ecffe",
+                                  "name": "Unrecognized jurisdiction, or field_config fails obligatory-field validation.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"IFT\",\n  \"field_config\": {}\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v3/organization/:organization_id/application/:application_id/report-templates/",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v3",
+                                        "organization",
+                                        ":organization_id",
+                                        "application",
+                                        ":application_id",
+                                        "report-templates",
+                                        ""
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "organization_id"
+                                        },
+                                        {
+                                          "key": "application_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Bad Request",
+                                  "code": 400,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"errors\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+                                  "createdAt": "2026-10-22T01:10:06.000Z",
+                                  "updatedAt": "2026-10-22T01:10:06.000Z",
+                                  "uid": "35240-eb67c737-6193-45cd-aca9-4441097ecffe"
+                                }
+                              ],
+                              "createdAt": "2026-10-22T01:10:06.000Z",
+                              "updatedAt": "2026-10-22T01:10:06.000Z",
+                              "uid": "35240-aa03f912-e658-4f02-80d2-62d07779bb27"
+                            }
+                          ],
+                          "id": "c865ccac-5d8a-414d-8eda-b402b04e9fa3",
+                          "createdAt": "2026-10-22T01:10:05.000Z",
+                          "updatedAt": "2026-10-22T01:10:05.000Z",
+                          "uid": "35240-c865ccac-5d8a-414d-8eda-b402b04e9fa3"
+                        }
+                      ],
+                      "id": "7126b86a-99eb-48f8-8588-de1a6a565750",
+                      "createdAt": "2026-10-22T01:10:05.000Z",
+                      "updatedAt": "2026-10-22T01:10:05.000Z",
+                      "uid": "35240-7126b86a-99eb-48f8-8588-de1a6a565750"
+                    }
+                  ],
+                  "id": "892a50a7-f8fe-4571-a191-2d73925082a8",
+                  "createdAt": "2026-10-22T01:10:05.000Z",
+                  "updatedAt": "2026-10-22T01:10:05.000Z",
+                  "uid": "35240-892a50a7-f8fe-4571-a191-2d73925082a8"
                 }
               ],
-              "body": "{\n  \"count\": 7412,\n  \"next\": \"string\",\n  \"previous\": \"string\",\n  \"results\": [\n    {\n      \"uuid\": \"81ee1654-a202-f9f8-d1d7-decfb4bd1e18\",\n      \"name\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"report_type\": \"STR\",\n      \"report_type_display\": \"string\",\n      \"field_config\": {},\n      \"created_at\": \"2002-10-19T18:23:56.049Z\",\n      \"updated_at\": \"1998-09-02T10:18:35.210Z\"\n    },\n    {\n      \"uuid\": \"9b6bfb5c-70f6-5dd6-4174-9d013babc4c0\",\n      \"name\": \"string\",\n      \"jurisdiction\": \"st\",\n      \"report_type\": \"STR\",\n      \"report_type_display\": \"string\",\n      \"field_config\": {},\n      \"created_at\": \"1978-08-29T04:50:06.120Z\",\n      \"updated_at\": \"1961-06-30T03:46:36.754Z\"\n    }\n  ]\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
+              "id": "0eaff4e8-c287-4758-83a3-e67c745c422e",
+              "createdAt": "2026-10-22T01:10:05.000Z",
+              "updatedAt": "2026-10-22T01:10:05.000Z",
+              "uid": "35240-0eaff4e8-c287-4758-83a3-e67c745c422e"
             }
           ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "36e79006-ec01-4618-a7a8-972fec27d15c",
-          "name": "Create report template",
-          "request": {
-            "name": "Create report template",
-            "description": {
-              "content": "Create a reusable per-jurisdiction, per-report-type goAML header template. Rejected with 400 if any of the template-level obligatory fields (rentity_id, submission_code, currency_code_local) is missing from field_config; an invalid template cannot be saved or used to create a report. Per-filing header fields (action, submission_date, transactions) are enforced at report validate/finalize time instead.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "organization",
-                ":organization_id",
-                "application",
-                ":application_id",
-                "report-templates",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": [
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "organization_id",
-                  "description": "(Required) Organization UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "application_id",
-                  "description": "(Required) Application UUID."
-                }
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"<string>\",\n  \"field_config\": \"<object>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "4c99a095-2326-4559-89e4-08fffaef5853",
-              "name": "Template created.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    }
-                  ]
-                },
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"<string>\",\n  \"field_config\": \"<object>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Created",
-              "code": 201,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"uuid\": \"feca3902-3856-9a08-1e5a-0436d5b76034\",\n  \"name\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"string\",\n  \"field_config\": {},\n  \"created_at\": \"1953-03-15T19:06:16.989Z\",\n  \"updated_at\": \"1999-04-01T18:08:21.005Z\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "8f40efd5-65dc-4449-94f4-98e44c4a5096",
-              "name": "Unrecognized jurisdiction, or field_config fails obligatory-field validation.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    }
-                  ]
-                },
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"<string>\",\n  \"field_config\": \"<object>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"errors\": [\n    \"string\",\n    \"string\"\n  ]\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "938369b4-76e4-42c0-9dc3-616b6190c62b",
-          "name": "Get report template",
-          "request": {
-            "name": "Get report template",
-            "description": {
-              "content": "Retrieve a report template.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "organization",
-                ":organization_id",
-                "application",
-                ":application_id",
-                "report-templates",
-                ":template_uuid",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": [
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "organization_id",
-                  "description": "(Required) Organization UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "application_id",
-                  "description": "(Required) Application UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "template_uuid",
-                  "description": "(Required) Report template UUID."
-                }
-              ]
-            },
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "GET",
-            "auth": null
-          },
-          "response": [
-            {
-              "id": "1f054c12-3a21-4f0f-a399-1c46e00abdba",
-              "name": "Template detail.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ":template_uuid",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "template_uuid",
-                      "description": "(Required) Report template UUID."
-                    }
-                  ]
-                },
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "GET",
-                "body": {}
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"uuid\": \"feca3902-3856-9a08-1e5a-0436d5b76034\",\n  \"name\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"string\",\n  \"field_config\": {},\n  \"created_at\": \"1953-03-15T19:06:16.989Z\",\n  \"updated_at\": \"1999-04-01T18:08:21.005Z\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "b6fd908b-030d-4772-87b0-5815ecf9174b",
-          "name": "Update report template",
-          "request": {
-            "name": "Update report template",
-            "description": {
-              "content": "Partially update a report template. Re-validates obligatory goAML fields on save.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "organization",
-                ":organization_id",
-                "application",
-                ":application_id",
-                "report-templates",
-                ":template_uuid",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": [
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "organization_id",
-                  "description": "(Required) Organization UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "application_id",
-                  "description": "(Required) Application UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "template_uuid",
-                  "description": "(Required) Report template UUID."
-                }
-              ]
-            },
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "PATCH",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"<string>\",\n  \"field_config\": \"<object>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "3f279e33-946c-4953-a670-2f99572a15d6",
-              "name": "Updated template.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ":template_uuid",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "template_uuid",
-                      "description": "(Required) Report template UUID."
-                    }
-                  ]
-                },
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "PATCH",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"<string>\",\n  \"jurisdiction\": \"<string>\",\n  \"report_type\": \"<string>\",\n  \"field_config\": \"<object>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"uuid\": \"feca3902-3856-9a08-1e5a-0436d5b76034\",\n  \"name\": \"string\",\n  \"jurisdiction\": \"st\",\n  \"report_type\": \"IFT\",\n  \"report_type_display\": \"string\",\n  \"field_config\": {},\n  \"created_at\": \"1953-03-15T19:06:16.989Z\",\n  \"updated_at\": \"1999-04-01T18:08:21.005Z\"\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "702f25fd-e5a7-48f6-a51a-94ab5d6cf668",
-          "name": "Delete report template",
-          "request": {
-            "name": "Delete report template",
-            "description": {
-              "content": "Soft-delete a report template. Reports already created from it are unaffected.",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "v3",
-                "organization",
-                ":organization_id",
-                "application",
-                ":application_id",
-                "report-templates",
-                ":template_uuid",
-                ""
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": [
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "organization_id",
-                  "description": "(Required) Organization UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "application_id",
-                  "description": "(Required) Application UUID."
-                },
-                {
-                  "disabled": false,
-                  "type": "any",
-                  "value": "<uuid>",
-                  "key": "template_uuid",
-                  "description": "(Required) Report template UUID."
-                }
-              ]
-            },
-            "method": "DELETE",
-            "auth": null
-          },
-          "response": [
-            {
-              "id": "d8daf9ca-02d2-47b9-b586-2bb980a9f5a6",
-              "name": "Template deleted.",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "v3",
-                    "organization",
-                    ":organization_id",
-                    "application",
-                    ":application_id",
-                    "report-templates",
-                    ":template_uuid",
-                    ""
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": [
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "organization_id",
-                      "description": "(Required) Organization UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "application_id",
-                      "description": "(Required) Application UUID."
-                    },
-                    {
-                      "disabled": false,
-                      "type": "any",
-                      "value": "<uuid>",
-                      "key": "template_uuid",
-                      "description": "(Required) Report template UUID."
-                    }
-                  ]
-                },
-                "method": "DELETE",
-                "body": {}
-              },
-              "status": "No Content",
-              "code": 204,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "text/plain"
-                }
-              ],
-              "body": "",
-              "cookie": [],
-              "_postman_previewlanguage": "text"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
+          "id": "8989860a-dd1c-4bda-bded-8166c0481196",
+          "createdAt": "2026-10-22T01:10:05.000Z",
+          "updatedAt": "2026-10-22T01:10:05.000Z",
+          "uid": "35240-8989860a-dd1c-4bda-bded-8166c0481196"
         }
       ],
-      "event": []
+      "id": "edcd580a-46d3-4e97-aca3-9531842b6962",
+      "createdAt": "2026-10-22T01:10:05.000Z",
+      "updatedAt": "2026-10-22T01:10:05.000Z",
+      "uid": "35240-edcd580a-46d3-4e97-aca3-9531842b6962"
     }
   ],
-  "event": [],
   "variable": [
     {
-      "type": "string",
-      "value": "https://verification.didit.me",
-      "key": "baseUrl"
+      "key": "baseUrl",
+      "value": "https://verification.didit.me"
     }
-  ],
-  "info": {
-    "_postman_id": "0a6c0122-eb9a-4be2-83ec-ec6a8820c9e6",
-    "name": "Didit Verification Billing Report Templates API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": {
-      "content": "Identity verification API. Authenticate with x-api-key header.",
-      "type": "text/plain"
-    }
-  }
+  ]
 }
