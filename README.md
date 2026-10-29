@@ -64,6 +64,166 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Didit is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+Didit is a developer-first identity verification and fraud-prevention platform that exposes one unified API for KYC (ID verification, passive/active liveness, face match and search, age estimation, proof of address, NFC), KYB business verification (registry, UBO/ownership, officers, entity AML), AML sanctions/PEP screening, transaction monitoring (KYT), crypto wallet screening, and FATF/EU Travel Rule. It spans 220+ countries, 14,000+ document types and 50+ languages with sub-two-second inference, pay-per-call pricing from $0.30 and a 500-verification monthly free tier. The v3 REST API authenticates with an x-api-key header, ships Web/iOS/Android/React Native/Flutter SDKs, HMAC-signed webhooks, a live hosted MCP server, and Agent Skills. Backed by Y Combinator and Robinhood Ventures.
 
-Backed by: y-combinator
+**Areas:** Identity · Identity Verification · KYC · KYB · AML · Fraud Prevention · Compliance · Biometrics · Transaction Monitoring · Cryptocurrency
+
+## Didit on APIs.io
+
+Everything profiled for Didit is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/didit/](https://apis.io/providers/didit/)** — or go straight to one of the APIs or properties below.
+
+### APIs (17)
+
+- [Didit Billing API](https://apis.io/apis/didit/didit-billing-api/) — The Billing API from Didit — 2 operation(s) for billing.
+- [Didit Businesses API](https://apis.io/apis/didit/didit-businesses-api/) — The Businesses API from Didit — 5 operation(s) for businesses.
+- [Didit Case Blueprints API](https://apis.io/apis/didit/didit-case-blueprints-api/) — The Case Blueprints API from Didit — 4 operation(s) for case blueprints.
+- [Didit Cases API](https://apis.io/apis/didit/didit-cases-api/) — The Cases API from Didit — 24 operation(s) for cases.
+- [Didit Customization API](https://apis.io/apis/didit/didit-customization-api/) — The Customization API from Didit — 1 operation(s) for customization.
+- [Didit Questionnaires API](https://apis.io/apis/didit/didit-questionnaires-api/) — The Questionnaires API from Didit — 2 operation(s) for questionnaires.
+- [Didit Regulatory Reports API](https://apis.io/apis/didit/didit-regulatory-reports-api/) — The Regulatory Reports API from Didit — 6 operation(s) for regulatory reports.
+- [Didit Report Templates API](https://apis.io/apis/didit/didit-report-templates-api/) — The Report Templates API from Didit — 2 operation(s) for report templates.
+- [Didit Session API](https://apis.io/apis/didit/didit-session-api/) — The Session API from Didit — 1 operation(s) for session.
+- [Didit Sessions API](https://apis.io/apis/didit/didit-sessions-api/) — The Sessions API from Didit — 20 operation(s) for sessions.
+- [Didit Standalone APIs API](https://apis.io/apis/didit/didit-standalone-apis-api/) — The Standalone APIs API from Didit — 14 operation(s) for standalone apis.
+- [Didit System API](https://apis.io/apis/didit/didit-system-api/) — The System API from Didit — 1 operation(s) for system.
+- [Didit Transactions API](https://apis.io/apis/didit/didit-transactions-api/) — The Transactions API from Didit — 6 operation(s) for transactions.
+- [Didit Travel Rule API](https://apis.io/apis/didit/didit-travel-rule-api/) — The Travel Rule API from Didit — 11 operation(s) for travel rule.
+- [Didit Users API](https://apis.io/apis/didit/didit-users-api/) — The Users API from Didit — 6 operation(s) for users.
+- [Didit Webhook API](https://apis.io/apis/didit/didit-webhook-api/) — The Webhook API from Didit — 2 operation(s) for webhook.
+- [Didit Workflows API](https://apis.io/apis/didit/didit-workflows-api/) — The Workflows API from Didit — 2 operation(s) for workflows.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Didit Webhooks](https://apis.io/asyncapis/didit/didit-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [didit](https://apis.io/servers/didit/didit/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Didit Agentic Access](https://apis.io/agentic-access/didit/didit-agentic-access/)
+
+#### Collections (17)
+
+Postman and Open Collection request collections.
+
+- [Didit Verification Billing API](https://apis.io/collections/didit/open-didit-billing-api/)
+- [Didit Verification Billing Businesses API](https://apis.io/collections/didit/open-didit-businesses-api/)
+- [Didit Verification Billing Case Blueprints API](https://apis.io/collections/didit/open-didit-case-blueprints-api/)
+- [Didit Verification Billing Cases API](https://apis.io/collections/didit/open-didit-cases-api/)
+- [Didit Verification Billing Customization API](https://apis.io/collections/didit/open-didit-customization-api/)
+- [Didit Verification Billing Questionnaires API](https://apis.io/collections/didit/open-didit-questionnaires-api/)
+- [Didit Verification Billing Regulatory Reports API](https://apis.io/collections/didit/open-didit-regulatory-reports-api/)
+- [Didit Verification Billing Report Templates API](https://apis.io/collections/didit/open-didit-report-templates-api/)
+- [Didit Verification Billing Session API](https://apis.io/collections/didit/open-didit-session-api/)
+- [Didit Verification Billing Sessions API](https://apis.io/collections/didit/open-didit-sessions-api/)
+- [Didit Verification Billing Standalone APIs API](https://apis.io/collections/didit/open-didit-standalone-apis-api/)
+- [Didit Verification Billing System API](https://apis.io/collections/didit/open-didit-system-api/)
+- [Didit Verification Billing Transactions API](https://apis.io/collections/didit/open-didit-transactions-api/)
+- [Didit Verification Billing Travel Rule API](https://apis.io/collections/didit/open-didit-travel-rule-api/)
+- [Didit Verification Billing Users API](https://apis.io/collections/didit/open-didit-users-api/)
+- [Didit Verification Billing Webhook API](https://apis.io/collections/didit/open-didit-webhook-api/)
+- [Didit Verification Billing Workflows API](https://apis.io/collections/didit/open-didit-workflows-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Didit Openapi Overlay](https://apis.io/overlays/didit/didit-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Didit Authentication](https://apis.io/security/didit/didit-authentication/)
+- [Didit Domain Security](https://apis.io/security/didit/didit-domain-security/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Didit Scopes](https://apis.io/scopes/didit/didit-scopes/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.didit.me/)
+- [Documentation](https://docs.didit.me)
+- [Getting started](https://docs.didit.me/getting-started/quick-start)
+- [API reference](https://docs.didit.me/api-reference)
+- [Pricing](https://didit.me/pricing)
+- [Sign up](https://business.didit.me)
+- [Support](https://wa.me/+19544659728)
+- [Blog](https://didit.me/blog)
+- [Compliance](https://docs.didit.me/getting-started/security-compliance)
+- [Terms of service](https://didit.me/terms/business)
+- [Privacy policy](https://didit.me/terms/privacy-policy)
+- [GitHub](https://github.com/didit-protocol)
+- [Status](https://status.didit.me)
+
+## API Evangelist rating
+
+**Kin Score 62.6** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 55.4 |
+| Contract governance | 18.2 |
+| Operational transparency | 42.1 |
+| Developer ergonomics | 73.2 |
+| Access clarity | 52.6 |
+
+**Agent readiness 60.3** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | verified |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | partial |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 45.3** — AI & Biometrics
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/didit/](https://apis.io/providers/didit/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Didit: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/didit/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
